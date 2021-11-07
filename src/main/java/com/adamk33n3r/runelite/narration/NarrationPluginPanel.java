@@ -8,20 +8,15 @@ import net.runelite.client.config.ConfigItemDescriptor;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.config.Range;
 import net.runelite.client.ui.ColorScheme;
-import net.runelite.client.ui.DynamicGridLayout;
 import net.runelite.client.ui.PluginPanel;
-import net.runelite.client.ui.components.ComboBoxListRenderer;
-import net.runelite.client.ui.components.PluginErrorPanel;
 import org.apache.commons.lang3.StringUtils;
 
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.ArrayList;
-import java.util.NoSuchElementException;
-import java.util.Optional;
 
 @Slf4j
 public class NarrationPluginPanel extends PluginPanel {
@@ -97,12 +92,18 @@ public class NarrationPluginPanel extends PluginPanel {
         this.add(scroll);
     }
 
-    private JPanel createSlider(String configName, int minorTickSpacing, int majorTickSpacing) throws NoSuchElementException {
+    @Nullable
+    private JPanel createSlider(String configName, int minorTickSpacing, int majorTickSpacing) {
         ConfigDescriptor cd = this.configManager.getConfigDescriptor(this.config);
-        ConfigItemDescriptor desc = cd.getItems().stream()
-            .filter(cid -> cid.getItem().keyName().equals(configName))
-            .findFirst()
-            .orElseThrow();
+        ConfigItemDescriptor desc = null;
+        for (ConfigItemDescriptor cid : cd.getItems()) {
+            if (cid.getItem().keyName().equals(configName)) {
+                desc = cid;
+                break;
+            }
+        }
+        if (desc == null)
+            return null;
         Range range = desc.getRange();
         int value = this.configManager.getConfiguration(cd.getGroup().value(), configName, int.class);
         JSlider slider = new JSlider(SwingConstants.VERTICAL, range.min(), range.max(), value);
