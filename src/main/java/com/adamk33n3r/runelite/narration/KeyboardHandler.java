@@ -45,10 +45,6 @@ public class KeyboardHandler {
                 if (idx == -1)
                     return;
                 MenuEntry hoveredEntry = entries[idx];
-//                log.info(hoveredEntry.getOption());
-//                log.info(hoveredEntry.getTarget());
-//                log.info("param1: " + hoveredEntry.getParam1());
-//                log.info("param0: " + hoveredEntry.getParam0());
                 Widget hoveredWidget = this.client.getWidget(hoveredEntry.getParam1());
                 if (hoveredWidget != null) {
                     Widget childWidget = hoveredWidget.getChild(hoveredEntry.getParam0());

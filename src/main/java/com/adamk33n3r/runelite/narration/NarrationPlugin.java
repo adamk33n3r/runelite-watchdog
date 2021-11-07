@@ -30,7 +30,7 @@ import java.awt.image.BufferedImage;
 
 @Slf4j
 @PluginDescriptor(
-	name = "!Narration"
+	name = "Narration"
 )
 public class NarrationPlugin extends Plugin
 {
@@ -65,9 +65,6 @@ public class NarrationPlugin extends Plugin
 	@Inject
 	private ClientToolbar clientToolbar;
 
-//	@Inject
-//	private NarrationOverlay narrationOverlay;
-
 	@Inject
 	@Named("developerMode")
 	private boolean developerMode;
@@ -78,13 +75,13 @@ public class NarrationPlugin extends Plugin
 
 	private NarrationPluginPanel panel;
 	private NavigationButton navButton;
-	private HotkeyListener hotkeyListener = new HotkeyListener(() -> this.config.narrateHotkey()) {
+	private final HotkeyListener hotkeyListener = new HotkeyListener(() -> this.config.narrateHotkey()) {
 		@Override
 		public void hotkeyPressed() {
 			keyboardHandler.handleHotkey(config.narrateHotkey());
 		}
 	};
-	private HotkeyListener quantityHotkeyListener = new HotkeyListener(() -> this.config.narrateQuantityHotkey()) {
+	private final HotkeyListener quantityHotkeyListener = new HotkeyListener(() -> this.config.narrateQuantityHotkey()) {
 		@Override
 		public void hotkeyPressed() {
 			keyboardHandler.handleHotkey(config.narrateQuantityHotkey());
@@ -110,7 +107,6 @@ public class NarrationPlugin extends Plugin
 				.panel(this.panel)
 				.build();
 			this.clientToolbar.addNavigation(this.navButton);
-//			this.overlayManager.add(this.narrationOverlay);
 		}
 	}
 
@@ -121,7 +117,6 @@ public class NarrationPlugin extends Plugin
 		this.keyManager.unregisterKeyListener(this.hotkeyListener);
 		this.keyManager.unregisterKeyListener(this.quantityHotkeyListener);
 		this.mouseManager.unregisterMouseListener(this.mouseHandler);
-//		this.overlayManager.remove(this.narrationOverlay);
 		log.info("Narration Plugin stopped!");
 	}
 
