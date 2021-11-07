@@ -1,5 +1,14 @@
 plugins {
 	id 'java'
+	id 'com.github.johnrengelman.shadow' version '6.1.0'
+}
+
+shadowJar {
+	from sourceSets.test.output
+	configurations = [project.configurations.testRuntimeClasspath]
+	manifest {
+		attributes 'Main-Class': 'com.adamk33n3r.runelite.narration.NarrationPluginTest'
+	}
 }
 
 repositories {
@@ -10,7 +19,7 @@ repositories {
 	mavenCentral()
 }
 
-def runeLiteVersion = '1.7.5'
+def runeLiteVersion = '1.8.1'
 
 dependencies {
 	compileOnly group: 'net.runelite', name:'client', version: runeLiteVersion
@@ -18,13 +27,34 @@ dependencies {
 	compileOnly 'org.projectlombok:lombok:1.18.20'
 	annotationProcessor 'org.projectlombok:lombok:1.18.20'
 
+	implementation 'net.sf.sociaal:freetts:1.2.2'
+
 	testImplementation 'junit:junit:4.12'
 	testImplementation group: 'net.runelite', name:'client', version: runeLiteVersion
 	testImplementation group: 'net.runelite', name:'jshell', version: runeLiteVersion
 }
 
-group = 'com.example'
-version = '1.0-SNAPSHOT'
+def versionProps = new Properties()
+def versionPropsFile = file('version.properties')
+if (versionPropsFile.exists())
+	versionProps.load(versionPropsFile.newReader())
+
+def major = (versionProps['VERSION_MAJOR'] as String ?: '0').toInteger()
+def minor = (versionProps['VERSION_MINOR'] as String ?: '0').toInteger()
+def patch = (versionProps['VERSION_PATCH'] as String ?: '0').toInteger()
+def build = (versionProps['VERSION_BUILD'] as String ?: '0').toInteger()
+def phase = (versionProps['VERSION_PHASE'] as String ?: '')
+versionProps['VERSION_MAJOR'] = major.toString()
+versionProps['VERSION_MINOR'] = minor.toString()
+versionProps['VERSION_PATCH'] = patch.toString()
+versionProps['VERSION_BUILD'] = (build + 1).toString()
+versionProps['VERSION_PHASE'] = phase
+versionProps.store(versionPropsFile.newWriter(), null)
+
+group = 'com.adamk33n3r.runelite.narration'
+version = major+'.'+minor+'.'+patch+'.'+build
+if (!phase.empty)
+	version = version+'-'+phase
 sourceCompatibility = '1.8'
 
 tasks.withType(JavaCompile) {
