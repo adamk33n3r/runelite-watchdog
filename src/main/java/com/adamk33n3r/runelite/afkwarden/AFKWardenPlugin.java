@@ -1,4 +1,4 @@
-package com.adamk33n3r.runelite.example;
+package com.adamk33n3r.runelite.afkwarden;
 
 import com.google.inject.Provides;
 
@@ -18,12 +18,12 @@ import net.runelite.client.plugins.PluginDescriptor;
 @PluginDescriptor(
     name = "Example"
 )
-public class ExamplePlugin extends Plugin {
+public class AFKWardenPlugin extends Plugin {
     @Inject
     private Client client;
 
     @Inject
-    private ExampleConfig config;
+    private AFKWardenConfig config;
 
     @Override
     protected void startUp() throws Exception {
@@ -43,7 +43,7 @@ public class ExamplePlugin extends Plugin {
     }
 
     @Provides
-    ExampleConfig provideConfig(ConfigManager configManager) {
-        return configManager.getConfig(ExampleConfig.class);
+    AFKWardenConfig provideConfig(ConfigManager configManager) {
+        return configManager.getConfig(AFKWardenConfig.class);
     }
 }
