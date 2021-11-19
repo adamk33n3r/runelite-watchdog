@@ -1,5 +1,6 @@
 package com.adamk33n3r.runelite.afkwarden;
 
+import net.runelite.api.ChatMessageType;
 import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
@@ -7,11 +8,9 @@ import net.runelite.client.config.ConfigItem;
 @ConfigGroup("afk-warden")
 public interface AFKWardenConfig extends Config {
     @ConfigItem(
-        keyName = "greeting",
-        name = "Welcome Greeting",
-        description = "The message to show to the user when they login"
+        keyName = "alerts",
+        name = "Alerts",
+        description = "Serialized Alerts as a JSON string"
     )
-    default String greeting() {
-        return "Hello";
-    }
+    default String alerts() { return "[]"; };
 }

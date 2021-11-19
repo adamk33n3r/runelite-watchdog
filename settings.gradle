@@ -1,1 +1,3 @@
-rootProject.name = 'example'
+rootProject.name = 'afkwarden'
+include('tts')
+project(':tts').projectDir = file('./tts')
