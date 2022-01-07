@@ -2,27 +2,27 @@ package com.adamk33n3r.runelite.watchdog;
 
 import com.adamk33n3r.runelite.watchdog.alerts.*;
 import com.adamk33n3r.runelite.watchdog.dropdownbutton.DropDownButtonFactory;
-import com.adamk33n3r.runelite.watchdog.panels.ChatAlertPanel;
-import com.adamk33n3r.runelite.watchdog.panels.IdleAlertPanel;
-import com.adamk33n3r.runelite.watchdog.panels.NotificationFiredAlertPanel;
-import com.adamk33n3r.runelite.watchdog.panels.StatDrainAlertPanel;
+import com.adamk33n3r.runelite.watchdog.panels.*;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
+import net.runelite.api.Skill;
 import net.runelite.client.plugins.timetracking.TimeTrackingPlugin;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.DynamicGridLayout;
 import net.runelite.client.ui.MultiplexingPluginPanel;
 import net.runelite.client.ui.PluginPanel;
 import net.runelite.client.util.ImageUtil;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.text.WordUtils;
 
 import javax.inject.Inject;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 public class WatchdogPanel extends PluginPanel {
@@ -33,9 +33,12 @@ public class WatchdogPanel extends PluginPanel {
     @Inject
     private WatchdogPlugin plugin;
 
-//    private Map<ChatMessageType, String> messageTypeToStringMap = new HashMap<>() {{
-//        put(ChatMessageType.CLAN_MESSAGE)
-//    }};
+    private final Map<Class<? extends Alert>, TriggerType> alertTriggerTypeMap = new HashMap<Class<? extends Alert>, TriggerType>() {
+        {
+            put(ChatAlert.class, TriggerType.CHAT);
+            put(NotificationFiredAlert.class, TriggerType.NOTIFICATION_FIRED);
+        }
+    };
 
     private ChatMonitorFrame chatMonitorFrame;
 
@@ -74,7 +77,7 @@ public class WatchdogPanel extends PluginPanel {
             this.createAlert(tType);
         };
         for (TriggerType tType : TriggerType.values()) {
-            JMenuItem c = new JMenuItem(StringUtils.capitalize(StringUtils.lowerCase(tType.name())));
+            JMenuItem c = new JMenuItem(WordUtils.capitalizeFully(tType.name().replaceAll("_", " ")));
             c.putClientProperty(TriggerType.class, tType);
             c.addActionListener(actionListener);
             popupMenu.add(c);
@@ -101,7 +104,7 @@ public class WatchdogPanel extends PluginPanel {
             final JButton alertButton = new JButton(alert.getName());
 //            alertButton.setPreferredSize(new Dimension(10, 1));
             alertButton.addActionListener(ev -> {
-                this.editAlert(alert);
+                this.openAlert(alert);
             });
 //            JPanel alertWrapper = new JPanel(new DynamicGridLayout(1, 2, 3, 3));
             JPanel alertWrapper = new JPanel(new BorderLayout());
@@ -130,28 +133,67 @@ public class WatchdogPanel extends PluginPanel {
     }
 
     private void createAlert(TriggerType triggerType) {
-        this.openAlert(null, triggerType);
-    }
-
-    private void editAlert(Alert alert) {
-        this.openAlert(alert, alert.getTriggerType());
-    }
-
-    private void openAlert(Alert alert, TriggerType triggerType) {
         switch (triggerType) {
             case CHAT:
-                // TODO: look into using DI for chat alert panel. Will need capability to send existing alert
-                this.muxer.pushState(new ChatAlertPanel((ChatAlert)alert, this.muxer, this.plugin));
-                break;
-            case IDLE:
-                this.muxer.pushState(new IdleAlertPanel((IdleAlert) alert, this.muxer, this.plugin));
+                this.openAlert(new ChatAlert());
                 break;
             case NOTIFICATION_FIRED:
-                this.muxer.pushState(new NotificationFiredAlertPanel((NotificationFiredAlert) alert, this.muxer, this.plugin));
+                this.openAlert(new NotificationFiredAlert());
                 break;
             case STAT_DRAIN:
-                this.muxer.pushState(new StatDrainAlertPanel((StatDrainAlert) alert, this.muxer, this.plugin));
+                this.openAlert(new StatDrainAlert());
+                break;
+            case IDLE:
+                this.openAlert(new IdleAlert());
+                break;
+            case RESOURCE:
+                this.openAlert(new ResourceAlert());
                 break;
         }
+    }
+
+    private void openAlert(Alert alert) {
+        PluginPanel panel = this.createPluginPanel(alert);
+        if (panel != null)
+            this.muxer.pushState(panel);
+        else
+            log.error(String.format("Tried to open an alert of type %s that doesn't have a panel.", alert.getClass()));
+    }
+
+    private PluginPanel createPluginPanel(Alert alert) {
+        if (alert instanceof ChatAlert) {
+            ChatAlert chatAlert = (ChatAlert) alert;
+            return AlertPanel.create(this.muxer, alert)
+                .addTextField("Name", chatAlert.getName(), chatAlert::setName)
+                .addTextArea("Message", chatAlert.getMessage(), chatAlert::setMessage)
+                .build();
+        } else if (alert instanceof IdleAlert) {
+            IdleAlert idleAlert = (IdleAlert) alert;
+            return AlertPanel.create(this.muxer, alert)
+                .addTextField("Name", idleAlert.getName(), idleAlert::setName)
+                .addSelect("Action", IdleAlert.IdleAction.class, idleAlert.getIdleAction(), idleAlert::setIdleAction)
+                .build();
+        } else if (alert instanceof NotificationFiredAlert) {
+            NotificationFiredAlert notificationFiredAlert = (NotificationFiredAlert) alert;
+            return AlertPanel.create(this.muxer, alert)
+                .addTextField("Name", notificationFiredAlert.getName(), notificationFiredAlert::setName)
+                .addTextArea("Message", notificationFiredAlert.getMessage(), notificationFiredAlert::setMessage)
+                .build();
+        } else if (alert instanceof ResourceAlert) {
+            ResourceAlert resourceAlert = (ResourceAlert) alert;
+            return AlertPanel.create(this.muxer, alert)
+                .addTextField("Name", resourceAlert.getName(), resourceAlert::setName)
+                .addSelect("Resource", ResourceAlert.ResourceType.class, resourceAlert.getResourceType(), resourceAlert::setResourceType)
+                .build();
+        } else if (alert instanceof StatDrainAlert) {
+            StatDrainAlert statDrainAlert = (StatDrainAlert) alert;
+            return AlertPanel.create(this.muxer, alert)
+                .addTextField("Name", statDrainAlert.getName(), statDrainAlert::setName)
+                .addSelect("Skill", Skill.class, Skill.ATTACK, statDrainAlert::setSkill)
+                .addSpinner("Drain Amount", statDrainAlert.getDrainAmount(), statDrainAlert::setDrainAmount)
+                .build();
+        }
+
+        return null;
     }
 }

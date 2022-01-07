@@ -1,4 +1,4 @@
-package com.adamk33n3r.runelite.watchdog.panels.notifications;
+package com.adamk33n3r.runelite.watchdog.panels;
 
 import com.adamk33n3r.runelite.watchdog.NotificationType;
 import com.adamk33n3r.runelite.watchdog.SimpleDocumentListener;

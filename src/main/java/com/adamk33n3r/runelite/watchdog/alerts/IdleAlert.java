@@ -1,17 +1,24 @@
 package com.adamk33n3r.runelite.watchdog.alerts;
 
-import com.adamk33n3r.runelite.watchdog.TriggerType;
+import lombok.Getter;
+import lombok.Setter;
 
 public class IdleAlert extends Alert {
-    enum IdleAction {
-        Fishing,
-        Combat,
-        Mining,
-        Logout,
+    public enum IdleAction {
+        FISHING,
+        COMBAT,
+        MINING,
+        LOGOUT,
     }
-    private IdleAction idleAction;
+    @Getter
+    @Setter
+    private IdleAction idleAction = IdleAction.MINING;
+
+    public IdleAlert() {
+        super("New Idle Alert");
+    }
 
     public IdleAlert(String name) {
-        super(name, TriggerType.IDLE);
+        super(name);
     }
 }
