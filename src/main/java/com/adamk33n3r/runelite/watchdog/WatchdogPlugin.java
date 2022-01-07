@@ -32,6 +32,7 @@ import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.plugins.PluginManager;
 import net.runelite.client.ui.ClientToolbar;
 import net.runelite.client.ui.NavigationButton;
+import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.util.AsyncBufferedImage;
 import net.runelite.client.util.Text;
 import net.runelite.http.api.ws.RuntimeTypeAdapterFactory;
@@ -61,7 +62,7 @@ public class WatchdogPlugin extends Plugin {
     private ClientToolbar clientToolbar;
 
     @Inject
-    private PluginManager pluginManager;
+    private OverlayManager overlayManager;
 
     private WatchdogPanel panel;
 
@@ -81,12 +82,16 @@ public class WatchdogPlugin extends Plugin {
     }
 
     @Getter
+    private FlashOverlay flashOverlay;
+
+    @Getter
     private static WatchdogPlugin instance;
 
     @Override
     protected void startUp() throws Exception {
         instance = this;
-        log.info("Example started!");
+        this.flashOverlay = this.injector.getInstance(FlashOverlay.class);
+        this.overlayManager.add(this.flashOverlay);
         // Add new alert types here
         final RuntimeTypeAdapterFactory<Alert> alertTypeFactory = RuntimeTypeAdapterFactory.of(Alert.class)
             .registerSubtype(ChatAlert.class)
@@ -136,11 +141,6 @@ public class WatchdogPlugin extends Plugin {
             this.clientToolbar.addNavigation(this.navButton);
         });
         this.navButton.setSelected(true);
-
-        for (AudioFileFormat.Type audioFileType : AudioSystem.getAudioFileTypes()) {
-            log.info(audioFileType.toString());
-        }
-
     }
 
     public List<Alert> getAlerts() {
@@ -153,7 +153,7 @@ public class WatchdogPlugin extends Plugin {
         return this.cachedAlerts = this.fetchAlerts();
     }
     public List<Alert> fetchAlerts() {
-        String json = configManager.getConfiguration("afk-warden", "alerts");
+        String json = configManager.getConfiguration(WatchdogConfig.configGroupName, "alerts");
         Type alertListType = new TypeToken<List<Alert>>() {}.getType();
         List<Alert> alerts = new ArrayList<>();
         if (!Strings.isNullOrEmpty(json)) {
@@ -171,7 +171,7 @@ public class WatchdogPlugin extends Plugin {
     public void saveAlerts(List<Alert> alerts) {
         this.cachedAlerts = alerts;
         String json = this.gson.toJson(alerts, alertListType);
-        this.configManager.setConfiguration("afk-warden", "alerts", json);
+        this.configManager.setConfiguration(WatchdogConfig.configGroupName, "alerts", json);
     }
 
     public List<ChatAlert> getChatAlerts() {
@@ -249,8 +249,7 @@ public class WatchdogPlugin extends Plugin {
 
     @Subscribe
     private void onConfigChanged(ConfigChanged configChanged) {
-        if (configChanged.getGroup().equals("afk-warden") && configChanged.getKey().equals("alerts")) {
-            log.info("Calling REBUILD!!!");
+        if (configChanged.getGroup().equals(WatchdogConfig.configGroupName) && configChanged.getKey().equals("alerts")) {
             this.panel.rebuild();
         }
     }

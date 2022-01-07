@@ -6,6 +6,7 @@ import net.runelite.client.config.ConfigItem;
 
 @ConfigGroup("watchdog")
 public interface WatchdogConfig extends Config {
+    String configGroupName = "watchdog";
     @ConfigItem(
         keyName = "alerts",
         name = "Alerts",

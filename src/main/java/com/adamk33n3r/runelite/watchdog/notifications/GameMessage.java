@@ -12,8 +12,6 @@ import net.runelite.client.chat.QueuedMessage;
 import javax.inject.Inject;
 
 @Slf4j
-@Data
-//@AllArgsConstructor
 public class GameMessage extends NotificationWithMessage {
     @Inject
     private transient ChatMessageManager chatMessageManager;
