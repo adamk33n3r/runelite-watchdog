@@ -1,3 +1,1 @@
 rootProject.name = 'watchdog'
-include('tts')
-project(':tts').projectDir = file('./tts')

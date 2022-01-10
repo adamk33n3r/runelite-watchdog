@@ -2,8 +2,6 @@ package com.adamk33n3r.runelite.watchdog;
 
 import com.adamk33n3r.runelite.watchdog.alerts.*;
 import com.adamk33n3r.runelite.watchdog.notifications.*;
-import com.adamk33n3r.tts.MessageSegment;
-import com.adamk33n3r.tts.TTSSegmentProcessor;
 import com.google.common.base.Strings;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -11,16 +9,12 @@ import com.google.gson.reflect.TypeToken;
 import com.google.inject.Provides;
 
 import javax.inject.Inject;
-import javax.sound.sampled.AudioFileFormat;
-import javax.sound.sampled.AudioSystem;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.ChatMessageType;
 import net.runelite.api.ItemID;
 import net.runelite.api.events.ChatMessage;
-import net.runelite.api.events.GameStateChanged;
-import net.runelite.api.events.GameTick;
 import net.runelite.api.events.StatChanged;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
@@ -29,12 +23,10 @@ import net.runelite.client.events.NotificationFired;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
-import net.runelite.client.plugins.PluginManager;
 import net.runelite.client.ui.ClientToolbar;
 import net.runelite.client.ui.NavigationButton;
 import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.util.AsyncBufferedImage;
-import net.runelite.client.util.Text;
 import net.runelite.http.api.ws.RuntimeTypeAdapterFactory;
 
 import java.lang.reflect.Type;
@@ -45,7 +37,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @PluginDescriptor(
-    name = "AFK Warden"
+    name = "!Watchdog"
 )
 public class WatchdogPlugin extends Plugin {
     @Inject
@@ -54,9 +46,6 @@ public class WatchdogPlugin extends Plugin {
     private ConfigManager configManager;
     @Inject
     private ItemManager itemManager;
-
-    @Inject
-    private TTSSegmentProcessor ttsSegmentProcessor;
 
     @Inject
     private ClientToolbar clientToolbar;
@@ -153,8 +142,7 @@ public class WatchdogPlugin extends Plugin {
         return this.cachedAlerts = this.fetchAlerts();
     }
     public List<Alert> fetchAlerts() {
-        String json = configManager.getConfiguration(WatchdogConfig.configGroupName, "alerts");
-        Type alertListType = new TypeToken<List<Alert>>() {}.getType();
+        String json = config.alerts();
         List<Alert> alerts = new ArrayList<>();
         if (!Strings.isNullOrEmpty(json)) {
             alerts = this.gson.fromJson(json, alertListType);
@@ -243,11 +231,6 @@ public class WatchdogPlugin extends Plugin {
     }
 
     @Subscribe
-    public void onGameTick(GameTick gameTick) {
-        this.ttsSegmentProcessor.process();
-    }
-
-    @Subscribe
     private void onConfigChanged(ConfigChanged configChanged) {
         if (configChanged.getGroup().equals(WatchdogConfig.configGroupName) && configChanged.getKey().equals("alerts")) {
             this.panel.rebuild();
@@ -261,19 +244,5 @@ public class WatchdogPlugin extends Plugin {
 
     private void fireAlert(Alert alert) {
         alert.getNotifications().forEach(notification -> notification.fire(this));
-    }
-
-    private void say(String message) {
-        this.ttsSegmentProcessor.add(new MessageSegment(this.sanitize(message)));
-    }
-
-    private String sanitize(String message) {
-        return Text.sanitizeMultilineText(
-            message
-                // Replace hyphens with spaces. It has trouble processing utterances.
-                .replaceAll("-", " ")
-                // The synthesizer seems to treat an ellipsis as nothing. Replace it with a period.
-                .replaceAll("\\.\\.\\.", ". ")
-        );
     }
 }

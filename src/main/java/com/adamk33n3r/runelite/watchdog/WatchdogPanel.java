@@ -64,7 +64,7 @@ public class WatchdogPanel extends PluginPanel {
         this.setBackground(ColorScheme.DARK_GRAY_COLOR);
 
         JPanel newAlertPanel = new JPanel(new BorderLayout());
-        JLabel title = new JLabel("AFK Warden");
+        JLabel title = new JLabel("Watchdog");
         title.setFont(title.getFont().deriveFont(Font.BOLD));
         title.setHorizontalAlignment(JLabel.LEFT);
         title.setForeground(Color.WHITE);
@@ -82,12 +82,12 @@ public class WatchdogPanel extends PluginPanel {
             c.addActionListener(actionListener);
             popupMenu.add(c);
         }
-        JButton inspector = new JButton("Inspector");
-        this.chatMonitorFrame = new ChatMonitorFrame();
-        inspector.addActionListener(ev -> {
-            this.chatMonitorFrame.open();
-        });
-        newAlertPanel.add(inspector);
+//        JButton inspector = new JButton("Inspector");
+//        this.chatMonitorFrame = new ChatMonitorFrame();
+//        inspector.addActionListener(ev -> {
+//            this.chatMonitorFrame.open();
+//        });
+//        newAlertPanel.add(inspector);
         JButton addDropDownButton = DropDownButtonFactory.createDropDownButton(ADD_ICON, popupMenu, true);
         addDropDownButton.setToolTipText("Create New Alert");
         newAlertPanel.add(addDropDownButton, BorderLayout.EAST);

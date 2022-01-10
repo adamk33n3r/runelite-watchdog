@@ -96,6 +96,13 @@ public class NotificationsPanel extends JPanel {
                     gameMessage.message = notificationMessage.getText();
                 });
                 notifPanel.add(PanelUtils.createLabeledComponent("Message", notificationMessage));
+                if (notification instanceof TextToSpeech) {
+                    JButton testButton = new JButton("Test");
+                    testButton.addActionListener(ev -> {
+                        notification.fire(WatchdogPlugin.getInstance());
+                    });
+                    notifPanel.add(testButton);
+                }
             } else if (notification instanceof Sound) {
                 Sound sound = (Sound) notification;
                 JButton testButton = new JButton("Test");
