@@ -1,6 +1,6 @@
 package com.adamk33n3r.runelite.watchdog.alerts;
 
-import com.adamk33n3r.runelite.watchdog.notifications.INotification;
+import com.adamk33n3r.runelite.watchdog.notifications.Notification;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,5 +14,5 @@ public class Alert {
     @Setter
     private String name;
 
-    private final List<INotification> notifications = new ArrayList<>();
+    private final List<Notification> notifications = new ArrayList<>();
 }

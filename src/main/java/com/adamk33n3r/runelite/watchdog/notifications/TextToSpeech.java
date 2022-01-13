@@ -1,6 +1,8 @@
 package com.adamk33n3r.runelite.watchdog.notifications;
 
-import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
+import com.adamk33n3r.runelite.watchdog.notifications.tts.Voice;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.client.RuneLite;
 
@@ -14,21 +16,22 @@ import java.net.URLConnection;
 import java.net.URLEncoder;
 
 @Slf4j
-public class TextToSpeech extends NotificationWithMessage {
-    public TextToSpeech() {
-        this.message = "Hey! Wake up!";
-    }
+public class TextToSpeech extends MessageNotification implements IAudioNotification {
+    @Getter @Setter
+    private int gain = -10;
+    @Getter @Setter
+    private int rate = 1;
+    @Getter @Setter
+    private Voice voice = Voice.GEORGE;
 
     @Override
-    public void fire(WatchdogPlugin plugin) {
+    protected void fireImpl() {
         try {
+            String encodedMessage = URLEncoder.encode(this.message, "UTF-8");
             File watchdogPath = new File(RuneLite.CACHE_DIR, "watchdog");
             //noinspection ResultOfMethodCallIgnored
             watchdogPath.mkdirs();
-            String encodedMessage = URLEncoder.encode(this.message, "UTF-8");
-            int rate = 1;
-            int voice = 4;
-            File soundFile = new File(watchdogPath, String.format("%s-%s-%s.wav", encodedMessage, rate, voice));
+            File soundFile = new File(watchdogPath, String.format("%s-%d-%d.wav", encodedMessage, rate, voice.id));
 
             AudioInputStream inputStream;
 
@@ -36,7 +39,7 @@ public class TextToSpeech extends NotificationWithMessage {
             if (soundFile.exists()) {
                 inputStream = AudioSystem.getAudioInputStream(soundFile);
             } else {
-                String request = String.format("https://ttsplugin.com?m=%s&r=%s&v=%s", encodedMessage, rate, voice);
+                String request = String.format("https://ttsplugin.com?m=%s&r=%d&v=%d", encodedMessage, rate, voice.id);
                 URLConnection conn = new URL(request).openConnection();
                 byte[] bytes = new byte[conn.getContentLength()];
                 InputStream stream = conn.getInputStream();
@@ -50,7 +53,8 @@ public class TextToSpeech extends NotificationWithMessage {
             Clip clip = AudioSystem.getClip();
             clip.open(inputStream);
             FloatControl volume = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
-            volume.setValue(-10);
+            volume.setValue(this.gain);
+            log.info("volume: " + this.gain);
             clip.start();
         } catch (Exception ex) {
             ex.printStackTrace();

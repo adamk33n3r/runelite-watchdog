@@ -8,12 +8,12 @@ import net.runelite.client.util.ColorUtil;
 import java.awt.Color;
 
 @Slf4j
-public class ScreenFlash implements INotification {
+public class ScreenFlash extends Notification {
     public Color color = ColorUtil.fromHex("#46FF0000");
     public FlashNotification flashNotification = FlashNotification.SOLID_TWO_SECONDS;
 
     @Override
-    public void fire(WatchdogPlugin plugin) {
-        plugin.getFlashOverlay().flash(this);
+    protected void fireImpl() {
+        WatchdogPlugin.getInstance().getFlashOverlay().flash(this);
     }
 }

@@ -78,6 +78,7 @@ public class WatchdogPlugin extends Plugin {
 
     @Override
     protected void startUp() throws Exception {
+        // TODO: Fix the notifications to not modify the obj
         instance = this;
         this.flashOverlay = this.injector.getInstance(FlashOverlay.class);
         this.overlayManager.add(this.flashOverlay);
@@ -89,7 +90,7 @@ public class WatchdogPlugin extends Plugin {
             .registerSubtype(StatDrainAlert.class)
             .registerSubtype(ResourceAlert.class);
         // Add new notification types here
-        final RuntimeTypeAdapterFactory<INotification> notificationTypeFactory = RuntimeTypeAdapterFactory.of(INotification.class)
+        final RuntimeTypeAdapterFactory<Notification> notificationTypeFactory = RuntimeTypeAdapterFactory.of(Notification.class)
             .registerSubtype(TrayNotification.class)
             .registerSubtype(TextToSpeech.class)
             .registerSubtype(Sound.class)
@@ -109,10 +110,6 @@ public class WatchdogPlugin extends Plugin {
             alerts.add(new ResourceAlert("Low HP"));
             alerts.add(new ChatAlert("Nothing interesting happens"));
             this.saveAlerts(alerts);
-        }
-
-        for (Alert alert : alerts) {
-            log.info(alert.getClass().getSimpleName());
         }
 
         this.panel = this.injector.getInstance(WatchdogPanel.class);
@@ -162,16 +159,8 @@ public class WatchdogPlugin extends Plugin {
         this.configManager.setConfiguration(WatchdogConfig.configGroupName, "alerts", json);
     }
 
-    public List<ChatAlert> getChatAlerts() {
-        return this.getAlerts().stream()
-            .filter(alert -> alert instanceof ChatAlert)
-            .map(alert -> (ChatAlert)alert)
-            .collect(Collectors.toList());
-    }
-
     @Override
     protected void shutDown() throws Exception {
-        log.info("Example stopped!");
         this.clientToolbar.removeNavigation(this.navButton);
     }
 
@@ -182,25 +171,32 @@ public class WatchdogPlugin extends Plugin {
             return;
         }
 
-        log.info(chatMessage.getType().name() + ": " + chatMessage.getMessage());
+//        log.info(chatMessage.getType().name() + ": " + chatMessage.getMessage());
 
         // Filter out player messages
         if (
             chatMessage.getType() == ChatMessageType.PUBLICCHAT
+            || chatMessage.getType() == ChatMessageType.AUTOTYPER
             || chatMessage.getType() == ChatMessageType.PRIVATECHAT
             || chatMessage.getType() == ChatMessageType.PRIVATECHATOUT
             || chatMessage.getType() == ChatMessageType.MODCHAT
             || chatMessage.getType() == ChatMessageType.MODPRIVATECHAT
+            || chatMessage.getType() == ChatMessageType.MODAUTOTYPER
             || chatMessage.getType() == ChatMessageType.FRIENDSCHAT
             || chatMessage.getType() == ChatMessageType.CLAN_CHAT
+            || chatMessage.getType() == ChatMessageType.CLAN_GUEST_CHAT
+            || chatMessage.getType() == ChatMessageType.CLAN_GIM_CHAT
         ) {
             return;
         }
 
-        this.getChatAlerts().stream()
+        this.getAlerts().stream()
+            .filter(alert -> alert instanceof ChatAlert)
+            .map(alert -> (ChatAlert) alert)
 //            .filter(chatAlert -> chatAlert.getChatMessageType() == chatMessage.getType())
             .filter(chatAlert -> {
-                // TODO: Implement capture groups
+                // TODO: Implement capture groups. Not sure best way to do this since notifications can be used on
+                // alerts that wouldn't have this
                 String regex = Util.createRegexFromGlob(chatAlert.getMessage());
                 return Pattern.matches("(?i)"+regex, chatMessage.getMessage());
             })
@@ -209,12 +205,11 @@ public class WatchdogPlugin extends Plugin {
 
     @Subscribe
     public void onNotificationFired(NotificationFired notificationFired) {
-        log.info(notificationFired.getMessage());
         this.getAlerts().stream()
             .filter(alert -> alert instanceof NotificationFiredAlert)
             .map(alert -> (NotificationFiredAlert) alert)
-            .filter(alert -> {
-                String regex = Util.createRegexFromGlob(alert.getMessage());
+            .filter(notificationFiredAlert -> {
+                String regex = Util.createRegexFromGlob(notificationFiredAlert.getMessage());
                 return Pattern.matches("(?i)"+regex, notificationFired.getMessage());
             })
             .forEach(this::fireAlert);
@@ -243,6 +238,6 @@ public class WatchdogPlugin extends Plugin {
     }
 
     private void fireAlert(Alert alert) {
-        alert.getNotifications().forEach(notification -> notification.fire(this));
+        alert.getNotifications().forEach(Notification::fire);
     }
 }

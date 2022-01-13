@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package com.adamk33n3r.runelite.watchdog.dropdownbutton;
+package com.adamk33n3r.runelite.watchdog.ui.dropdownbutton;
 
 import javax.swing.Icon;
 import javax.swing.JButton;
@@ -53,8 +53,8 @@ public final class DropDownButtonFactory {
      * the popup menu later using PROP_DROP_DOWN_MENU client property.
      * @return A button that is capable of displaying an 'arrow' in its icon to open a popup menu.
      */
-    public static JButton createDropDownButton( Icon icon, JPopupMenu dropDownMenu, boolean onlyPopupAction ) {
-        return new DropDownButton( icon, dropDownMenu, onlyPopupAction );
+    public static JButton createDropDownButton( Icon icon, JPopupMenu dropDownMenu ) {
+        return new DropDownButton( icon, dropDownMenu );
     }
 
     /**

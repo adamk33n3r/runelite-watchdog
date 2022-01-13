@@ -17,7 +17,7 @@
  * under the License.
  */
 
-package com.adamk33n3r.runelite.watchdog.dropdownbutton;
+package com.adamk33n3r.runelite.watchdog.ui.dropdownbutton;
 
 import java.awt.Point;
 import java.awt.event.MouseAdapter;
@@ -65,10 +65,7 @@ class DropDownButton extends JButton {
     private PopupMenuListener menuListener;
 
     /** Creates a new instance of MenuToggleButton */
-    public DropDownButton( Icon icon, JPopupMenu popup ) {
-        this(icon, popup, false);
-    }
-    public DropDownButton( Icon icon, JPopupMenu popup, boolean onlyPopupAction ) {
+    public DropDownButton( Icon icon, JPopupMenu popup) {
 //        Parameters.notNull("icon", icon); //NOI18N
 
         putClientProperty( "dropDownMenu", popup );
@@ -82,17 +79,15 @@ class DropDownButton extends JButton {
             resetIcons();
         });
 
-        if (!onlyPopupAction) {
-            addMouseMotionListener(new MouseMotionAdapter() {
-                @Override
-                public void mouseMoved(MouseEvent e) {
-                    if (null != getPopupMenu()) {
-                        mouseInArrowArea = isInArrowArea(e.getPoint());
-                        updateRollover(_getRolloverIcon(), _getRolloverSelectedIcon());
-                    }
+        addMouseMotionListener(new MouseMotionAdapter() {
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                if (null != getPopupMenu()) {
+                    mouseInArrowArea = isInArrowArea(e.getPoint());
+                    updateRollover(_getRolloverIcon(), _getRolloverSelectedIcon());
                 }
-            });
-        }
+            }
+        });
 
         addMouseListener( new MouseAdapter() {
             private boolean popupMenuOperation = false;
@@ -102,12 +97,12 @@ class DropDownButton extends JButton {
                 if (popupClosingInProgress) {
                     return;
                 }
-                popupMenuOperation = onlyPopupAction;
+                popupMenuOperation = false;
                 JPopupMenu menu = getPopupMenu();
                 if ( menu != null && getModel() instanceof Model ) {
                     Model model = (Model) getModel();
                     if ( !model._isPressed() ) {
-                        if( (onlyPopupAction || isInArrowArea( e.getPoint() )) && menu.getComponentCount() > 0 &&
+                        if( (isInArrowArea( e.getPoint() )) && menu.getComponentCount() > 0 &&
                             model.isEnabled() )
                         {
                             model._press();
@@ -137,7 +132,7 @@ class DropDownButton extends JButton {
             public void mouseEntered( MouseEvent e ) {
                 mouseInButton = true;
                 if( hasPopupMenu() ) {
-                    mouseInArrowArea = onlyPopupAction ? true : isInArrowArea( e.getPoint() );
+                    mouseInArrowArea = isInArrowArea( e.getPoint() );
                     updateRollover( _getRolloverIcon(), _getRolloverSelectedIcon() );
                 }
             }

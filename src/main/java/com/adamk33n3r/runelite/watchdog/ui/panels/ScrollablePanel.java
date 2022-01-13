@@ -16,7 +16,7 @@
  *  components added to the panel will be size to fill the area available,
  *  based on the rules of the applicable layout manager of course.
  */
-package com.adamk33n3r.runelite.watchdog.panels;
+package com.adamk33n3r.runelite.watchdog.ui.panels;
 
 import java.awt.*;
 import javax.swing.*;

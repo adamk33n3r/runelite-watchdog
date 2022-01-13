@@ -1,8 +1,8 @@
 package com.adamk33n3r.runelite.watchdog;
 
 import com.adamk33n3r.runelite.watchdog.alerts.*;
-import com.adamk33n3r.runelite.watchdog.dropdownbutton.DropDownButtonFactory;
-import com.adamk33n3r.runelite.watchdog.panels.*;
+import com.adamk33n3r.runelite.watchdog.ui.dropdownbutton.DropDownButtonFactory;
+import com.adamk33n3r.runelite.watchdog.ui.panels.AlertPanel;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
@@ -20,9 +20,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
-import java.util.HashMap;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 @Slf4j
 public class WatchdogPanel extends PluginPanel {
@@ -32,15 +31,6 @@ public class WatchdogPanel extends PluginPanel {
     private Client client;
     @Inject
     private WatchdogPlugin plugin;
-
-    private final Map<Class<? extends Alert>, TriggerType> alertTriggerTypeMap = new HashMap<Class<? extends Alert>, TriggerType>() {
-        {
-            put(ChatAlert.class, TriggerType.CHAT);
-            put(NotificationFiredAlert.class, TriggerType.NOTIFICATION_FIRED);
-        }
-    };
-
-    private ChatMonitorFrame chatMonitorFrame;
 
     public static final ImageIcon ADD_ICON;
     private static final ImageIcon ADD_ICON_HOVER;
@@ -52,14 +42,11 @@ public class WatchdogPanel extends PluginPanel {
 
     @Inject
     public void init() {
-        log.info("panel init");
         this.muxer = new MultiplexingPluginPanel(this);
-        this.rebuild();
     }
 
     public void rebuild() {
         this.removeAll();
-//        this.setLayout(new DynamicGridLayout(0, 1, 3, 3));
         this.setLayout(new BorderLayout(0, 5));
         this.setBackground(ColorScheme.DARK_GRAY_COLOR);
 
@@ -76,42 +63,30 @@ public class WatchdogPanel extends PluginPanel {
             TriggerType tType = (TriggerType) menuItem.getClientProperty(TriggerType.class);
             this.createAlert(tType);
         };
-        for (TriggerType tType : TriggerType.values()) {
-            JMenuItem c = new JMenuItem(WordUtils.capitalizeFully(tType.name().replaceAll("_", " ")));
-            c.putClientProperty(TriggerType.class, tType);
-            c.addActionListener(actionListener);
-            popupMenu.add(c);
-        }
-//        JButton inspector = new JButton("Inspector");
-//        this.chatMonitorFrame = new ChatMonitorFrame();
-//        inspector.addActionListener(ev -> {
-//            this.chatMonitorFrame.open();
-//        });
-//        newAlertPanel.add(inspector);
-        JButton addDropDownButton = DropDownButtonFactory.createDropDownButton(ADD_ICON, popupMenu, true);
+
+        Arrays.stream(TriggerType.values())
+            .filter(tt -> tt != TriggerType.IDLE).forEach(tType -> {
+                JMenuItem c = new JMenuItem(WordUtils.capitalizeFully(tType.name().replaceAll("_", " ")));
+                c.putClientProperty(TriggerType.class, tType);
+                c.addActionListener(actionListener);
+                popupMenu.add(c);
+            });
+        JButton addDropDownButton = DropDownButtonFactory.createDropDownButton(ADD_ICON, popupMenu);
         addDropDownButton.setToolTipText("Create New Alert");
         newAlertPanel.add(addDropDownButton, BorderLayout.EAST);
         this.add(newAlertPanel, BorderLayout.NORTH);
 
-//        JPanel alertPanel = new JPanel(new DynamicGridLayout(0, 1, 3, 3));
         JPanel alertPanel = new JPanel(new BorderLayout());
-//        alertPanel.setBorder(new TitledBorder(new EtchedBorder(), "Alert Panel", TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, Color.WHITE));
         JPanel alertWrapperWrapper = new JPanel(new DynamicGridLayout(0, 1, 3, 3));
-//        alertWrapperWrapper.setBorder(new TitledBorder(new EtchedBorder(), "Alert Wrapper Wrapper", TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, Color.WHITE));
         alertPanel.add(alertWrapperWrapper, BorderLayout.NORTH);
         for (Alert alert : this.plugin.getAlerts()) {
-            log.info(alert.toString());
             final JButton alertButton = new JButton(alert.getName());
-//            alertButton.setPreferredSize(new Dimension(10, 1));
             alertButton.addActionListener(ev -> {
                 this.openAlert(alert);
             });
-//            JPanel alertWrapper = new JPanel(new DynamicGridLayout(1, 2, 3, 3));
             JPanel alertWrapper = new JPanel(new BorderLayout());
             alertWrapper.setPreferredSize(new Dimension(PluginPanel.PANEL_WIDTH, 30));
-//            JPanel alertWrapper = new JPanel();
             alertWrapperWrapper.add(alertWrapper);
-//            alertWrapper.setBorder(new TitledBorder(new EtchedBorder(), "Alert Wrapper", TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, Color.WHITE));
             alertWrapper.add(alertButton, BorderLayout.CENTER);
             final JButton deleteButton = new JButton("x");
             deleteButton.setBorder(null);
@@ -164,6 +139,7 @@ public class WatchdogPanel extends PluginPanel {
         if (alert instanceof ChatAlert) {
             ChatAlert chatAlert = (ChatAlert) alert;
             return AlertPanel.create(this.muxer, alert)
+                .addLabel("<html>Will not trigger on<br>player chat messages</html>")
                 .addTextField("Name", chatAlert.getName(), chatAlert::setName)
                 .addTextArea("Message", chatAlert.getMessage(), chatAlert::setMessage)
                 .build();
@@ -195,5 +171,10 @@ public class WatchdogPanel extends PluginPanel {
         }
 
         return null;
+    }
+
+    @Override
+    public void onActivate() {
+        this.rebuild();
     }
 }

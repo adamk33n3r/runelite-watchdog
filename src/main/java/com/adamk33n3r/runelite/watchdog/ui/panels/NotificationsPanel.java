@@ -1,16 +1,12 @@
-package com.adamk33n3r.runelite.watchdog.panels;
+package com.adamk33n3r.runelite.watchdog.ui.panels;
 
-import com.adamk33n3r.runelite.watchdog.NotificationType;
-import com.adamk33n3r.runelite.watchdog.SimpleDocumentListener;
-import com.adamk33n3r.runelite.watchdog.Util;
-import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
-import com.adamk33n3r.runelite.watchdog.dropdownbutton.DropDownButtonFactory;
+import com.adamk33n3r.runelite.watchdog.*;
+import com.adamk33n3r.runelite.watchdog.ui.dropdownbutton.DropDownButtonFactory;
 import com.adamk33n3r.runelite.watchdog.notifications.*;
-import com.google.inject.Inject;
+import com.adamk33n3r.runelite.watchdog.notifications.tts.Voice;
 import com.google.inject.Injector;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import net.runelite.client.Notifier;
 import net.runelite.client.config.FlashNotification;
 import net.runelite.client.ui.DynamicGridLayout;
 import net.runelite.client.ui.components.ColorJButton;
@@ -19,11 +15,13 @@ import net.runelite.client.ui.components.colorpicker.RuneliteColorPicker;
 import net.runelite.client.util.ColorUtil;
 import org.apache.commons.text.WordUtils;
 
+import javax.inject.Inject;
 import javax.sound.sampled.AudioFileFormat;
 import javax.sound.sampled.AudioSystem;
 import javax.swing.*;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
+import javax.swing.text.AbstractDocument;
 
 import java.awt.*;
 import java.awt.event.ActionListener;
@@ -32,21 +30,20 @@ import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static com.adamk33n3r.runelite.watchdog.WatchdogPanel.ADD_ICON;
 
 @Slf4j
 public class NotificationsPanel extends JPanel {
     @Getter
-    private final List<INotification> notifications = new ArrayList<>();
+    private final List<Notification> notifications = new ArrayList<>();
     @Inject
     private ColorPickerManager colorPickerManager;
 
     private final JPanel container;
     private final JPanel notificationContainer;
 
-    public NotificationsPanel(List<INotification> notifications) {
+    public NotificationsPanel(List<Notification> notifications) {
         this.notifications.addAll(notifications);
         this.setLayout(new BorderLayout());
         this.container = new JPanel(new DynamicGridLayout(0, 1, 3, 3));
@@ -56,7 +53,6 @@ public class NotificationsPanel extends JPanel {
         ActionListener actionListener = e -> {
             JMenuItem menuItem = (JMenuItem) e.getSource();
             NotificationType nType = (NotificationType) menuItem.getClientProperty(NotificationType.class);
-            log.info("Create notification: " + nType.name());
             this.createNotification(nType);
             this.rebuild();
         };
@@ -66,13 +62,12 @@ public class NotificationsPanel extends JPanel {
             c.addActionListener(actionListener);
             popupMenu.add(c);
         }
-        JButton addDropDownButton = DropDownButtonFactory.createDropDownButton(ADD_ICON, popupMenu, true);
+        JButton addDropDownButton = DropDownButtonFactory.createDropDownButton(ADD_ICON, popupMenu);
         addDropDownButton.setToolTipText("Create New Notification");
         JPanel buttonPanel = new JPanel(new BorderLayout());
         buttonPanel.add(addDropDownButton, BorderLayout.EAST);
 
         this.container.add(buttonPanel);
-        this.container.add(new JSeparator());
         this.container.add(notificationContainer);
         this.add(container, BorderLayout.NORTH);
         this.rebuild();
@@ -81,53 +76,57 @@ public class NotificationsPanel extends JPanel {
     private void rebuild() {
         this.notificationContainer.removeAll();
 
-        // TODO: add client-in-focus checkbox for each notification
-        // TODO: or maybe a dropdown for in-focus, not-focus, both
+        for (Notification notification : this.notifications) {
+            JPanel notificationPanel = new JPanel(new DynamicGridLayout(0, 1, 3, 3));
+            notificationPanel.setBorder(new TitledBorder(new EtchedBorder(), Util.humanReadableClass(notification), TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, Color.WHITE));
+            this.notificationContainer.add(notificationPanel);
 
-        for (INotification notification : this.notifications) {
-            JPanel notifPanel = new JPanel(new DynamicGridLayout(0, 1, 3, 3));
-            notifPanel.setBorder(new TitledBorder(new EtchedBorder(), Util.humanReadableClass(notification), TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, Color.WHITE));
-            this.notificationContainer.add(notifPanel);
-            if (notification instanceof NotificationWithMessage) {
-                NotificationWithMessage gameMessage = (NotificationWithMessage) notification;
-                log.info(gameMessage.message);
-                JTextField notificationMessage = new JTextField(gameMessage.message);
+            JCheckBox fireWhenFocused = new JCheckBox("Fire when in focus", notification.isFireWhenFocused());
+            fireWhenFocused.addChangeListener(ev -> {
+                notification.setFireWhenFocused(fireWhenFocused.isSelected());
+            });
+            notificationPanel.add(fireWhenFocused);
+
+            if (notification instanceof IMessageNotification) {
+                IMessageNotification gameMessage = (IMessageNotification) notification;
+                JTextField notificationMessage = new JTextField(gameMessage.getMessage());
+                ((AbstractDocument)notificationMessage.getDocument()).setDocumentFilter(new LengthLimitFilter(200));
                 notificationMessage.getDocument().addDocumentListener((SimpleDocumentListener) ev -> {
-                    gameMessage.message = notificationMessage.getText();
+                    gameMessage.setMessage(notificationMessage.getText());
                 });
-                notifPanel.add(PanelUtils.createLabeledComponent("Message", notificationMessage));
-                if (notification instanceof TextToSpeech) {
-                    JButton testButton = new JButton("Test");
-                    testButton.addActionListener(ev -> {
-                        notification.fire(WatchdogPlugin.getInstance());
-                    });
-                    notifPanel.add(testButton);
-                }
-            } else if (notification instanceof Sound) {
+                notificationPanel.add(PanelUtils.createLabeledComponent("Message", notificationMessage));
+            }
+
+            if (notification instanceof Sound) {
                 Sound sound = (Sound) notification;
-                JButton testButton = new JButton("Test");
-                notifPanel.add(PanelUtils.createFileChooser("Sound Path", ev -> {
+                notificationPanel.add(PanelUtils.createFileChooser("Sound Path", ev -> {
                     JFileChooser fileChooser = (JFileChooser) ev.getSource();
                     sound.path = fileChooser.getSelectedFile().getAbsolutePath();
-                    log.info("selected a file");
-                    log.info(sound.path);
-                    testButton.setEnabled(sound.path != null);
                 }, sound.path, "Sound Files", Arrays.stream(AudioSystem.getAudioFileTypes()).map(AudioFileFormat.Type::getExtension).toArray(String[]::new)));
-                testButton.setEnabled(sound.path != null);
-                testButton.addActionListener(ev -> {
-                    sound.fire(WatchdogPlugin.getInstance());
+            } else if (notification instanceof TextToSpeech) {
+                TextToSpeech tts = (TextToSpeech) notification;
+                JSlider rateSlider = new JSlider(1, 5, tts.getRate());
+                rateSlider.addChangeListener(ev -> {
+                    tts.setRate(rateSlider.getValue());
                 });
-                notifPanel.add(testButton);
+                notificationPanel.add(PanelUtils.createLabeledComponent("Rate", rateSlider));
+                JComboBox<Voice> voiceChooser = new JComboBox<>(Voice.values());
+                voiceChooser.setSelectedItem(tts.getVoice());
+                voiceChooser.setRenderer((list, value, index, isSelected, cellHasFocus) -> {
+                    list.setToolTipText(value.toString());
+                    return new DefaultListCellRenderer().getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+                });
+                voiceChooser.addActionListener(ev -> {
+                    tts.setVoice(voiceChooser.getItemAt(voiceChooser.getSelectedIndex()));
+                });
+                notificationPanel.add(PanelUtils.createLabeledComponent("Voice", voiceChooser));
             } else if (notification instanceof ScreenFlash) {
                 ScreenFlash screenFlash = (ScreenFlash) notification;
                 ColorJButton colorPickerBtn;
                 Color existing = screenFlash.color;
-                if (existing == null)
-                {
+                if (existing == null) {
                     colorPickerBtn = new ColorJButton("Pick a color", Color.BLACK);
-                }
-                else
-                {
+                } else {
                     String colorHex = "#" + ColorUtil.colorToAlphaHexCode(existing);
                     colorPickerBtn = new ColorJButton(colorHex, existing);
                 }
@@ -151,7 +150,7 @@ public class NotificationsPanel extends JPanel {
                         colorPicker.setVisible(true);
                     }
                 });
-                notifPanel.add(colorPickerBtn);
+                notificationPanel.add(colorPickerBtn);
                 JComboBox<FlashNotification> flashNotificationSelect = new JComboBox<>(Arrays.stream(FlashNotification.values()).filter(fn -> fn != FlashNotification.DISABLED).toArray(FlashNotification[]::new));
                 flashNotificationSelect.setSelectedItem(screenFlash.flashNotification);
                 flashNotificationSelect.setRenderer((list, value, index, isSelected, cellHasFocus) -> {
@@ -159,20 +158,38 @@ public class NotificationsPanel extends JPanel {
                     return new DefaultListCellRenderer().getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
                 });
                 flashNotificationSelect.addActionListener(e -> screenFlash.flashNotification = flashNotificationSelect.getItemAt(flashNotificationSelect.getSelectedIndex()));
-                notifPanel.add(flashNotificationSelect);
-                JButton testButton = new JButton("Test");
-                testButton.addActionListener(ev -> {
-                    screenFlash.fire(WatchdogPlugin.getInstance());
-                });
-                notifPanel.add(testButton);
+                notificationPanel.add(flashNotificationSelect);
             }
+
+            if (notification instanceof IAudioNotification) {
+                IAudioNotification audioNotification = (IAudioNotification) notification;
+                JSlider volumeSlider = new JSlider(0, 10, (audioNotification.getGain() + 25) / 3);
+//                volumeSlider.setPaintTicks(true);
+                volumeSlider.setSnapToTicks(true);
+                volumeSlider.setMajorTickSpacing(5);
+                volumeSlider.setMinorTickSpacing(1);
+                volumeSlider.addChangeListener(ev -> {
+                    audioNotification.setGain(volumeSlider.getValue() * 3 - 25);
+                });
+                notificationPanel.add(PanelUtils.createLabeledComponent("Volume", volumeSlider));
+            }
+
+            JButton testButton = new JButton("Test");
+            testButton.addActionListener(ev -> {
+                boolean prev = notification.isFireWhenFocused();
+                notification.setFireWhenFocused(true);
+                notification.fire();
+                notification.setFireWhenFocused(prev);
+            });
+            notificationPanel.add(testButton);
+
             JButton remove = new JButton("Remove");
             remove.addActionListener(ev -> {
                 this.notifications.remove(notification);
-                this.notificationContainer.remove(notifPanel);
+                this.notificationContainer.remove(notificationPanel);
                 this.notificationContainer.revalidate();
             });
-            notifPanel.add(remove);
+            notificationPanel.add(remove);
         }
         this.notificationContainer.revalidate();
     }

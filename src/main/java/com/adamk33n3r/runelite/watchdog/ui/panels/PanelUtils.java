@@ -1,4 +1,4 @@
-package com.adamk33n3r.runelite.watchdog.panels;
+package com.adamk33n3r.runelite.watchdog.ui.panels;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;

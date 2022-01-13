@@ -1,15 +1,18 @@
-package com.adamk33n3r.runelite.watchdog.panels;
+package com.adamk33n3r.runelite.watchdog.ui.panels;
 
 import com.adamk33n3r.runelite.watchdog.Util;
 import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
 import com.adamk33n3r.runelite.watchdog.alerts.Alert;
-import com.adamk33n3r.runelite.watchdog.notifications.INotification;
+import com.adamk33n3r.runelite.watchdog.notifications.Notification;
+import com.adamk33n3r.runelite.watchdog.ui.StretchedStackedLayout;
+import lombok.extern.slf4j.Slf4j;
 import net.runelite.client.ui.DynamicGridLayout;
 import net.runelite.client.ui.MultiplexingPluginPanel;
 import net.runelite.client.ui.PluginPanel;
 import org.apache.commons.text.WordUtils;
 
 import javax.swing.*;
+import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
@@ -18,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
+@Slf4j
 public class AlertPanel extends PluginPanel {
     ScrollablePanel container;
     MultiplexingPluginPanel muxer;
@@ -30,13 +34,15 @@ public class AlertPanel extends PluginPanel {
         this.muxer = muxer;
         this.alert = alert;
         this.setLayout(new BorderLayout());
-        this.setBorder(new EmptyBorder(10, 10, 10, 10));
 
         this.wrapper = new JPanel(new BorderLayout());
         this.container = new ScrollablePanel(new DynamicGridLayout(0, 1, 3, 3));
+        this.container = new ScrollablePanel(new StretchedStackedLayout(3, 3));
         this.container.setScrollableWidth(ScrollablePanel.ScrollableSizeHint.FIT);
+        this.container.setScrollableHeight(ScrollablePanel.ScrollableSizeHint.STRETCH);
         this.container.setScrollableBlockIncrement(ScrollablePanel.VERTICAL, ScrollablePanel.IncrementType.PERCENT, 10);
-        this.container.setBorder(new TitledBorder(new EtchedBorder(), Util.humanReadableClass(this.alert), TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, Color.WHITE));
+        CompoundBorder compoundBorder = BorderFactory.createCompoundBorder(new EtchedBorder(), new EmptyBorder(0, 5, 5, 5));
+        this.container.setBorder(new TitledBorder(compoundBorder, Util.humanReadableClass(this.alert), TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, Color.WHITE));
         JScrollPane scroll = new JScrollPane(this.container, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         this.wrapper.add(scroll, BorderLayout.CENTER);
 
@@ -45,6 +51,12 @@ public class AlertPanel extends PluginPanel {
 
     public static AlertPanel create(MultiplexingPluginPanel muxer, Alert alert) {
         return new AlertPanel(muxer, alert);
+    }
+
+    public AlertPanel addLabel(String label) {
+        JLabel labelComp = new JLabel(label);
+        this.container.add(labelComp);
+        return this;
     }
 
     public AlertPanel addTextField(String name, String initialValue, Consumer<String> saveAction) {
@@ -93,13 +105,16 @@ public class AlertPanel extends PluginPanel {
         JPanel buttonPanel = new JPanel(new DynamicGridLayout(1, 2, 3, 3));
         JButton back = new JButton("Back");
         back.addActionListener(ev -> {
+            // This and the code in onActivate are bandages because the notification panel components actually modify
+            // the data directly so that it can test fire itself.
+            WatchdogPlugin.getInstance().refetchAlerts();
             this.muxer.popState();
         });
         buttonPanel.add(back);
         JButton save = new JButton("Save");
         save.addActionListener(ev -> {
             this.saveActions.forEach(Runnable::run);
-            java.util.List<INotification> notificationList = notificationPanel.getNotifications();
+            List<Notification> notificationList = notificationPanel.getNotifications();
             this.alert.getNotifications().clear();
             this.alert.getNotifications().addAll(notificationList);
             List<Alert> alerts = WatchdogPlugin.getInstance().getAlerts();

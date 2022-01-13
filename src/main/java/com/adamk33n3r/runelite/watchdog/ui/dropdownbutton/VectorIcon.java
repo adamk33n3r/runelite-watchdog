@@ -16,7 +16,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.adamk33n3r.runelite.watchdog.dropdownbutton;
+package com.adamk33n3r.runelite.watchdog.ui.dropdownbutton;
 
 import java.awt.Component;
 import java.awt.Graphics;
