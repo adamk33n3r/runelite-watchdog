@@ -65,7 +65,7 @@ public class WatchdogPanel extends PluginPanel {
         };
 
         Arrays.stream(TriggerType.values())
-            .filter(tt -> tt != TriggerType.IDLE).forEach(tType -> {
+            .filter(tt -> tt != TriggerType.IDLE && tt != TriggerType.RESOURCE).forEach(tType -> {
                 JMenuItem c = new JMenuItem(WordUtils.capitalizeFully(tType.name().replaceAll("_", " ")));
                 c.putClientProperty(TriggerType.class, tType);
                 c.addActionListener(actionListener);
