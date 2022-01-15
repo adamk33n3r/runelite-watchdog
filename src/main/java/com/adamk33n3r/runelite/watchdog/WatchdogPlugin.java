@@ -115,7 +115,7 @@ public class WatchdogPlugin extends Plugin {
         this.panel = this.injector.getInstance(WatchdogPanel.class);
         AsyncBufferedImage icon = this.itemManager.getImage(ItemID.BELL_BAUBLE);
         this.navButton = NavigationButton.builder()
-            .tooltip("AFK Warden")
+            .tooltip("Watchdog")
             .icon(icon)
             .priority(1)
             .panel(this.panel.getMuxer())
