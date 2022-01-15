@@ -10,7 +10,8 @@ public interface WatchdogConfig extends Config {
     @ConfigItem(
         keyName = "alerts",
         name = "Alerts",
-        description = "Serialized Alerts as a JSON string"
+        description = "Serialized Alerts as a JSON string",
+        hidden = true
     )
     default String alerts() { return "[]"; };
 }
