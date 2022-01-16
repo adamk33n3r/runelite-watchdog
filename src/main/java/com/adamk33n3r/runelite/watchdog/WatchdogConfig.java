@@ -13,5 +13,5 @@ public interface WatchdogConfig extends Config {
         description = "Serialized Alerts as a JSON string",
         hidden = true
     )
-    default String alerts() { return "[]"; };
+    default String alerts() { return "[]"; }
 }
