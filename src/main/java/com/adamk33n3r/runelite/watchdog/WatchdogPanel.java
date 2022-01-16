@@ -165,7 +165,7 @@ public class WatchdogPanel extends PluginPanel {
             StatDrainAlert statDrainAlert = (StatDrainAlert) alert;
             return AlertPanel.create(this.muxer, alert)
                 .addTextField("Name", statDrainAlert.getName(), statDrainAlert::setName)
-                .addSelect("Skill", Skill.class, Skill.ATTACK, statDrainAlert::setSkill)
+                .addSelect("Skill", Skill.class, statDrainAlert.getSkill(), statDrainAlert::setSkill)
                 .addSpinner("Drain Amount", statDrainAlert.getDrainAmount(), statDrainAlert::setDrainAmount)
                 .build();
         }
