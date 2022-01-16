@@ -33,11 +33,10 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 @Slf4j
 @PluginDescriptor(
-    name = "!Watchdog"
+    name = "Watchdog"
 )
 public class WatchdogPlugin extends Plugin {
     @Inject
