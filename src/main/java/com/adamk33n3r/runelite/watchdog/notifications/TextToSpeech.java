@@ -6,10 +6,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.client.RuneLite;
 
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.Clip;
-import javax.sound.sampled.FloatControl;
+import javax.sound.sampled.*;
 import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
@@ -42,20 +39,29 @@ public class TextToSpeech extends MessageNotification implements IAudioNotificat
                 String request = String.format("https://ttsplugin.com?m=%s&r=%d&v=%d", encodedMessage, rate, voice.id);
                 URLConnection conn = new URL(request).openConnection();
                 byte[] bytes = new byte[conn.getContentLength()];
-                InputStream stream = conn.getInputStream();
-                for (int i = 0; i < conn.getContentLength(); i++) {
-                    bytes[i] = (byte) stream.read();
+                try (InputStream stream = conn.getInputStream()) {
+                    for (int i = 0; i < conn.getContentLength(); i++) {
+                        bytes[i] = (byte) stream.read();
+                    }
                 }
                 // Write bytes to file in cache
-                new FileOutputStream(soundFile).write(bytes);
+                try (FileOutputStream fileOutputStream = new FileOutputStream(soundFile)) {
+                    fileOutputStream.write(bytes);
+                }
                 inputStream = AudioSystem.getAudioInputStream(new ByteArrayInputStream(bytes));
             }
             Clip clip = AudioSystem.getClip();
             clip.open(inputStream);
+            inputStream.close();
             FloatControl volume = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
             volume.setValue(this.gain);
             log.info("volume: " + this.gain);
             clip.start();
+            clip.addLineListener(event -> {
+                if (event.getType() == LineEvent.Type.STOP) {
+                    clip.close();
+                }
+            });
         } catch (Exception ex) {
             ex.printStackTrace();
         }

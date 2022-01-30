@@ -125,7 +125,6 @@ public class WatchdogPlugin extends Plugin {
             this.clientToolbar.removeNavigation(this.navButton);
             this.clientToolbar.addNavigation(this.navButton);
         });
-        this.navButton.setSelected(true);
     }
 
     public List<Alert> getAlerts() {
@@ -161,6 +160,7 @@ public class WatchdogPlugin extends Plugin {
     @Override
     protected void shutDown() throws Exception {
         this.clientToolbar.removeNavigation(this.navButton);
+        this.overlayManager.remove(this.flashOverlay);
     }
 
     @Subscribe
