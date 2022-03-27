@@ -1,6 +1,8 @@
 ![Guard_dog_resize](https://user-images.githubusercontent.com/1350444/149637084-270521ab-2d96-4c54-a7b4-71357fb6b291.png)
 
 # Watchdog
+[![](https://img.shields.io/endpoint?url=https://i.pluginhub.info/shields/installs/plugin/watchdog)](https://runelite.net/plugin-hub/show/watchdog)
+
 Create custom alerts triggered by
 - Chat
 - Stat Drain/Change
