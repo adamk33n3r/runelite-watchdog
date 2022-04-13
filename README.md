@@ -4,7 +4,7 @@
 [![](https://img.shields.io/endpoint?url=https://i.pluginhub.info/shields/installs/plugin/watchdog)](https://runelite.net/plugin-hub/show/watchdog)
 
 Create custom alerts triggered by
-- Chat
+- Chat/Game Messages
 - Stat Drain/Change
 - Notifications (allows you to hook into existing notifications, even if you have the alerts off in Runelite. For example low prayer, idle, tempoross, etc)
 
