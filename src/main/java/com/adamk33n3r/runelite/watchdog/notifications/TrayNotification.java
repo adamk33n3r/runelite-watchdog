@@ -8,7 +8,7 @@ import java.awt.*;
 public class TrayNotification extends MessageNotification {
     @Override
     protected void fireImpl() {
-        log.info("Fire TrayNotification");
+        log.debug("Fire TrayNotification");
         if (this.clientUI.getTrayIcon() != null) {
             this.clientUI.getTrayIcon().displayMessage("Watchdog", message, TrayIcon.MessageType.NONE);
         }

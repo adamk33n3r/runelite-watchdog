@@ -13,8 +13,11 @@ import javax.inject.Inject;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.ChatMessageType;
+import net.runelite.api.Client;
 import net.runelite.api.ItemID;
+import net.runelite.api.Skill;
 import net.runelite.api.events.ChatMessage;
+import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.StatChanged;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
@@ -52,6 +55,9 @@ public class WatchdogPlugin extends Plugin {
     @Inject
     private OverlayManager overlayManager;
 
+    @Inject
+    private Client client;
+
     private WatchdogPanel panel;
 
     private NavigationButton navButton;
@@ -59,6 +65,8 @@ public class WatchdogPlugin extends Plugin {
     private Gson gson;
 
     private List<Alert> cachedAlerts;
+
+    private int[] previousLevels = new int[Skill.values().length];
 
     // TODO: create an alert manager
 //    private List<Alert> alerts = new ArrayList<>();
@@ -100,7 +108,6 @@ public class WatchdogPlugin extends Plugin {
             .registerTypeAdapterFactory(alertTypeFactory)
             .registerTypeAdapterFactory(notificationTypeFactory)
             .create();
-//        this.ttsSegmentProcessor.add(new MessageSegment("this is a test of the tts"));
 
         List<Alert> alerts = this.refetchAlerts();
 
@@ -170,7 +177,7 @@ public class WatchdogPlugin extends Plugin {
             return;
         }
 
-//        log.info(chatMessage.getType().name() + ": " + chatMessage.getMessage());
+//        log.debug(chatMessage.getType().name() + ": " + chatMessage.getMessage());
 
         // Filter out player messages
         if (
@@ -216,18 +223,40 @@ public class WatchdogPlugin extends Plugin {
 
     @Subscribe
     public void onStatChanged(StatChanged statChanged) {
-        log.info(String.format("%s: %s/%s", statChanged.getSkill().getName(), statChanged.getBoostedLevel(), statChanged.getLevel()));
+//        log.debug(String.format("%s: %s/%s", statChanged.getSkill().getName(), statChanged.getBoostedLevel(), statChanged.getLevel()));
+        int previousLevel = this.previousLevels[statChanged.getSkill().ordinal()];
         this.getAlerts().stream()
             .filter(alert -> alert instanceof StatDrainAlert)
             .map(alert -> (StatDrainAlert) alert)
-            .filter(alert -> alert.getSkill() == statChanged.getSkill() && (statChanged.getLevel() - statChanged.getBoostedLevel() >= alert.getDrainAmount()))
+            .filter(alert -> {
+                boolean isSkill = alert.getSkill() == statChanged.getSkill();
+                int targetLevel = statChanged.getLevel() - alert.getDrainAmount();
+                boolean isLower = statChanged.getBoostedLevel() <= targetLevel;
+                boolean wasHigher = previousLevel > targetLevel;
+                log.debug("targetLevel: " + targetLevel);
+                log.debug("{}, {}, {}", isSkill, isLower, wasHigher);
+                return isSkill && isLower && wasHigher;
+            })
             .forEach(this::fireAlert);
+
+        int[] boostedSkillLevels = this.client.getBoostedSkillLevels();
+        for (Skill skill : Skill.values()) {
+            this.previousLevels[skill.ordinal()] = boostedSkillLevels[skill.ordinal()];
+        }
     }
 
     @Subscribe
     private void onConfigChanged(ConfigChanged configChanged) {
         if (configChanged.getGroup().equals(WatchdogConfig.configGroupName) && configChanged.getKey().equals("alerts")) {
             this.panel.rebuild();
+        }
+    }
+
+    @Subscribe
+    private void onGameStateChanged(GameStateChanged gameStateChanged) {
+        int[] boostedSkillLevels = this.client.getBoostedSkillLevels();
+        for (Skill skill : Skill.values()) {
+            this.previousLevels[skill.ordinal()] = boostedSkillLevels[skill.ordinal()];
         }
     }
 

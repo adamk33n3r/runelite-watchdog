@@ -55,7 +55,7 @@ public class TextToSpeech extends MessageNotification implements IAudioNotificat
             inputStream.close();
             FloatControl volume = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
             volume.setValue(this.gain);
-            log.info("volume: " + this.gain);
+            log.debug("volume: " + this.gain);
             clip.start();
             clip.addLineListener(event -> {
                 if (event.getType() == LineEvent.Type.STOP) {
