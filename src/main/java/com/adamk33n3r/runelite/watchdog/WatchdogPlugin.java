@@ -30,12 +30,12 @@ import net.runelite.client.ui.ClientToolbar;
 import net.runelite.client.ui.NavigationButton;
 import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.util.AsyncBufferedImage;
-import net.runelite.http.api.ws.RuntimeTypeAdapterFactory;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
+import net.runelite.client.util.RuntimeTypeAdapterFactory;
 
 @Slf4j
 @PluginDescriptor(
