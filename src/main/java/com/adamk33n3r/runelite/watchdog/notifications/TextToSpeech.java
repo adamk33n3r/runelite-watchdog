@@ -1,5 +1,6 @@
 package com.adamk33n3r.runelite.watchdog.notifications;
 
+import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
 import com.adamk33n3r.runelite.watchdog.notifications.tts.Voice;
 import lombok.Getter;
 import lombok.Setter;
@@ -23,6 +24,10 @@ public class TextToSpeech extends MessageNotification implements IAudioNotificat
 
     @Override
     protected void fireImpl() {
+        if (!WatchdogPlugin.getInstance().getConfig().ttsEnabled()) {
+            return;
+        }
+
         try {
             String encodedMessage = URLEncoder.encode(this.message, "UTF-8");
             File watchdogPath = new File(RuneLite.CACHE_DIR, "watchdog");

@@ -42,6 +42,7 @@ import net.runelite.client.util.RuntimeTypeAdapterFactory;
     name = "Watchdog"
 )
 public class WatchdogPlugin extends Plugin {
+    @Getter
     @Inject
     private WatchdogConfig config;
     @Inject
@@ -112,9 +113,18 @@ public class WatchdogPlugin extends Plugin {
         List<Alert> alerts = this.refetchAlerts();
 
         if (alerts.isEmpty()) {
-            alerts.add(new ChatAlert("Test Chat Alert 1"));
-            alerts.add(new ResourceAlert("Low HP"));
-            alerts.add(new ChatAlert("Nothing interesting happens"));
+            ChatAlert readyToHarvest = new ChatAlert("Ready to Harvest");
+            readyToHarvest.setMessage("*is ready to harvest*");
+            TrayNotification harvestNotif = new TrayNotification();
+            harvestNotif.setMessage("Time to harvest your crops!");
+            readyToHarvest.getNotifications().add(harvestNotif);
+            alerts.add(readyToHarvest);
+
+            NotificationFiredAlert outOfCombat = new NotificationFiredAlert("Out of Combat");
+            outOfCombat.setMessage("You are now out of combat!");
+            outOfCombat.getNotifications().add(new ScreenFlash());
+            alerts.add(outOfCombat);
+
             this.saveAlerts(alerts);
         }
 
@@ -247,7 +257,11 @@ public class WatchdogPlugin extends Plugin {
 
     @Subscribe
     private void onConfigChanged(ConfigChanged configChanged) {
-        if (configChanged.getGroup().equals(WatchdogConfig.configGroupName) && configChanged.getKey().equals("alerts")) {
+        if (configChanged.getGroup().equals(WatchdogConfig.configGroupName) && (configChanged.getKey().equals("alerts") || configChanged.getKey().equals("enableTTS"))) {
+            // To the top!
+            while (this.panel.getMuxer().getComponentCount() > 1) {
+                this.panel.getMuxer().popState();
+            }
             this.panel.rebuild();
         }
     }

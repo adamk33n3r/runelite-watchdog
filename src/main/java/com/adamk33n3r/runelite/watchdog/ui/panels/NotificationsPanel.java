@@ -81,107 +81,111 @@ public class NotificationsPanel extends JPanel {
             notificationPanel.setBorder(new TitledBorder(new EtchedBorder(), Util.humanReadableClass(notification), TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, Color.WHITE));
             this.notificationContainer.add(notificationPanel);
 
-            JCheckBox fireWhenFocused = new JCheckBox("Fire when in focus", notification.isFireWhenFocused());
-            fireWhenFocused.addChangeListener(ev -> {
-                notification.setFireWhenFocused(fireWhenFocused.isSelected());
-            });
-            notificationPanel.add(fireWhenFocused);
+            if (notification instanceof TextToSpeech && !WatchdogPlugin.getInstance().getConfig().ttsEnabled()) {
+                JLabel ttsLabel = new JLabel("<html>Enable TTS in the config to use this Notification type</html>");
+                ttsLabel.setFont(new Font(ttsLabel.getFont().getFontName(), Font.ITALIC | Font.BOLD, ttsLabel.getFont().getSize()));
+                notificationPanel.add(ttsLabel);
+            } else {
+                JCheckBox fireWhenFocused = new JCheckBox("Fire when in focus", notification.isFireWhenFocused());
+                fireWhenFocused.addChangeListener(ev -> {
+                    notification.setFireWhenFocused(fireWhenFocused.isSelected());
+                });
+                notificationPanel.add(fireWhenFocused);
 
-            if (notification instanceof IMessageNotification) {
-                IMessageNotification gameMessage = (IMessageNotification) notification;
-                JTextField notificationMessage = new JTextField(gameMessage.getMessage());
-                ((AbstractDocument)notificationMessage.getDocument()).setDocumentFilter(new LengthLimitFilter(200));
-                notificationMessage.getDocument().addDocumentListener((SimpleDocumentListener) ev -> {
-                    gameMessage.setMessage(notificationMessage.getText());
-                });
-                notificationPanel.add(PanelUtils.createLabeledComponent("Message", notificationMessage));
-            }
-
-            if (notification instanceof Sound) {
-                Sound sound = (Sound) notification;
-                notificationPanel.add(PanelUtils.createFileChooser("Sound Path", ev -> {
-                    JFileChooser fileChooser = (JFileChooser) ev.getSource();
-                    sound.path = fileChooser.getSelectedFile().getAbsolutePath();
-                }, sound.path, "Sound Files", Arrays.stream(AudioSystem.getAudioFileTypes()).map(AudioFileFormat.Type::getExtension).toArray(String[]::new)));
-            } else if (notification instanceof TextToSpeech) {
-                TextToSpeech tts = (TextToSpeech) notification;
-                JSlider rateSlider = new JSlider(1, 5, tts.getRate());
-                rateSlider.addChangeListener(ev -> {
-                    tts.setRate(rateSlider.getValue());
-                });
-                notificationPanel.add(PanelUtils.createLabeledComponent("Rate", rateSlider));
-                JComboBox<Voice> voiceChooser = new JComboBox<>(Voice.values());
-                voiceChooser.setSelectedItem(tts.getVoice());
-                voiceChooser.setRenderer((list, value, index, isSelected, cellHasFocus) -> {
-                    list.setToolTipText(value.toString());
-                    return new DefaultListCellRenderer().getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-                });
-                voiceChooser.addActionListener(ev -> {
-                    tts.setVoice(voiceChooser.getItemAt(voiceChooser.getSelectedIndex()));
-                });
-                notificationPanel.add(PanelUtils.createLabeledComponent("Voice", voiceChooser));
-            } else if (notification instanceof ScreenFlash) {
-                ScreenFlash screenFlash = (ScreenFlash) notification;
-                ColorJButton colorPickerBtn;
-                Color existing = screenFlash.color;
-                if (existing == null) {
-                    colorPickerBtn = new ColorJButton("Pick a color", Color.BLACK);
-                } else {
-                    String colorHex = "#" + ColorUtil.colorToAlphaHexCode(existing);
-                    colorPickerBtn = new ColorJButton(colorHex, existing);
+                if (notification instanceof IMessageNotification) {
+                    IMessageNotification gameMessage = (IMessageNotification) notification;
+                    JTextField notificationMessage = new JTextField(gameMessage.getMessage());
+                    ((AbstractDocument) notificationMessage.getDocument()).setDocumentFilter(new LengthLimitFilter(200));
+                    notificationMessage.getDocument().addDocumentListener((SimpleDocumentListener) ev -> {
+                        gameMessage.setMessage(notificationMessage.getText());
+                    });
+                    notificationPanel.add(PanelUtils.createLabeledComponent("Message", notificationMessage));
                 }
-                colorPickerBtn.setFocusable(false);
-                colorPickerBtn.addMouseListener(new MouseAdapter()
-                {
-                    @Override
-                    public void mouseClicked(MouseEvent e)
-                    {
-                        RuneliteColorPicker colorPicker = colorPickerManager.create(
-                            SwingUtilities.windowForComponent(NotificationsPanel.this),
-                            colorPickerBtn.getColor(),
-                            "Flash Color",
-                            false);
-                        colorPicker.setLocation(getLocationOnScreen());
-                        colorPicker.setOnColorChange(c -> {
-                            colorPickerBtn.setColor(c);
-                            colorPickerBtn.setText("#" + ColorUtil.colorToAlphaHexCode(c).toUpperCase());
-                        });
-                        colorPicker.setOnClose(c -> screenFlash.color = c);
-                        colorPicker.setVisible(true);
+
+                if (notification instanceof Sound) {
+                    Sound sound = (Sound) notification;
+                    notificationPanel.add(PanelUtils.createFileChooser("Sound Path", ev -> {
+                        JFileChooser fileChooser = (JFileChooser) ev.getSource();
+                        sound.path = fileChooser.getSelectedFile().getAbsolutePath();
+                    }, sound.path, "Sound Files", Arrays.stream(AudioSystem.getAudioFileTypes()).map(AudioFileFormat.Type::getExtension).toArray(String[]::new)));
+                } else if (notification instanceof TextToSpeech) {
+                    TextToSpeech tts = (TextToSpeech) notification;
+                    JSlider rateSlider = new JSlider(1, 5, tts.getRate());
+                    rateSlider.addChangeListener(ev -> {
+                        tts.setRate(rateSlider.getValue());
+                    });
+                    notificationPanel.add(PanelUtils.createLabeledComponent("Rate", rateSlider));
+                    JComboBox<Voice> voiceChooser = new JComboBox<>(Voice.values());
+                    voiceChooser.setSelectedItem(tts.getVoice());
+                    voiceChooser.setRenderer((list, value, index, isSelected, cellHasFocus) -> {
+                        list.setToolTipText(value.toString());
+                        return new DefaultListCellRenderer().getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+                    });
+                    voiceChooser.addActionListener(ev -> {
+                        tts.setVoice(voiceChooser.getItemAt(voiceChooser.getSelectedIndex()));
+                    });
+                    notificationPanel.add(PanelUtils.createLabeledComponent("Voice", voiceChooser));
+                } else if (notification instanceof ScreenFlash) {
+                    ScreenFlash screenFlash = (ScreenFlash) notification;
+                    ColorJButton colorPickerBtn;
+                    Color existing = screenFlash.color;
+                    if (existing == null) {
+                        colorPickerBtn = new ColorJButton("Pick a color", Color.BLACK);
+                    } else {
+                        String colorHex = "#" + ColorUtil.colorToAlphaHexCode(existing);
+                        colorPickerBtn = new ColorJButton(colorHex, existing);
                     }
-                });
-                notificationPanel.add(colorPickerBtn);
-                JComboBox<FlashNotification> flashNotificationSelect = new JComboBox<>(Arrays.stream(FlashNotification.values()).filter(fn -> fn != FlashNotification.DISABLED).toArray(FlashNotification[]::new));
-                flashNotificationSelect.setSelectedItem(screenFlash.flashNotification);
-                flashNotificationSelect.setRenderer((list, value, index, isSelected, cellHasFocus) -> {
-                    list.setToolTipText(value.toString());
-                    return new DefaultListCellRenderer().getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-                });
-                flashNotificationSelect.addActionListener(e -> screenFlash.flashNotification = flashNotificationSelect.getItemAt(flashNotificationSelect.getSelectedIndex()));
-                notificationPanel.add(flashNotificationSelect);
-            }
+                    colorPickerBtn.setFocusable(false);
+                    colorPickerBtn.addMouseListener(new MouseAdapter() {
+                        @Override
+                        public void mouseClicked(MouseEvent e) {
+                            RuneliteColorPicker colorPicker = colorPickerManager.create(
+                                SwingUtilities.windowForComponent(NotificationsPanel.this),
+                                colorPickerBtn.getColor(),
+                                "Flash Color",
+                                false);
+                            colorPicker.setLocation(getLocationOnScreen());
+                            colorPicker.setOnColorChange(c -> {
+                                colorPickerBtn.setColor(c);
+                                colorPickerBtn.setText("#" + ColorUtil.colorToAlphaHexCode(c).toUpperCase());
+                            });
+                            colorPicker.setOnClose(c -> screenFlash.color = c);
+                            colorPicker.setVisible(true);
+                        }
+                    });
+                    notificationPanel.add(colorPickerBtn);
+                    JComboBox<FlashNotification> flashNotificationSelect = new JComboBox<>(Arrays.stream(FlashNotification.values()).filter(fn -> fn != FlashNotification.DISABLED).toArray(FlashNotification[]::new));
+                    flashNotificationSelect.setSelectedItem(screenFlash.flashNotification);
+                    flashNotificationSelect.setRenderer((list, value, index, isSelected, cellHasFocus) -> {
+                        list.setToolTipText(value.toString());
+                        return new DefaultListCellRenderer().getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+                    });
+                    flashNotificationSelect.addActionListener(e -> screenFlash.flashNotification = flashNotificationSelect.getItemAt(flashNotificationSelect.getSelectedIndex()));
+                    notificationPanel.add(flashNotificationSelect);
+                }
 
-            if (notification instanceof IAudioNotification) {
-                IAudioNotification audioNotification = (IAudioNotification) notification;
-                JSlider volumeSlider = new JSlider(0, 10, (audioNotification.getGain() + 25) / 3);
-//                volumeSlider.setPaintTicks(true);
-                volumeSlider.setSnapToTicks(true);
-                volumeSlider.setMajorTickSpacing(5);
-                volumeSlider.setMinorTickSpacing(1);
-                volumeSlider.addChangeListener(ev -> {
-                    audioNotification.setGain(volumeSlider.getValue() * 3 - 25);
-                });
-                notificationPanel.add(PanelUtils.createLabeledComponent("Volume", volumeSlider));
-            }
+                if (notification instanceof IAudioNotification) {
+                    IAudioNotification audioNotification = (IAudioNotification) notification;
+                    JSlider volumeSlider = new JSlider(0, 10, (audioNotification.getGain() + 25) / 3);
+                    //                volumeSlider.setPaintTicks(true);
+                    volumeSlider.setSnapToTicks(true);
+                    volumeSlider.setMajorTickSpacing(5);
+                    volumeSlider.setMinorTickSpacing(1);
+                    volumeSlider.addChangeListener(ev -> {
+                        audioNotification.setGain(volumeSlider.getValue() * 3 - 25);
+                    });
+                    notificationPanel.add(PanelUtils.createLabeledComponent("Volume", volumeSlider));
+                }
 
-            JButton testButton = new JButton("Test");
-            testButton.addActionListener(ev -> {
-                boolean prev = notification.isFireWhenFocused();
-                notification.setFireWhenFocused(true);
-                notification.fire();
-                notification.setFireWhenFocused(prev);
-            });
-            notificationPanel.add(testButton);
+                JButton testButton = new JButton("Test");
+                testButton.addActionListener(ev -> {
+                    boolean prev = notification.isFireWhenFocused();
+                    notification.setFireWhenFocused(true);
+                    notification.fire();
+                    notification.setFireWhenFocused(prev);
+                });
+                notificationPanel.add(testButton);
+            }
 
             JButton remove = new JButton("Remove");
             remove.addActionListener(ev -> {

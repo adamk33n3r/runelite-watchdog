@@ -14,4 +14,12 @@ public interface WatchdogConfig extends Config {
         hidden = true
     )
     default String alerts() { return "[]"; }
+
+    @ConfigItem(
+        keyName = "enableTTS",
+        name = "Enable TTS",
+        description = "Enables the TTS Notification Type",
+        warning = "Using TTS will submit your IP address to a 3rd party website not controlled or verified by the RuneLite Developers."
+    )
+    default boolean ttsEnabled() { return false; }
 }
