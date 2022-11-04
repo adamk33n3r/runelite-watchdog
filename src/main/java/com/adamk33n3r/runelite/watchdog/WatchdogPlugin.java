@@ -32,8 +32,11 @@ import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.util.AsyncBufferedImage;
 
 import java.lang.reflect.Type;
+import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 import net.runelite.client.util.RuntimeTypeAdapterFactory;
 
@@ -73,6 +76,8 @@ public class WatchdogPlugin extends Plugin {
 
     // TODO: create an alert manager
 //    private List<Alert> alerts = new ArrayList<>();
+
+    private Map<Alert, Instant> lastTriggered = new HashMap<>();
 
     private static final Type alertListType;
 
@@ -116,6 +121,7 @@ public class WatchdogPlugin extends Plugin {
 
         if (alerts.isEmpty()) {
             ChatAlert readyToHarvest = new ChatAlert("Ready to Harvest");
+            readyToHarvest.setDebounceTime(500);
             readyToHarvest.setMessage("*is ready to harvest*");
             TrayNotification harvestNotif = new TrayNotification();
             harvestNotif.setMessage("Time to harvest your crops!");
@@ -286,6 +292,10 @@ public class WatchdogPlugin extends Plugin {
     }
 
     private void fireAlert(Alert alert) {
-        alert.getNotifications().forEach(Notification::fire);
+        // If the alert hasn't been fired yet, or has been enough time, set the last trigger time to now and fire.
+        if (!this.lastTriggered.containsKey(alert) || Instant.now().compareTo(this.lastTriggered.get(alert).plusMillis(alert.getDebounceTime())) >= 0) {
+            this.lastTriggered.put(alert, Instant.now());
+            alert.getNotifications().forEach(Notification::fire);
+        }
     }
 }

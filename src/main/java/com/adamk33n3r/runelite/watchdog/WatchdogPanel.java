@@ -140,33 +140,33 @@ public class WatchdogPanel extends PluginPanel {
             ChatAlert chatAlert = (ChatAlert) alert;
             return AlertPanel.create(this.muxer, alert)
                 .addLabel("<html>Will not trigger on<br>player chat messages</html>")
-                .addTextField("Name", chatAlert.getName(), chatAlert::setName)
-                .addTextArea("Message", chatAlert.getMessage(), chatAlert::setMessage)
+                .addAlertDefaults(alert)
+                .addTextArea("Message", "The message to trigger on. Supports glob (*)", chatAlert.getMessage(), chatAlert::setMessage)
                 .build();
         } else if (alert instanceof IdleAlert) {
             IdleAlert idleAlert = (IdleAlert) alert;
             return AlertPanel.create(this.muxer, alert)
-                .addTextField("Name", idleAlert.getName(), idleAlert::setName)
-                .addSelect("Action", IdleAlert.IdleAction.class, idleAlert.getIdleAction(), idleAlert::setIdleAction)
+                .addAlertDefaults(alert)
+                .addSelect("Action", "Action to trigger alert when stop", IdleAlert.IdleAction.class, idleAlert.getIdleAction(), idleAlert::setIdleAction)
                 .build();
         } else if (alert instanceof NotificationFiredAlert) {
             NotificationFiredAlert notificationFiredAlert = (NotificationFiredAlert) alert;
             return AlertPanel.create(this.muxer, alert)
-                .addTextField("Name", notificationFiredAlert.getName(), notificationFiredAlert::setName)
-                .addTextArea("Message", notificationFiredAlert.getMessage(), notificationFiredAlert::setMessage)
+                .addAlertDefaults(alert)
+                .addTextArea("Message", "The notification message to trigger on. Supports glob (*)", notificationFiredAlert.getMessage(), notificationFiredAlert::setMessage)
                 .build();
         } else if (alert instanceof ResourceAlert) {
             ResourceAlert resourceAlert = (ResourceAlert) alert;
             return AlertPanel.create(this.muxer, alert)
-                .addTextField("Name", resourceAlert.getName(), resourceAlert::setName)
-                .addSelect("Resource", ResourceAlert.ResourceType.class, resourceAlert.getResourceType(), resourceAlert::setResourceType)
+                .addAlertDefaults(alert)
+                .addSelect("Resource", "The resource to trigger the alert when low", ResourceAlert.ResourceType.class, resourceAlert.getResourceType(), resourceAlert::setResourceType)
                 .build();
         } else if (alert instanceof StatDrainAlert) {
             StatDrainAlert statDrainAlert = (StatDrainAlert) alert;
             return AlertPanel.create(this.muxer, alert)
-                .addTextField("Name", statDrainAlert.getName(), statDrainAlert::setName)
-                .addSelect("Skill", Skill.class, statDrainAlert.getSkill(), statDrainAlert::setSkill)
-                .addSpinner("Drain Amount", statDrainAlert.getDrainAmount(), statDrainAlert::setDrainAmount)
+                .addAlertDefaults(alert)
+                .addSelect("Skill", "The skill to track", Skill.class, statDrainAlert.getSkill(), statDrainAlert::setSkill)
+                .addSpinner("Drain Amount", "The difference in level to trigger the alert. Can be negative for stat gain", statDrainAlert.getDrainAmount(), statDrainAlert::setDrainAmount)
                 .build();
         }
 

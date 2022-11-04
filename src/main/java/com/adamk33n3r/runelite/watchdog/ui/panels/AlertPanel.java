@@ -59,31 +59,35 @@ public class AlertPanel extends PluginPanel {
         return this;
     }
 
-    public AlertPanel addTextField(String name, String initialValue, Consumer<String> saveAction) {
+    public AlertPanel addTextField(String name, String tooltip, String initialValue, Consumer<String> saveAction) {
         JTextField nameTextField = new JTextField(initialValue);
         this.saveActions.add(() -> saveAction.accept(nameTextField.getText()));
-        this.container.add(PanelUtils.createLabeledComponent(name, nameTextField));
+        this.container.add(PanelUtils.createLabeledComponent(name, tooltip, nameTextField));
         return this;
     }
 
-    public AlertPanel addTextArea(String name, String initialValue, Consumer<String> saveAction) {
+    public AlertPanel addTextArea(String name, String tooltip, String initialValue, Consumer<String> saveAction) {
         JTextArea textArea = new JTextArea(initialValue);
         textArea.setLineWrap(true);
         textArea.setWrapStyleWord(true);
         textArea.setMargin(new Insets(4, 6, 5, 6));
         this.saveActions.add(() -> saveAction.accept(textArea.getText()));
-        this.container.add(PanelUtils.createLabeledComponent(name, textArea));
+        this.container.add(PanelUtils.createLabeledComponent(name, tooltip, textArea));
         return this;
     }
 
-    public AlertPanel addSpinner(String name, int initialValue, Consumer<Integer> saveAction) {
-        JSpinner spinner = new JSpinner(new SpinnerNumberModel(initialValue, 1, 99, 1));
+    public AlertPanel addSpinner(String name, String tooltip, int initialValue, Consumer<Integer> saveAction) {
+        return this.addSpinner(name, tooltip, initialValue, saveAction, 1, 99, 1);
+    }
+
+    public AlertPanel addSpinner(String name, String tooltip, int initialValue, Consumer<Integer> saveAction, int min, int max, int step) {
+        JSpinner spinner = new JSpinner(new SpinnerNumberModel(initialValue, min, max, step));
         this.saveActions.add(() -> saveAction.accept((Integer) spinner.getValue()));
-        this.container.add(PanelUtils.createLabeledComponent(name, spinner));
+        this.container.add(PanelUtils.createLabeledComponent(name, tooltip, spinner));
         return this;
     }
 
-    public <T extends Enum<T>> AlertPanel addSelect(String name, Class<T> enumType, T initialValue, Consumer<T> saveAction) {
+    public <T extends Enum<T>> AlertPanel addSelect(String name, String tooltip, Class<T> enumType, T initialValue, Consumer<T> saveAction) {
         JComboBox<T> select = new JComboBox<>(enumType.getEnumConstants());
         select.setSelectedItem(initialValue);
         select.setRenderer((list, value, index, isSelected, cellHasFocus) -> {
@@ -92,7 +96,7 @@ public class AlertPanel extends PluginPanel {
             return new DefaultListCellRenderer().getListCellRendererComponent(list, titleized, index, isSelected, cellHasFocus);
         });
         this.saveActions.add(() -> saveAction.accept(select.getItemAt(select.getSelectedIndex())));
-        this.container.add(PanelUtils.createLabeledComponent(name, select));
+        this.container.add(PanelUtils.createLabeledComponent(name, tooltip, select));
         return this;
     }
 
@@ -127,5 +131,18 @@ public class AlertPanel extends PluginPanel {
         buttonPanel.add(save);
         this.wrapper.add(buttonPanel, BorderLayout.SOUTH);
         return this;
+    }
+
+    public AlertPanel addAlertDefaults(Alert alert) {
+        return this.addTextField("Name", "Name of Alert", alert.getName(), alert::setName)
+            .addSpinner(
+                "Debounce Time (ms)",
+                "How long to wait before allowing this alert to trigger again",
+                alert.getDebounceTime(),
+                alert::setDebounceTime,
+                0,
+                60000,
+                100
+            );
     }
 }

@@ -12,16 +12,20 @@ import java.util.stream.Collectors;
 public class PanelUtils {
     private PanelUtils () {}
 
-    public static JPanel createLabeledComponent(String label, Component component) {
+    public static JPanel createLabeledComponent(String label, String tooltip, Component component) {
         JPanel panel = new JPanel(new BorderLayout(5, 0));
-        panel.add(new JLabel(label), BorderLayout.WEST);
+        JLabel jLabel = new JLabel(label);
+        jLabel.setToolTipText(tooltip);
+        panel.add(jLabel, BorderLayout.WEST);
         panel.add(component);
         return panel;
     }
 
-    public static JPanel createFileChooser(String label, ActionListener actionListener, String path, String filterLabel, String... filters) {
+    public static JPanel createFileChooser(String label, String tooltip, ActionListener actionListener, String path, String filterLabel, String... filters) {
         JPanel panel = new JPanel(new GridLayout(2, 1));
-        panel.add(new JLabel(label), BorderLayout.WEST);
+        JLabel jLabel = new JLabel(label);
+        jLabel.setToolTipText(tooltip);
+        panel.add(jLabel, BorderLayout.WEST);
         JPanel chooserPanel = new JPanel(new BorderLayout(5, 0));
         panel.add(chooserPanel);
         JTextField pathField = new JTextField(path);

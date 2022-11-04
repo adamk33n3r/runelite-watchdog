@@ -87,6 +87,7 @@ public class NotificationsPanel extends JPanel {
                 notificationPanel.add(ttsLabel);
             } else {
                 JCheckBox fireWhenFocused = new JCheckBox("Fire when in focus", notification.isFireWhenFocused());
+                fireWhenFocused.setToolTipText("Allows the notification to fire when the game is focused");
                 fireWhenFocused.addChangeListener(ev -> {
                     notification.setFireWhenFocused(fireWhenFocused.isSelected());
                 });
@@ -99,12 +100,12 @@ public class NotificationsPanel extends JPanel {
                     notificationMessage.getDocument().addDocumentListener((SimpleDocumentListener) ev -> {
                         gameMessage.setMessage(notificationMessage.getText());
                     });
-                    notificationPanel.add(PanelUtils.createLabeledComponent("Message", notificationMessage));
+                    notificationPanel.add(PanelUtils.createLabeledComponent("Message", "Message to use for the notification", notificationMessage));
                 }
 
                 if (notification instanceof Sound) {
                     Sound sound = (Sound) notification;
-                    notificationPanel.add(PanelUtils.createFileChooser("Sound Path", ev -> {
+                    notificationPanel.add(PanelUtils.createFileChooser("Sound Path", "Path to the sound file", ev -> {
                         JFileChooser fileChooser = (JFileChooser) ev.getSource();
                         sound.path = fileChooser.getSelectedFile().getAbsolutePath();
                     }, sound.path, "Sound Files", Arrays.stream(AudioSystem.getAudioFileTypes()).map(AudioFileFormat.Type::getExtension).toArray(String[]::new)));
@@ -114,7 +115,7 @@ public class NotificationsPanel extends JPanel {
                     rateSlider.addChangeListener(ev -> {
                         tts.setRate(rateSlider.getValue());
                     });
-                    notificationPanel.add(PanelUtils.createLabeledComponent("Rate", rateSlider));
+                    notificationPanel.add(PanelUtils.createLabeledComponent("Rate", "The speed of the generated speech", rateSlider));
                     JComboBox<Voice> voiceChooser = new JComboBox<>(Voice.values());
                     voiceChooser.setSelectedItem(tts.getVoice());
                     voiceChooser.setRenderer((list, value, index, isSelected, cellHasFocus) -> {
@@ -124,7 +125,7 @@ public class NotificationsPanel extends JPanel {
                     voiceChooser.addActionListener(ev -> {
                         tts.setVoice(voiceChooser.getItemAt(voiceChooser.getSelectedIndex()));
                     });
-                    notificationPanel.add(PanelUtils.createLabeledComponent("Voice", voiceChooser));
+                    notificationPanel.add(PanelUtils.createLabeledComponent("Voice", "The voice to generate speech with", voiceChooser));
                 } else if (notification instanceof ScreenFlash) {
                     ScreenFlash screenFlash = (ScreenFlash) notification;
                     ColorJButton colorPickerBtn;
@@ -135,6 +136,7 @@ public class NotificationsPanel extends JPanel {
                         String colorHex = "#" + ColorUtil.colorToAlphaHexCode(existing);
                         colorPickerBtn = new ColorJButton(colorHex, existing);
                     }
+                    colorPickerBtn.setToolTipText("The color to flash the screen");
                     colorPickerBtn.setFocusable(false);
                     colorPickerBtn.addMouseListener(new MouseAdapter() {
                         @Override
@@ -155,6 +157,7 @@ public class NotificationsPanel extends JPanel {
                     });
                     notificationPanel.add(colorPickerBtn);
                     JComboBox<FlashNotification> flashNotificationSelect = new JComboBox<>(Arrays.stream(FlashNotification.values()).filter(fn -> fn != FlashNotification.DISABLED).toArray(FlashNotification[]::new));
+                    flashNotificationSelect.setToolTipText("The screen flash mode");
                     flashNotificationSelect.setSelectedItem(screenFlash.flashNotification);
                     flashNotificationSelect.setRenderer((list, value, index, isSelected, cellHasFocus) -> {
                         list.setToolTipText(value.toString());
@@ -174,10 +177,11 @@ public class NotificationsPanel extends JPanel {
                     volumeSlider.addChangeListener(ev -> {
                         audioNotification.setGain(volumeSlider.getValue() * 3 - 25);
                     });
-                    notificationPanel.add(PanelUtils.createLabeledComponent("Volume", volumeSlider));
+                    notificationPanel.add(PanelUtils.createLabeledComponent("Volume", "The volume to playback speech", volumeSlider));
                 }
 
                 JButton testButton = new JButton("Test");
+                testButton.setToolTipText("Test the notification");
                 testButton.addActionListener(ev -> {
                     boolean prev = notification.isFireWhenFocused();
                     notification.setFireWhenFocused(true);
@@ -188,6 +192,7 @@ public class NotificationsPanel extends JPanel {
             }
 
             JButton remove = new JButton("Remove");
+            remove.setToolTipText("Remove this notification");
             remove.addActionListener(ev -> {
                 this.notifications.remove(notification);
                 this.notificationContainer.remove(notificationPanel);
