@@ -59,11 +59,13 @@ public class WatchdogPlugin extends Plugin {
     @Inject
     private Client client;
 
+    @Inject
+    private Gson clientGson;
+    private Gson gson;
+
     private WatchdogPanel panel;
 
     private NavigationButton navButton;
-
-    private Gson gson;
 
     private List<Alert> cachedAlerts;
 
@@ -104,7 +106,7 @@ public class WatchdogPlugin extends Plugin {
             .registerSubtype(Sound.class)
             .registerSubtype(ScreenFlash.class)
             .registerSubtype(GameMessage.class);
-        this.gson = new GsonBuilder()
+        this.gson = this.clientGson.newBuilder()
 //            .serializeNulls()
             .registerTypeAdapterFactory(alertTypeFactory)
             .registerTypeAdapterFactory(notificationTypeFactory)
@@ -257,12 +259,16 @@ public class WatchdogPlugin extends Plugin {
 
     @Subscribe
     private void onConfigChanged(ConfigChanged configChanged) {
-        if (configChanged.getGroup().equals(WatchdogConfig.configGroupName) && (configChanged.getKey().equals("alerts") || configChanged.getKey().equals("enableTTS"))) {
-            // To the top!
-            while (this.panel.getMuxer().getComponentCount() > 1) {
-                this.panel.getMuxer().popState();
+        if (configChanged.getGroup().equals(WatchdogConfig.configGroupName)) {
+            if (configChanged.getKey().equals("alerts")) {
+                this.panel.rebuild();
+            } else if (configChanged.getKey().equals("enableTTS")) {
+                // To the top!
+                while (this.panel.getMuxer().getComponentCount() > 1) {
+                    this.panel.getMuxer().popState();
+                }
+                this.panel.rebuild();
             }
-            this.panel.rebuild();
         }
     }
 
