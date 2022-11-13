@@ -10,6 +10,9 @@ import java.util.List;
 @Getter
 public class Alert {
     @Setter
+    private boolean enabled = true;
+
+    @Setter
     private String name;
 
     @Setter

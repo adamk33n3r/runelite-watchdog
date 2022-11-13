@@ -4,7 +4,6 @@ import com.adamk33n3r.runelite.watchdog.alerts.*;
 import com.adamk33n3r.runelite.watchdog.notifications.*;
 import com.google.common.base.Strings;
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import com.google.inject.Provides;
 
@@ -163,9 +162,21 @@ public class WatchdogPlugin extends Plugin {
     }
     public List<Alert> fetchAlerts() {
         String json = config.alerts();
-        List<Alert> alerts = new ArrayList<>();
+        // Importing will immediately save to config which is nice to set new property defaults
+        return this.importAlerts(json, false);
+    }
+
+    public void saveAlerts(List<Alert> alerts) {
+        this.cachedAlerts = alerts;
+        String json = this.gson.toJson(alerts, alertListType);
+        this.configManager.setConfiguration(WatchdogConfig.configGroupName, "alerts", json);
+    }
+
+    public List<Alert> importAlerts(String json, boolean append) {
+        List<Alert> alerts = append ? this.getAlerts() : new ArrayList<>();
         if (!Strings.isNullOrEmpty(json)) {
-            alerts = this.gson.fromJson(json, alertListType);
+            alerts.addAll(this.gson.fromJson(json, alertListType));
+            this.saveAlerts(alerts);
         }
         for (Alert alert : alerts) {
             this.injector.injectMembers(alert);
@@ -174,12 +185,6 @@ public class WatchdogPlugin extends Plugin {
             }
         }
         return alerts;
-    }
-
-    public void saveAlerts(List<Alert> alerts) {
-        this.cachedAlerts = alerts;
-        String json = this.gson.toJson(alerts, alertListType);
-        this.configManager.setConfiguration(WatchdogConfig.configGroupName, "alerts", json);
     }
 
     @Override
@@ -292,6 +297,9 @@ public class WatchdogPlugin extends Plugin {
     }
 
     private void fireAlert(Alert alert) {
+        // Don't fire if it is disabled
+        if (!alert.isEnabled()) return;
+
         // If the alert hasn't been fired yet, or has been enough time, set the last trigger time to now and fire.
         if (!this.lastTriggered.containsKey(alert) || Instant.now().compareTo(this.lastTriggered.get(alert).plusMillis(alert.getDebounceTime())) >= 0) {
             this.lastTriggered.put(alert, Instant.now());

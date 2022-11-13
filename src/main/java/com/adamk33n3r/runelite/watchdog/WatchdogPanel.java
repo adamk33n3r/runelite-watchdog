@@ -1,7 +1,9 @@
 package com.adamk33n3r.runelite.watchdog;
 
 import com.adamk33n3r.runelite.watchdog.alerts.*;
+import com.adamk33n3r.runelite.watchdog.ui.ImportExportDialog;
 import com.adamk33n3r.runelite.watchdog.ui.dropdownbutton.DropDownButtonFactory;
+import com.adamk33n3r.runelite.watchdog.ui.AlertListItem;
 import com.adamk33n3r.runelite.watchdog.ui.panels.AlertPanel;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +23,6 @@ import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.util.Arrays;
-import java.util.List;
 
 @Slf4j
 public class WatchdogPanel extends PluginPanel {
@@ -80,31 +81,37 @@ public class WatchdogPanel extends PluginPanel {
         JPanel alertWrapperWrapper = new JPanel(new DynamicGridLayout(0, 1, 3, 3));
         alertPanel.add(alertWrapperWrapper, BorderLayout.NORTH);
         for (Alert alert : this.plugin.getAlerts()) {
-            final JButton alertButton = new JButton(alert.getName());
-            alertButton.addActionListener(ev -> {
-                this.openAlert(alert);
-            });
-            JPanel alertWrapper = new JPanel(new BorderLayout());
-            alertWrapper.setPreferredSize(new Dimension(PluginPanel.PANEL_WIDTH, 30));
-            alertWrapperWrapper.add(alertWrapper);
-            alertWrapper.add(alertButton, BorderLayout.CENTER);
-            final JButton deleteButton = new JButton("x");
-            deleteButton.setBorder(null);
-            deleteButton.setPreferredSize(new Dimension(30, 0));
-            deleteButton.addActionListener(ev -> {
-                int result = JOptionPane.showConfirmDialog(alertWrapper, "Are you sure you want to delete the " + alert.getName() + " alert?", "Delete?", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE);
-                if (result == JOptionPane.YES_OPTION) {
-                    List<Alert> alerts = plugin.getAlerts();
-                    alerts.remove(alert);
-                    plugin.saveAlerts(alerts);
-                    // Rebuild called automatically when alerts config changed
-                }
-            });
-            alertWrapper.add(deleteButton, BorderLayout.LINE_END);
+            AlertListItem alertListItem = new AlertListItem(this.plugin, this, alert);
+            alertWrapperWrapper.add(alertListItem);
         }
-        this.add(new JScrollPane(alertPanel), BorderLayout.CENTER);
+        this.add(new JScrollPane(alertPanel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER), BorderLayout.CENTER);
+
+        JPanel importExportGroup = new JPanel(new GridLayout(1, 2, 5, 0));
+        JButton importButton = new JButton("Import");
+        importButton.addActionListener(ev -> {
+            ImportExportDialog importExportDialog = new ImportExportDialog(SwingUtilities.getWindowAncestor(this));
+            importExportDialog.setVisible(true);
+        });
+        importExportGroup.add(importButton);
+        JButton exportButton = new JButton("Export");
+        exportButton.addActionListener(ev -> {
+            ImportExportDialog importExportDialog = new ImportExportDialog(SwingUtilities.getWindowAncestor(this), this.plugin.getConfig().alerts());
+            importExportDialog.setVisible(true);
+        });
+        importExportGroup.add(exportButton);
+        this.add(importExportGroup, BorderLayout.SOUTH);
+
         // Need this for rebuild for some reason
         this.revalidate();
+    }
+
+    public void openAlert(Alert alert) {
+        PluginPanel panel = this.createPluginPanel(alert);
+        if (panel != null) {
+            this.muxer.pushState(panel);
+        } else {
+            log.error(String.format("Tried to open an alert of type %s that doesn't have a panel.", alert.getClass()));
+        }
     }
 
     private void createAlert(TriggerType triggerType) {
@@ -125,14 +132,6 @@ public class WatchdogPanel extends PluginPanel {
                 this.openAlert(new ResourceAlert());
                 break;
         }
-    }
-
-    private void openAlert(Alert alert) {
-        PluginPanel panel = this.createPluginPanel(alert);
-        if (panel != null)
-            this.muxer.pushState(panel);
-        else
-            log.error(String.format("Tried to open an alert of type %s that doesn't have a panel.", alert.getClass()));
     }
 
     private PluginPanel createPluginPanel(Alert alert) {
