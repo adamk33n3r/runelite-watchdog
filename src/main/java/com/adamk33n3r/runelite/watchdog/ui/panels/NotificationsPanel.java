@@ -105,10 +105,12 @@ public class NotificationsPanel extends JPanel {
 
                 if (notification instanceof Sound) {
                     Sound sound = (Sound) notification;
+                    String[] supportedExtensions = Arrays.stream(AudioSystem.getAudioFileTypes()).map(AudioFileFormat.Type::getExtension).toArray(String[]::new);
+                    notificationPanel.add(new JLabel("Supports " + String.join(", ", Arrays.stream(supportedExtensions).map(ext -> "."+ext).toArray(String[]::new))));
                     notificationPanel.add(PanelUtils.createFileChooser("Sound Path", "Path to the sound file", ev -> {
                         JFileChooser fileChooser = (JFileChooser) ev.getSource();
                         sound.path = fileChooser.getSelectedFile().getAbsolutePath();
-                    }, sound.path, "Sound Files", Arrays.stream(AudioSystem.getAudioFileTypes()).map(AudioFileFormat.Type::getExtension).toArray(String[]::new)));
+                    }, sound.path, "Sound Files", supportedExtensions));
                 } else if (notification instanceof TextToSpeech) {
                     TextToSpeech tts = (TextToSpeech) notification;
                     JSlider rateSlider = new JSlider(1, 5, tts.getRate());
