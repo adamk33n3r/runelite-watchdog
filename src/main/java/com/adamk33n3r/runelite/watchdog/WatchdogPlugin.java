@@ -63,6 +63,7 @@ public class WatchdogPlugin extends Plugin {
 
     @Inject
     private Gson clientGson;
+    @Getter
     private Gson gson;
 
     private WatchdogPanel panel;

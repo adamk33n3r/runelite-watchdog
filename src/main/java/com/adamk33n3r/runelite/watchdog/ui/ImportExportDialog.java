@@ -9,21 +9,24 @@ import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.util.function.Function;
 
 @Slf4j
 public class ImportExportDialog extends JDialog {
     // Import
     public ImportExportDialog(Component parent) {
-        this.setTitle("Import Alerts");
+        this.setTitle("Import");
         this.setSize(500, 250);
         this.setLocationRelativeTo(parent);
         this.setModal(true);
+        this.setUndecorated(true);
 
         JPanel wrapper = this.createWrapper();
         this.add(wrapper);
 
-        wrapper.add(new JLabel("Paste the alert json here"), BorderLayout.NORTH);
+        wrapper.add(new JLabel("Paste the Alert JSON here"), BorderLayout.NORTH);
 
         JTextArea textArea = new JTextArea();
         textArea.setLineWrap(true);
@@ -60,12 +63,15 @@ public class ImportExportDialog extends JDialog {
 
     // Export
     public ImportExportDialog(Component parent, String exportString) {
-        this.setTitle("Export Alerts");
+        this.setTitle("Export");
         this.setSize(500, 250);
         this.setLocationRelativeTo(parent);
         this.setModal(true);
+        this.setUndecorated(true);
 
         JPanel wrapper = this.createWrapper();
+        this.add(wrapper);
+        wrapper.add(new JLabel("Exported Alert JSON"), BorderLayout.NORTH);
         JPanel btnGroup = new JPanel(new GridLayout(1, 2, 25, 0));
         JButton copyBtn = new JButton("Copy to Clipboard");
         copyBtn.addActionListener(ev -> {
@@ -80,7 +86,6 @@ public class ImportExportDialog extends JDialog {
             this.setVisible(false);
         });
         wrapper.add(btnGroup, BorderLayout.SOUTH);
-        this.add(wrapper);
 
         JTextArea textArea = new JTextArea(exportString);
         textArea.setLineWrap(true);

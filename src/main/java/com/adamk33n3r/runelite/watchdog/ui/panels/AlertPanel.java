@@ -4,6 +4,7 @@ import com.adamk33n3r.runelite.watchdog.Util;
 import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
 import com.adamk33n3r.runelite.watchdog.alerts.Alert;
 import com.adamk33n3r.runelite.watchdog.notifications.Notification;
+import com.adamk33n3r.runelite.watchdog.ui.ImportExportDialog;
 import com.adamk33n3r.runelite.watchdog.ui.StretchedStackedLayout;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.client.ui.DynamicGridLayout;
@@ -36,7 +37,6 @@ public class AlertPanel extends PluginPanel {
         this.setLayout(new BorderLayout());
 
         this.wrapper = new JPanel(new BorderLayout());
-        this.container = new ScrollablePanel(new DynamicGridLayout(0, 1, 3, 3));
         this.container = new ScrollablePanel(new StretchedStackedLayout(3, 3));
         this.container.setScrollableWidth(ScrollablePanel.ScrollableSizeHint.FIT);
         this.container.setScrollableHeight(ScrollablePanel.ScrollableSizeHint.STRETCH);
@@ -106,7 +106,18 @@ public class AlertPanel extends PluginPanel {
         notificationPanel.setBorder(new TitledBorder(new EtchedBorder(), "Notifications", TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, Color.WHITE));
         this.container.add(notificationPanel);
 
-        JPanel buttonPanel = new JPanel(new DynamicGridLayout(1, 2, 3, 3));
+        JPanel buttonPanel = new JPanel(new BorderLayout(3, 3));
+
+        JButton exportAlertBtn = new JButton("Export Alert");
+        exportAlertBtn.addActionListener(ev -> {
+            ImportExportDialog importExportDialog = new ImportExportDialog(SwingUtilities.getWindowAncestor(this), WatchdogPlugin.getInstance().getGson().toJson(new Alert[] { alert }));
+            importExportDialog.setVisible(true);
+        });
+        buttonPanel.add(exportAlertBtn, BorderLayout.NORTH);
+
+        JPanel backSavePanel = new JPanel(new DynamicGridLayout(1, 2, 3, 3));
+        buttonPanel.add(backSavePanel, BorderLayout.CENTER);
+
         JButton back = new JButton("Back");
         back.addActionListener(ev -> {
             // This and the code in onActivate are bandages because the notification panel components actually modify
@@ -114,7 +125,8 @@ public class AlertPanel extends PluginPanel {
             WatchdogPlugin.getInstance().refetchAlerts();
             this.muxer.popState();
         });
-        buttonPanel.add(back);
+        backSavePanel.add(back);
+
         JButton save = new JButton("Save");
         save.addActionListener(ev -> {
             this.saveActions.forEach(Runnable::run);
@@ -128,7 +140,8 @@ public class AlertPanel extends PluginPanel {
             WatchdogPlugin.getInstance().saveAlerts(alerts);
             this.muxer.popState();
         });
-        buttonPanel.add(save);
+        backSavePanel.add(save);
+
         this.wrapper.add(buttonPanel, BorderLayout.SOUTH);
         return this;
     }
