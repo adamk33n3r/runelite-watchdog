@@ -32,10 +32,10 @@ import net.runelite.client.util.AsyncBufferedImage;
 
 import java.lang.reflect.Type;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.regex.Pattern;
 import net.runelite.client.util.RuntimeTypeAdapterFactory;
 
@@ -164,6 +164,7 @@ public class WatchdogPlugin extends Plugin {
     public List<Alert> fetchAlerts() {
         String json = config.alerts();
         // Importing will immediately save to config which is nice to set new property defaults
+        // This 'false' is important to not trigger infinite recursion
         return this.importAlerts(json, false);
     }
 
@@ -174,7 +175,7 @@ public class WatchdogPlugin extends Plugin {
     }
 
     public List<Alert> importAlerts(String json, boolean append) {
-        List<Alert> alerts = append ? this.getAlerts() : new ArrayList<>();
+        List<Alert> alerts = append ? this.getAlerts() : new CopyOnWriteArrayList<>();
         if (!Strings.isNullOrEmpty(json)) {
             alerts.addAll(this.gson.fromJson(json, alertListType));
             this.saveAlerts(alerts);
