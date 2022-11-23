@@ -4,6 +4,10 @@ import com.adamk33n3r.runelite.watchdog.*;
 import com.adamk33n3r.runelite.watchdog.ui.dropdownbutton.DropDownButtonFactory;
 import com.adamk33n3r.runelite.watchdog.notifications.*;
 import com.adamk33n3r.runelite.watchdog.notifications.tts.Voice;
+import com.adamk33n3r.runelite.watchdog.ui.notifications.panels.MessageNotificationPanel;
+import com.adamk33n3r.runelite.watchdog.ui.notifications.panels.ScreenFlashNotificationPanel;
+import com.adamk33n3r.runelite.watchdog.ui.notifications.panels.SoundNotificationPanel;
+import com.adamk33n3r.runelite.watchdog.ui.notifications.panels.TextToSpeechNotificationPanel;
 import com.google.inject.Injector;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -40,13 +44,11 @@ public class NotificationsPanel extends JPanel {
     @Inject
     private ColorPickerManager colorPickerManager;
 
-    private final JPanel container;
     private final JPanel notificationContainer;
 
     public NotificationsPanel(List<Notification> notifications) {
         this.notifications.addAll(notifications);
-        this.setLayout(new BorderLayout());
-        this.container = new JPanel(new DynamicGridLayout(0, 1, 3, 3));
+        this.setLayout(new DynamicGridLayout(0, 1, 3, 3));
         this.notificationContainer = new JPanel(new DynamicGridLayout(0, 1, 3, 3));
 
         JPopupMenu popupMenu = new JPopupMenu();
@@ -67,9 +69,8 @@ public class NotificationsPanel extends JPanel {
         JPanel buttonPanel = new JPanel(new BorderLayout());
         buttonPanel.add(addDropDownButton, BorderLayout.EAST);
 
-        this.container.add(buttonPanel);
-        this.container.add(notificationContainer);
-        this.add(container, BorderLayout.NORTH);
+        this.add(buttonPanel);
+        this.add(notificationContainer);
         this.rebuild();
     }
 
@@ -77,6 +78,7 @@ public class NotificationsPanel extends JPanel {
         this.notificationContainer.removeAll();
 
         for (Notification notification : this.notifications) {
+
             JPanel notificationPanel = new JPanel(new DynamicGridLayout(0, 1, 3, 3));
             notificationPanel.setBorder(new TitledBorder(new EtchedBorder(), Util.humanReadableClass(notification), TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, Color.WHITE));
             this.notificationContainer.add(notificationPanel);
@@ -92,6 +94,17 @@ public class NotificationsPanel extends JPanel {
                     notification.setFireWhenFocused(fireWhenFocused.isSelected());
                 });
                 notificationPanel.add(fireWhenFocused);
+
+                if (notification instanceof GameMessage)
+                    this.notificationContainer.add(new MessageNotificationPanel((GameMessage)notification));
+                else if (notification instanceof TextToSpeech)
+                    this.notificationContainer.add(new TextToSpeechNotificationPanel((TextToSpeech)notification));
+                else if (notification instanceof Sound)
+                    this.notificationContainer.add(new SoundNotificationPanel((Sound)notification));
+                else if (notification instanceof TrayNotification)
+                    this.notificationContainer.add(new MessageNotificationPanel((TrayNotification)notification));
+                else if (notification instanceof ScreenFlash)
+                    this.notificationContainer.add(new ScreenFlashNotificationPanel((ScreenFlash)notification));
 
                 if (notification instanceof IMessageNotification) {
                     IMessageNotification gameMessage = (IMessageNotification) notification;

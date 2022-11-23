@@ -46,6 +46,12 @@ public class AlertPanel extends PluginPanel {
         JScrollPane scroll = new JScrollPane(this.container, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         this.wrapper.add(scroll, BorderLayout.CENTER);
 
+        // If developer mode
+//        JButton rbldBtn = new JButton("Rebuild Panel");
+//        rbldBtn.addActionListener(ev -> {
+//            this.build()
+//        });
+//        this.add(rbldBtn, BorderLayout.NORTH);
         this.add(wrapper, BorderLayout.CENTER);
     }
 

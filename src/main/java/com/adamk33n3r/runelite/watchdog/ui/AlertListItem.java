@@ -24,6 +24,7 @@ public class AlertListItem extends JPanel {
         this.add(toggleButton, BorderLayout.LINE_START);
 
         final JButton alertButton = new JButton(alert.getName());
+        alertButton.setToolTipText(alert.getName());
         alertButton.addActionListener(ev -> {
             panel.openAlert(alert);
         });

@@ -21,6 +21,16 @@ public class PanelUtils {
         return panel;
     }
 
+    public static JPanel createIconComponent(ImageIcon icon, String tooltip, Component component) {
+        JPanel panel = new JPanel(new BorderLayout(5, 0));
+        panel.setBackground(null);
+        JLabel jLabel = new JLabel(icon);
+        jLabel.setToolTipText(tooltip);
+        panel.add(jLabel, BorderLayout.WEST);
+        panel.add(component);
+        return panel;
+    }
+
     public static JPanel createFileChooser(String label, String tooltip, ActionListener actionListener, String path, String filterLabel, String... filters) {
         JPanel panel = new JPanel(new GridLayout(2, 1));
         JLabel jLabel = new JLabel(label);
