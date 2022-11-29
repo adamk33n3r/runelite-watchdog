@@ -16,10 +16,7 @@ public class MessageNotificationPanel extends NotificationPanel {
         FlatTextArea flatTextArea = new FlatTextArea(true);
         flatTextArea.setText(notification.getMessage());
         ((AbstractDocument) flatTextArea.getDocument()).setDocumentFilter(new LengthLimitFilter(200));
-        flatTextArea.getDocument().addDocumentListener((SimpleDocumentListener) ev -> {
-            notification.setMessage(flatTextArea.getText());
-        });
-
+        flatTextArea.getDocument().addDocumentListener((SimpleDocumentListener) ev -> notification.setMessage(flatTextArea.getText()));
         flatTextArea.getTextArea().addFocusListener(new FocusListener() {
             @Override
             public void focusGained(FocusEvent e) {

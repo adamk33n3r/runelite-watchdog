@@ -23,5 +23,10 @@ public abstract class Notification implements INotification {
             this.fireImpl();
         }
     }
+
+    public void fireForced() {
+        this.fireImpl();
+    }
+
     protected abstract void fireImpl();
 }

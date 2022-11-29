@@ -107,7 +107,9 @@ public class AlertPanel extends PluginPanel {
     }
 
     public PluginPanel build() {
+        System.out.println("creating notifications panel");
         NotificationsPanel notificationPanel = new NotificationsPanel(this.alert.getNotifications());
+        System.out.println("injecting panel");
         WatchdogPlugin.getInstance().getInjector().injectMembers(notificationPanel);
         notificationPanel.setBorder(new TitledBorder(new EtchedBorder(), "Notifications", TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, Color.WHITE));
         this.container.add(notificationPanel);

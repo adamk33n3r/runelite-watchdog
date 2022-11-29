@@ -3,7 +3,9 @@ package com.adamk33n3r.runelite.watchdog.ui.notifications.panels;
 import com.adamk33n3r.runelite.watchdog.Util;
 import com.adamk33n3r.runelite.watchdog.notifications.Notification;
 import com.adamk33n3r.runelite.watchdog.ui.StretchedStackedLayout;
+import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
 import net.runelite.client.plugins.loottracker.LootTrackerPlugin;
+import net.runelite.client.plugins.timetracking.TimeTrackingPlugin;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.DynamicGridLayout;
 import net.runelite.client.util.ImageUtil;
@@ -30,24 +32,34 @@ public abstract class NotificationPanel extends JPanel {
 
     private static final ImageIcon COLLAPSE_ICON;
     private static final ImageIcon EXPAND_ICON;
+    private static final ImageIcon DELETE_ICON;
+    private static final ImageIcon DELETE_ICON_HOVER;
     private static final ImageIcon FOCUS_ICON;
     private static final ImageIcon FOCUS_ICON_HOVER;
     private static final ImageIcon FOCUS_SELECTED_ICON;
     private static final ImageIcon FOCUS_SELECTED_ICON_HOVER;
+    private static final ImageIcon TEST_ICON;
+    private static final ImageIcon TEST_ICON_HOVER;
     protected static final ImageIcon VOLUME_ICON;
 
     static {
         final BufferedImage collapseImg = ImageUtil.loadImageResource(LootTrackerPlugin.class, "collapsed.png");
         final BufferedImage expandedImg = ImageUtil.loadImageResource(LootTrackerPlugin.class, "expanded.png");
+        final BufferedImage deleteImg = ImageUtil.loadImageResource(TimeTrackingPlugin.class, "delete_icon.png");
         final BufferedImage focusImg = ImageUtil.loadImageResource(NotificationPanel.class, "focus_icon.png");
+        final BufferedImage testImg = ImageUtil.loadImageResource(NotificationPanel.class, "test_icon.png");
         final BufferedImage volumeImg = ImageUtil.loadImageResource(NotificationPanel.class, "volume_icon.png");
 
         COLLAPSE_ICON = new ImageIcon(collapseImg);
         EXPAND_ICON = new ImageIcon(expandedImg);
+        DELETE_ICON = new ImageIcon(deleteImg);
+        DELETE_ICON_HOVER = new ImageIcon(ImageUtil.luminanceOffset(deleteImg, -80));
         FOCUS_ICON = new ImageIcon(ImageUtil.luminanceOffset(focusImg, -80));
         FOCUS_ICON_HOVER = new ImageIcon(ImageUtil.luminanceOffset(focusImg, -120));
         FOCUS_SELECTED_ICON = new ImageIcon(focusImg);
         FOCUS_SELECTED_ICON_HOVER = new ImageIcon(ImageUtil.luminanceOffset(focusImg, -80));
+        TEST_ICON = new ImageIcon(testImg);
+        TEST_ICON_HOVER = new ImageIcon(ImageUtil.luminanceOffset(testImg, -80));
         VOLUME_ICON = new ImageIcon(ImageUtil.luminanceOffset(volumeImg, -80));
     }
 
@@ -56,15 +68,17 @@ public abstract class NotificationPanel extends JPanel {
 
     private static final Border NAME_BOTTOM_BORDER = new CompoundBorder(
         BorderFactory.createMatteBorder(0, 0, 1, 0, ColorScheme.DARK_GRAY_COLOR),
-        BorderFactory.createLineBorder(ColorScheme.DARKER_GRAY_COLOR, 5));
+        BorderFactory.createMatteBorder(5, 0, 5, 0, ColorScheme.DARKER_GRAY_COLOR));
 
     public NotificationPanel(Notification notification) {
         this.setLayout(new BorderLayout());
-        this.setBorder(new EmptyBorder(3, 10, 0, 10));
+        this.setBorder(new EmptyBorder(3, 0, 0, 0));
 //        this.setBorder(new TitledBorder(new EtchedBorder(), Util.humanReadableClass(notification), TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, Color.WHITE));
 //        this.setBackground(ColorScheme.PROGRESS_ERROR_COLOR);
+        this.container.setBorder(new EmptyBorder(0, 5, 0, 5));
         this.container.setBackground(ColorScheme.DARKER_GRAY_COLOR);
         JPanel nameWrapper = new JPanel(new BorderLayout(3, 3));
+        this.container.add(nameWrapper);
 //        nameWrapper.setBorder(new EmptyBorder(15, 15, 15, 15));
         nameWrapper.setBackground(ColorScheme.DARKER_GRAY_COLOR);
         nameWrapper.setBorder(NAME_BOTTOM_BORDER);
@@ -81,47 +95,48 @@ public abstract class NotificationPanel extends JPanel {
         collapseBtn.addActionListener(ev -> collapseBtn.setSelected(!collapseBtn.isSelected()));
 //        nameWrapper.add(collapseBtn, BorderLayout.CENTER);
 
-        JButton focusBtn = new JButton();
-        SwingUtil.removeButtonDecorations(focusBtn);
-        focusBtn.setIcon(FOCUS_ICON);
-        focusBtn.setRolloverIcon(FOCUS_ICON_HOVER);
-        focusBtn.setSelectedIcon(FOCUS_SELECTED_ICON);
-        focusBtn.setRolloverSelectedIcon(FOCUS_SELECTED_ICON_HOVER);
-        SwingUtil.addModalTooltip(focusBtn, "Set only out of focus", "Set allow in-focus");
-        focusBtn.setBackground(ColorScheme.DARKER_GRAY_COLOR);
-        focusBtn.setUI(new BasicButtonUI()); // substance breaks the layout
-        focusBtn.addActionListener(ev -> {
-            focusBtn.setSelected(!focusBtn.isSelected());
-            notification.setFireWhenFocused(focusBtn.isSelected());
-        });
-        nameWrapper.add(focusBtn, BorderLayout.EAST);
-        this.container.add(nameWrapper);
+
+        // Right buttons
+//        JPanel rightActions = new JPanel(new DynamicGridLayout(1, 0, 3, 3));
+        JPanel rightActions = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
+        rightActions.setBorder(new EmptyBorder(4, 0, 0, 0));
+        rightActions.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+        nameWrapper.add(rightActions, BorderLayout.EAST);
+
+        JButton focusBtn = PanelUtils.createToggleActionButton(FOCUS_SELECTED_ICON,
+            FOCUS_SELECTED_ICON_HOVER,
+            FOCUS_ICON,
+            FOCUS_ICON_HOVER,
+            "Set only out of Focus",
+            "Set allow in-focus",
+            btn -> notification.setFireWhenFocused(btn.isSelected()));
+        rightActions.add(focusBtn, BorderLayout.EAST);
+
+        JButton testBtn = PanelUtils.createActionButton(TEST_ICON,
+            TEST_ICON_HOVER,
+            "Test the notification",
+            btn -> notification.fireForced());
+        rightActions.add(testBtn);
+
+        JButton deleteBtn = PanelUtils.createActionButton(DELETE_ICON,
+            DELETE_ICON_HOVER,
+            "Remove this notification",
+            btn -> notification.fireForced());
+        rightActions.add(deleteBtn);
 
         this.footer.setBackground(ColorScheme.PROGRESS_ERROR_COLOR);
 
         this.add(container, BorderLayout.CENTER);
-        this.add(footer, BorderLayout.SOUTH);
-
-//        JCheckBox fireWhenFocused = new JCheckBox("Fire when in focus", notification.isFireWhenFocused());
-//        fireWhenFocused.setToolTipText("Allows the notification to fire when the game is focused");
-//        fireWhenFocused.addChangeListener(ev -> {
-//            notification.setFireWhenFocused(fireWhenFocused.isSelected());
-//        });
-//        this.container.add(fireWhenFocused);
+//        this.add(footer, BorderLayout.SOUTH);
 
         JButton testButton = new JButton("Test");
         testButton.setToolTipText("Test the notification");
-        testButton.addActionListener(ev -> {
-            boolean prev = notification.isFireWhenFocused();
-            notification.setFireWhenFocused(true);
-            notification.fire();
-            notification.setFireWhenFocused(prev);
-        });
+        testButton.addActionListener(ev -> notification.fireForced());
         this.footer.add(testButton);
 
         JButton remove = new JButton("Remove");
-                remove.setToolTipText("Remove this notification");
-                remove.addActionListener(ev -> {
+        remove.setToolTipText("Remove this notification");
+        remove.addActionListener(ev -> {
 //            this.notifications.remove(notification);
 //            this.notificationContainer.remove(notificationPanel);
 //            this.notificationContainer.revalidate();
