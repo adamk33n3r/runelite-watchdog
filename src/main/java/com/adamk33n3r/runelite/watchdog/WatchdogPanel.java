@@ -17,7 +17,6 @@ import net.runelite.client.ui.PluginPanel;
 import net.runelite.client.util.ImageUtil;
 import org.apache.commons.text.WordUtils;
 
-import javax.inject.Inject;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
@@ -28,10 +27,7 @@ import java.util.Arrays;
 public class WatchdogPanel extends PluginPanel {
     @Getter
     private MultiplexingPluginPanel muxer;
-    @Inject
-    private Client client;
-    @Inject
-    private WatchdogPlugin plugin;
+    private AlertManager alertManager;
 
     public static final ImageIcon ADD_ICON;
     private static final ImageIcon ADD_ICON_HOVER;
@@ -41,8 +37,8 @@ public class WatchdogPanel extends PluginPanel {
         ADD_ICON_HOVER = new ImageIcon(ImageUtil.alphaOffset(addIcon, 0.53f));
     }
 
-    @Inject
-    public void init() {
+    public WatchdogPanel(AlertManager alertManager) {
+        this.alertManager = alertManager;
         this.muxer = new MultiplexingPluginPanel(this);
     }
 
@@ -80,8 +76,8 @@ public class WatchdogPanel extends PluginPanel {
         JPanel alertPanel = new JPanel(new BorderLayout());
         JPanel alertWrapperWrapper = new JPanel(new DynamicGridLayout(0, 1, 3, 3));
         alertPanel.add(alertWrapperWrapper, BorderLayout.NORTH);
-        for (Alert alert : this.plugin.getAlerts()) {
-            AlertListItem alertListItem = new AlertListItem(this.plugin, this, alert);
+        for (Alert alert : this.alertManager.getAlerts()) {
+            AlertListItem alertListItem = new AlertListItem(this, this.alertManager, alert);
             alertWrapperWrapper.add(alertListItem);
         }
         this.add(new JScrollPane(alertPanel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER), BorderLayout.CENTER);
@@ -95,7 +91,7 @@ public class WatchdogPanel extends PluginPanel {
         importExportGroup.add(importButton);
         JButton exportButton = new JButton("Export");
         exportButton.addActionListener(ev -> {
-            ImportExportDialog importExportDialog = new ImportExportDialog(SwingUtilities.getWindowAncestor(this), this.plugin.getConfig().alerts());
+            ImportExportDialog importExportDialog = new ImportExportDialog(SwingUtilities.getWindowAncestor(this), WatchdogPlugin.getInstance().getConfig().alerts());
             importExportDialog.setVisible(true);
         });
         importExportGroup.add(exportButton);
@@ -115,22 +111,28 @@ public class WatchdogPanel extends PluginPanel {
     }
 
     private void createAlert(TriggerType triggerType) {
+        Alert createdAlert = null;
         switch (triggerType) {
             case CHAT:
-                this.openAlert(new ChatAlert());
+                createdAlert = new ChatAlert();
                 break;
             case NOTIFICATION_FIRED:
-                this.openAlert(new NotificationFiredAlert());
+                createdAlert = new NotificationFiredAlert();
                 break;
             case STAT_DRAIN:
-                this.openAlert(new StatDrainAlert());
+                createdAlert = new StatDrainAlert();
                 break;
             case IDLE:
-                this.openAlert(new IdleAlert());
+                createdAlert = new IdleAlert();
                 break;
             case RESOURCE:
-                this.openAlert(new ResourceAlert());
+                createdAlert = new ResourceAlert();
                 break;
+        }
+
+        if (createdAlert != null) {
+            this.alertManager.addAlert(createdAlert);
+            this.openAlert(createdAlert);
         }
     }
 

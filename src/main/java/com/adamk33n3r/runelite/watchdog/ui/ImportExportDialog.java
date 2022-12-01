@@ -40,7 +40,7 @@ public class ImportExportDialog extends JDialog {
             }
             String json = textArea.getText();
             try {
-                WatchdogPlugin.getInstance().importAlerts(json, append);
+                WatchdogPlugin.getInstance().getAlertManager().importAlerts(json, append);
                 this.setVisible(false);
             } catch (Exception ex) {
                 log.error("Error parsing json: " + ex);

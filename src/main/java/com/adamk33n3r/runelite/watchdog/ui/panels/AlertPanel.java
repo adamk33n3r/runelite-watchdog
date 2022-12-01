@@ -1,5 +1,6 @@
 package com.adamk33n3r.runelite.watchdog.ui.panels;
 
+import com.adamk33n3r.runelite.watchdog.AlertManager;
 import com.adamk33n3r.runelite.watchdog.Util;
 import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
 import com.adamk33n3r.runelite.watchdog.alerts.Alert;
@@ -24,16 +25,20 @@ import java.util.function.Consumer;
 
 @Slf4j
 public class AlertPanel extends PluginPanel {
-    ScrollablePanel container;
-    MultiplexingPluginPanel muxer;
-    Alert alert;
-    JPanel wrapper;
+    private final ScrollablePanel container;
+    private final MultiplexingPluginPanel muxer;
+    private final Alert alert;
+    private final JPanel wrapper;
 
-    List<Runnable> saveActions = new ArrayList<>();
+    private List<Runnable> saveActions = new ArrayList<>();
+
+    private AlertManager alertManager;
 
     private AlertPanel(MultiplexingPluginPanel muxer, Alert alert) {
         this.muxer = muxer;
         this.alert = alert;
+        this.alertManager = WatchdogPlugin.getInstance().getAlertManager();
+
         this.setLayout(new BorderLayout());
 
         this.wrapper = new JPanel(new BorderLayout());
@@ -107,9 +112,7 @@ public class AlertPanel extends PluginPanel {
     }
 
     public PluginPanel build() {
-        System.out.println("creating notifications panel");
         NotificationsPanel notificationPanel = new NotificationsPanel(this.alert.getNotifications());
-        System.out.println("injecting panel");
         WatchdogPlugin.getInstance().getInjector().injectMembers(notificationPanel);
         notificationPanel.setBorder(new TitledBorder(new EtchedBorder(), "Notifications", TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, Color.WHITE));
         this.container.add(notificationPanel);
@@ -118,7 +121,7 @@ public class AlertPanel extends PluginPanel {
 
         JButton exportAlertBtn = new JButton("Export Alert");
         exportAlertBtn.addActionListener(ev -> {
-            ImportExportDialog importExportDialog = new ImportExportDialog(SwingUtilities.getWindowAncestor(this), WatchdogPlugin.getInstance().getGson().toJson(new Alert[] { alert }));
+            ImportExportDialog importExportDialog = new ImportExportDialog(SwingUtilities.getWindowAncestor(this), this.alertManager.getGson().toJson(new Alert[] { alert }));
             importExportDialog.setVisible(true);
         });
         buttonPanel.add(exportAlertBtn, BorderLayout.NORTH);
@@ -130,7 +133,7 @@ public class AlertPanel extends PluginPanel {
         back.addActionListener(ev -> {
             // This and the code in onActivate are bandages because the notification panel components actually modify
             // the data directly so that it can test fire itself.
-            WatchdogPlugin.getInstance().refetchAlerts();
+            this.alertManager.loadAlerts();
             this.muxer.popState();
         });
         backSavePanel.add(back);
@@ -141,11 +144,7 @@ public class AlertPanel extends PluginPanel {
             List<Notification> notificationList = notificationPanel.getNotifications();
             this.alert.getNotifications().clear();
             this.alert.getNotifications().addAll(notificationList);
-            List<Alert> alerts = WatchdogPlugin.getInstance().getAlerts();
-            if (!alerts.contains(this.alert)) {
-                alerts.add(this.alert);
-            }
-            WatchdogPlugin.getInstance().saveAlerts(alerts);
+            this.alertManager.saveAlerts();
             this.muxer.popState();
         });
         backSavePanel.add(save);

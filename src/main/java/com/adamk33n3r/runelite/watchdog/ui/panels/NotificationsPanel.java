@@ -84,20 +84,24 @@ public class NotificationsPanel extends JPanel {
             JPanel notificationPanel = new JPanel(new DynamicGridLayout(0, 1, 3, 3));
 //            notificationPanel.setBorder(new TitledBorder(new EtchedBorder(), Util.humanReadableClass(notification), TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, Color.WHITE));
             this.notificationContainer.add(notificationPanel);
+            PanelUtils.ButtonClickListener removeNotification = btn -> {
+                this.notifications.remove(notification);
+                this.notificationContainer.remove(notificationPanel);
+                this.notificationContainer.revalidate();
+            };
 
             if (notification instanceof GameMessage)
-                notificationPanel.add(new MessageNotificationPanel((GameMessage)notification));
+                notificationPanel.add(new MessageNotificationPanel((GameMessage)notification, removeNotification));
             else if (notification instanceof TextToSpeech)
-                notificationPanel.add(new TextToSpeechNotificationPanel((TextToSpeech) notification));
+                notificationPanel.add(new TextToSpeechNotificationPanel((TextToSpeech) notification, removeNotification));
             else if (notification instanceof Sound)
-                notificationPanel.add(new SoundNotificationPanel((Sound)notification));
+                notificationPanel.add(new SoundNotificationPanel((Sound)notification, removeNotification));
             else if (notification instanceof TrayNotification)
-                notificationPanel.add(new MessageNotificationPanel((TrayNotification)notification));
+                notificationPanel.add(new MessageNotificationPanel((TrayNotification)notification, removeNotification));
             else if (notification instanceof ScreenFlash)
-                notificationPanel.add(new ScreenFlashNotificationPanel((ScreenFlash) notification, this.colorPickerManager));
+                notificationPanel.add(new ScreenFlashNotificationPanel((ScreenFlash) notification, this.colorPickerManager, removeNotification));
 
             JPanel footer = new JPanel(new GridLayout(1, 2, 3, 3));
-//            notificationPanel.add(footer);
 
             JButton testButton = new JButton("Test");
             testButton.setToolTipText("Test the notification");

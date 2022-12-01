@@ -2,22 +2,18 @@ package com.adamk33n3r.runelite.watchdog;
 
 import com.adamk33n3r.runelite.watchdog.alerts.*;
 import com.adamk33n3r.runelite.watchdog.notifications.*;
-import com.google.common.base.Strings;
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import com.google.inject.Provides;
 
 import javax.inject.Inject;
 
+import joptsimple.internal.Strings;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
 import net.runelite.api.ItemID;
 import net.runelite.api.Skill;
-import net.runelite.api.events.ChatMessage;
-import net.runelite.api.events.GameStateChanged;
-import net.runelite.api.events.StatChanged;
+import net.runelite.api.events.*;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ConfigChanged;
@@ -30,14 +26,12 @@ import net.runelite.client.ui.NavigationButton;
 import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.util.AsyncBufferedImage;
 
-import java.lang.reflect.Type;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.regex.Pattern;
-import net.runelite.client.util.RuntimeTypeAdapterFactory;
 
 @Slf4j
 @PluginDescriptor(
@@ -58,34 +52,26 @@ public class WatchdogPlugin extends Plugin {
     @Inject
     private OverlayManager overlayManager;
 
+    @Getter
     @Inject
-    private Client client;
+    private AlertManager alertManager;
 
     @Inject
-    private Gson clientGson;
-    @Getter
-    private Gson gson;
+    private Client client;
 
     private WatchdogPanel panel;
 
     private NavigationButton navButton;
 
-    private List<Alert> cachedAlerts;
-
-    private int[] previousLevels = new int[Skill.values().length];
+    private final int[] previousLevels = new int[Skill.values().length];
 
     // TODO: create an alert manager
 //    private List<Alert> alerts = new ArrayList<>();
 
-    private Map<Alert, Instant> lastTriggered = new HashMap<>();
-
-    private static final Type alertListType;
-
-    static {
-        alertListType = new TypeToken<List<Alert>>() {}.getType();
-    }
+    private final Map<Alert, Instant> lastTriggered = new HashMap<>();
 
     @Getter
+    @Inject
     private FlashOverlay flashOverlay;
 
     @Getter
@@ -95,29 +81,10 @@ public class WatchdogPlugin extends Plugin {
     protected void startUp() throws Exception {
         // TODO: Fix the notifications to not modify the obj
         instance = this;
-        this.flashOverlay = this.injector.getInstance(FlashOverlay.class);
         this.overlayManager.add(this.flashOverlay);
-        // Add new alert types here
-        final RuntimeTypeAdapterFactory<Alert> alertTypeFactory = RuntimeTypeAdapterFactory.of(Alert.class)
-            .registerSubtype(ChatAlert.class)
-            .registerSubtype(IdleAlert.class)
-            .registerSubtype(NotificationFiredAlert.class)
-            .registerSubtype(StatDrainAlert.class)
-            .registerSubtype(ResourceAlert.class);
-        // Add new notification types here
-        final RuntimeTypeAdapterFactory<Notification> notificationTypeFactory = RuntimeTypeAdapterFactory.of(Notification.class)
-            .registerSubtype(TrayNotification.class)
-            .registerSubtype(TextToSpeech.class)
-            .registerSubtype(Sound.class)
-            .registerSubtype(ScreenFlash.class)
-            .registerSubtype(GameMessage.class);
-        this.gson = this.clientGson.newBuilder()
-//            .serializeNulls()
-            .registerTypeAdapterFactory(alertTypeFactory)
-            .registerTypeAdapterFactory(notificationTypeFactory)
-            .create();
 
-        List<Alert> alerts = this.refetchAlerts();
+        this.alertManager.loadAlerts();
+        List<Alert> alerts = this.alertManager.getAlerts();
 
         if (alerts.isEmpty()) {
             ChatAlert readyToHarvest = new ChatAlert("Ready to Harvest");
@@ -126,17 +93,15 @@ public class WatchdogPlugin extends Plugin {
             TrayNotification harvestNotif = new TrayNotification();
             harvestNotif.setMessage("Time to harvest your crops!");
             readyToHarvest.getNotifications().add(harvestNotif);
-            alerts.add(readyToHarvest);
+            this.alertManager.addAlert(readyToHarvest);
 
             NotificationFiredAlert outOfCombat = new NotificationFiredAlert("Out of Combat");
             outOfCombat.setMessage("You are now out of combat!");
             outOfCombat.getNotifications().add(new ScreenFlash());
-            alerts.add(outOfCombat);
-
-            this.saveAlerts(alerts);
+            this.alertManager.addAlert(outOfCombat);
         }
 
-        this.panel = this.injector.getInstance(WatchdogPanel.class);
+        this.panel = this.alertManager.getWatchdogPanel();
         AsyncBufferedImage icon = this.itemManager.getImage(ItemID.BELL_BAUBLE);
         this.navButton = NavigationButton.builder()
             .tooltip("Watchdog")
@@ -150,43 +115,6 @@ public class WatchdogPlugin extends Plugin {
             this.clientToolbar.removeNavigation(this.navButton);
             this.clientToolbar.addNavigation(this.navButton);
         });
-    }
-
-    public List<Alert> getAlerts() {
-        if (this.cachedAlerts == null) {
-            this.cachedAlerts = this.fetchAlerts();
-        }
-        return this.cachedAlerts;
-    }
-    public List<Alert> refetchAlerts() {
-        return this.cachedAlerts = this.fetchAlerts();
-    }
-    public List<Alert> fetchAlerts() {
-        String json = config.alerts();
-        // Importing will immediately save to config which is nice to set new property defaults
-        // This 'false' is important to not trigger infinite recursion
-        return this.importAlerts(json, false);
-    }
-
-    public void saveAlerts(List<Alert> alerts) {
-        this.cachedAlerts = alerts;
-        String json = this.gson.toJson(alerts, alertListType);
-        this.configManager.setConfiguration(WatchdogConfig.configGroupName, "alerts", json);
-    }
-
-    public List<Alert> importAlerts(String json, boolean append) {
-        List<Alert> alerts = append ? this.getAlerts() : new CopyOnWriteArrayList<>();
-        if (!Strings.isNullOrEmpty(json)) {
-            alerts.addAll(this.gson.fromJson(json, alertListType));
-            this.saveAlerts(alerts);
-        }
-        for (Alert alert : alerts) {
-            this.injector.injectMembers(alert);
-            for (INotification notification : alert.getNotifications()) {
-                this.injector.injectMembers(notification);
-            }
-        }
-        return alerts;
     }
 
     @Override
@@ -221,7 +149,7 @@ public class WatchdogPlugin extends Plugin {
             return;
         }
 
-        this.getAlerts().stream()
+        this.alertManager.getAlerts().stream()
             .filter(alert -> alert instanceof ChatAlert)
             .map(alert -> (ChatAlert) alert)
 //            .filter(chatAlert -> chatAlert.getChatMessageType() == chatMessage.getType())
@@ -236,7 +164,7 @@ public class WatchdogPlugin extends Plugin {
 
     @Subscribe
     public void onNotificationFired(NotificationFired notificationFired) {
-        this.getAlerts().stream()
+        this.alertManager.getAlerts().stream()
             .filter(alert -> alert instanceof NotificationFiredAlert)
             .map(alert -> (NotificationFiredAlert) alert)
             .filter(notificationFiredAlert -> {
@@ -250,7 +178,7 @@ public class WatchdogPlugin extends Plugin {
     public void onStatChanged(StatChanged statChanged) {
 //        log.debug(String.format("%s: %s/%s", statChanged.getSkill().getName(), statChanged.getBoostedLevel(), statChanged.getLevel()));
         int previousLevel = this.previousLevels[statChanged.getSkill().ordinal()];
-        this.getAlerts().stream()
+        this.alertManager.getAlerts().stream()
             .filter(alert -> alert instanceof StatDrainAlert)
             .map(alert -> (StatDrainAlert) alert)
             .filter(alert -> {
@@ -272,9 +200,9 @@ public class WatchdogPlugin extends Plugin {
 
     @Subscribe
     private void onConfigChanged(ConfigChanged configChanged) {
-        if (configChanged.getGroup().equals(WatchdogConfig.configGroupName)) {
+        if (configChanged.getGroup().equals(WatchdogConfig.CONFIG_GROUP_NAME)) {
             if (configChanged.getKey().equals("alerts")) {
-                this.panel.rebuild();
+                this.alertManager.loadAlerts();
             } else if (configChanged.getKey().equals("enableTTS")) {
                 // To the top!
                 while (this.panel.getMuxer().getComponentCount() > 1) {
@@ -291,6 +219,15 @@ public class WatchdogPlugin extends Plugin {
         for (Skill skill : Skill.values()) {
             this.previousLevels[skill.ordinal()] = boostedSkillLevels[skill.ordinal()];
         }
+    }
+
+    @Subscribe
+    private void onSoundEffectPlayed(SoundEffectPlayed soundEffectPlayed) {
+//        soundEffectPlayed.get
+    }
+    @Subscribe
+    private void onAreaSoundEffectPlayed(AreaSoundEffectPlayed areaSoundEffectPlayed) {
+//        areaSoundEffectPlayed.get
     }
 
     @Provides

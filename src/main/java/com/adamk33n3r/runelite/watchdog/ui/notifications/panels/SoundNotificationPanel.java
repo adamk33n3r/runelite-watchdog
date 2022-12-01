@@ -12,8 +12,8 @@ import java.util.Arrays;
 
 public class SoundNotificationPanel extends NotificationPanel {
 
-    public SoundNotificationPanel(Sound sound) {
-        super(sound);
+    public SoundNotificationPanel(Sound sound, PanelUtils.ButtonClickListener onRemove) {
+        super(sound, onRemove);
 
         String[] supportedExtensions = Arrays.stream(AudioSystem.getAudioFileTypes()).map(AudioFileFormat.Type::getExtension).toArray(String[]::new);
         this.container.add(new JLabel("Supports " + String.join(", ", Arrays.stream(supportedExtensions).map(ext -> "."+ext).toArray(String[]::new))));

@@ -7,7 +7,6 @@ import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
 import net.runelite.client.plugins.loottracker.LootTrackerPlugin;
 import net.runelite.client.plugins.timetracking.TimeTrackingPlugin;
 import net.runelite.client.ui.ColorScheme;
-import net.runelite.client.ui.DynamicGridLayout;
 import net.runelite.client.util.ImageUtil;
 import net.runelite.client.util.SwingUtil;
 
@@ -64,13 +63,12 @@ public abstract class NotificationPanel extends JPanel {
     }
 
     protected JPanel container = new JPanel(new StretchedStackedLayout(3, 3));
-    protected JPanel footer = new JPanel(new DynamicGridLayout(1, 0, 3, 3));
 
     private static final Border NAME_BOTTOM_BORDER = new CompoundBorder(
         BorderFactory.createMatteBorder(0, 0, 1, 0, ColorScheme.DARK_GRAY_COLOR),
         BorderFactory.createMatteBorder(5, 0, 5, 0, ColorScheme.DARKER_GRAY_COLOR));
 
-    public NotificationPanel(Notification notification) {
+    public NotificationPanel(Notification notification, PanelUtils.ButtonClickListener onRemove) {
         this.setLayout(new BorderLayout());
         this.setBorder(new EmptyBorder(3, 0, 0, 0));
 //        this.setBorder(new TitledBorder(new EtchedBorder(), Util.humanReadableClass(notification), TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, Color.WHITE));
@@ -121,27 +119,9 @@ public abstract class NotificationPanel extends JPanel {
         JButton deleteBtn = PanelUtils.createActionButton(DELETE_ICON,
             DELETE_ICON_HOVER,
             "Remove this notification",
-            btn -> notification.fireForced());
+            onRemove);
         rightActions.add(deleteBtn);
 
-        this.footer.setBackground(ColorScheme.PROGRESS_ERROR_COLOR);
-
         this.add(container, BorderLayout.CENTER);
-//        this.add(footer, BorderLayout.SOUTH);
-
-        JButton testButton = new JButton("Test");
-        testButton.setToolTipText("Test the notification");
-        testButton.addActionListener(ev -> notification.fireForced());
-        this.footer.add(testButton);
-
-        JButton remove = new JButton("Remove");
-        remove.setToolTipText("Remove this notification");
-        remove.addActionListener(ev -> {
-//            this.notifications.remove(notification);
-//            this.notificationContainer.remove(notificationPanel);
-//            this.notificationContainer.revalidate();
-        });
-        this.footer.add(remove);
-
     }
 }

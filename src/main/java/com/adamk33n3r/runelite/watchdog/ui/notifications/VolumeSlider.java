@@ -11,11 +11,8 @@ public class VolumeSlider extends JSlider {
         super(0, 10, (audioNotification.getGain() + 25) / 3);
 //        this.setPaintTicks(true);
         this.setSnapToTicks(true);
-        this.setMajorTickSpacing(5);
-        this.setMinorTickSpacing(1);
         this.addChangeListener(ev -> {
             audioNotification.setGain(this.getValue() * 3 - 25);
         });
-//        this.setBackground(ColorScheme.DARKER_GRAY_COLOR);
     }
 }

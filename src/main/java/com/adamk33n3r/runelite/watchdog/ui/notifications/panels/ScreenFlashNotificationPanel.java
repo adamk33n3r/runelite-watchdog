@@ -1,7 +1,7 @@
 package com.adamk33n3r.runelite.watchdog.ui.notifications.panels;
 
 import com.adamk33n3r.runelite.watchdog.notifications.ScreenFlash;
-import com.adamk33n3r.runelite.watchdog.ui.panels.NotificationsPanel;
+import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
 import net.runelite.client.config.FlashNotification;
 import net.runelite.client.ui.components.ColorJButton;
 import net.runelite.client.ui.components.colorpicker.ColorPickerManager;
@@ -15,8 +15,8 @@ import java.awt.event.MouseEvent;
 import java.util.Arrays;
 
 public class ScreenFlashNotificationPanel extends NotificationPanel {
-    public ScreenFlashNotificationPanel(ScreenFlash screenFlash, ColorPickerManager colorPickerManager) {
-        super(screenFlash);
+    public ScreenFlashNotificationPanel(ScreenFlash screenFlash, ColorPickerManager colorPickerManager, PanelUtils.ButtonClickListener onRemove) {
+        super(screenFlash, onRemove);
 
 
         ColorJButton colorPickerBtn;
@@ -35,8 +35,7 @@ public class ScreenFlashNotificationPanel extends NotificationPanel {
             public void mouseClicked(MouseEvent e) {
                 System.out.println(colorPickerManager);
                 RuneliteColorPicker colorPicker = colorPickerManager.create(
-                    SwingUtilities.windowForComponent(ScreenFlashNotificationPanel.this),
-//                    SwingUtilities.getWindowAncestor(ScreenFlashNotificationPanel.this),
+                    SwingUtilities.getWindowAncestor(ScreenFlashNotificationPanel.this),
                     colorPickerBtn.getColor(),
                     "Flash Color",
                     false);
