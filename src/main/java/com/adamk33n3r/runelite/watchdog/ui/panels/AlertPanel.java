@@ -5,6 +5,7 @@ import com.adamk33n3r.runelite.watchdog.Util;
 import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
 import com.adamk33n3r.runelite.watchdog.alerts.Alert;
 import com.adamk33n3r.runelite.watchdog.notifications.Notification;
+import com.adamk33n3r.runelite.watchdog.ui.HorizontalRuleBorder;
 import com.adamk33n3r.runelite.watchdog.ui.ImportExportDialog;
 import com.adamk33n3r.runelite.watchdog.ui.StretchedStackedLayout;
 import lombok.extern.slf4j.Slf4j;
@@ -14,10 +15,7 @@ import net.runelite.client.ui.PluginPanel;
 import org.apache.commons.text.WordUtils;
 
 import javax.swing.*;
-import javax.swing.border.CompoundBorder;
-import javax.swing.border.EmptyBorder;
-import javax.swing.border.EtchedBorder;
-import javax.swing.border.TitledBorder;
+import javax.swing.border.*;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -114,7 +112,9 @@ public class AlertPanel extends PluginPanel {
     public PluginPanel build() {
         NotificationsPanel notificationPanel = new NotificationsPanel(this.alert.getNotifications());
         WatchdogPlugin.getInstance().getInjector().injectMembers(notificationPanel);
-        notificationPanel.setBorder(new TitledBorder(new EtchedBorder(), "Notifications", TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, Color.WHITE));
+//        notificationPanel.setBorder(new TitledBorder(new EtchedBorder(), "Notifications", TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, Color.WHITE));
+//        notificationPanel.setBorder(new EmptyBorder(50, 0, 0, 0));
+        notificationPanel.setBorder(new HorizontalRuleBorder(10));
         this.container.add(notificationPanel);
 
         JPanel buttonPanel = new JPanel(new BorderLayout(3, 3));

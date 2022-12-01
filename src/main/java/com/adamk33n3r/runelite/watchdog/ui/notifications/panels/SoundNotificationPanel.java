@@ -16,14 +16,14 @@ public class SoundNotificationPanel extends NotificationPanel {
         super(sound, onRemove);
 
         String[] supportedExtensions = Arrays.stream(AudioSystem.getAudioFileTypes()).map(AudioFileFormat.Type::getExtension).toArray(String[]::new);
-        this.container.add(new JLabel("Supports " + String.join(", ", Arrays.stream(supportedExtensions).map(ext -> "."+ext).toArray(String[]::new))));
-        this.container.add(PanelUtils.createFileChooser(null, "Path to the sound file", ev -> {
+        this.settings.add(new JLabel("Supports " + String.join(", ", Arrays.stream(supportedExtensions).map(ext -> "."+ext).toArray(String[]::new))));
+        this.settings.add(PanelUtils.createFileChooser(null, "Path to the sound file", ev -> {
             JFileChooser fileChooser = (JFileChooser) ev.getSource();
             sound.path = fileChooser.getSelectedFile().getAbsolutePath();
         }, sound.path, "Sound Files", supportedExtensions));
 
         VolumeSlider volumeSlider = new VolumeSlider(sound);
         volumeSlider.setBackground(ColorScheme.MEDIUM_GRAY_COLOR);
-        this.container.add(PanelUtils.createIconComponent(VOLUME_ICON, "The volume to playback speech", volumeSlider));
+        this.settings.add(PanelUtils.createIconComponent(VOLUME_ICON, "The volume to playback speech", volumeSlider));
     }
 }

@@ -28,6 +28,6 @@ public class MessageNotificationPanel extends NotificationPanel {
             public void focusLost(FocusEvent e) {
             }
         });
-        this.container.add(flatTextArea);
+        this.settings.add(flatTextArea);
     }
 }

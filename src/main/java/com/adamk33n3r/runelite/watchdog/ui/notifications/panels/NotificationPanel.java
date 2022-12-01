@@ -62,37 +62,33 @@ public abstract class NotificationPanel extends JPanel {
         VOLUME_ICON = new ImageIcon(ImageUtil.luminanceOffset(volumeImg, -80));
     }
 
-    protected JPanel container = new JPanel(new StretchedStackedLayout(3, 3));
+    protected JPanel settings = new JPanel(new StretchedStackedLayout(3, 3));
 
     private static final Border NAME_BOTTOM_BORDER = new CompoundBorder(
         BorderFactory.createMatteBorder(0, 0, 1, 0, ColorScheme.DARK_GRAY_COLOR),
-        BorderFactory.createMatteBorder(5, 0, 5, 0, ColorScheme.DARKER_GRAY_COLOR));
+        BorderFactory.createMatteBorder(5, 10, 5, 0, ColorScheme.DARKER_GRAY_COLOR));
+
+    private static final Border NAME_BOTTOM_BORDER2 = new CompoundBorder(
+        BorderFactory.createMatteBorder(0, 0, 1, 0, ColorScheme.DARK_GRAY_COLOR),
+        BorderFactory.createLineBorder(ColorScheme.DARKER_GRAY_COLOR));
 
     public NotificationPanel(Notification notification, PanelUtils.ButtonClickListener onRemove) {
         this.setLayout(new BorderLayout());
         this.setBorder(new EmptyBorder(3, 0, 0, 0));
 //        this.setBorder(new TitledBorder(new EtchedBorder(), Util.humanReadableClass(notification), TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, Color.WHITE));
 //        this.setBackground(ColorScheme.PROGRESS_ERROR_COLOR);
-        this.container.setBorder(new EmptyBorder(0, 5, 0, 5));
-        this.container.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+        JPanel container = new JPanel(new StretchedStackedLayout(3, 3));
+        container.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+
         JPanel nameWrapper = new JPanel(new BorderLayout(3, 3));
-        this.container.add(nameWrapper);
-//        nameWrapper.setBorder(new EmptyBorder(15, 15, 15, 15));
+        container.add(nameWrapper);
+
         nameWrapper.setBackground(ColorScheme.DARKER_GRAY_COLOR);
         nameWrapper.setBorder(NAME_BOTTOM_BORDER);
+        nameWrapper.setBorder(new CompoundBorder(
+            BorderFactory.createMatteBorder(0, 0, 1, 0, ColorScheme.DARK_GRAY_COLOR),
+            BorderFactory.createMatteBorder(5, 10, 5, 0, ColorScheme.DARKER_GRAY_COLOR)));
         nameWrapper.add(new JLabel(Util.humanReadableClass(notification)), BorderLayout.WEST);
-        JButton collapseBtn = new JButton();
-        SwingUtil.removeButtonDecorations(collapseBtn);
-        collapseBtn.setIcon(EXPAND_ICON);
-//        checkbox?
-//            make them draggable
-        collapseBtn.setSelectedIcon(COLLAPSE_ICON);
-        SwingUtil.addModalTooltip(collapseBtn, "Collapse", "Un-Collapse");
-        collapseBtn.setBackground(ColorScheme.DARKER_GRAY_COLOR);
-        collapseBtn.setUI(new BasicButtonUI()); // substance breaks the layout
-        collapseBtn.addActionListener(ev -> collapseBtn.setSelected(!collapseBtn.isSelected()));
-//        nameWrapper.add(collapseBtn, BorderLayout.CENTER);
-
 
         // Right buttons
 //        JPanel rightActions = new JPanel(new DynamicGridLayout(1, 0, 3, 3));
@@ -121,6 +117,10 @@ public abstract class NotificationPanel extends JPanel {
             "Remove this notification",
             onRemove);
         rightActions.add(deleteBtn);
+
+        this.settings.setBorder(new EmptyBorder(5, 10, 5, 10));
+        this.settings.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+        container.add(this.settings);
 
         this.add(container, BorderLayout.CENTER);
     }

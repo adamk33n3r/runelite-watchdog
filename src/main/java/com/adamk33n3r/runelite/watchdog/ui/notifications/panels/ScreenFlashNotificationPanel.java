@@ -48,7 +48,7 @@ public class ScreenFlashNotificationPanel extends NotificationPanel {
                 colorPicker.setVisible(true);
             }
         });
-        this.container.add(colorPickerBtn);
+        this.settings.add(colorPickerBtn);
 
         JComboBox<FlashNotification> flashNotificationSelect = new JComboBox<>(Arrays.stream(FlashNotification.values()).filter(fn -> fn != FlashNotification.DISABLED).toArray(FlashNotification[]::new));
         flashNotificationSelect.setToolTipText("The screen flash mode");
@@ -58,6 +58,6 @@ public class ScreenFlashNotificationPanel extends NotificationPanel {
             return new DefaultListCellRenderer().getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
         });
         flashNotificationSelect.addActionListener(e -> screenFlash.flashNotification = flashNotificationSelect.getItemAt(flashNotificationSelect.getSelectedIndex()));
-        this.container.add(flashNotificationSelect);
+        this.settings.add(flashNotificationSelect);
     }
 }

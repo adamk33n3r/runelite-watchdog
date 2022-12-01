@@ -36,7 +36,7 @@ public class TextToSpeechNotificationPanel extends NotificationPanel {
         if (!WatchdogPlugin.getInstance().getConfig().ttsEnabled()) {
             JLabel ttsLabel = new JLabel("<html>Enable TTS in the config to use this Notification type</html>");
             ttsLabel.setFont(new Font(ttsLabel.getFont().getFontName(), Font.ITALIC | Font.BOLD, ttsLabel.getFont().getSize()));
-            this.container.add(ttsLabel);
+            this.settings.add(ttsLabel);
             return;
         }
 
@@ -54,23 +54,23 @@ public class TextToSpeechNotificationPanel extends NotificationPanel {
             public void focusLost(FocusEvent e) {
             }
         });
-        this.container.add(flatTextArea);
+        this.settings.add(flatTextArea);
 
 
         JSlider rateSlider = new JSlider(1, 5, notification.getRate());
         rateSlider.setBackground(ColorScheme.MEDIUM_GRAY_COLOR);
 //        rateSlider.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
         rateSlider.addChangeListener(ev -> notification.setRate(rateSlider.getValue()));
-        this.container.add(PanelUtils.createIconComponent(SPEED_ICON, "The speed of the generated speech", rateSlider));
+        this.settings.add(PanelUtils.createIconComponent(SPEED_ICON, "The speed of the generated speech", rateSlider));
 //        this.container.add(rateSlider);
 
         // Should be an icon of a head looking right with the same "sound waves" of the volume icon
         // "speech" icon
-        this.container.add(PanelUtils.createIconComponent(SPEECH_ICON, "The voice to generate speech with", new VoiceChooser(notification)));
+        this.settings.add(PanelUtils.createIconComponent(SPEECH_ICON, "The voice to generate speech with", new VoiceChooser(notification)));
 //        this.container.add(new VoiceChooser(notification));
 
         VolumeSlider volumeSlider = new VolumeSlider(notification);
         volumeSlider.setBackground(ColorScheme.MEDIUM_GRAY_COLOR);
-        this.container.add(PanelUtils.createIconComponent(VOLUME_ICON, "The volume to playback sound", volumeSlider));
+        this.settings.add(PanelUtils.createIconComponent(VOLUME_ICON, "The volume to playback sound", volumeSlider));
     }
 }

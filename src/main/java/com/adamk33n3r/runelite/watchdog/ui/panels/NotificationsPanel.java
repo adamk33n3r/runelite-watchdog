@@ -67,6 +67,7 @@ public class NotificationsPanel extends JPanel {
         JButton addDropDownButton = DropDownButtonFactory.createDropDownButton(ADD_ICON, popupMenu);
         addDropDownButton.setToolTipText("Create New Notification");
         JPanel buttonPanel = new JPanel(new BorderLayout());
+        buttonPanel.add(new JLabel("Notifications"), BorderLayout.WEST);
         buttonPanel.add(addDropDownButton, BorderLayout.EAST);
 
         this.add(buttonPanel);
