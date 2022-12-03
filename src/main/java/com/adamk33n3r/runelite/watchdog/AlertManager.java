@@ -30,7 +30,8 @@ public class AlertManager {
     private final List<Alert> alerts = new CopyOnWriteArrayList<>();
 
     @Getter
-    private final WatchdogPanel watchdogPanel = new WatchdogPanel(this);
+    @Inject
+    private WatchdogPanel watchdogPanel;
 
     private static final Type ALERT_LIST_TYPE;
 
@@ -46,7 +47,8 @@ public class AlertManager {
             .registerSubtype(IdleAlert.class)
             .registerSubtype(NotificationFiredAlert.class)
             .registerSubtype(StatDrainAlert.class)
-            .registerSubtype(ResourceAlert.class);
+            .registerSubtype(ResourceAlert.class)
+            .registerSubtype(SoundFiredAlert.class);
         // Add new notification types here
         final RuntimeTypeAdapterFactory<Notification> notificationTypeFactory = RuntimeTypeAdapterFactory.of(Notification.class)
             .registerSubtype(TrayNotification.class)

@@ -2,11 +2,13 @@ package com.adamk33n3r.runelite.watchdog;
 
 import com.adamk33n3r.runelite.watchdog.alerts.*;
 import com.adamk33n3r.runelite.watchdog.notifications.*;
+import com.google.inject.Binder;
 import com.google.inject.Provides;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
-import joptsimple.internal.Strings;
+import com.google.inject.name.Names;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.ChatMessageType;
@@ -30,7 +32,7 @@ import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.Properties;
 import java.util.regex.Pattern;
 
 @Slf4j
@@ -65,9 +67,6 @@ public class WatchdogPlugin extends Plugin {
 
     private final int[] previousLevels = new int[Skill.values().length];
 
-    // TODO: create an alert manager
-//    private List<Alert> alerts = new ArrayList<>();
-
     private final Map<Alert, Instant> lastTriggered = new HashMap<>();
 
     @Getter
@@ -77,10 +76,19 @@ public class WatchdogPlugin extends Plugin {
     @Getter
     private static WatchdogPlugin instance;
 
+    public WatchdogPlugin() {
+        instance = this;
+    }
+
+    @Override
+    public void configure(Binder binder) {
+        Properties properties = WatchdogProperties.getProperties();
+        Names.bindProperties(binder, properties);
+    }
+
     @Override
     protected void startUp() throws Exception {
         // TODO: Fix the notifications to not modify the obj
-        instance = this;
         this.overlayManager.add(this.flashOverlay);
 
         this.alertManager.loadAlerts();
@@ -223,11 +231,19 @@ public class WatchdogPlugin extends Plugin {
 
     @Subscribe
     private void onSoundEffectPlayed(SoundEffectPlayed soundEffectPlayed) {
-//        soundEffectPlayed.get
+        this.handleSoundEffectPlayed(soundEffectPlayed.getSoundId());
     }
     @Subscribe
     private void onAreaSoundEffectPlayed(AreaSoundEffectPlayed areaSoundEffectPlayed) {
-//        areaSoundEffectPlayed.get
+        this.handleSoundEffectPlayed(areaSoundEffectPlayed.getSoundId());
+    }
+
+    private void handleSoundEffectPlayed(int soundID) {
+        this.alertManager.getAlerts().stream()
+            .filter(alert -> alert instanceof SoundFiredAlert)
+            .map(alert -> (SoundFiredAlert) alert)
+            .filter(soundFiredAlert -> soundID == soundFiredAlert.getSoundID())
+            .forEach(this::fireAlert);
     }
 
     @Provides

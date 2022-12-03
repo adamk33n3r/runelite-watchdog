@@ -7,7 +7,6 @@ import com.adamk33n3r.runelite.watchdog.ui.AlertListItem;
 import com.adamk33n3r.runelite.watchdog.ui.panels.AlertPanel;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import net.runelite.api.Client;
 import net.runelite.api.Skill;
 import net.runelite.client.plugins.timetracking.TimeTrackingPlugin;
 import net.runelite.client.ui.ColorScheme;
@@ -17,6 +16,8 @@ import net.runelite.client.ui.PluginPanel;
 import net.runelite.client.util.ImageUtil;
 import org.apache.commons.text.WordUtils;
 
+import javax.inject.Inject;
+import javax.inject.Named;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
@@ -25,8 +26,14 @@ import java.util.Arrays;
 
 @Slf4j
 public class WatchdogPanel extends PluginPanel {
+    @Inject
+    @Named("wikiPage.soundIDs")
+    private String SOUND_ID_WIKI_PAGE;
+
     @Getter
-    private MultiplexingPluginPanel muxer;
+    private final MultiplexingPluginPanel muxer = new MultiplexingPluginPanel(this);
+
+    @Inject
     private AlertManager alertManager;
 
     public static final ImageIcon ADD_ICON;
@@ -35,11 +42,6 @@ public class WatchdogPanel extends PluginPanel {
         BufferedImage addIcon = ImageUtil.loadImageResource(TimeTrackingPlugin.class, "add_icon.png");
         ADD_ICON = new ImageIcon(addIcon);
         ADD_ICON_HOVER = new ImageIcon(ImageUtil.alphaOffset(addIcon, 0.53f));
-    }
-
-    public WatchdogPanel(AlertManager alertManager) {
-        this.alertManager = alertManager;
-        this.muxer = new MultiplexingPluginPanel(this);
     }
 
     public void rebuild() {
@@ -128,6 +130,9 @@ public class WatchdogPanel extends PluginPanel {
             case RESOURCE:
                 createdAlert = new ResourceAlert();
                 break;
+            case SOUND_FIRED:
+                createdAlert = new SoundFiredAlert();
+                break;
         }
 
         if (createdAlert != null) {
@@ -168,6 +173,12 @@ public class WatchdogPanel extends PluginPanel {
                 .addAlertDefaults(alert)
                 .addSelect("Skill", "The skill to track", Skill.class, statDrainAlert.getSkill(), statDrainAlert::setSkill)
                 .addSpinner("Drain Amount", "The difference in level to trigger the alert. Can be negative for stat gain", statDrainAlert.getDrainAmount(), statDrainAlert::setDrainAmount)
+                .build();
+        } else if (alert instanceof  SoundFiredAlert) {
+            SoundFiredAlert soundFiredAlert = (SoundFiredAlert) alert;
+            return AlertPanel.create(this.muxer, alert)
+                .addRichTextPane("<html>Go to <a href='" + SOUND_ID_WIKI_PAGE + "'>this wiki page</a> to get a list<br>of sound ids</html>")
+                .addSpinner("Sound ID", "The ID of the sound", soundFiredAlert.getSoundID(), soundFiredAlert::setSoundID, 0, 99999, 1)
                 .build();
         }
 

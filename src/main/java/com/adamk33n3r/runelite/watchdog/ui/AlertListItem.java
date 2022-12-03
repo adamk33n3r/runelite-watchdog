@@ -2,14 +2,11 @@ package com.adamk33n3r.runelite.watchdog.ui;
 
 import com.adamk33n3r.runelite.watchdog.AlertManager;
 import com.adamk33n3r.runelite.watchdog.WatchdogPanel;
-import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
 import com.adamk33n3r.runelite.watchdog.alerts.Alert;
-import com.adamk33n3r.runelite.watchdog.ui.ToggleButton;
 import net.runelite.client.ui.PluginPanel;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.List;
 
 public class AlertListItem extends JPanel {
     public AlertListItem(WatchdogPanel panel, AlertManager alertManager, Alert alert) {

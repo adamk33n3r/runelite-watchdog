@@ -4,11 +4,9 @@ import lombok.Getter;
 import net.runelite.client.ui.ColorScheme;
 
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
 import javax.swing.text.Document;
 import java.awt.*;
 import java.awt.event.*;
-import javax.swing.JPanel;
 
 /**
  * This component is a JTextArea with a flat design look.

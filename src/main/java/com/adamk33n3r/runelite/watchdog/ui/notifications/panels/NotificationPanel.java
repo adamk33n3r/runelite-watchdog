@@ -8,11 +8,9 @@ import net.runelite.client.plugins.loottracker.LootTrackerPlugin;
 import net.runelite.client.plugins.timetracking.TimeTrackingPlugin;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.util.ImageUtil;
-import net.runelite.client.util.SwingUtil;
 
 import javax.swing.*;
 import javax.swing.border.*;
-import javax.swing.plaf.basic.BasicButtonUI;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 

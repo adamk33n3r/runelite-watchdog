@@ -6,4 +6,5 @@ public enum TriggerType {
     RESOURCE(),
     NOTIFICATION_FIRED(),
     STAT_DRAIN(),
+    SOUND_FIRED(),
 }

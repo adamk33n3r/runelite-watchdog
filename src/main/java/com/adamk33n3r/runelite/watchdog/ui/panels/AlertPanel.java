@@ -9,6 +9,7 @@ import com.adamk33n3r.runelite.watchdog.ui.HorizontalRuleBorder;
 import com.adamk33n3r.runelite.watchdog.ui.ImportExportDialog;
 import com.adamk33n3r.runelite.watchdog.ui.StretchedStackedLayout;
 import lombok.extern.slf4j.Slf4j;
+import net.runelite.client.plugins.info.JRichTextPane;
 import net.runelite.client.ui.DynamicGridLayout;
 import net.runelite.client.ui.MultiplexingPluginPanel;
 import net.runelite.client.ui.PluginPanel;
@@ -68,6 +69,15 @@ public class AlertPanel extends PluginPanel {
         return this;
     }
 
+    public AlertPanel addRichTextPane(String text) {
+        JRichTextPane richTextPane = new JRichTextPane();
+        richTextPane.setContentType("text/html");
+        richTextPane.setText(text);
+        richTextPane.setForeground(Color.WHITE);
+        this.container.add(richTextPane);
+        return this;
+    }
+
     public AlertPanel addTextField(String name, String tooltip, String initialValue, Consumer<String> saveAction) {
         JTextField nameTextField = new JTextField(initialValue);
         this.saveActions.add(() -> saveAction.accept(nameTextField.getText()));
@@ -81,7 +91,7 @@ public class AlertPanel extends PluginPanel {
         textArea.setWrapStyleWord(true);
         textArea.setMargin(new Insets(4, 6, 5, 6));
         this.saveActions.add(() -> saveAction.accept(textArea.getText()));
-        this.container.add(PanelUtils.createLabeledComponent(name, tooltip, textArea));
+        this.container.add(PanelUtils.createLabeledComponent(name, tooltip, textArea, true));
         return this;
     }
 

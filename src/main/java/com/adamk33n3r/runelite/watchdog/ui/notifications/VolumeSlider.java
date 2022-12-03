@@ -1,7 +1,6 @@
 package com.adamk33n3r.runelite.watchdog.ui.notifications;
 
 import com.adamk33n3r.runelite.watchdog.notifications.IAudioNotification;
-import net.runelite.client.ui.ColorScheme;
 
 import javax.swing.*;
 

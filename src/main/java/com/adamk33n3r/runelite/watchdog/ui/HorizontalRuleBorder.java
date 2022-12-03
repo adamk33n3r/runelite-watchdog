@@ -1,7 +1,5 @@
 package com.adamk33n3r.runelite.watchdog.ui;
 
-import net.runelite.client.ui.ColorScheme;
-
 import javax.swing.border.*;
 import java.awt.*;
 

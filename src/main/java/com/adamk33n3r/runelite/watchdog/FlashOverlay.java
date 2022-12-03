@@ -9,13 +9,10 @@ import net.runelite.client.ui.ClientUI;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;
-import net.runelite.client.ui.overlay.OverlayPriority;
 
 import javax.inject.Inject;
 import java.awt.*;
 import java.time.Instant;
-
-import static net.runelite.api.widgets.WidgetID.*;
 
 @Slf4j
 public class FlashOverlay extends Overlay {

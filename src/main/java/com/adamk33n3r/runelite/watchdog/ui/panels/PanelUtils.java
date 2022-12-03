@@ -1,5 +1,6 @@
 package com.adamk33n3r.runelite.watchdog.ui.panels;
 
+import net.runelite.client.ui.DynamicGridLayout;
 import net.runelite.client.util.ImageUtil;
 import net.runelite.client.util.SwingUtil;
 
@@ -24,7 +25,16 @@ public class PanelUtils {
     private PanelUtils () {}
 
     public static JPanel createLabeledComponent(String label, String tooltip, Component component) {
-        JPanel panel = new JPanel(new BorderLayout(5, 0));
+        return createLabeledComponent(label, tooltip, component, false);
+    }
+
+    public static JPanel createLabeledComponent(String label, String tooltip, Component component, boolean twoLines) {
+        JPanel panel = new JPanel();
+        if (twoLines) {
+            panel.setLayout(new DynamicGridLayout(2, 0, 5, 5));
+        } else {
+            panel.setLayout(new BorderLayout(5, 0));
+        }
         JLabel jLabel = new JLabel(label);
         jLabel.setToolTipText(tooltip);
         panel.add(jLabel, BorderLayout.WEST);
