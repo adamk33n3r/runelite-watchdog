@@ -9,21 +9,94 @@ public class Util {
         return thing != null ? thing : defaultValue;
     }
 
-    // https://stackoverflow.com/a/1248627/1260715
-    public static String createRegexFromGlob(String glob) {
-        StringBuilder out = new StringBuilder("^");
-        for(int i = 0; i < glob.length(); ++i) {
-            final char c = glob.charAt(i);
-            switch(c) {
-                case '*': out.append(".*"); break;
-                case '?': out.append('.'); break;
-                case '.': out.append("\\."); break;
-                case '\\': out.append("\\\\"); break;
-                default: out.append(c);
+    // https://stackoverflow.com/a/17369948
+    public static String createRegexFromGlob(String pattern) {
+        StringBuilder sb = new StringBuilder(pattern.length());
+        int inGroup = 0;
+        int inClass = 0;
+        int firstIndexInClass = -1;
+        char[] arr = pattern.toCharArray();
+        for (int i = 0; i < arr.length; i++) {
+            char ch = arr[i];
+            switch (ch) {
+                case '\\':
+                    if (++i >= arr.length) {
+                        sb.append('\\');
+                    } else {
+                        char next = arr[i];
+                        switch (next) {
+                            case ',':
+                                // escape not needed
+                                break;
+                            case 'Q':
+                            case 'E':
+                                // extra escape needed
+                                sb.append('\\');
+                            default:
+                                sb.append('\\');
+                        }
+                        sb.append(next);
+                    }
+                    break;
+                case '*':
+                    if (inClass == 0)
+                        sb.append(".*");
+                    else
+                        sb.append('*');
+                    break;
+                case '?':
+                    if (inClass == 0)
+                        sb.append('.');
+                    else
+                        sb.append('?');
+                    break;
+                case '[':
+                    inClass++;
+                    firstIndexInClass = i+1;
+                    sb.append('[');
+                    break;
+                case ']':
+                    inClass--;
+                    sb.append(']');
+                    break;
+                case '.':
+                case '(':
+                case ')':
+                case '+':
+                case '|':
+                case '^':
+                case '$':
+                case '@':
+                case '%':
+                    if (inClass == 0 || (firstIndexInClass == i && ch == '^'))
+                        sb.append('\\');
+                    sb.append(ch);
+                    break;
+                case '!':
+                    if (firstIndexInClass == i)
+                        sb.append('^');
+                    else
+                        sb.append('!');
+                    break;
+                case '{':
+                    inGroup++;
+                    sb.append('(');
+                    break;
+                case '}':
+                    inGroup--;
+                    sb.append(')');
+                    break;
+                case ',':
+                    if (inGroup > 0)
+                        sb.append('|');
+                    else
+                        sb.append(',');
+                    break;
+                default:
+                    sb.append(ch);
             }
         }
-        out.append('$');
-        return out.toString();
+        return sb.toString();
     }
 
     public static String splitCamelCase(String s) {
@@ -39,5 +112,12 @@ public class Util {
 
     public static String humanReadableClass(Object obj) {
         return splitCamelCase(obj.getClass().getSimpleName());
+    }
+
+    public static String processTriggerValues(String string, String[] triggerValues) {
+        for (int i = 0; i < triggerValues.length; i++) {
+            string = string.replaceAll("\\$"+(i+1), triggerValues[i]);
+        }
+        return string;
     }
 }

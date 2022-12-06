@@ -9,11 +9,13 @@ import net.runelite.api.Skill;
 import net.runelite.api.events.*;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.NotificationFired;
+import net.runelite.client.util.Text;
 
 import javax.inject.Inject;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Slf4j
@@ -55,17 +57,22 @@ public class EventHandler {
             return;
         }
 
+        String unformattedMessage = Text.removeFormattingTags(chatMessage.getMessage());
         this.alertManager.getAlerts().stream()
             .filter(alert -> alert instanceof ChatAlert)
             .map(alert -> (ChatAlert) alert)
 //            .filter(chatAlert -> chatAlert.getChatMessageType() == chatMessage.getType())
-            .filter(chatAlert -> {
-                // TODO: Implement capture groups. Not sure best way to do this since notifications can be used on
-                // alerts that wouldn't have this
-                String regex = Util.createRegexFromGlob(chatAlert.getMessage());
-                return Pattern.matches("(?i)"+regex, chatMessage.getMessage());
-            })
-            .forEach(this::fireAlert);
+            .forEach(alert -> {
+                String regex = Util.createRegexFromGlob(alert.getMessage());
+                Matcher matcher = Pattern.compile("(?i)"+regex).matcher(unformattedMessage);
+                if (!matcher.matches()) return;
+
+                String[] groups = new String[matcher.groupCount()];
+                for (int i = 0; i <= matcher.groupCount(); i++) {
+                    groups[i] = matcher.group(i);
+                }
+                this.fireAlert(alert, groups);
+            });
     }
     //endregion
 
@@ -75,11 +82,17 @@ public class EventHandler {
         this.alertManager.getAlerts().stream()
             .filter(alert -> alert instanceof NotificationFiredAlert)
             .map(alert -> (NotificationFiredAlert) alert)
-            .filter(notificationFiredAlert -> {
-                String regex = Util.createRegexFromGlob(notificationFiredAlert.getMessage());
-                return Pattern.matches("(?i)"+regex, notificationFired.getMessage());
-            })
-            .forEach(this::fireAlert);
+            .forEach(alert -> {
+                String regex = Util.createRegexFromGlob(alert.getMessage());
+                Matcher matcher = Pattern.compile("(?i)"+regex).matcher(notificationFired.getMessage());
+                if (!matcher.matches()) return;
+
+                String[] groups = new String[matcher.groupCount()];
+                for (int i = 0; i <= matcher.groupCount(); i++) {
+                    groups[i] = matcher.group(i);
+                }
+                this.fireAlert(alert, groups);
+            });
     }
     //endregion
 
@@ -107,7 +120,7 @@ public class EventHandler {
 //                log.debug("{}, {}, {}", isSkill, isLower, wasHigher);
                 return isSkill && isLower && wasHigher;
             })
-            .forEach(this::fireAlert);
+            .forEach(alert -> this.fireAlert(alert, statChanged.getSkill().getName()));
 
         int[] boostedSkillLevels = this.client.getBoostedSkillLevels();
         for (Skill skill : Skill.values()) {
@@ -132,18 +145,22 @@ public class EventHandler {
             .filter(alert -> alert instanceof SoundFiredAlert)
             .map(alert -> (SoundFiredAlert) alert)
             .filter(soundFiredAlert -> soundID == soundFiredAlert.getSoundID())
-            .forEach(this::fireAlert);
+            .forEach(alert -> this.fireAlert(alert, "" + soundID));
     }
     //endregion
 
-    private void fireAlert(Alert alert) {
+    private void fireAlert(Alert alert, String triggerValue) {
+       this.fireAlert(alert, new String[] { triggerValue });
+    }
+
+    private void fireAlert(Alert alert, String[] triggerValues) {
         // Don't fire if it is disabled
         if (!alert.isEnabled()) return;
 
         // If the alert hasn't been fired yet, or has been enough time, set the last trigger time to now and fire.
         if (!this.lastTriggered.containsKey(alert) || Instant.now().compareTo(this.lastTriggered.get(alert).plusMillis(alert.getDebounceTime())) >= 0) {
             this.lastTriggered.put(alert, Instant.now());
-            alert.getNotifications().forEach(Notification::fire);
+            alert.getNotifications().forEach(notification -> notification.fire(triggerValues));
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.adamk33n3r.runelite.watchdog.notifications;
 
+import com.adamk33n3r.runelite.watchdog.Util;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.sound.sampled.*;
@@ -12,9 +13,10 @@ public class Sound extends AudioNotification {
     public String path;
 
     @Override
-    protected void fireImpl() {
-        log.debug("trying to play: " + this.path);
-        CompletableFuture.supplyAsync(this::tryPlaySound).thenAccept(playedCustom -> {
+    protected void fireImpl(String[] triggerValues) {
+        String processedPath = Util.processTriggerValues(this.path, triggerValues);
+        log.debug("trying to play: " + processedPath);
+        CompletableFuture.supplyAsync(() -> tryPlaySound(processedPath)).thenAccept(playedCustom -> {
             log.debug("played custom: " + playedCustom);
             if (!playedCustom) {
                 log.debug("playing default");
@@ -23,9 +25,9 @@ public class Sound extends AudioNotification {
         });
     }
 
-    private boolean tryPlaySound() {
+    private boolean tryPlaySound(String path) {
         try {
-            File soundFile = new File(this.path);
+            File soundFile = new File(path);
             if (soundFile.exists()) {
                 Clip clip = AudioSystem.getClip();
 

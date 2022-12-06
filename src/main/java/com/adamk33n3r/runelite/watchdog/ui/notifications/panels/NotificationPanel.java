@@ -107,7 +107,7 @@ public abstract class NotificationPanel extends JPanel {
         JButton testBtn = PanelUtils.createActionButton(TEST_ICON,
             TEST_ICON_HOVER,
             "Test the notification",
-            btn -> notification.fireForced());
+            btn -> notification.fireForced(new String[]{ "1", "2", "3", "4", "5" }));
         rightActions.add(testBtn);
 
         JButton deleteBtn = PanelUtils.createActionButton(DELETE_ICON,

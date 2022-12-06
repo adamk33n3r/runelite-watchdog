@@ -68,9 +68,7 @@ public class NotificationsPanel extends JPanel {
         this.notificationContainer.removeAll();
 
         for (Notification notification : this.notifications) {
-
             JPanel notificationPanel = new JPanel(new DynamicGridLayout(0, 1, 3, 3));
-//            notificationPanel.setBorder(new TitledBorder(new EtchedBorder(), Util.humanReadableClass(notification), TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, Color.WHITE));
             this.notificationContainer.add(notificationPanel);
             PanelUtils.ButtonClickListener removeNotification = btn -> {
                 this.notifications.remove(notification);
@@ -88,28 +86,8 @@ public class NotificationsPanel extends JPanel {
                 notificationPanel.add(new MessageNotificationPanel((TrayNotification)notification, removeNotification));
             else if (notification instanceof ScreenFlash)
                 notificationPanel.add(new ScreenFlashNotificationPanel((ScreenFlash) notification, this.colorPickerManager, removeNotification));
-
-            JPanel footer = new JPanel(new GridLayout(1, 2, 3, 3));
-
-            JButton testButton = new JButton("Test");
-            testButton.setToolTipText("Test the notification");
-            testButton.addActionListener(ev -> {
-                boolean prev = notification.isFireWhenFocused();
-                notification.setFireWhenFocused(true);
-                notification.fire();
-                notification.setFireWhenFocused(prev);
-            });
-            footer.add(testButton);
-
-            JButton remove = new JButton("Remove");
-            remove.setToolTipText("Remove this notification");
-            remove.addActionListener(ev -> {
-                this.notifications.remove(notification);
-                this.notificationContainer.remove(notificationPanel);
-                this.notificationContainer.revalidate();
-            });
-            footer.add(remove);
         }
+
         this.notificationContainer.revalidate();
     }
 
