@@ -14,7 +14,7 @@ import java.awt.event.*;
 public class FlatTextArea extends JPanel
 {
     @Getter
-    private final JTextArea textArea;
+    private final PlaceholderTextArea textArea;
 
     //the default background color, this needs to be stored for hover effects
     @Getter
@@ -28,14 +28,15 @@ public class FlatTextArea extends JPanel
     @Getter
     private boolean blocked;
 
-    public FlatTextArea()
+    public FlatTextArea(String placeholder)
     {
         this.setLayout(new BorderLayout());
 //        this.setBorder(new EmptyBorder(0, 10, 0, 0));
         this.setBackground(this.backgroundColor);
 //        setBorder(null);
 
-        this.textArea = new JTextArea();
+        this.textArea = new PlaceholderTextArea();
+        this.textArea.setPlaceholder(placeholder);
 //        this.textArea.setBorder(null);
         this.textArea.setOpaque(false);
         this.textArea.setSelectedTextColor(Color.WHITE);
@@ -70,8 +71,8 @@ public class FlatTextArea extends JPanel
         });
     }
 
-    public FlatTextArea(boolean preventNewline) {
-        this();
+    public FlatTextArea(String placeholder, boolean preventNewline) {
+        this(placeholder);
         if (!preventNewline) {
             return;
         }
@@ -84,7 +85,6 @@ public class FlatTextArea extends JPanel
             public void actionPerformed(ActionEvent e) {
                 JTextArea textArea = (JTextArea)e.getSource();
                 textArea.getParent().getParent().requestFocusInWindow();
-                System.out.println("action performed");
             }
         });
     }

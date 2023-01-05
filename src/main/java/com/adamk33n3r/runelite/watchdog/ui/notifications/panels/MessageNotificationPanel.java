@@ -7,17 +7,20 @@ import com.adamk33n3r.runelite.watchdog.ui.FlatTextArea;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
 
 import javax.swing.text.AbstractDocument;
+import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 
 public class MessageNotificationPanel extends NotificationPanel {
-    public MessageNotificationPanel(MessageNotification notification, PanelUtils.ButtonClickListener onRemove) {
-        super(notification, onRemove);
+    public MessageNotificationPanel(MessageNotification notification, Runnable onChangeListener, PanelUtils.ButtonClickListener onRemove) {
+        super(notification, onChangeListener, onRemove);
 
-        FlatTextArea flatTextArea = new FlatTextArea(true);
+        FlatTextArea flatTextArea = new FlatTextArea("Enter your message...", true);
         flatTextArea.setText(notification.getMessage());
         ((AbstractDocument) flatTextArea.getDocument()).setDocumentFilter(new LengthLimitFilter(200));
-        flatTextArea.getDocument().addDocumentListener((SimpleDocumentListener) ev -> notification.setMessage(flatTextArea.getText()));
+        flatTextArea.getDocument().addDocumentListener((SimpleDocumentListener) ev -> {
+            notification.setMessage(flatTextArea.getText());
+        });
         flatTextArea.getTextArea().addFocusListener(new FocusListener() {
             @Override
             public void focusGained(FocusEvent e) {
@@ -26,6 +29,7 @@ public class MessageNotificationPanel extends NotificationPanel {
 
             @Override
             public void focusLost(FocusEvent e) {
+                onChangeListener.run();
             }
         });
         this.settings.add(flatTextArea);

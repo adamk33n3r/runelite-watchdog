@@ -15,8 +15,8 @@ import java.awt.event.MouseEvent;
 import java.util.Arrays;
 
 public class ScreenFlashNotificationPanel extends NotificationPanel {
-    public ScreenFlashNotificationPanel(ScreenFlash screenFlash, ColorPickerManager colorPickerManager, PanelUtils.ButtonClickListener onRemove) {
-        super(screenFlash, onRemove);
+    public ScreenFlashNotificationPanel(ScreenFlash screenFlash, ColorPickerManager colorPickerManager, Runnable onChangeListener, PanelUtils.ButtonClickListener onRemove) {
+        super(screenFlash, onChangeListener, onRemove);
 
 
         ColorJButton colorPickerBtn;
@@ -29,11 +29,9 @@ public class ScreenFlashNotificationPanel extends NotificationPanel {
         }
         colorPickerBtn.setToolTipText("The color to flash the screen");
         colorPickerBtn.setFocusable(false);
-        System.out.println(colorPickerManager);
         colorPickerBtn.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                System.out.println(colorPickerManager);
                 RuneliteColorPicker colorPicker = colorPickerManager.create(
                     SwingUtilities.getWindowAncestor(ScreenFlashNotificationPanel.this),
                     colorPickerBtn.getColor(),
@@ -44,7 +42,10 @@ public class ScreenFlashNotificationPanel extends NotificationPanel {
                     colorPickerBtn.setColor(c);
                     colorPickerBtn.setText("#" + ColorUtil.colorToAlphaHexCode(c).toUpperCase());
                 });
-                colorPicker.setOnClose(c -> screenFlash.color = c);
+                colorPicker.setOnClose(c -> {
+                    screenFlash.color = c;
+                    onChangeListener.run();
+                });
                 colorPicker.setVisible(true);
             }
         });
@@ -57,7 +58,10 @@ public class ScreenFlashNotificationPanel extends NotificationPanel {
             list.setToolTipText(value.toString());
             return new DefaultListCellRenderer().getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
         });
-        flashNotificationSelect.addActionListener(e -> screenFlash.flashNotification = flashNotificationSelect.getItemAt(flashNotificationSelect.getSelectedIndex()));
+        flashNotificationSelect.addActionListener(e -> {
+            screenFlash.flashNotification = flashNotificationSelect.getItemAt(flashNotificationSelect.getSelectedIndex());
+            onChangeListener.run();
+        });
         this.settings.add(flashNotificationSelect);
     }
 }

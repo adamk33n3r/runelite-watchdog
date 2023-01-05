@@ -5,6 +5,7 @@ import com.adamk33n3r.runelite.watchdog.SimpleDocumentListener;
 import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
 import com.adamk33n3r.runelite.watchdog.notifications.TextToSpeech;
 import com.adamk33n3r.runelite.watchdog.ui.FlatTextArea;
+import com.adamk33n3r.runelite.watchdog.ui.PlaceholderTextField;
 import com.adamk33n3r.runelite.watchdog.ui.notifications.VoiceChooser;
 import com.adamk33n3r.runelite.watchdog.ui.notifications.VolumeSlider;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
@@ -30,8 +31,8 @@ public class TextToSpeechNotificationPanel extends NotificationPanel {
         SPEED_ICON = new ImageIcon(ImageUtil.luminanceOffset(speedImg, -80));
     }
 
-    public TextToSpeechNotificationPanel(TextToSpeech notification, PanelUtils.ButtonClickListener onRemove) {
-        super(notification, onRemove);
+    public TextToSpeechNotificationPanel(TextToSpeech notification, Runnable onChangeListener, PanelUtils.ButtonClickListener onRemove) {
+        super(notification, onChangeListener, onRemove);
 
         if (!WatchdogPlugin.getInstance().getConfig().ttsEnabled()) {
             JLabel ttsLabel = new JLabel("<html>Enable TTS in the config to use this Notification type</html>");
@@ -40,10 +41,12 @@ public class TextToSpeechNotificationPanel extends NotificationPanel {
             return;
         }
 
-        FlatTextArea flatTextArea = new FlatTextArea(true);
+        FlatTextArea flatTextArea = new FlatTextArea("Enter your message...", true);
         flatTextArea.setText(notification.getMessage());
         ((AbstractDocument) flatTextArea.getDocument()).setDocumentFilter(new LengthLimitFilter(200));
-        flatTextArea.getDocument().addDocumentListener((SimpleDocumentListener) ev -> notification.setMessage(flatTextArea.getText()));
+        flatTextArea.getDocument().addDocumentListener((SimpleDocumentListener) ev -> {
+            notification.setMessage(flatTextArea.getText());
+        });
         flatTextArea.getTextArea().addFocusListener(new FocusListener() {
             @Override
             public void focusGained(FocusEvent e) {
@@ -52,6 +55,7 @@ public class TextToSpeechNotificationPanel extends NotificationPanel {
 
             @Override
             public void focusLost(FocusEvent e) {
+                onChangeListener.run();
             }
         });
         this.settings.add(flatTextArea);
@@ -59,18 +63,21 @@ public class TextToSpeechNotificationPanel extends NotificationPanel {
 
         JSlider rateSlider = new JSlider(1, 5, notification.getRate());
         rateSlider.setBackground(ColorScheme.MEDIUM_GRAY_COLOR);
-//        rateSlider.setForeground(ColorScheme.LIGHT_GRAY_COLOR);
-        rateSlider.addChangeListener(ev -> notification.setRate(rateSlider.getValue()));
+        rateSlider.addChangeListener(ev -> {
+            notification.setRate(rateSlider.getValue());
+            onChangeListener.run();
+        });
         this.settings.add(PanelUtils.createIconComponent(SPEED_ICON, "The speed of the generated speech", rateSlider));
-//        this.container.add(rateSlider);
 
         // Should be an icon of a head looking right with the same "sound waves" of the volume icon
         // "speech" icon
-        this.settings.add(PanelUtils.createIconComponent(SPEECH_ICON, "The voice to generate speech with", new VoiceChooser(notification)));
-//        this.container.add(new VoiceChooser(notification));
+        VoiceChooser voiceChooser = new VoiceChooser(notification);
+        this.settings.add(PanelUtils.createIconComponent(SPEECH_ICON, "The voice to generate speech with", voiceChooser));
+        voiceChooser.addActionListener(e -> onChangeListener.run());
 
         VolumeSlider volumeSlider = new VolumeSlider(notification);
         volumeSlider.setBackground(ColorScheme.MEDIUM_GRAY_COLOR);
+        volumeSlider.addChangeListener(e -> onChangeListener.run());
         this.settings.add(PanelUtils.createIconComponent(VOLUME_ICON, "The volume to playback sound", volumeSlider));
     }
 }

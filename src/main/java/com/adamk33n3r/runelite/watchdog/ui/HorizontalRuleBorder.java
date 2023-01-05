@@ -9,7 +9,7 @@ public class HorizontalRuleBorder extends EtchedBorder {
     public HorizontalRuleBorder(int size) {
         super();
         this.size = size;
-        this.outsideBorder = new EmptyBorder(this.size, 0, this.size, 0);
+        this.outsideBorder = new EmptyBorder(this.size, 0, 0, 0);
     }
 
     /**

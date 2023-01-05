@@ -105,7 +105,11 @@ public class AlertManager {
 
     public void saveAlerts() {
         String json = this.gson.toJson(this.alerts, ALERT_LIST_TYPE);
-        this.configManager.setConfiguration(WatchdogConfig.CONFIG_GROUP_NAME, "alerts", json);
+        this.configManager.setConfiguration(WatchdogConfig.CONFIG_GROUP_NAME, WatchdogConfig.ALERTS, json);
+    }
+
+    public String toJSON() {
+        return this.gson.toJson(this.alerts, ALERT_LIST_TYPE);
     }
 
 }

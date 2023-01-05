@@ -145,9 +145,9 @@ public class WatchdogPanel extends PluginPanel {
         if (alert instanceof ChatAlert) {
             ChatAlert chatAlert = (ChatAlert) alert;
             return AlertPanel.create(this.muxer, alert)
-                .addLabel("<html>Will not trigger on<br>player chat messages</html>")
                 .addAlertDefaults(alert)
-                .addTextArea("Message", "The message to trigger on. Supports glob (*)", chatAlert.getMessage(), chatAlert::setMessage)
+                .addTextArea("Enter the message to trigger on...", "The message to trigger on. Supports glob (*)", chatAlert.getMessage(), chatAlert::setMessage)
+                .addLabel("<html><i>Will not trigger on<br>player chat messages</i></html>")
                 .build();
         } else if (alert instanceof IdleAlert) {
             IdleAlert idleAlert = (IdleAlert) alert;
@@ -159,7 +159,7 @@ public class WatchdogPanel extends PluginPanel {
             NotificationFiredAlert notificationFiredAlert = (NotificationFiredAlert) alert;
             return AlertPanel.create(this.muxer, alert)
                 .addAlertDefaults(alert)
-                .addTextArea("Message", "The notification message to trigger on. Supports glob (*)", notificationFiredAlert.getMessage(), notificationFiredAlert::setMessage)
+                .addTextArea("Enter the message to trigger on...", "The notification message to trigger on. Supports glob (*)", notificationFiredAlert.getMessage(), notificationFiredAlert::setMessage)
                 .build();
         } else if (alert instanceof ResourceAlert) {
             ResourceAlert resourceAlert = (ResourceAlert) alert;
@@ -177,6 +177,7 @@ public class WatchdogPanel extends PluginPanel {
         } else if (alert instanceof  SoundFiredAlert) {
             SoundFiredAlert soundFiredAlert = (SoundFiredAlert) alert;
             return AlertPanel.create(this.muxer, alert)
+                .addAlertDefaults(alert)
                 .addRichTextPane("<html>Go to <a href='" + SOUND_ID_WIKI_PAGE + "'>this wiki page</a> to get a list<br>of sound ids</html>")
                 .addSpinner("Sound ID", "The ID of the sound", soundFiredAlert.getSoundID(), soundFiredAlert::setSoundID, 0, 99999, 1)
                 .build();

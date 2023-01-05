@@ -12,14 +12,15 @@ import java.util.Arrays;
 
 public class SoundNotificationPanel extends NotificationPanel {
 
-    public SoundNotificationPanel(Sound sound, PanelUtils.ButtonClickListener onRemove) {
-        super(sound, onRemove);
+    public SoundNotificationPanel(Sound sound, Runnable onChangeListener, PanelUtils.ButtonClickListener onRemove) {
+        super(sound, onChangeListener, onRemove);
 
         String[] supportedExtensions = Arrays.stream(AudioSystem.getAudioFileTypes()).map(AudioFileFormat.Type::getExtension).toArray(String[]::new);
         this.settings.add(new JLabel("Supports " + String.join(", ", Arrays.stream(supportedExtensions).map(ext -> "."+ext).toArray(String[]::new))));
         this.settings.add(PanelUtils.createFileChooser(null, "Path to the sound file", ev -> {
             JFileChooser fileChooser = (JFileChooser) ev.getSource();
             sound.path = fileChooser.getSelectedFile().getAbsolutePath();
+            onChangeListener.run();
         }, sound.path, "Sound Files", supportedExtensions));
 
         VolumeSlider volumeSlider = new VolumeSlider(sound);

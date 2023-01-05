@@ -8,9 +8,10 @@ import net.runelite.client.config.ConfigItem;
 public interface WatchdogConfig extends Config {
     String CONFIG_GROUP_NAME = "watchdog";
     String ALERTS = "alerts";
+    String ENABLE_TTS = "enableTTS";
 
     @ConfigItem(
-        keyName = "alerts",
+        keyName = ALERTS,
         name = "Alerts",
         description = "Serialized Alerts as a JSON string",
         hidden = true
@@ -18,7 +19,7 @@ public interface WatchdogConfig extends Config {
     default String alerts() { return "[]"; }
 
     @ConfigItem(
-        keyName = "enableTTS",
+        keyName = ENABLE_TTS,
         name = "Enable TTS",
         description = "Enables the TTS Notification Type",
         warning = "Using TTS will submit your IP address to a 3rd party website not controlled or verified by the RuneLite Developers."

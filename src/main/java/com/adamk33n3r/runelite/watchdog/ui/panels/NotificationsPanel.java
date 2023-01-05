@@ -19,7 +19,6 @@ import javax.swing.*;
 
 import java.awt.*;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
 import java.util.List;
 
 import static com.adamk33n3r.runelite.watchdog.WatchdogPanel.ADD_ICON;
@@ -27,14 +26,17 @@ import static com.adamk33n3r.runelite.watchdog.WatchdogPanel.ADD_ICON;
 @Slf4j
 public class NotificationsPanel extends JPanel {
     @Getter
-    private final List<Notification> notifications = new ArrayList<>();
+    private final List<Notification> notifications;
     @Inject
     private ColorPickerManager colorPickerManager;
+
+    @Inject
+    private AlertManager alertManager;
 
     private final JPanel notificationContainer;
 
     public NotificationsPanel(List<Notification> notifications) {
-        this.notifications.addAll(notifications);
+        this.notifications = notifications;
         this.setLayout(new DynamicGridLayout(0, 1, 3, 3));
         this.notificationContainer = new JPanel(new DynamicGridLayout(0, 1, 3, 3));
 
@@ -43,7 +45,9 @@ public class NotificationsPanel extends JPanel {
             JMenuItem menuItem = (JMenuItem) e.getSource();
             NotificationType nType = (NotificationType) menuItem.getClientProperty(NotificationType.class);
             this.createNotification(nType);
-            this.rebuild();
+            this.addPanel(this.notifications.get(this.notifications.size() - 1));
+            this.notificationContainer.revalidate();
+            this.alertManager.saveAlerts();
         };
         for (NotificationType nType : NotificationType.values()) {
             JMenuItem c = new JMenuItem(WordUtils.capitalizeFully(nType.name().replace("_", " ")));
@@ -59,7 +63,6 @@ public class NotificationsPanel extends JPanel {
 
         this.add(buttonPanel);
         this.add(notificationContainer);
-//        this.rebuild();
     }
 
     // After inject, build
@@ -68,27 +71,33 @@ public class NotificationsPanel extends JPanel {
         this.notificationContainer.removeAll();
 
         for (Notification notification : this.notifications) {
-            JPanel notificationPanel = new JPanel(new DynamicGridLayout(0, 1, 3, 3));
-            this.notificationContainer.add(notificationPanel);
-            PanelUtils.ButtonClickListener removeNotification = btn -> {
-                this.notifications.remove(notification);
-                this.notificationContainer.remove(notificationPanel);
-                this.notificationContainer.revalidate();
-            };
-
-            if (notification instanceof GameMessage)
-                notificationPanel.add(new MessageNotificationPanel((GameMessage)notification, removeNotification));
-            else if (notification instanceof TextToSpeech)
-                notificationPanel.add(new TextToSpeechNotificationPanel((TextToSpeech) notification, removeNotification));
-            else if (notification instanceof Sound)
-                notificationPanel.add(new SoundNotificationPanel((Sound)notification, removeNotification));
-            else if (notification instanceof TrayNotification)
-                notificationPanel.add(new MessageNotificationPanel((TrayNotification)notification, removeNotification));
-            else if (notification instanceof ScreenFlash)
-                notificationPanel.add(new ScreenFlashNotificationPanel((ScreenFlash) notification, this.colorPickerManager, removeNotification));
+            this.addPanel(notification);
         }
 
         this.notificationContainer.revalidate();
+    }
+
+    private void addPanel(Notification notification) {
+        JPanel notificationPanel = new JPanel(new DynamicGridLayout(0, 1, 3, 3));
+        this.notificationContainer.add(notificationPanel);
+
+        PanelUtils.ButtonClickListener removeNotification = btn -> {
+            this.notifications.remove(notification);
+            this.notificationContainer.remove(notificationPanel);
+            this.notificationContainer.revalidate();
+            this.alertManager.saveAlerts();
+        };
+
+        if (notification instanceof GameMessage)
+            notificationPanel.add(new MessageNotificationPanel((GameMessage)notification, this.alertManager::saveAlerts, removeNotification));
+        else if (notification instanceof TextToSpeech)
+            notificationPanel.add(new TextToSpeechNotificationPanel((TextToSpeech) notification, this.alertManager::saveAlerts, removeNotification));
+        else if (notification instanceof Sound)
+            notificationPanel.add(new SoundNotificationPanel((Sound)notification, this.alertManager::saveAlerts, removeNotification));
+        else if (notification instanceof TrayNotification)
+            notificationPanel.add(new MessageNotificationPanel((TrayNotification)notification, this.alertManager::saveAlerts, removeNotification));
+        else if (notification instanceof ScreenFlash)
+            notificationPanel.add(new ScreenFlashNotificationPanel((ScreenFlash) notification, this.colorPickerManager, this.alertManager::saveAlerts, removeNotification));
     }
 
     private void createNotification(NotificationType notificationType) {

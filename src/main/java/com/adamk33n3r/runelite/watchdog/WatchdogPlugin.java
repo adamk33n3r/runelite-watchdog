@@ -132,9 +132,7 @@ public class WatchdogPlugin extends Plugin {
     @Subscribe
     private void onConfigChanged(ConfigChanged configChanged) {
         if (configChanged.getGroup().equals(WatchdogConfig.CONFIG_GROUP_NAME)) {
-            if (configChanged.getKey().equals("alerts")) {
-                this.alertManager.loadAlerts();
-            } else if (configChanged.getKey().equals("enableTTS")) {
+            if (configChanged.getKey().equals(WatchdogConfig.ENABLE_TTS)) {
                 // To the top!
                 while (this.panel.getMuxer().getComponentCount() > 1) {
                     this.panel.getMuxer().popState();

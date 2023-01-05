@@ -35,8 +35,8 @@ public abstract class NotificationPanel extends JPanel {
     private static final ImageIcon FOCUS_ICON_HOVER;
     private static final ImageIcon FOCUS_SELECTED_ICON;
     private static final ImageIcon FOCUS_SELECTED_ICON_HOVER;
-    private static final ImageIcon TEST_ICON;
-    private static final ImageIcon TEST_ICON_HOVER;
+    public static final ImageIcon TEST_ICON;
+    public static final ImageIcon TEST_ICON_HOVER;
     protected static final ImageIcon VOLUME_ICON;
 
     static {
@@ -70,7 +70,7 @@ public abstract class NotificationPanel extends JPanel {
         BorderFactory.createMatteBorder(0, 0, 1, 0, ColorScheme.DARK_GRAY_COLOR),
         BorderFactory.createLineBorder(ColorScheme.DARKER_GRAY_COLOR));
 
-    public NotificationPanel(Notification notification, PanelUtils.ButtonClickListener onRemove) {
+    public NotificationPanel(Notification notification, Runnable onChangeListener, PanelUtils.ButtonClickListener onRemove) {
         this.setLayout(new BorderLayout());
         this.setBorder(new EmptyBorder(3, 0, 0, 0));
 //        this.setBorder(new TitledBorder(new EtchedBorder(), Util.humanReadableClass(notification), TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, Color.WHITE));
@@ -101,16 +101,22 @@ public abstract class NotificationPanel extends JPanel {
             FOCUS_ICON_HOVER,
             "Set only out of Focus",
             "Set allow in-focus",
-            btn -> notification.setFireWhenFocused(btn.isSelected()));
+            btn -> {
+                notification.setFireWhenFocused(btn.isSelected());
+                onChangeListener.run();
+            });
+        focusBtn.setSelected(notification.isFireWhenFocused());
         rightActions.add(focusBtn, BorderLayout.EAST);
 
-        JButton testBtn = PanelUtils.createActionButton(TEST_ICON,
+        JButton testBtn = PanelUtils.createActionButton(
+            TEST_ICON,
             TEST_ICON_HOVER,
             "Test the notification",
             btn -> notification.fireForced(new String[]{ "1", "2", "3", "4", "5" }));
         rightActions.add(testBtn);
 
-        JButton deleteBtn = PanelUtils.createActionButton(DELETE_ICON,
+        JButton deleteBtn = PanelUtils.createActionButton(
+            DELETE_ICON,
             DELETE_ICON_HOVER,
             "Remove this notification",
             onRemove);

@@ -106,4 +106,11 @@ public class GlobTest {
         assertEquals("Jan [4-9]th", regex);
         assertTrue("Jan 8th".matches(regex));
     }
+
+    @Test
+    public void test_valuable_drop() throws Exception {
+        String regex = Util.createRegexFromGlob("*Valuable drop: *\\([5-9],??? coins\\)*");
+        assertEquals(".*Valuable drop: .*\\([5-9],... coins\\).*", regex);
+        assertTrue("Valuable drop: (5,001 coins)".matches(regex));
+    }
 }
