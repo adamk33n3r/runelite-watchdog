@@ -6,4 +6,5 @@ public enum NotificationType {
     SOUND,
     TEXT_TO_SPEECH,
     TRAY_NOTIFICATION,
+    OVERHEAD,
 }

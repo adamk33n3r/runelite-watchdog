@@ -1,5 +1,6 @@
 package com.adamk33n3r.runelite.watchdog.alerts;
 
+import com.adamk33n3r.runelite.watchdog.Util;
 import com.adamk33n3r.runelite.watchdog.notifications.Notification;
 import lombok.Getter;
 import lombok.Setter;
@@ -8,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Getter
-public class Alert {
+public abstract class Alert {
     @Setter
     private boolean enabled = true;
 
@@ -23,5 +24,9 @@ public class Alert {
     public Alert(String name) {
         this.name = name;
         this.debounceTime = 0;
+    }
+
+    public String getDisplayName() {
+        return Util.humanReadableClass(this);
     }
 }

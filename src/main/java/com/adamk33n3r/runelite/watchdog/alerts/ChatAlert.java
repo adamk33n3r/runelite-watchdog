@@ -6,7 +6,8 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ChatAlert extends Alert {
-    private String message = "Nothing interesting happens.";
+    private String message = "";
+    private boolean regexEnabled = false;
 
     public ChatAlert() {
         super("New Chat Alert");
@@ -14,5 +15,10 @@ public class ChatAlert extends Alert {
 
     public ChatAlert(String name) {
         super(name);
+    }
+
+    @Override
+    public String getDisplayName() {
+        return "Game Message Alert";
     }
 }

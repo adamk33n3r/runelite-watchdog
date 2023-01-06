@@ -6,5 +6,5 @@ import lombok.Setter;
 public abstract class MessageNotification extends Notification implements IMessageNotification {
     @Getter
     @Setter
-    protected String message = "Hey! Wake up!";
+    protected String message = "";
 }

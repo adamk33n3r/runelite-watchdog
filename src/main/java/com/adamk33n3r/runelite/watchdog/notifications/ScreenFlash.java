@@ -13,7 +13,7 @@ public class ScreenFlash extends Notification {
     public FlashNotification flashNotification = FlashNotification.SOLID_TWO_SECONDS;
 
     @Override
-    protected void fireImpl() {
+    protected void fireImpl(String[] triggerValues) {
         WatchdogPlugin.getInstance().getFlashOverlay().flash(this);
     }
 }

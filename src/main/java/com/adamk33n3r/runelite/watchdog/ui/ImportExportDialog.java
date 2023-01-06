@@ -3,14 +3,21 @@ package com.adamk33n3r.runelite.watchdog.ui;
 import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
 import lombok.extern.slf4j.Slf4j;
 
-import javax.swing.*;
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 import javax.swing.border.EmptyBorder;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.GridLayout;
+import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionListener;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
 import java.util.function.Function;
 
 @Slf4j
@@ -40,7 +47,7 @@ public class ImportExportDialog extends JDialog {
             }
             String json = textArea.getText();
             try {
-                WatchdogPlugin.getInstance().importAlerts(json, append);
+                WatchdogPlugin.getInstance().getAlertManager().importAlerts(json, append);
                 this.setVisible(false);
             } catch (Exception ex) {
                 log.error("Error parsing json: " + ex);

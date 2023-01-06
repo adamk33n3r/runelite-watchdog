@@ -1,5 +1,6 @@
 package com.adamk33n3r.runelite.watchdog.notifications;
 
+import com.adamk33n3r.runelite.watchdog.Util;
 import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
 import com.adamk33n3r.runelite.watchdog.notifications.tts.Voice;
 import lombok.Getter;
@@ -7,8 +8,15 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.client.RuneLite;
 
-import javax.sound.sampled.*;
-import java.io.*;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
+import javax.sound.sampled.FloatControl;
+import javax.sound.sampled.LineEvent;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
@@ -23,13 +31,13 @@ public class TextToSpeech extends MessageNotification implements IAudioNotificat
     private Voice voice = Voice.GEORGE;
 
     @Override
-    protected void fireImpl() {
+    protected void fireImpl(String[] triggerValues) {
         if (!WatchdogPlugin.getInstance().getConfig().ttsEnabled()) {
             return;
         }
 
         try {
-            String encodedMessage = URLEncoder.encode(this.message, "UTF-8");
+            String encodedMessage = URLEncoder.encode(Util.processTriggerValues(this.message, triggerValues), "UTF-8");
             File watchdogPath = new File(RuneLite.CACHE_DIR, "watchdog");
             //noinspection ResultOfMethodCallIgnored
             watchdogPath.mkdirs();

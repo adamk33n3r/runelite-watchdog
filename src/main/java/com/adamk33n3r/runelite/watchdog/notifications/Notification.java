@@ -18,10 +18,15 @@ public abstract class Notification implements INotification {
     }
 
     @Override
-    public void fire() {
+    public void fire(String[] triggerValues) {
         if (this.shouldFire()) {
-            this.fireImpl();
+            this.fireImpl(triggerValues);
         }
     }
-    protected abstract void fireImpl();
+
+    public void fireForced(String[] triggerValues) {
+        this.fireImpl(triggerValues);
+    }
+
+    protected abstract void fireImpl(String[] triggerValues);
 }

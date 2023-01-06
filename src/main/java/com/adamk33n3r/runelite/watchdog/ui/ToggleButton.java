@@ -8,8 +8,9 @@ import net.runelite.client.plugins.config.ConfigPlugin;
 import net.runelite.client.util.ImageUtil;
 import net.runelite.client.util.SwingUtil;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.ImageIcon;
+import javax.swing.JToggleButton;
+import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 
 public class ToggleButton extends JToggleButton {

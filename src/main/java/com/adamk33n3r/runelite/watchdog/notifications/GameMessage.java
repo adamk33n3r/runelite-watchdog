@@ -1,5 +1,6 @@
 package com.adamk33n3r.runelite.watchdog.notifications;
 
+import com.adamk33n3r.runelite.watchdog.Util;
 import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.ChatMessageType;
@@ -16,10 +17,10 @@ public class GameMessage extends MessageNotification {
     private transient ChatMessageManager chatMessageManager;
 
     @Override
-    protected void fireImpl() {
+    protected void fireImpl(String[] triggerValues) {
         final String formattedMessage = new ChatMessageBuilder()
             .append(ChatColorType.HIGHLIGHT)
-            .append(this.message)
+            .append(Util.processTriggerValues(this.message, triggerValues))
             .build();
         this.chatMessageManager.queue(QueuedMessage.builder()
             .type(ChatMessageType.CONSOLE)

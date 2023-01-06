@@ -1,13 +1,19 @@
 package com.adamk33n3r.runelite.watchdog;
 
-import com.adamk33n3r.runelite.watchdog.alerts.*;
+import com.adamk33n3r.runelite.watchdog.alerts.Alert;
+import com.adamk33n3r.runelite.watchdog.alerts.ChatAlert;
+import com.adamk33n3r.runelite.watchdog.alerts.IdleAlert;
+import com.adamk33n3r.runelite.watchdog.alerts.NotificationFiredAlert;
+import com.adamk33n3r.runelite.watchdog.alerts.ResourceAlert;
+import com.adamk33n3r.runelite.watchdog.alerts.SoundFiredAlert;
+import com.adamk33n3r.runelite.watchdog.alerts.StatDrainAlert;
+import com.adamk33n3r.runelite.watchdog.ui.AlertListItem;
 import com.adamk33n3r.runelite.watchdog.ui.ImportExportDialog;
 import com.adamk33n3r.runelite.watchdog.ui.dropdownbutton.DropDownButtonFactory;
-import com.adamk33n3r.runelite.watchdog.ui.AlertListItem;
 import com.adamk33n3r.runelite.watchdog.ui.panels.AlertPanel;
+import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import net.runelite.api.Client;
 import net.runelite.api.Skill;
 import net.runelite.client.plugins.timetracking.TimeTrackingPlugin;
 import net.runelite.client.ui.ColorScheme;
@@ -18,32 +24,51 @@ import net.runelite.client.util.ImageUtil;
 import org.apache.commons.text.WordUtils;
 
 import javax.inject.Inject;
-import javax.swing.*;
-import java.awt.*;
+import javax.inject.Named;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JMenuItem;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
+import javax.swing.SwingUtilities;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.GridLayout;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.util.Arrays;
 
 @Slf4j
 public class WatchdogPanel extends PluginPanel {
+    @Inject
+    @Named("wikiPage.soundIDs")
+    private String SOUND_ID_WIKI_PAGE;
+
     @Getter
-    private MultiplexingPluginPanel muxer;
+    private final MultiplexingPluginPanel muxer = new MultiplexingPluginPanel(this);
+
     @Inject
-    private Client client;
-    @Inject
-    private WatchdogPlugin plugin;
+    private AlertManager alertManager;
 
     public static final ImageIcon ADD_ICON;
-    private static final ImageIcon ADD_ICON_HOVER;
+    public static final ImageIcon REGEX_ICON;
+    public static final ImageIcon REGEX_ICON_HOVER;
+    public static final ImageIcon REGEX_SELECTED_ICON;
+    public static final ImageIcon REGEX_SELECTED_ICON_HOVER;
+
     static {
         BufferedImage addIcon = ImageUtil.loadImageResource(TimeTrackingPlugin.class, "add_icon.png");
         ADD_ICON = new ImageIcon(addIcon);
-        ADD_ICON_HOVER = new ImageIcon(ImageUtil.alphaOffset(addIcon, 0.53f));
-    }
 
-    @Inject
-    public void init() {
-        this.muxer = new MultiplexingPluginPanel(this);
+        BufferedImage regexIcon = ImageUtil.loadImageResource(AlertPanel.class, "regex_icon.png");
+        BufferedImage regexIconSelected = ImageUtil.loadImageResource(AlertPanel.class, "regex_icon_selected.png");
+        REGEX_ICON = new ImageIcon(ImageUtil.luminanceOffset(regexIcon, -80));
+        REGEX_ICON_HOVER = new ImageIcon(ImageUtil.luminanceOffset(regexIcon, -120));
+        REGEX_SELECTED_ICON = new ImageIcon(regexIconSelected);
+        REGEX_SELECTED_ICON_HOVER = new ImageIcon(ImageUtil.luminanceOffset(regexIconSelected, -80));
     }
 
     public void rebuild() {
@@ -80,8 +105,8 @@ public class WatchdogPanel extends PluginPanel {
         JPanel alertPanel = new JPanel(new BorderLayout());
         JPanel alertWrapperWrapper = new JPanel(new DynamicGridLayout(0, 1, 3, 3));
         alertPanel.add(alertWrapperWrapper, BorderLayout.NORTH);
-        for (Alert alert : this.plugin.getAlerts()) {
-            AlertListItem alertListItem = new AlertListItem(this.plugin, this, alert);
+        for (Alert alert : this.alertManager.getAlerts()) {
+            AlertListItem alertListItem = new AlertListItem(this, this.alertManager, alert);
             alertWrapperWrapper.add(alertListItem);
         }
         this.add(new JScrollPane(alertPanel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER), BorderLayout.CENTER);
@@ -95,7 +120,7 @@ public class WatchdogPanel extends PluginPanel {
         importExportGroup.add(importButton);
         JButton exportButton = new JButton("Export");
         exportButton.addActionListener(ev -> {
-            ImportExportDialog importExportDialog = new ImportExportDialog(SwingUtilities.getWindowAncestor(this), this.plugin.getConfig().alerts());
+            ImportExportDialog importExportDialog = new ImportExportDialog(SwingUtilities.getWindowAncestor(this), WatchdogPlugin.getInstance().getConfig().alerts());
             importExportDialog.setVisible(true);
         });
         importExportGroup.add(exportButton);
@@ -115,22 +140,31 @@ public class WatchdogPanel extends PluginPanel {
     }
 
     private void createAlert(TriggerType triggerType) {
+        Alert createdAlert = null;
         switch (triggerType) {
-            case CHAT:
-                this.openAlert(new ChatAlert());
+            case GAME_MESSAGE:
+                createdAlert = new ChatAlert();
                 break;
             case NOTIFICATION_FIRED:
-                this.openAlert(new NotificationFiredAlert());
+                createdAlert = new NotificationFiredAlert();
                 break;
             case STAT_DRAIN:
-                this.openAlert(new StatDrainAlert());
+                createdAlert = new StatDrainAlert();
                 break;
             case IDLE:
-                this.openAlert(new IdleAlert());
+                createdAlert = new IdleAlert();
                 break;
             case RESOURCE:
-                this.openAlert(new ResourceAlert());
+                createdAlert = new ResourceAlert();
                 break;
+            case SOUND_FIRED:
+                createdAlert = new SoundFiredAlert();
+                break;
+        }
+
+        if (createdAlert != null) {
+            this.alertManager.addAlert(createdAlert);
+            this.openAlert(createdAlert);
         }
     }
 
@@ -138,9 +172,25 @@ public class WatchdogPanel extends PluginPanel {
         if (alert instanceof ChatAlert) {
             ChatAlert chatAlert = (ChatAlert) alert;
             return AlertPanel.create(this.muxer, alert)
-                .addLabel("<html>Will not trigger on<br>player chat messages</html>")
                 .addAlertDefaults(alert)
-                .addTextArea("Message", "The message to trigger on. Supports glob (*)", chatAlert.getMessage(), chatAlert::setMessage)
+                .addInputGroupWithSuffix(
+                    PanelUtils.createTextArea("Enter the message to trigger on...", "The message to trigger on. Supports glob (*)", chatAlert.getMessage(), chatAlert::setMessage),
+                    PanelUtils.createToggleActionButton(
+                        REGEX_SELECTED_ICON,
+                        REGEX_SELECTED_ICON_HOVER,
+                        REGEX_ICON,
+                        REGEX_ICON_HOVER,
+                        "Disable regex",
+                        "Enable regex",
+                        chatAlert.isRegexEnabled(),
+                        btn -> {
+                            chatAlert.setRegexEnabled(btn.isSelected());
+                            this.alertManager.saveAlerts();
+                        }
+                    )
+//                    PanelUtils.createCheckbox(".*", "do the regex", chatAlert.isRegexEnabled(), chatAlert::setRegexEnabled)
+                )
+                .addLabel("<html><i>Note: Will not trigger on<br>player chat messages</i></html>")
                 .build();
         } else if (alert instanceof IdleAlert) {
             IdleAlert idleAlert = (IdleAlert) alert;
@@ -152,7 +202,8 @@ public class WatchdogPanel extends PluginPanel {
             NotificationFiredAlert notificationFiredAlert = (NotificationFiredAlert) alert;
             return AlertPanel.create(this.muxer, alert)
                 .addAlertDefaults(alert)
-                .addTextArea("Message", "The notification message to trigger on. Supports glob (*)", notificationFiredAlert.getMessage(), notificationFiredAlert::setMessage)
+                .addTextArea("Enter the message to trigger on...", "The notification message to trigger on. Supports glob (*)", notificationFiredAlert.getMessage(), notificationFiredAlert::setMessage)
+                .addCheckbox("Enable Regex", "Toggles regex mode", notificationFiredAlert.isRegexEnabled(), notificationFiredAlert::setRegexEnabled)
                 .build();
         } else if (alert instanceof ResourceAlert) {
             ResourceAlert resourceAlert = (ResourceAlert) alert;
@@ -166,6 +217,13 @@ public class WatchdogPanel extends PluginPanel {
                 .addAlertDefaults(alert)
                 .addSelect("Skill", "The skill to track", Skill.class, statDrainAlert.getSkill(), statDrainAlert::setSkill)
                 .addSpinner("Drain Amount", "The difference in level to trigger the alert. Can be negative for stat gain", statDrainAlert.getDrainAmount(), statDrainAlert::setDrainAmount)
+                .build();
+        } else if (alert instanceof  SoundFiredAlert) {
+            SoundFiredAlert soundFiredAlert = (SoundFiredAlert) alert;
+            return AlertPanel.create(this.muxer, alert)
+                .addAlertDefaults(alert)
+                .addRichTextPane("<html>Go to <a href='" + SOUND_ID_WIKI_PAGE + "'>this wiki page</a> to get a list<br>of sound ids</html>")
+                .addSpinner("Sound ID", "The ID of the sound", soundFiredAlert.getSoundID(), soundFiredAlert::setSoundID, 0, 99999, 1)
                 .build();
         }
 
