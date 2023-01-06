@@ -3,7 +3,8 @@ package com.adamk33n3r.runelite.watchdog.ui.notifications;
 import com.adamk33n3r.runelite.watchdog.notifications.TextToSpeech;
 import com.adamk33n3r.runelite.watchdog.notifications.tts.Voice;
 
-import javax.swing.*;
+import javax.swing.DefaultListCellRenderer;
+import javax.swing.JComboBox;
 
 public class VoiceChooser extends JComboBox<Voice> {
     public VoiceChooser(TextToSpeech notification) {

@@ -9,9 +9,16 @@ import net.runelite.client.plugins.timetracking.TimeTrackingPlugin;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.util.ImageUtil;
 
-import javax.swing.*;
-import javax.swing.border.*;
-import java.awt.*;
+import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.border.Border;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.EmptyBorder;
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
 import java.awt.image.BufferedImage;
 
 public abstract class NotificationPanel extends JPanel {

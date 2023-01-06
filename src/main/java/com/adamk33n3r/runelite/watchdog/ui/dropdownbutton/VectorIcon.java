@@ -18,6 +18,7 @@
  */
 package com.adamk33n3r.runelite.watchdog.ui.dropdownbutton;
 
+import javax.swing.Icon;
 import java.awt.Component;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -27,7 +28,6 @@ import java.awt.geom.AffineTransform;
 import java.io.Serializable;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import javax.swing.Icon;
 
 /**
  * A scalable icon that can be drawn at any resolution, for use with HiDPI displays. Implementations

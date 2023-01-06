@@ -1,10 +1,13 @@
 package com.adamk33n3r.runelite.watchdog.ui.panels;
 
 import com.adamk33n3r.runelite.watchdog.AlertManager;
-import com.adamk33n3r.runelite.watchdog.Util;
 import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
 import com.adamk33n3r.runelite.watchdog.alerts.Alert;
-import com.adamk33n3r.runelite.watchdog.ui.*;
+import com.adamk33n3r.runelite.watchdog.ui.HorizontalRuleBorder;
+import com.adamk33n3r.runelite.watchdog.ui.ImportExportDialog;
+import com.adamk33n3r.runelite.watchdog.ui.PlaceholderTextField;
+import com.adamk33n3r.runelite.watchdog.ui.StretchedStackedLayout;
+import com.adamk33n3r.runelite.watchdog.ui.ToggleButton;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.client.plugins.config.ConfigPlugin;
 import net.runelite.client.plugins.info.JRichTextPane;
@@ -13,9 +16,24 @@ import net.runelite.client.ui.PluginPanel;
 import net.runelite.client.util.ImageUtil;
 import org.apache.commons.text.WordUtils;
 
-import javax.swing.*;
-import javax.swing.border.*;
-import java.awt.*;
+import javax.swing.DefaultListCellRenderer;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JSpinner;
+import javax.swing.JTextArea;
+import javax.swing.SpinnerNumberModel;
+import javax.swing.SwingUtilities;
+import javax.swing.border.EmptyBorder;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.GridLayout;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.image.BufferedImage;
@@ -72,7 +90,8 @@ public class AlertPanel extends PluginPanel {
         JPanel nameGroup = new JPanel(new BorderLayout());
         nameGroup.setBorder(new EmptyBorder(10, 10, 10, 10));
 
-        JLabel nameLabel = new JLabel(Util.humanReadableClass(this.alert));
+        JLabel nameLabel = new JLabel(this.alert.getDisplayName());
+        nameLabel.setToolTipText(this.alert.getDisplayName());
         nameLabel.setForeground(Color.WHITE);
         nameGroup.add(nameLabel, BorderLayout.CENTER);
 

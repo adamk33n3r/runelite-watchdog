@@ -1,12 +1,12 @@
 package com.adamk33n3r.runelite.watchdog;
 
-import com.adamk33n3r.runelite.watchdog.alerts.*;
-import com.adamk33n3r.runelite.watchdog.notifications.*;
+import com.adamk33n3r.runelite.watchdog.alerts.Alert;
+import com.adamk33n3r.runelite.watchdog.alerts.ChatAlert;
+import com.adamk33n3r.runelite.watchdog.alerts.NotificationFiredAlert;
+import com.adamk33n3r.runelite.watchdog.notifications.ScreenFlash;
+import com.adamk33n3r.runelite.watchdog.notifications.TrayNotification;
 import com.google.inject.Binder;
 import com.google.inject.Provides;
-
-import javax.inject.Inject;
-
 import com.google.inject.name.Names;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +24,7 @@ import net.runelite.client.ui.NavigationButton;
 import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.util.AsyncBufferedImage;
 
+import javax.inject.Inject;
 import java.util.List;
 import java.util.Properties;
 

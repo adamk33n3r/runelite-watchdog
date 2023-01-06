@@ -11,7 +11,7 @@ import net.runelite.client.util.RuntimeTypeAdapterFactory;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import javax.swing.*;
+import javax.swing.SwingUtilities;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;

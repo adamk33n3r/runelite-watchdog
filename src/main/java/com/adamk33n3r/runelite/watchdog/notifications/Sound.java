@@ -3,9 +3,18 @@ package com.adamk33n3r.runelite.watchdog.notifications;
 import com.adamk33n3r.runelite.watchdog.Util;
 import lombok.extern.slf4j.Slf4j;
 
-import javax.sound.sampled.*;
-import java.awt.*;
-import java.io.*;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
+import javax.sound.sampled.FloatControl;
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.UnsupportedAudioFileException;
+import java.awt.Toolkit;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.concurrent.CompletableFuture;
 
 @Slf4j

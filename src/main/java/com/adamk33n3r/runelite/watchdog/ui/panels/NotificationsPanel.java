@@ -1,8 +1,15 @@
 package com.adamk33n3r.runelite.watchdog.ui.panels;
 
-import com.adamk33n3r.runelite.watchdog.*;
+import com.adamk33n3r.runelite.watchdog.AlertManager;
+import com.adamk33n3r.runelite.watchdog.NotificationType;
+import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
+import com.adamk33n3r.runelite.watchdog.notifications.GameMessage;
+import com.adamk33n3r.runelite.watchdog.notifications.Notification;
+import com.adamk33n3r.runelite.watchdog.notifications.ScreenFlash;
+import com.adamk33n3r.runelite.watchdog.notifications.Sound;
+import com.adamk33n3r.runelite.watchdog.notifications.TextToSpeech;
+import com.adamk33n3r.runelite.watchdog.notifications.TrayNotification;
 import com.adamk33n3r.runelite.watchdog.ui.dropdownbutton.DropDownButtonFactory;
-import com.adamk33n3r.runelite.watchdog.notifications.*;
 import com.adamk33n3r.runelite.watchdog.ui.notifications.panels.MessageNotificationPanel;
 import com.adamk33n3r.runelite.watchdog.ui.notifications.panels.ScreenFlashNotificationPanel;
 import com.adamk33n3r.runelite.watchdog.ui.notifications.panels.SoundNotificationPanel;
@@ -15,9 +22,12 @@ import net.runelite.client.ui.components.colorpicker.ColorPickerManager;
 import org.apache.commons.text.WordUtils;
 
 import javax.inject.Inject;
-import javax.swing.*;
-
-import java.awt.*;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JMenuItem;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import java.awt.BorderLayout;
 import java.awt.event.ActionListener;
 import java.util.List;
 

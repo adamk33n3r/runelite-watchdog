@@ -1,10 +1,15 @@
 package com.adamk33n3r.runelite.watchdog;
 
-import com.adamk33n3r.runelite.watchdog.alerts.*;
+import com.adamk33n3r.runelite.watchdog.alerts.Alert;
+import com.adamk33n3r.runelite.watchdog.alerts.ChatAlert;
+import com.adamk33n3r.runelite.watchdog.alerts.IdleAlert;
+import com.adamk33n3r.runelite.watchdog.alerts.NotificationFiredAlert;
+import com.adamk33n3r.runelite.watchdog.alerts.ResourceAlert;
+import com.adamk33n3r.runelite.watchdog.alerts.SoundFiredAlert;
+import com.adamk33n3r.runelite.watchdog.alerts.StatDrainAlert;
+import com.adamk33n3r.runelite.watchdog.ui.AlertListItem;
 import com.adamk33n3r.runelite.watchdog.ui.ImportExportDialog;
 import com.adamk33n3r.runelite.watchdog.ui.dropdownbutton.DropDownButtonFactory;
-import com.adamk33n3r.runelite.watchdog.ui.AlertListItem;
-import com.adamk33n3r.runelite.watchdog.ui.notifications.panels.NotificationPanel;
 import com.adamk33n3r.runelite.watchdog.ui.panels.AlertPanel;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
 import lombok.Getter;
@@ -20,8 +25,18 @@ import org.apache.commons.text.WordUtils;
 
 import javax.inject.Inject;
 import javax.inject.Named;
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JMenuItem;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
+import javax.swing.SwingUtilities;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.GridLayout;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.util.Arrays;
@@ -127,7 +142,7 @@ public class WatchdogPanel extends PluginPanel {
     private void createAlert(TriggerType triggerType) {
         Alert createdAlert = null;
         switch (triggerType) {
-            case CHAT:
+            case GAME_MESSAGE:
                 createdAlert = new ChatAlert();
                 break;
             case NOTIFICATION_FIRED:
