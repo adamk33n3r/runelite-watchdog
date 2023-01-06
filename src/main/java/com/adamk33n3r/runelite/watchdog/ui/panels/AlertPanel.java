@@ -4,12 +4,10 @@ import com.adamk33n3r.runelite.watchdog.AlertManager;
 import com.adamk33n3r.runelite.watchdog.Util;
 import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
 import com.adamk33n3r.runelite.watchdog.alerts.Alert;
-import com.adamk33n3r.runelite.watchdog.notifications.Notification;
 import com.adamk33n3r.runelite.watchdog.ui.*;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.client.plugins.config.ConfigPlugin;
 import net.runelite.client.plugins.info.JRichTextPane;
-import net.runelite.client.ui.DynamicGridLayout;
 import net.runelite.client.ui.MultiplexingPluginPanel;
 import net.runelite.client.ui.PluginPanel;
 import net.runelite.client.util.ImageUtil;
@@ -21,6 +19,8 @@ import java.awt.*;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.image.BufferedImage;
+import java.util.Collections;
+import java.util.List;
 import java.util.function.Consumer;
 
 import static com.adamk33n3r.runelite.watchdog.ui.notifications.panels.NotificationPanel.TEST_ICON;
@@ -165,23 +165,9 @@ public class AlertPanel extends PluginPanel {
     }
 
     public AlertPanel addTextArea(String placeholder, String tooltip, String initialValue, Consumer<String> saveAction) {
-        PlaceholderTextArea textArea = new PlaceholderTextArea(initialValue);
-        textArea.setPlaceholder(placeholder);
-        textArea.setToolTipText(tooltip);
-        textArea.setLineWrap(true);
-        textArea.setWrapStyleWord(true);
-        textArea.setMargin(new Insets(4, 6, 5, 6));
-        textArea.addFocusListener(new FocusListener() {
-            @Override
-            public void focusGained(FocusEvent e) {
-                textArea.selectAll();
-            }
-
-            @Override
-            public void focusLost(FocusEvent e) {
-                saveAction.accept(textArea.getText());
-                alertManager.saveAlerts();
-            }
+        JTextArea textArea = PanelUtils.createTextArea(placeholder, tooltip, initialValue, val -> {
+            saveAction.accept(val);
+            this.alertManager.saveAlerts();
         });
         this.container.add(textArea);
         return this;
@@ -214,6 +200,27 @@ public class AlertPanel extends PluginPanel {
             this.alertManager.saveAlerts();
         });
         this.container.add(PanelUtils.createLabeledComponent(name, tooltip, select));
+        return this;
+    }
+
+    public AlertPanel addCheckbox(String name, String tooltip, boolean initialValue, Consumer<Boolean> saveAction) {
+        JCheckBox checkbox = PanelUtils.createCheckbox(name, tooltip, initialValue, val -> {
+            saveAction.accept(val);
+            this.alertManager.saveAlerts();
+        });
+        this.container.add(checkbox);
+        return this;
+    }
+
+    public AlertPanel addInputGroupWithSuffix(JComponent mainComponent, JComponent suffix) {
+        return this.addInputGroup(mainComponent, null, Collections.singletonList(suffix));
+    }
+
+    public AlertPanel addInputGroup(JComponent mainComponent, List<JComponent> prefixes, List<JComponent> suffixes) {
+        InputGroup textFieldGroup = new InputGroup(mainComponent)
+            .addPrefixes(prefixes)
+            .addSuffixes(suffixes);
+        this.container.add(textFieldGroup);
         return this;
     }
 

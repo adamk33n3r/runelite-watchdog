@@ -7,7 +7,6 @@ import com.adamk33n3r.runelite.watchdog.ui.FlatTextArea;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
 
 import javax.swing.text.AbstractDocument;
-import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 

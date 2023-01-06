@@ -7,6 +7,7 @@ import lombok.Setter;
 @Setter
 public class NotificationFiredAlert extends Alert {
     private String message;
+    private boolean regexEnabled = false;
 
     public NotificationFiredAlert() {
         super("New Notification Fired Alert");

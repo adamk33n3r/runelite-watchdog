@@ -63,13 +63,13 @@ public class EventHandler {
             .map(alert -> (ChatAlert) alert)
 //            .filter(chatAlert -> chatAlert.getChatMessageType() == chatMessage.getType())
             .forEach(alert -> {
-                String regex = Util.createRegexFromGlob(alert.getMessage());
-                Matcher matcher = Pattern.compile("(?i)"+regex).matcher(unformattedMessage);
+                String regex = alert.isRegexEnabled() ? alert.getMessage() : Util.createRegexFromGlob(alert.getMessage());
+                Matcher matcher = Pattern.compile(regex, alert.isRegexEnabled() ? 0 : Pattern.CASE_INSENSITIVE).matcher(unformattedMessage);
                 if (!matcher.matches()) return;
 
                 String[] groups = new String[matcher.groupCount()];
-                for (int i = 0; i <= matcher.groupCount(); i++) {
-                    groups[i] = matcher.group(i);
+                for (int i = 0; i < matcher.groupCount(); i++) {
+                    groups[i] = matcher.group(i+1);
                 }
                 this.fireAlert(alert, groups);
             });
@@ -83,13 +83,13 @@ public class EventHandler {
             .filter(alert -> alert instanceof NotificationFiredAlert)
             .map(alert -> (NotificationFiredAlert) alert)
             .forEach(alert -> {
-                String regex = Util.createRegexFromGlob(alert.getMessage());
-                Matcher matcher = Pattern.compile("(?i)"+regex).matcher(notificationFired.getMessage());
+                String regex = alert.isRegexEnabled() ? alert.getMessage() : Util.createRegexFromGlob(alert.getMessage());
+                Matcher matcher = Pattern.compile(regex, alert.isRegexEnabled() ? 0 : Pattern.CASE_INSENSITIVE).matcher(notificationFired.getMessage());
                 if (!matcher.matches()) return;
 
                 String[] groups = new String[matcher.groupCount()];
-                for (int i = 0; i <= matcher.groupCount(); i++) {
-                    groups[i] = matcher.group(i);
+                for (int i = 0; i < matcher.groupCount(); i++) {
+                    groups[i] = matcher.group(i + 1);
                 }
                 this.fireAlert(alert, groups);
             });

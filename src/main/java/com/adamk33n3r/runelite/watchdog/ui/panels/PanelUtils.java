@@ -1,5 +1,6 @@
 package com.adamk33n3r.runelite.watchdog.ui.panels;
 
+import com.adamk33n3r.runelite.watchdog.ui.PlaceholderTextArea;
 import net.runelite.client.ui.DynamicGridLayout;
 import net.runelite.client.util.ImageUtil;
 import net.runelite.client.util.SwingUtil;
@@ -9,9 +10,12 @@ import javax.swing.filechooser.FileFilter;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.Arrays;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public class PanelUtils {
@@ -124,7 +128,7 @@ public class PanelUtils {
         void clickPerformed(JButton button);
     }
 
-    public static JButton createToggleActionButton(ImageIcon onIcon, ImageIcon onRolloverIcon, ImageIcon offIcon, ImageIcon offRolloverIcon, String onTooltip, String offTooltip, ButtonClickListener listener) {
+    public static JButton createToggleActionButton(ImageIcon onIcon, ImageIcon onRolloverIcon, ImageIcon offIcon, ImageIcon offRolloverIcon, String onTooltip, String offTooltip, boolean initialValue, ButtonClickListener listener) {
         JButton actionButton = createActionButton(offIcon, offRolloverIcon, offTooltip, btn -> {
             btn.setSelected(!btn.isSelected());
             listener.clickPerformed(btn);
@@ -132,6 +136,39 @@ public class PanelUtils {
         SwingUtil.addModalTooltip(actionButton, onTooltip, offTooltip);
         actionButton.setSelectedIcon(onIcon);
         actionButton.setRolloverSelectedIcon(onRolloverIcon);
+        actionButton.setSelected(initialValue);
         return actionButton;
+    }
+
+    public static JCheckBox createCheckbox(String name, String tooltip, boolean initialValue, Consumer<Boolean> onChange) {
+        JCheckBox checkbox = new JCheckBox(name, initialValue);
+        checkbox.setToolTipText(tooltip);
+        checkbox.addChangeListener(ev -> {
+            onChange.accept(checkbox.isSelected());
+        });
+        return checkbox;
+    }
+
+
+    public static JTextArea createTextArea(String placeholder, String tooltip, String initialValue, Consumer<String> onChange) {
+        PlaceholderTextArea textArea = new PlaceholderTextArea(initialValue);
+        textArea.setPlaceholder(placeholder);
+        textArea.setToolTipText(tooltip);
+        textArea.setLineWrap(true);
+        textArea.setWrapStyleWord(true);
+        textArea.setMargin(new Insets(4, 6, 5, 6));
+        textArea.addFocusListener(new FocusListener() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                textArea.selectAll();
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                onChange.accept(textArea.getText());
+            }
+        });
+
+        return textArea;
     }
 }

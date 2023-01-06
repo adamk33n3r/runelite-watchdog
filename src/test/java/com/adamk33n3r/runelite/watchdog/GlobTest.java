@@ -113,4 +113,11 @@ public class GlobTest {
         assertEquals(".*Valuable drop: .*\\([5-9],... coins\\).*", regex);
         assertTrue("Valuable drop: (5,001 coins)".matches(regex));
     }
+
+    @Test
+    public void test_valuable_drop_all() throws Exception {
+        String regex = Util.createRegexFromGlob("*drop*");
+        assertEquals(".*drop.*", regex);
+        assertTrue("Valuable drop: (5,001 coins)".matches(regex));
+    }
 }

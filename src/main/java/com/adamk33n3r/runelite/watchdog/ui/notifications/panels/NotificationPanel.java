@@ -95,17 +95,18 @@ public abstract class NotificationPanel extends JPanel {
         rightActions.setBackground(ColorScheme.DARKER_GRAY_COLOR);
         nameWrapper.add(rightActions, BorderLayout.EAST);
 
-        JButton focusBtn = PanelUtils.createToggleActionButton(FOCUS_SELECTED_ICON,
+        JButton focusBtn = PanelUtils.createToggleActionButton(
+            FOCUS_SELECTED_ICON,
             FOCUS_SELECTED_ICON_HOVER,
             FOCUS_ICON,
             FOCUS_ICON_HOVER,
-            "Set only out of Focus",
+            "Set only out of focus",
             "Set allow in-focus",
+            notification.isFireWhenFocused(),
             btn -> {
                 notification.setFireWhenFocused(btn.isSelected());
                 onChangeListener.run();
             });
-        focusBtn.setSelected(notification.isFireWhenFocused());
         rightActions.add(focusBtn, BorderLayout.EAST);
 
         JButton testBtn = PanelUtils.createActionButton(

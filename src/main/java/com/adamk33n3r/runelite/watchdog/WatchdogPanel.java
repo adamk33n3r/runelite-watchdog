@@ -4,7 +4,9 @@ import com.adamk33n3r.runelite.watchdog.alerts.*;
 import com.adamk33n3r.runelite.watchdog.ui.ImportExportDialog;
 import com.adamk33n3r.runelite.watchdog.ui.dropdownbutton.DropDownButtonFactory;
 import com.adamk33n3r.runelite.watchdog.ui.AlertListItem;
+import com.adamk33n3r.runelite.watchdog.ui.notifications.panels.NotificationPanel;
 import com.adamk33n3r.runelite.watchdog.ui.panels.AlertPanel;
+import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Skill;
@@ -37,11 +39,21 @@ public class WatchdogPanel extends PluginPanel {
     private AlertManager alertManager;
 
     public static final ImageIcon ADD_ICON;
-    private static final ImageIcon ADD_ICON_HOVER;
+    public static final ImageIcon REGEX_ICON;
+    public static final ImageIcon REGEX_ICON_HOVER;
+    public static final ImageIcon REGEX_SELECTED_ICON;
+    public static final ImageIcon REGEX_SELECTED_ICON_HOVER;
+
     static {
         BufferedImage addIcon = ImageUtil.loadImageResource(TimeTrackingPlugin.class, "add_icon.png");
         ADD_ICON = new ImageIcon(addIcon);
-        ADD_ICON_HOVER = new ImageIcon(ImageUtil.alphaOffset(addIcon, 0.53f));
+
+        BufferedImage regexIcon = ImageUtil.loadImageResource(AlertPanel.class, "regex_icon.png");
+        BufferedImage regexIconSelected = ImageUtil.loadImageResource(AlertPanel.class, "regex_icon_selected.png");
+        REGEX_ICON = new ImageIcon(ImageUtil.luminanceOffset(regexIcon, -80));
+        REGEX_ICON_HOVER = new ImageIcon(ImageUtil.luminanceOffset(regexIcon, -120));
+        REGEX_SELECTED_ICON = new ImageIcon(regexIconSelected);
+        REGEX_SELECTED_ICON_HOVER = new ImageIcon(ImageUtil.luminanceOffset(regexIconSelected, -80));
     }
 
     public void rebuild() {
@@ -146,8 +158,24 @@ public class WatchdogPanel extends PluginPanel {
             ChatAlert chatAlert = (ChatAlert) alert;
             return AlertPanel.create(this.muxer, alert)
                 .addAlertDefaults(alert)
-                .addTextArea("Enter the message to trigger on...", "The message to trigger on. Supports glob (*)", chatAlert.getMessage(), chatAlert::setMessage)
-                .addLabel("<html><i>Will not trigger on<br>player chat messages</i></html>")
+                .addInputGroupWithSuffix(
+                    PanelUtils.createTextArea("Enter the message to trigger on...", "The message to trigger on. Supports glob (*)", chatAlert.getMessage(), chatAlert::setMessage),
+                    PanelUtils.createToggleActionButton(
+                        REGEX_SELECTED_ICON,
+                        REGEX_SELECTED_ICON_HOVER,
+                        REGEX_ICON,
+                        REGEX_ICON_HOVER,
+                        "Disable regex",
+                        "Enable regex",
+                        chatAlert.isRegexEnabled(),
+                        btn -> {
+                            chatAlert.setRegexEnabled(btn.isSelected());
+                            this.alertManager.saveAlerts();
+                        }
+                    )
+//                    PanelUtils.createCheckbox(".*", "do the regex", chatAlert.isRegexEnabled(), chatAlert::setRegexEnabled)
+                )
+                .addLabel("<html><i>Note: Will not trigger on<br>player chat messages</i></html>")
                 .build();
         } else if (alert instanceof IdleAlert) {
             IdleAlert idleAlert = (IdleAlert) alert;
@@ -160,6 +188,7 @@ public class WatchdogPanel extends PluginPanel {
             return AlertPanel.create(this.muxer, alert)
                 .addAlertDefaults(alert)
                 .addTextArea("Enter the message to trigger on...", "The notification message to trigger on. Supports glob (*)", notificationFiredAlert.getMessage(), notificationFiredAlert::setMessage)
+                .addCheckbox("Enable Regex", "Toggles regex mode", notificationFiredAlert.isRegexEnabled(), notificationFiredAlert::setRegexEnabled)
                 .build();
         } else if (alert instanceof ResourceAlert) {
             ResourceAlert resourceAlert = (ResourceAlert) alert;
