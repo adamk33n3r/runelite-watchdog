@@ -107,8 +107,8 @@ public abstract class NotificationPanel extends JPanel {
             FOCUS_SELECTED_ICON_HOVER,
             FOCUS_ICON,
             FOCUS_ICON_HOVER,
-            "Set only out of focus",
-            "Set allow in-focus",
+            "Disable firing while game is in focus",
+            "Enable firing while game is in focus",
             notification.isFireWhenFocused(),
             btn -> {
                 notification.setFireWhenFocused(btn.isSelected());

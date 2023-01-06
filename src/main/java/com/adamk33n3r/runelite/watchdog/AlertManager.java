@@ -55,7 +55,8 @@ public class AlertManager {
             .registerSubtype(TextToSpeech.class)
             .registerSubtype(Sound.class)
             .registerSubtype(ScreenFlash.class)
-            .registerSubtype(GameMessage.class);
+            .registerSubtype(GameMessage.class)
+            .registerSubtype(Overhead.class);
         this.gson = this.clientGson.newBuilder()
 //            .serializeNulls()
             .registerTypeAdapterFactory(alertTypeFactory)

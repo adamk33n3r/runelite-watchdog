@@ -11,8 +11,10 @@ import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JSpinner;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.filechooser.FileFilter;
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -181,5 +183,14 @@ public class PanelUtils {
         });
 
         return textArea;
+    }
+
+    public static JSpinner createSpinner(int initialValue, int min, int max, int step, Consumer<Integer> onChange) {
+        JSpinner spinner = new JSpinner(new SpinnerNumberModel(initialValue, min, max, step));
+        spinner.addChangeListener(e -> {
+            onChange.accept((Integer) spinner.getValue());
+        });
+
+        return spinner;
     }
 }

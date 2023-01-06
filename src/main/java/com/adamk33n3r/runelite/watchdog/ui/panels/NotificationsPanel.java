@@ -5,12 +5,14 @@ import com.adamk33n3r.runelite.watchdog.NotificationType;
 import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
 import com.adamk33n3r.runelite.watchdog.notifications.GameMessage;
 import com.adamk33n3r.runelite.watchdog.notifications.Notification;
+import com.adamk33n3r.runelite.watchdog.notifications.Overhead;
 import com.adamk33n3r.runelite.watchdog.notifications.ScreenFlash;
 import com.adamk33n3r.runelite.watchdog.notifications.Sound;
 import com.adamk33n3r.runelite.watchdog.notifications.TextToSpeech;
 import com.adamk33n3r.runelite.watchdog.notifications.TrayNotification;
 import com.adamk33n3r.runelite.watchdog.ui.dropdownbutton.DropDownButtonFactory;
 import com.adamk33n3r.runelite.watchdog.ui.notifications.panels.MessageNotificationPanel;
+import com.adamk33n3r.runelite.watchdog.ui.notifications.panels.OverheadNotificationPanel;
 import com.adamk33n3r.runelite.watchdog.ui.notifications.panels.ScreenFlashNotificationPanel;
 import com.adamk33n3r.runelite.watchdog.ui.notifications.panels.SoundNotificationPanel;
 import com.adamk33n3r.runelite.watchdog.ui.notifications.panels.TextToSpeechNotificationPanel;
@@ -29,7 +31,9 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import java.awt.BorderLayout;
 import java.awt.event.ActionListener;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.adamk33n3r.runelite.watchdog.WatchdogPanel.ADD_ICON;
 
@@ -59,12 +63,12 @@ public class NotificationsPanel extends JPanel {
             this.notificationContainer.revalidate();
             this.alertManager.saveAlerts();
         };
-        for (NotificationType nType : NotificationType.values()) {
+        Arrays.stream(NotificationType.values()).sorted().forEach(nType -> {
             JMenuItem c = new JMenuItem(WordUtils.capitalizeFully(nType.name().replace("_", " ")));
             c.putClientProperty(NotificationType.class, nType);
             c.addActionListener(actionListener);
             popupMenu.add(c);
-        }
+        });
         JButton addDropDownButton = DropDownButtonFactory.createDropDownButton(ADD_ICON, popupMenu);
         addDropDownButton.setToolTipText("Create New Notification");
         JPanel buttonPanel = new JPanel(new BorderLayout());
@@ -108,6 +112,8 @@ public class NotificationsPanel extends JPanel {
             notificationPanel.add(new MessageNotificationPanel((TrayNotification)notification, this.alertManager::saveAlerts, removeNotification));
         else if (notification instanceof ScreenFlash)
             notificationPanel.add(new ScreenFlashNotificationPanel((ScreenFlash) notification, this.colorPickerManager, this.alertManager::saveAlerts, removeNotification));
+        else if (notification instanceof Overhead)
+            notificationPanel.add(new OverheadNotificationPanel((Overhead) notification, this.alertManager::saveAlerts, removeNotification));
     }
 
     private void createNotification(NotificationType notificationType) {
@@ -127,6 +133,9 @@ public class NotificationsPanel extends JPanel {
                 break;
             case TRAY_NOTIFICATION:
                 this.notifications.add(injector.getInstance(TrayNotification.class));
+                break;
+            case OVERHEAD:
+                this.notifications.add(injector.getInstance(Overhead.class));
                 break;
         }
     }

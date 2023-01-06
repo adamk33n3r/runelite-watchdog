@@ -197,9 +197,8 @@ public class AlertPanel extends PluginPanel {
     }
 
     public AlertPanel addSpinner(String name, String tooltip, int initialValue, Consumer<Integer> saveAction, int min, int max, int step) {
-        JSpinner spinner = new JSpinner(new SpinnerNumberModel(initialValue, min, max, step));
-        spinner.addChangeListener(e -> {
-            saveAction.accept((Integer) spinner.getValue());
+        JSpinner spinner = PanelUtils.createSpinner(initialValue, min, max, step, val -> {
+            saveAction.accept(val);
             this.alertManager.saveAlerts();
         });
         this.container.add(PanelUtils.createLabeledComponent(name, tooltip, spinner));

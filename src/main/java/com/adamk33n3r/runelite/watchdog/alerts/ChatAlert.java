@@ -6,7 +6,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ChatAlert extends Alert {
-    private String message = "Nothing interesting happens.";
+    private String message = "";
     private boolean regexEnabled = false;
 
     public ChatAlert() {
