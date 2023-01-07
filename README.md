@@ -4,9 +4,10 @@
 [![](https://img.shields.io/endpoint?url=https://i.pluginhub.info/shields/installs/plugin/watchdog)](https://runelite.net/plugin-hub/show/watchdog)
 
 Create custom alerts triggered by
-- Chat/Game Messages (supports glob pattern)
+- Chat/Game Messages (supports glob pattern or regex)
 - Stat Drain/Change
-- Notifications (supports glob pattern. allows you to hook into existing notifications, even if you have the alerts off in Runelite. For example low prayer, idle, tempoross, etc) 
+- Sound Fired (trigger on a sound effect playing)
+- Notifications (supports glob pattern or regex. allows you to hook into existing notifications, even if you have the alerts off in Runelite. For example low prayer, idle, tempoross, etc) 
 
 with any amount of unique notification types like
 - Game Message
@@ -14,6 +15,7 @@ with any amount of unique notification types like
 - Custom Sound
 - Text to Speech
 - Tray Notification
+- Overhead Text
 
 ## Example
-![image](https://user-images.githubusercontent.com/1350444/149637694-ab91c77d-a5db-4cd1-a910-b3f6937d5fc2.png)
+![image](https://user-images.githubusercontent.com/1350444/210900848-4c177374-9b74-4cb3-b7a7-92c29596ff40.png)
