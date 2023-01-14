@@ -188,7 +188,6 @@ public class WatchdogPanel extends PluginPanel {
                             this.alertManager.saveAlerts();
                         }
                     )
-//                    PanelUtils.createCheckbox(".*", "do the regex", chatAlert.isRegexEnabled(), chatAlert::setRegexEnabled)
                 )
                 .addLabel("<html><i>Note: Will not trigger on<br>player chat messages</i></html>")
                 .build();
@@ -202,8 +201,22 @@ public class WatchdogPanel extends PluginPanel {
             NotificationFiredAlert notificationFiredAlert = (NotificationFiredAlert) alert;
             return AlertPanel.create(this.muxer, alert)
                 .addAlertDefaults(alert)
-                .addTextArea("Enter the message to trigger on...", "The notification message to trigger on. Supports glob (*)", notificationFiredAlert.getMessage(), notificationFiredAlert::setMessage)
-                .addCheckbox("Enable Regex", "Toggles regex mode", notificationFiredAlert.isRegexEnabled(), notificationFiredAlert::setRegexEnabled)
+                .addInputGroupWithSuffix(
+                    PanelUtils.createTextArea("Enter the message to trigger on...", "The message to trigger on. Supports glob (*)", notificationFiredAlert.getMessage(), notificationFiredAlert::setMessage),
+                    PanelUtils.createToggleActionButton(
+                        REGEX_SELECTED_ICON,
+                        REGEX_SELECTED_ICON_HOVER,
+                        REGEX_ICON,
+                        REGEX_ICON_HOVER,
+                        "Disable regex",
+                        "Enable regex",
+                        notificationFiredAlert.isRegexEnabled(),
+                        btn -> {
+                            notificationFiredAlert.setRegexEnabled(btn.isSelected());
+                            this.alertManager.saveAlerts();
+                        }
+                    )
+                )
                 .build();
         } else if (alert instanceof ResourceAlert) {
             ResourceAlert resourceAlert = (ResourceAlert) alert;
