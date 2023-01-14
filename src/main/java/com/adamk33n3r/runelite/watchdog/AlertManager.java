@@ -84,17 +84,17 @@ public class AlertManager {
     }
 
     public void importAlerts(String json, boolean append) {
-        List<Alert> alerts = append ? this.alerts : new ArrayList<>();
         if (!Strings.isNullOrEmpty(json)) {
-            alerts.addAll(this.gson.fromJson(json, ALERT_LIST_TYPE));
-            this.alerts.clear();
-            this.alerts.addAll(alerts);
+            if (!append) {
+                this.alerts.clear();
+            }
+            this.alerts.addAll(this.gson.fromJson(json, ALERT_LIST_TYPE));
             // Save immediately to save new properties
             this.saveAlerts();
         }
 
         // Inject dependencies
-        for (Alert alert : alerts) {
+        for (Alert alert : this.alerts) {
             WatchdogPlugin.getInstance().getInjector().injectMembers(alert);
             for (INotification notification : alert.getNotifications()) {
                 WatchdogPlugin.getInstance().getInjector().injectMembers(notification);
