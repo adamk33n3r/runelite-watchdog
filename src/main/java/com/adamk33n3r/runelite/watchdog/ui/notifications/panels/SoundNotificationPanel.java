@@ -27,6 +27,7 @@ public class SoundNotificationPanel extends NotificationPanel {
 
         VolumeSlider volumeSlider = new VolumeSlider(sound);
         volumeSlider.setBackground(ColorScheme.MEDIUM_GRAY_COLOR);
+        volumeSlider.addChangeListener(e -> onChangeListener.run());
         this.settings.add(PanelUtils.createIconComponent(VOLUME_ICON, "The volume to playback speech", volumeSlider));
     }
 }

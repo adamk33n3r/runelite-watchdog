@@ -134,7 +134,10 @@ public class AlertPanel extends PluginPanel {
             BACK_ICON,
             BACK_ICON_HOVER,
             "Back",
-            btn -> this.muxer.popState()
+            btn -> {
+                this.alertManager.saveAlerts();
+                this.muxer.popState();
+            }
         );
         backButton.setPreferredSize(new Dimension(22, 16));
         backButton.setBorder(new EmptyBorder(0, 0, 0, 5));

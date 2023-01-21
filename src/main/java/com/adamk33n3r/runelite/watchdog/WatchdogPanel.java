@@ -193,7 +193,10 @@ public class WatchdogPanel extends PluginPanel {
             return AlertPanel.create(this.muxer, alert)
                 .addAlertDefaults(alert)
                 .addInputGroupWithSuffix(
-                    PanelUtils.createTextArea("Enter the message to trigger on...", "The message to trigger on. Supports glob (*)", chatAlert.getMessage(), chatAlert::setMessage),
+                    PanelUtils.createTextArea("Enter the message to trigger on...", "The message to trigger on. Supports glob (*)", chatAlert.getMessage(), msg -> {
+                        chatAlert.setMessage(msg);
+                        this.alertManager.saveAlerts();
+                    }),
                     PanelUtils.createToggleActionButton(
                         REGEX_SELECTED_ICON,
                         REGEX_SELECTED_ICON_HOVER,
@@ -221,7 +224,10 @@ public class WatchdogPanel extends PluginPanel {
             return AlertPanel.create(this.muxer, alert)
                 .addAlertDefaults(alert)
                 .addInputGroupWithSuffix(
-                    PanelUtils.createTextArea("Enter the message to trigger on...", "The message to trigger on. Supports glob (*)", notificationFiredAlert.getMessage(), notificationFiredAlert::setMessage),
+                    PanelUtils.createTextArea("Enter the message to trigger on...", "The message to trigger on. Supports glob (*)", notificationFiredAlert.getMessage(), msg -> {
+                        notificationFiredAlert.setMessage(msg);
+                        this.alertManager.saveAlerts();
+                    }),
                     PanelUtils.createToggleActionButton(
                         REGEX_SELECTED_ICON,
                         REGEX_SELECTED_ICON_HOVER,
