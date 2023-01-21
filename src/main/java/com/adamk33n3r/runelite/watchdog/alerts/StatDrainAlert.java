@@ -1,8 +1,9 @@
 package com.adamk33n3r.runelite.watchdog.alerts;
 
+import net.runelite.api.Skill;
+
 import lombok.Getter;
 import lombok.Setter;
-import net.runelite.api.Skill;
 
 @Getter
 @Setter

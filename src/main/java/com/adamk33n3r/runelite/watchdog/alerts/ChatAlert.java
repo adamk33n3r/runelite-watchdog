@@ -10,7 +10,7 @@ public class ChatAlert extends Alert {
     private boolean regexEnabled = false;
 
     public ChatAlert() {
-        super("New Chat Alert");
+        super("New Game Message Alert");
     }
 
     public ChatAlert(String name) {

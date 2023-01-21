@@ -1,8 +1,9 @@
 package com.adamk33n3r.runelite.watchdog.notifications;
 
+import net.runelite.client.ui.ClientUI;
+
 import lombok.Getter;
 import lombok.Setter;
-import net.runelite.client.ui.ClientUI;
 
 import javax.inject.Inject;
 

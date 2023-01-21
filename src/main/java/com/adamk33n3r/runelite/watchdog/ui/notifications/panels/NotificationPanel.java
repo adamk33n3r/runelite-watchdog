@@ -4,6 +4,7 @@ import com.adamk33n3r.runelite.watchdog.Util;
 import com.adamk33n3r.runelite.watchdog.notifications.Notification;
 import com.adamk33n3r.runelite.watchdog.ui.StretchedStackedLayout;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
+
 import net.runelite.client.plugins.loottracker.LootTrackerPlugin;
 import net.runelite.client.plugins.timetracking.TimeTrackingPlugin;
 import net.runelite.client.ui.ColorScheme;
@@ -45,6 +46,7 @@ public abstract class NotificationPanel extends JPanel {
     public static final ImageIcon TEST_ICON;
     public static final ImageIcon TEST_ICON_HOVER;
     protected static final ImageIcon VOLUME_ICON;
+    protected static final ImageIcon CLOCK_ICON;
 
     static {
         final BufferedImage collapseImg = ImageUtil.loadImageResource(LootTrackerPlugin.class, "collapsed.png");
@@ -53,6 +55,7 @@ public abstract class NotificationPanel extends JPanel {
         final BufferedImage focusImg = ImageUtil.loadImageResource(NotificationPanel.class, "focus_icon.png");
         final BufferedImage testImg = ImageUtil.loadImageResource(NotificationPanel.class, "test_icon.png");
         final BufferedImage volumeImg = ImageUtil.loadImageResource(NotificationPanel.class, "volume_icon.png");
+        final BufferedImage clockIcon = ImageUtil.loadImageResource(NotificationPanel.class, "clock_icon.png");
 
         COLLAPSE_ICON = new ImageIcon(collapseImg);
         EXPAND_ICON = new ImageIcon(expandedImg);
@@ -65,6 +68,7 @@ public abstract class NotificationPanel extends JPanel {
         TEST_ICON = new ImageIcon(testImg);
         TEST_ICON_HOVER = new ImageIcon(ImageUtil.luminanceOffset(testImg, -80));
         VOLUME_ICON = new ImageIcon(ImageUtil.luminanceOffset(volumeImg, -80));
+        CLOCK_ICON = new ImageIcon(ImageUtil.luminanceOffset(clockIcon, -80));
     }
 
     protected JPanel settings = new JPanel(new StretchedStackedLayout(3, 3));

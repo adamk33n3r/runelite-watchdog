@@ -2,18 +2,19 @@ package com.adamk33n3r.runelite.watchdog;
 
 import com.adamk33n3r.runelite.watchdog.alerts.*;
 import com.adamk33n3r.runelite.watchdog.notifications.*;
+
+import net.runelite.client.config.ConfigManager;
+import net.runelite.client.util.RuntimeTypeAdapterFactory;
+
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import joptsimple.internal.Strings;
 import lombok.Getter;
-import net.runelite.client.config.ConfigManager;
-import net.runelite.client.util.RuntimeTypeAdapterFactory;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.swing.SwingUtilities;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -56,7 +57,8 @@ public class AlertManager {
             .registerSubtype(Sound.class)
             .registerSubtype(ScreenFlash.class)
             .registerSubtype(GameMessage.class)
-            .registerSubtype(Overhead.class);
+            .registerSubtype(Overhead.class)
+            .registerSubtype(Overlay.class);
         this.gson = this.clientGson.newBuilder()
 //            .serializeNulls()
             .registerTypeAdapterFactory(alertTypeFactory)

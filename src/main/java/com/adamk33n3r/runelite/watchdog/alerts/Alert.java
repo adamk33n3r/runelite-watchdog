@@ -2,6 +2,7 @@ package com.adamk33n3r.runelite.watchdog.alerts;
 
 import com.adamk33n3r.runelite.watchdog.Util;
 import com.adamk33n3r.runelite.watchdog.notifications.Notification;
+
 import lombok.Getter;
 import lombok.Setter;
 

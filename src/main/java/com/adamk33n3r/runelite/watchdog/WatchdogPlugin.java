@@ -5,32 +5,43 @@ import com.adamk33n3r.runelite.watchdog.alerts.ChatAlert;
 import com.adamk33n3r.runelite.watchdog.alerts.NotificationFiredAlert;
 import com.adamk33n3r.runelite.watchdog.notifications.ScreenFlash;
 import com.adamk33n3r.runelite.watchdog.notifications.TrayNotification;
+
+import net.runelite.api.Client;
+import net.runelite.api.ItemID;
+import net.runelite.api.MenuAction;
+import net.runelite.client.config.ConfigManager;
+import net.runelite.client.eventbus.EventBus;
+import net.runelite.client.eventbus.Subscribe;
+import net.runelite.client.events.ConfigChanged;
+import net.runelite.client.events.OverlayMenuClicked;
+import net.runelite.client.game.ItemManager;
+import net.runelite.client.plugins.Plugin;
+import net.runelite.client.plugins.PluginDescriptor;
+import net.runelite.client.plugins.config.ConfigPlugin;
+import net.runelite.client.ui.ClientToolbar;
+import net.runelite.client.ui.NavigationButton;
+import net.runelite.client.ui.overlay.OverlayManager;
+import net.runelite.client.ui.overlay.OverlayMenuEntry;
+import net.runelite.client.util.AsyncBufferedImage;
+
 import com.google.inject.Binder;
 import com.google.inject.Provides;
 import com.google.inject.name.Names;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import net.runelite.api.Client;
-import net.runelite.api.ItemID;
-import net.runelite.client.config.ConfigManager;
-import net.runelite.client.eventbus.EventBus;
-import net.runelite.client.eventbus.Subscribe;
-import net.runelite.client.events.ConfigChanged;
-import net.runelite.client.game.ItemManager;
-import net.runelite.client.plugins.Plugin;
-import net.runelite.client.plugins.PluginDescriptor;
-import net.runelite.client.ui.ClientToolbar;
-import net.runelite.client.ui.NavigationButton;
-import net.runelite.client.ui.overlay.OverlayManager;
-import net.runelite.client.util.AsyncBufferedImage;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 import java.util.List;
 import java.util.Properties;
 
+import static net.runelite.api.MenuAction.RUNELITE_OVERLAY_CONFIG;
+
 @Slf4j
 @PluginDescriptor(
-    name = "Watchdog"
+    name = "Watchdog",
+    description = "Create custom alerts for different events like messages, stats, or built-in notifications",
+    tags = {"alert", "notification"}
 )
 public class WatchdogPlugin extends Plugin {
     @Getter
@@ -64,6 +75,13 @@ public class WatchdogPlugin extends Plugin {
     @Inject
     private FlashOverlay flashOverlay;
 
+    @Getter
+    @Inject
+    private NotificationOverlay notificationOverlay;
+
+    @Inject
+    private Provider<ConfigPlugin> configPluginProvider;
+
     private WatchdogPanel panel;
 
     private NavigationButton navButton;
@@ -83,11 +101,10 @@ public class WatchdogPlugin extends Plugin {
 
     @Override
     protected void startUp() throws Exception {
-        // TODO: Fix the notifications to not modify the obj
-
         this.eventBus.register(this.eventHandler);
 
         this.overlayManager.add(this.flashOverlay);
+        this.overlayManager.add(this.notificationOverlay);
 
         this.alertManager.loadAlerts();
         List<Alert> alerts = this.alertManager.getAlerts();
@@ -128,6 +145,27 @@ public class WatchdogPlugin extends Plugin {
         this.eventBus.unregister(this.eventHandler);
         this.clientToolbar.removeNavigation(this.navButton);
         this.overlayManager.remove(this.flashOverlay);
+        this.overlayManager.remove(this.notificationOverlay);
+    }
+
+    public void openConfiguration() {
+        // We don't have access to the ConfigPlugin so let's just emulate an overlay click
+        this.eventBus.post(new OverlayMenuClicked(new OverlayMenuEntry(RUNELITE_OVERLAY_CONFIG, null, null), this.notificationOverlay));
+    }
+
+    @Subscribe
+    public void onOverlayMenuClicked(final OverlayMenuClicked event)
+    {
+        if (!(event.getEntry().getMenuAction() == MenuAction.RUNELITE_OVERLAY
+            && event.getOverlay() == this.notificationOverlay))
+        {
+            return;
+        }
+
+        if (event.getEntry().getOption().equals(NotificationOverlay.CLEAR))
+        {
+            this.notificationOverlay.clear();
+        }
     }
 
     @Subscribe

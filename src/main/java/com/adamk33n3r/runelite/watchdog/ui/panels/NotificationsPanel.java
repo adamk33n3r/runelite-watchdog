@@ -6,6 +6,7 @@ import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
 import com.adamk33n3r.runelite.watchdog.notifications.GameMessage;
 import com.adamk33n3r.runelite.watchdog.notifications.Notification;
 import com.adamk33n3r.runelite.watchdog.notifications.Overhead;
+import com.adamk33n3r.runelite.watchdog.notifications.Overlay;
 import com.adamk33n3r.runelite.watchdog.notifications.ScreenFlash;
 import com.adamk33n3r.runelite.watchdog.notifications.Sound;
 import com.adamk33n3r.runelite.watchdog.notifications.TextToSpeech;
@@ -13,14 +14,17 @@ import com.adamk33n3r.runelite.watchdog.notifications.TrayNotification;
 import com.adamk33n3r.runelite.watchdog.ui.dropdownbutton.DropDownButtonFactory;
 import com.adamk33n3r.runelite.watchdog.ui.notifications.panels.MessageNotificationPanel;
 import com.adamk33n3r.runelite.watchdog.ui.notifications.panels.OverheadNotificationPanel;
+import com.adamk33n3r.runelite.watchdog.ui.notifications.panels.OverlayNotificationPanel;
 import com.adamk33n3r.runelite.watchdog.ui.notifications.panels.ScreenFlashNotificationPanel;
 import com.adamk33n3r.runelite.watchdog.ui.notifications.panels.SoundNotificationPanel;
 import com.adamk33n3r.runelite.watchdog.ui.notifications.panels.TextToSpeechNotificationPanel;
+
+import net.runelite.client.ui.DynamicGridLayout;
+import net.runelite.client.ui.components.colorpicker.ColorPickerManager;
+
 import com.google.inject.Injector;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import net.runelite.client.ui.DynamicGridLayout;
-import net.runelite.client.ui.components.colorpicker.ColorPickerManager;
 import org.apache.commons.text.WordUtils;
 
 import javax.inject.Inject;
@@ -33,7 +37,6 @@ import java.awt.BorderLayout;
 import java.awt.event.ActionListener;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static com.adamk33n3r.runelite.watchdog.WatchdogPanel.ADD_ICON;
 
@@ -114,6 +117,8 @@ public class NotificationsPanel extends JPanel {
             notificationPanel.add(new ScreenFlashNotificationPanel((ScreenFlash) notification, this.colorPickerManager, this.alertManager::saveAlerts, removeNotification));
         else if (notification instanceof Overhead)
             notificationPanel.add(new OverheadNotificationPanel((Overhead) notification, this.alertManager::saveAlerts, removeNotification));
+        else if (notification instanceof Overlay)
+            notificationPanel.add(new OverlayNotificationPanel((Overlay) notification, this.colorPickerManager, this.alertManager::saveAlerts, removeNotification));
     }
 
     private void createNotification(NotificationType notificationType) {
@@ -136,6 +141,9 @@ public class NotificationsPanel extends JPanel {
                 break;
             case OVERHEAD:
                 this.notifications.add(injector.getInstance(Overhead.class));
+                break;
+            case OVERLAY:
+                this.notifications.add(injector.getInstance(Overlay.class));
                 break;
         }
     }

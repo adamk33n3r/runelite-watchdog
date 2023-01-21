@@ -8,12 +8,14 @@ import com.adamk33n3r.runelite.watchdog.ui.ImportExportDialog;
 import com.adamk33n3r.runelite.watchdog.ui.PlaceholderTextField;
 import com.adamk33n3r.runelite.watchdog.ui.StretchedStackedLayout;
 import com.adamk33n3r.runelite.watchdog.ui.ToggleButton;
-import lombok.extern.slf4j.Slf4j;
+
 import net.runelite.client.plugins.config.ConfigPlugin;
 import net.runelite.client.plugins.info.JRichTextPane;
 import net.runelite.client.ui.MultiplexingPluginPanel;
 import net.runelite.client.ui.PluginPanel;
 import net.runelite.client.util.ImageUtil;
+
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.text.WordUtils;
 
 import javax.swing.DefaultListCellRenderer;
@@ -27,7 +29,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
 import javax.swing.JTextArea;
-import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 import java.awt.BorderLayout;
@@ -62,11 +63,11 @@ public class AlertPanel extends PluginPanel {
     static {
         final BufferedImage backIcon = ImageUtil.loadImageResource(ConfigPlugin.class, "config_back_icon.png");
         BACK_ICON = new ImageIcon(backIcon);
-        BACK_ICON_HOVER = new ImageIcon(ImageUtil.alphaOffset(backIcon, -100));
+        BACK_ICON_HOVER = new ImageIcon(ImageUtil.alphaOffset(backIcon, -120));
 
         final BufferedImage exportIcon = ImageUtil.loadImageResource(AlertPanel.class, "export_icon.png");
         EXPORT_ICON = new ImageIcon(exportIcon);
-        EXPORT_ICON_HOVER = new ImageIcon(ImageUtil.alphaOffset(exportIcon, -100));
+        EXPORT_ICON_HOVER = new ImageIcon(ImageUtil.alphaOffset(exportIcon, -120));
     }
 
     private AlertPanel(MultiplexingPluginPanel muxer, Alert alert) {

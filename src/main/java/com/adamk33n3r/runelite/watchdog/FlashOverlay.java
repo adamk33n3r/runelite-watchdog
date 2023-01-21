@@ -1,7 +1,7 @@
 package com.adamk33n3r.runelite.watchdog;
 
 import com.adamk33n3r.runelite.watchdog.notifications.ScreenFlash;
-import lombok.extern.slf4j.Slf4j;
+
 import net.runelite.api.Client;
 import net.runelite.api.Constants;
 import net.runelite.client.config.FlashNotification;
@@ -10,8 +10,12 @@ import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;
 
+import lombok.extern.slf4j.Slf4j;
+
 import javax.inject.Inject;
-import java.awt.*;
+import java.awt.Dimension;
+import java.awt.Graphics2D;
+import java.awt.Rectangle;
 import java.time.Instant;
 
 @Slf4j
@@ -44,7 +48,7 @@ public class FlashOverlay extends Overlay {
             return null;
         }
         if (Instant.now().minusMillis(2000).isAfter(this.flashStart)) {
-            switch (this.screenFlash.flashNotification)
+            switch (this.screenFlash.getFlashNotification())
             {
                 case FLASH_TWO_SECONDS:
                 case SOLID_TWO_SECONDS:
@@ -66,12 +70,12 @@ public class FlashOverlay extends Overlay {
         // Me: This can be weird depending on which game cycle the flash is fired
         if (client.getGameCycle() % 40 >= 20
             // For solid colour, fall through every time.
-            && (this.screenFlash.flashNotification == FlashNotification.FLASH_TWO_SECONDS
-            || this.screenFlash.flashNotification == FlashNotification.FLASH_UNTIL_CANCELLED))
+            && (this.screenFlash.getFlashNotification() == FlashNotification.FLASH_TWO_SECONDS
+            || this.screenFlash.getFlashNotification() == FlashNotification.FLASH_UNTIL_CANCELLED))
         {
             return null;
         }
-        graphics.setColor(this.screenFlash.color);
+        graphics.setColor(this.screenFlash.getColor());
         graphics.fill(new Rectangle(this.client.getCanvas().getSize()));
         return null;
     }

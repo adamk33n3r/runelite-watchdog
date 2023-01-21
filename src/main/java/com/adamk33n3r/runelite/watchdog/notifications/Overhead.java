@@ -1,10 +1,12 @@
 package com.adamk33n3r.runelite.watchdog.notifications;
 
 import com.adamk33n3r.runelite.watchdog.Util;
+
+import net.runelite.api.Client;
+
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import net.runelite.api.Client;
 
 import javax.inject.Inject;
 import java.util.concurrent.ScheduledExecutorService;

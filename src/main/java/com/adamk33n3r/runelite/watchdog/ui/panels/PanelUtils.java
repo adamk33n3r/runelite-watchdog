@@ -1,7 +1,12 @@
 package com.adamk33n3r.runelite.watchdog.ui.panels;
 
 import com.adamk33n3r.runelite.watchdog.ui.PlaceholderTextArea;
+
 import net.runelite.client.ui.DynamicGridLayout;
+import net.runelite.client.ui.components.ColorJButton;
+import net.runelite.client.ui.components.colorpicker.ColorPickerManager;
+import net.runelite.client.ui.components.colorpicker.RuneliteColorPicker;
+import net.runelite.client.util.ColorUtil;
 import net.runelite.client.util.ImageUtil;
 import net.runelite.client.util.SwingUtil;
 
@@ -15,8 +20,10 @@ import javax.swing.JSpinner;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
+import javax.swing.SwingUtilities;
 import javax.swing.filechooser.FileFilter;
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridLayout;
@@ -25,6 +32,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.Arrays;
@@ -156,7 +165,7 @@ public class PanelUtils {
     public static JCheckBox createCheckbox(String name, String tooltip, boolean initialValue, Consumer<Boolean> onChange) {
         JCheckBox checkbox = new JCheckBox(name, initialValue);
         checkbox.setToolTipText(tooltip);
-        checkbox.addChangeListener(ev -> {
+        checkbox.addItemListener(ev -> {
             onChange.accept(checkbox.isSelected());
         });
         return checkbox;
@@ -192,5 +201,35 @@ public class PanelUtils {
         });
 
         return spinner;
+    }
+
+    public static ColorJButton createColorPicker(String placeholder, String tooltip, String windowTitle, Component parentComponent, Color initialValue, ColorPickerManager colorPickerManager, Consumer<Color> onChange) {
+        ColorJButton colorPickerBtn = new ColorJButton(placeholder, Color.BLACK);
+        if (initialValue != null) {
+            String colorHex = "#" + ColorUtil.colorToAlphaHexCode(initialValue).toUpperCase();
+            colorPickerBtn.setText(colorHex);
+            colorPickerBtn.setColor(initialValue);
+        }
+        colorPickerBtn.setToolTipText(tooltip);
+        colorPickerBtn.setFocusable(false);
+        colorPickerBtn.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                RuneliteColorPicker colorPicker = colorPickerManager.create(
+                    SwingUtilities.getWindowAncestor(colorPickerBtn),
+                    colorPickerBtn.getColor(),
+                    windowTitle,
+                    false);
+                colorPicker.setLocation(parentComponent.getLocationOnScreen());
+                colorPicker.setOnColorChange(c -> {
+                    colorPickerBtn.setColor(c);
+                    colorPickerBtn.setText("#" + ColorUtil.colorToAlphaHexCode(c).toUpperCase());
+                });
+                colorPicker.setOnClose(onChange::accept);
+                colorPicker.setVisible(true);
+            }
+        });
+
+        return colorPickerBtn;
     }
 }

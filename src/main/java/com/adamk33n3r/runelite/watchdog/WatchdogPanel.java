@@ -12,15 +12,18 @@ import com.adamk33n3r.runelite.watchdog.ui.ImportExportDialog;
 import com.adamk33n3r.runelite.watchdog.ui.dropdownbutton.DropDownButtonFactory;
 import com.adamk33n3r.runelite.watchdog.ui.panels.AlertPanel;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
-import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
+
 import net.runelite.api.Skill;
+import net.runelite.client.plugins.config.ConfigPlugin;
 import net.runelite.client.plugins.timetracking.TimeTrackingPlugin;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.DynamicGridLayout;
 import net.runelite.client.ui.MultiplexingPluginPanel;
 import net.runelite.client.ui.PluginPanel;
 import net.runelite.client.util.ImageUtil;
+
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.text.WordUtils;
 
 import javax.inject.Inject;
@@ -54,6 +57,8 @@ public class WatchdogPanel extends PluginPanel {
     private AlertManager alertManager;
 
     public static final ImageIcon ADD_ICON;
+    public static final ImageIcon CONFIG_ICON;
+    public static final ImageIcon CONFIG_ICON_HOVER;
     public static final ImageIcon REGEX_ICON;
     public static final ImageIcon REGEX_ICON_HOVER;
     public static final ImageIcon REGEX_SELECTED_ICON;
@@ -62,6 +67,10 @@ public class WatchdogPanel extends PluginPanel {
     static {
         BufferedImage addIcon = ImageUtil.loadImageResource(TimeTrackingPlugin.class, "add_icon.png");
         ADD_ICON = new ImageIcon(addIcon);
+
+        BufferedImage configIcon = ImageUtil.loadImageResource(ConfigPlugin.class, "config_edit_icon.png");
+        CONFIG_ICON = new ImageIcon(configIcon);
+        CONFIG_ICON_HOVER = new ImageIcon(ImageUtil.luminanceOffset(configIcon, -100));
 
         BufferedImage regexIcon = ImageUtil.loadImageResource(AlertPanel.class, "regex_icon.png");
         BufferedImage regexIconSelected = ImageUtil.loadImageResource(AlertPanel.class, "regex_icon_selected.png");
@@ -83,6 +92,13 @@ public class WatchdogPanel extends PluginPanel {
         title.setForeground(Color.WHITE);
         newAlertPanel.add(title);
 
+        JPanel actionButtons = new JPanel();
+
+        JButton configButton = PanelUtils.createActionButton(CONFIG_ICON, CONFIG_ICON_HOVER, "Open Config", btn -> {
+            WatchdogPlugin.getInstance().openConfiguration();
+        });
+        actionButtons.add(configButton);
+
         JPopupMenu popupMenu = new JPopupMenu();
         ActionListener actionListener = e -> {
             JMenuItem menuItem = (JMenuItem) e.getSource();
@@ -99,7 +115,10 @@ public class WatchdogPanel extends PluginPanel {
             });
         JButton addDropDownButton = DropDownButtonFactory.createDropDownButton(ADD_ICON, popupMenu);
         addDropDownButton.setToolTipText("Create New Alert");
-        newAlertPanel.add(addDropDownButton, BorderLayout.EAST);
+        actionButtons.add(addDropDownButton);
+
+        newAlertPanel.add(actionButtons, BorderLayout.EAST);
+
         this.add(newAlertPanel, BorderLayout.NORTH);
 
         JPanel alertPanel = new JPanel(new BorderLayout());

@@ -1,9 +1,10 @@
 package com.adamk33n3r.runelite.watchdog.notifications;
 
 import com.adamk33n3r.runelite.watchdog.Util;
+
 import lombok.extern.slf4j.Slf4j;
 
-import java.awt.*;
+import java.awt.TrayIcon;
 
 @Slf4j
 public class TrayNotification extends MessageNotification {

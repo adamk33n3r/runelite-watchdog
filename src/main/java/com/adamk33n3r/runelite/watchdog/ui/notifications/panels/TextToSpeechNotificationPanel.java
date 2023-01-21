@@ -8,10 +8,12 @@ import com.adamk33n3r.runelite.watchdog.ui.FlatTextArea;
 import com.adamk33n3r.runelite.watchdog.ui.notifications.VoiceChooser;
 import com.adamk33n3r.runelite.watchdog.ui.notifications.VolumeSlider;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
+
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.util.ImageUtil;
 
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JSlider;
 import javax.swing.text.AbstractDocument;
@@ -39,6 +41,9 @@ public class TextToSpeechNotificationPanel extends NotificationPanel {
             JLabel ttsLabel = new JLabel("<html>Enable TTS in the config to use this Notification type</html>");
             ttsLabel.setFont(new Font(ttsLabel.getFont().getFontName(), Font.ITALIC | Font.BOLD, ttsLabel.getFont().getSize()));
             this.settings.add(ttsLabel);
+            JButton settingsBtn = new JButton("Open Config");
+            settingsBtn.addActionListener(ev -> WatchdogPlugin.getInstance().openConfiguration());
+            this.settings.add(settingsBtn);
             return;
         }
 

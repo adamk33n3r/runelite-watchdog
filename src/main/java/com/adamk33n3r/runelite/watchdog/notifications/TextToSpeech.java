@@ -3,10 +3,10 @@ package com.adamk33n3r.runelite.watchdog.notifications;
 import com.adamk33n3r.runelite.watchdog.Util;
 import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
 import com.adamk33n3r.runelite.watchdog.notifications.tts.Voice;
+
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import net.runelite.client.RuneLite;
 
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
@@ -20,6 +20,8 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
+
+import static net.runelite.client.RuneLite.CACHE_DIR;
 
 @Slf4j
 public class TextToSpeech extends MessageNotification implements IAudioNotification {
@@ -38,7 +40,7 @@ public class TextToSpeech extends MessageNotification implements IAudioNotificat
 
         try {
             String encodedMessage = URLEncoder.encode(Util.processTriggerValues(this.message, triggerValues), "UTF-8");
-            File watchdogPath = new File(RuneLite.CACHE_DIR, "watchdog");
+            File watchdogPath = new File(CACHE_DIR, "watchdog");
             //noinspection ResultOfMethodCallIgnored
             watchdogPath.mkdirs();
             File soundFile = new File(watchdogPath, String.format("%s-%d-%d.wav", encodedMessage, rate, voice.id));

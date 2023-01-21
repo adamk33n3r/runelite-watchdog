@@ -1,7 +1,8 @@
 package com.adamk33n3r.runelite.watchdog.ui;
 
-import lombok.Getter;
 import net.runelite.client.ui.ColorScheme;
+
+import lombok.Getter;
 
 import javax.swing.AbstractAction;
 import javax.swing.ActionMap;

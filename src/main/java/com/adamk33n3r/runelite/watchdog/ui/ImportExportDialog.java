@@ -1,6 +1,7 @@
 package com.adamk33n3r.runelite.watchdog.ui;
 
 import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
+
 import lombok.extern.slf4j.Slf4j;
 
 import javax.swing.JButton;

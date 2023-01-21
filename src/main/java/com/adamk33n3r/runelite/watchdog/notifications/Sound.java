@@ -1,6 +1,9 @@
 package com.adamk33n3r.runelite.watchdog.notifications;
 
 import com.adamk33n3r.runelite.watchdog.Util;
+
+import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.sound.sampled.AudioInputStream;
@@ -18,8 +21,10 @@ import java.io.InputStream;
 import java.util.concurrent.CompletableFuture;
 
 @Slf4j
+@Getter
+@Setter
 public class Sound extends AudioNotification {
-    public String path;
+    private String path;
 
     @Override
     protected void fireImpl(String[] triggerValues) {
