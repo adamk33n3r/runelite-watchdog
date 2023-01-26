@@ -41,7 +41,7 @@ public class NotificationOverlay extends OverlayPanel {
     static final private Dimension DEFAULT_SIZE = new Dimension(250, 60);
     static final String CLEAR = "Clear All";
 
-    private static class OverlayNotificationData extends PanelComponent {
+    private class OverlayNotificationData extends PanelComponent {
         private final Instant timeStarted;
         private final Overlay overlayNotification;
 
@@ -59,12 +59,14 @@ public class NotificationOverlay extends OverlayPanel {
         public Dimension render(Graphics2D graphics) {
             this.setBackgroundColor(this.overlayNotification.getColor());
             this.getChildren().clear();
-            this.getChildren().add(LineComponent.builder()
-                .left(this.overlayNotification.getMessage())
+            this.getChildren().add(WrappedTitleComponent.builder()
+                .text(this.overlayNotification.getMessage())
                 .build());
-            this.getChildren().add(LineComponent.builder()
-                .left(formatDuration(ChronoUnit.MILLIS.between(this.timeStarted, Instant.now()), "m'm' s's' 'ago'"))
-                .build());
+            if (config.overlayShowTime()) {
+                this.getChildren().add(WrappedTitleComponent.builder()
+                    .text(formatDuration(ChronoUnit.MILLIS.between(this.timeStarted, Instant.now()), "m'm' s's' 'ago'"))
+                    .build());
+            }
 
             return super.render(graphics);
         }
@@ -99,7 +101,7 @@ public class NotificationOverlay extends OverlayPanel {
     @Override
     public Dimension render(Graphics2D graphics) {
         this.setLayer(this.config.overlayLayer());
-        graphics.setFont(FontType.BOLD.getFont());
+        graphics.setFont(this.config.overlayFontType().getFont());
 
         this.panelComponent.getChildren().add(TitleComponent.builder().text("").build());
         if (this.overlayNotificationQueue.isEmpty()) {
