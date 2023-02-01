@@ -44,9 +44,11 @@ public class NotificationOverlay extends OverlayPanel {
     private class OverlayNotificationData extends PanelComponent {
         private final Instant timeStarted;
         private final Overlay overlayNotification;
+        private final String message;
 
-        public OverlayNotificationData(Overlay overlayNotification) {
+        public OverlayNotificationData(Overlay overlayNotification, String message) {
             this.overlayNotification = overlayNotification;
+            this.message = message;
             this.timeStarted = Instant.now();
             this.setWrap(false);
         }
@@ -60,7 +62,7 @@ public class NotificationOverlay extends OverlayPanel {
             this.setBackgroundColor(this.overlayNotification.getColor());
             this.getChildren().clear();
             this.getChildren().add(WrappedTitleComponent.builder()
-                .text(this.overlayNotification.getMessage())
+                .text(this.message)
                 .build());
             if (config.overlayShowTime()) {
                 this.getChildren().add(WrappedTitleComponent.builder()
@@ -90,8 +92,8 @@ public class NotificationOverlay extends OverlayPanel {
         getMenuEntries().add(new OverlayMenuEntry(RUNELITE_OVERLAY, CLEAR, "Watchdog Notification overlay"));
     }
 
-    public void add(Overlay overlayNotification) {
-        this.overlayNotificationQueue.add(new OverlayNotificationData(overlayNotification));
+    public void add(Overlay overlayNotification, String message) {
+        this.overlayNotificationQueue.add(new OverlayNotificationData(overlayNotification, message));
     }
 
     public void clear() {
