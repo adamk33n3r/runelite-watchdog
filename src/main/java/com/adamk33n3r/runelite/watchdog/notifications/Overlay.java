@@ -1,5 +1,6 @@
 package com.adamk33n3r.runelite.watchdog.notifications;
 
+import com.adamk33n3r.runelite.watchdog.Util;
 import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
 
 import net.runelite.client.util.ColorUtil;
@@ -18,6 +19,7 @@ public class Overlay extends MessageNotification {
 
     @Override
     protected void fireImpl(String[] triggerValues) {
-        WatchdogPlugin.getInstance().getNotificationOverlay().add(this);
+        WatchdogPlugin.getInstance().getNotificationOverlay()
+            .add(this, Util.processTriggerValues(this.message, triggerValues));
     }
 }

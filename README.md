@@ -22,7 +22,8 @@ with any amount of unique notification types like
 ![image](https://user-images.githubusercontent.com/1350444/210900848-4c177374-9b74-4cb3-b7a7-92c29596ff40.png)
 
 ## Capture Groups
-With glob patterns (or regex) and capture groups you can make your notifications dynamic.
+With glob patterns (or regex) and capture groups you can make your notifications dynamic. Using glob patterns you wrap
+the text you want in curly braces `{}` and in regex you use parenthesis `()`.
 Say you have a Notification Fired Alert with the Message set to `Your {*} is ready to harvest in {*}`.
 This will capture the crop and the location which you can then use in your notifications.
 In message type notifications like Text to Speech, Tray Notification, or Game Message you can use those
