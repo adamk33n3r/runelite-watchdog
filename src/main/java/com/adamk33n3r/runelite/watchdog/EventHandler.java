@@ -4,10 +4,12 @@ import com.adamk33n3r.runelite.watchdog.alerts.Alert;
 import com.adamk33n3r.runelite.watchdog.alerts.ChatAlert;
 import com.adamk33n3r.runelite.watchdog.alerts.NotificationFiredAlert;
 import com.adamk33n3r.runelite.watchdog.alerts.SoundFiredAlert;
-import com.adamk33n3r.runelite.watchdog.alerts.StatDrainAlert;
+import com.adamk33n3r.runelite.watchdog.alerts.StatChangedAlert;
+import com.adamk33n3r.runelite.watchdog.alerts.XPDropAlert;
 
 import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
+import net.runelite.api.GameState;
 import net.runelite.api.Skill;
 import net.runelite.api.events.AreaSoundEffectPlayed;
 import net.runelite.api.events.ChatMessage;
@@ -22,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import javax.inject.Inject;
 import java.time.Instant;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -30,14 +33,15 @@ import java.util.regex.Pattern;
 @Slf4j
 public class EventHandler {
     @Inject
-    Client client;
+    private Client client;
 
     @Inject
-    AlertManager alertManager;
+    private AlertManager alertManager;
 
     private final Map<Alert, Instant> lastTriggered = new HashMap<>();
 
-    private final int[] previousLevels = new int[Skill.values().length];
+    private final Map<Skill, Integer> previousSkillLevelTable = new EnumMap<>(Skill.class);
+    private final Map<Skill, Integer> previousSkillXPTable = new EnumMap<>(Skill.class);
 
     //region Chat Message
     @Subscribe
@@ -108,33 +112,64 @@ public class EventHandler {
     //region Stat Changed
     @Subscribe
     private void onGameStateChanged(GameStateChanged gameStateChanged) {
-        int[] boostedSkillLevels = this.client.getBoostedSkillLevels();
-        for (Skill skill : Skill.values()) {
-            this.previousLevels[skill.ordinal()] = boostedSkillLevels[skill.ordinal()];
+        if (gameStateChanged.getGameState() == GameState.LOGGED_IN) {
+            for (Skill skill : Skill.values()) {
+                this.previousSkillLevelTable.put(skill, this.client.getBoostedSkillLevel(skill));
+                this.previousSkillXPTable.put(skill, this.client.getSkillExperience(skill));
+            }
         }
     }
+
     @Subscribe
     public void onStatChanged(StatChanged statChanged) {
 //        log.debug(String.format("%s: %s/%s", statChanged.getSkill().getName(), statChanged.getBoostedLevel(), statChanged.getLevel()));
-        int previousLevel = this.previousLevels[statChanged.getSkill().ordinal()];
+        this.handleStatChanged(statChanged);
+        this.handleXPDrop(statChanged);
+    }
+
+    private void handleStatChanged(StatChanged statChanged) {
+        Integer previousLevel = this.previousSkillLevelTable.put(statChanged.getSkill(), statChanged.getBoostedLevel());
+        if (previousLevel == null) {
+            return;
+        }
+
         this.alertManager.getAlerts().stream()
-            .filter(alert -> alert instanceof StatDrainAlert)
-            .map(alert -> (StatDrainAlert) alert)
+            .filter(alert -> alert instanceof StatChangedAlert)
+            .map(alert -> (StatChangedAlert) alert)
             .filter(alert -> {
                 boolean isSkill = alert.getSkill() == statChanged.getSkill();
-                int targetLevel = statChanged.getLevel() - alert.getDrainAmount();
+                if (!isSkill) {
+                    return false;
+                }
+
+                int targetLevel = statChanged.getLevel() + alert.getChangedAmount();
+                boolean isNegative = alert.getChangedAmount() < 0;
                 boolean isLower = statChanged.getBoostedLevel() <= targetLevel;
                 boolean wasHigher = previousLevel > targetLevel;
+                boolean isHigher = statChanged.getBoostedLevel() >= targetLevel;
+                boolean wasLower = previousLevel < targetLevel;
 //                log.debug("targetLevel: " + targetLevel);
 //                log.debug("{}, {}, {}", isSkill, isLower, wasHigher);
-                return isSkill && isLower && wasHigher;
+                return (isNegative && isLower && wasHigher) || (!isNegative && isHigher && wasLower);
             })
             .forEach(alert -> this.fireAlert(alert, statChanged.getSkill().getName()));
+    }
 
-        int[] boostedSkillLevels = this.client.getBoostedSkillLevels();
-        for (Skill skill : Skill.values()) {
-            this.previousLevels[skill.ordinal()] = boostedSkillLevels[skill.ordinal()];
+    private void handleXPDrop(StatChanged statChanged) {
+        Integer previousXP = this.previousSkillXPTable.put(statChanged.getSkill(), statChanged.getXp());
+        if (previousXP == null) {
+            return;
         }
+
+        this.alertManager.getAlerts().stream()
+            .filter(alert -> alert instanceof XPDropAlert)
+            .map(alert -> (XPDropAlert) alert)
+            .filter(alert -> {
+                boolean isSkill = alert.getSkill() == statChanged.getSkill();
+                int gainedXP = statChanged.getXp() - previousXP;
+                return isSkill && gainedXP >= alert.getGainedAmount();
+            })
+            .forEach(alert -> this.fireAlert(alert, statChanged.getSkill().getName()));
     }
     //endregion
 

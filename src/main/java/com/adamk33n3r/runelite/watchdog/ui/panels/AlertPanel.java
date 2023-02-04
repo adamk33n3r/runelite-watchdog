@@ -197,7 +197,7 @@ public class AlertPanel extends PluginPanel {
     }
 
     public AlertPanel addSpinner(String name, String tooltip, int initialValue, Consumer<Integer> saveAction) {
-        return this.addSpinner(name, tooltip, initialValue, saveAction, 1, 99, 1);
+        return this.addSpinner(name, tooltip, initialValue, saveAction, -99, 99, 1);
     }
 
     public AlertPanel addSpinner(String name, String tooltip, int initialValue, Consumer<Integer> saveAction, int min, int max, int step) {

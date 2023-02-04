@@ -10,14 +10,20 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import joptsimple.internal.Strings;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Singleton;
 import javax.swing.SwingUtilities;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+@Slf4j
 @Singleton
 public class AlertManager {
     @Inject
@@ -34,6 +40,10 @@ public class AlertManager {
     @Inject
     private WatchdogPanel watchdogPanel;
 
+    @Inject
+    @Named("pluginVersion")
+    private String pluginVersion;
+
     private static final Type ALERT_LIST_TYPE;
 
     static {
@@ -45,10 +55,10 @@ public class AlertManager {
         // Add new alert types here
         final RuntimeTypeAdapterFactory<Alert> alertTypeFactory = RuntimeTypeAdapterFactory.of(Alert.class)
             .registerSubtype(ChatAlert.class)
-            .registerSubtype(IdleAlert.class)
             .registerSubtype(NotificationFiredAlert.class)
             .registerSubtype(StatDrainAlert.class)
-            .registerSubtype(ResourceAlert.class)
+            .registerSubtype(StatChangedAlert.class)
+            .registerSubtype(XPDropAlert.class)
             .registerSubtype(SoundFiredAlert.class);
         // Add new notification types here
         final RuntimeTypeAdapterFactory<Notification> notificationTypeFactory = RuntimeTypeAdapterFactory.of(Notification.class)
@@ -83,6 +93,7 @@ public class AlertManager {
     public void loadAlerts() {
         final String json = this.configManager.getConfiguration(WatchdogConfig.CONFIG_GROUP_NAME, WatchdogConfig.ALERTS);
         this.importAlerts(json, false);
+        this.handleUpgrades();
     }
 
     public void importAlerts(String json, boolean append) {
@@ -97,6 +108,11 @@ public class AlertManager {
 
         // Inject dependencies
         for (Alert alert : this.alerts) {
+            // Shouldn't ever happen...but just in case.
+            if (alert == null) {
+                continue;
+            }
+
             WatchdogPlugin.getInstance().getInjector().injectMembers(alert);
             for (INotification notification : alert.getNotifications()) {
                 WatchdogPlugin.getInstance().getInjector().injectMembers(notification);
@@ -113,6 +129,38 @@ public class AlertManager {
 
     public String toJSON() {
         return this.gson.toJson(this.alerts, ALERT_LIST_TYPE);
+    }
+
+    private void handleUpgrades() {
+        Version currentVersion = new Version(this.pluginVersion);
+        Version configVersion = new Version(this.configManager.getConfiguration(WatchdogConfig.CONFIG_GROUP_NAME, WatchdogConfig.PLUGIN_VERSION));
+        log.debug("currentVersion: " + currentVersion);
+        log.debug("configVersion: " + configVersion);
+        if (currentVersion.compareTo(configVersion) > 0) {
+            log.debug("Checking if data migration needed");
+            // Changed Stat Drain to Stat Change in v2.4.0, so need to swap sign of drainAmount and move to new alert
+            if (configVersion.compareTo(new Version("2.4.0")) < 0) {
+                log.debug("Need to convert StatDrainAlerts to StatChangedAlerts");
+                this.alerts.replaceAll(alert -> {
+                    if (alert instanceof StatDrainAlert) {
+                        StatDrainAlert statDrainAlert = (StatDrainAlert) alert;
+                        StatChangedAlert statChangedAlert = new StatChangedAlert();
+                        statChangedAlert.setName(statDrainAlert.getName());
+                        statChangedAlert.setEnabled(statDrainAlert.isEnabled());
+                        statChangedAlert.setDebounceTime(statDrainAlert.getDebounceTime());
+                        statChangedAlert.setSkill(statDrainAlert.getSkill());
+                        statChangedAlert.setChangedAmount(-statDrainAlert.getDrainAmount());
+                        statChangedAlert.getNotifications().addAll(statDrainAlert.getNotifications());
+                        return statChangedAlert;
+                    }
+
+                    return alert;
+                });
+            }
+
+            this.configManager.setConfiguration(WatchdogConfig.CONFIG_GROUP_NAME, WatchdogConfig.PLUGIN_VERSION, currentVersion.getVersion());
+            this.saveAlerts();
+        }
     }
 
 }
