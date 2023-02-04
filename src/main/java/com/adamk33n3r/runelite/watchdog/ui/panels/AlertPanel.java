@@ -1,6 +1,8 @@
 package com.adamk33n3r.runelite.watchdog.ui.panels;
 
 import com.adamk33n3r.runelite.watchdog.AlertManager;
+import com.adamk33n3r.runelite.watchdog.TriggerType;
+import com.adamk33n3r.runelite.watchdog.Util;
 import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
 import com.adamk33n3r.runelite.watchdog.alerts.Alert;
 import com.adamk33n3r.runelite.watchdog.ui.HorizontalRuleBorder;
@@ -91,8 +93,9 @@ public class AlertPanel extends PluginPanel {
         JPanel nameGroup = new JPanel(new BorderLayout());
         nameGroup.setBorder(new EmptyBorder(10, 10, 10, 10));
 
-        JLabel nameLabel = new JLabel(this.alert.getDisplayName());
-        nameLabel.setToolTipText(this.alert.getDisplayName());
+        TriggerType triggerType = this.alert.getType();
+        JLabel nameLabel = new JLabel(triggerType.getName());
+        nameLabel.setToolTipText(triggerType.getTooltip());
         nameLabel.setForeground(Color.WHITE);
         nameGroup.add(nameLabel, BorderLayout.CENTER);
 

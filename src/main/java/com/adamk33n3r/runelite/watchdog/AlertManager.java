@@ -68,7 +68,8 @@ public class AlertManager {
             .registerSubtype(ScreenFlash.class)
             .registerSubtype(GameMessage.class)
             .registerSubtype(Overhead.class)
-            .registerSubtype(Overlay.class);
+            .registerSubtype(Overlay.class)
+            .registerSubtype(NotificationEvent.class);
         this.gson = this.clientGson.newBuilder()
 //            .serializeNulls()
             .registerTypeAdapterFactory(alertTypeFactory)
