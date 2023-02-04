@@ -154,8 +154,7 @@ public class WatchdogPlugin extends Plugin {
     }
 
     @Subscribe
-    public void onOverlayMenuClicked(final OverlayMenuClicked event)
-    {
+    public void onOverlayMenuClicked(final OverlayMenuClicked event) {
         if (!(event.getEntry().getMenuAction() == MenuAction.RUNELITE_OVERLAY
             && event.getOverlay() == this.notificationOverlay))
         {

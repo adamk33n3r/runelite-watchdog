@@ -7,16 +7,15 @@ import lombok.Setter;
 
 @Getter
 @Setter
-@Deprecated
-public class StatDrainAlert extends Alert {
+public class XPDropAlert extends Alert {
     private Skill skill = Skill.ATTACK;
-    private int drainAmount = 1;
+    private int gainedAmount = 1;
 
-    public StatDrainAlert() {
-        super("New Stat Drained Alert");
+    public XPDropAlert() {
+        super("New XP Drop Alert");
     }
 
-    public StatDrainAlert(String name) {
+    public XPDropAlert(String name) {
         super(name);
     }
 }

@@ -11,6 +11,7 @@ import net.runelite.client.ui.overlay.OverlayLayer;
 public interface WatchdogConfig extends Config {
     String CONFIG_GROUP_NAME = "watchdog";
     String ALERTS = "alerts";
+    String PLUGIN_VERSION = "pluginVersion";
     String ENABLE_TTS = "enableTTS";
     String OVERLAY_LAYER = "overlayLayer";
     String OVERLAY_FONT_TYPE = "overlayFontType";
@@ -23,6 +24,14 @@ public interface WatchdogConfig extends Config {
         hidden = true
     )
     default String alerts() { return "[]"; }
+
+    @ConfigItem(
+        keyName = PLUGIN_VERSION,
+        name = "Plugin Version",
+        description = "Last version of the plugin loaded",
+        hidden = true
+    )
+    default String pluginVersion() { return null; }
 
     @ConfigSection(
         name = "Overlay",

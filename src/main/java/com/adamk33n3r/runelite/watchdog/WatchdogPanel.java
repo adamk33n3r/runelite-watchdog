@@ -2,11 +2,11 @@ package com.adamk33n3r.runelite.watchdog;
 
 import com.adamk33n3r.runelite.watchdog.alerts.Alert;
 import com.adamk33n3r.runelite.watchdog.alerts.ChatAlert;
-import com.adamk33n3r.runelite.watchdog.alerts.IdleAlert;
 import com.adamk33n3r.runelite.watchdog.alerts.NotificationFiredAlert;
-import com.adamk33n3r.runelite.watchdog.alerts.ResourceAlert;
 import com.adamk33n3r.runelite.watchdog.alerts.SoundFiredAlert;
+import com.adamk33n3r.runelite.watchdog.alerts.StatChangedAlert;
 import com.adamk33n3r.runelite.watchdog.alerts.StatDrainAlert;
+import com.adamk33n3r.runelite.watchdog.alerts.XPDropAlert;
 import com.adamk33n3r.runelite.watchdog.ui.AlertListItem;
 import com.adamk33n3r.runelite.watchdog.ui.ImportExportDialog;
 import com.adamk33n3r.runelite.watchdog.ui.dropdownbutton.DropDownButtonFactory;
@@ -107,7 +107,7 @@ public class WatchdogPanel extends PluginPanel {
         };
 
         Arrays.stream(TriggerType.values())
-            .filter(tt -> tt != TriggerType.IDLE && tt != TriggerType.RESOURCE).forEach(tType -> {
+            .forEach(tType -> {
                 JMenuItem c = new JMenuItem(WordUtils.capitalizeFully(tType.name().replaceAll("_", " ")));
                 c.putClientProperty(TriggerType.class, tType);
                 c.addActionListener(actionListener);
@@ -167,14 +167,11 @@ public class WatchdogPanel extends PluginPanel {
             case NOTIFICATION_FIRED:
                 createdAlert = new NotificationFiredAlert();
                 break;
-            case STAT_DRAIN:
-                createdAlert = new StatDrainAlert();
+            case STAT_CHANGED:
+                createdAlert = new StatChangedAlert();
                 break;
-            case IDLE:
-                createdAlert = new IdleAlert();
-                break;
-            case RESOURCE:
-                createdAlert = new ResourceAlert();
+            case XP_DROP:
+                createdAlert = new XPDropAlert();
                 break;
             case SOUND_FIRED:
                 createdAlert = new SoundFiredAlert();
@@ -213,12 +210,6 @@ public class WatchdogPanel extends PluginPanel {
                 )
                 .addLabel("<html><i>Note: Will not trigger on<br>player chat messages</i></html>")
                 .build();
-        } else if (alert instanceof IdleAlert) {
-            IdleAlert idleAlert = (IdleAlert) alert;
-            return AlertPanel.create(this.muxer, alert)
-                .addAlertDefaults(alert)
-                .addSelect("Action", "Action to trigger alert when stop", IdleAlert.IdleAction.class, idleAlert.getIdleAction(), idleAlert::setIdleAction)
-                .build();
         } else if (alert instanceof NotificationFiredAlert) {
             NotificationFiredAlert notificationFiredAlert = (NotificationFiredAlert) alert;
             return AlertPanel.create(this.muxer, alert)
@@ -243,18 +234,19 @@ public class WatchdogPanel extends PluginPanel {
                     )
                 )
                 .build();
-        } else if (alert instanceof ResourceAlert) {
-            ResourceAlert resourceAlert = (ResourceAlert) alert;
+        } else if (alert instanceof StatChangedAlert) {
+            StatChangedAlert statChangedAlert = (StatChangedAlert) alert;
             return AlertPanel.create(this.muxer, alert)
                 .addAlertDefaults(alert)
-                .addSelect("Resource", "The resource to trigger the alert when low", ResourceAlert.ResourceType.class, resourceAlert.getResourceType(), resourceAlert::setResourceType)
+                .addSelect("Skill", "The skill to track", Skill.class, statChangedAlert.getSkill(), statChangedAlert::setSkill)
+                .addSpinner("Changed Amount", "The difference in level to trigger the alert. Can be positive for boost and negative for drain", statChangedAlert.getChangedAmount(), statChangedAlert::setChangedAmount)
                 .build();
-        } else if (alert instanceof StatDrainAlert) {
-            StatDrainAlert statDrainAlert = (StatDrainAlert) alert;
+        } else if (alert instanceof XPDropAlert) {
+            XPDropAlert xpDropAlert = (XPDropAlert) alert;
             return AlertPanel.create(this.muxer, alert)
                 .addAlertDefaults(alert)
-                .addSelect("Skill", "The skill to track", Skill.class, statDrainAlert.getSkill(), statDrainAlert::setSkill)
-                .addSpinner("Drain Amount", "The difference in level to trigger the alert. Can be negative for stat gain", statDrainAlert.getDrainAmount(), statDrainAlert::setDrainAmount)
+                .addSelect("Skill", "The skill to track", Skill.class, xpDropAlert.getSkill(), xpDropAlert::setSkill)
+                .addSpinner("Gained Amount", "How much xp needed to trigger this alert", xpDropAlert.getGainedAmount(), xpDropAlert::setGainedAmount)
                 .build();
         } else if (alert instanceof  SoundFiredAlert) {
             SoundFiredAlert soundFiredAlert = (SoundFiredAlert) alert;

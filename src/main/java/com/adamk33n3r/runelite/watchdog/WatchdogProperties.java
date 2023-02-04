@@ -17,5 +17,17 @@ public class WatchdogProperties {
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
+
+        try (InputStream in = WatchdogProperties.class.getResourceAsStream("version.properties")) {
+            properties.load(in);
+            String pluginVersion = String.format(
+                "%s.%s.%s",
+                properties.getProperty("VERSION_MAJOR"),
+                properties.getProperty("VERSION_MINOR"),
+                properties.getProperty("VERSION_PATCH"));
+            properties.put("pluginVersion", pluginVersion);
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
+        }
     }
 }

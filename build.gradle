@@ -32,8 +32,10 @@ dependencies {
 	testImplementation group: 'net.runelite', name:'jshell', version: runeLiteVersion
 }
 
+group = 'com.adamk33n3r.runelite.watchdog'
+
 def versionProps = new Properties()
-def versionPropsFile = file('version.properties')
+def versionPropsFile = file("src/main/resources/${group.replace('.', '/')}/version.properties")
 if (versionPropsFile.exists())
 	versionProps.load(versionPropsFile.newReader())
 
@@ -49,7 +51,6 @@ versionProps['VERSION_BUILD'] = build.toString()
 versionProps['VERSION_PHASE'] = phase
 versionProps.store(versionPropsFile.newWriter(), null)
 
-group = 'com.adamk33n3r.runelite.watchdog'
 version = major+'.'+minor+'.'+patch+'.'+build
 if (!phase.empty)
 	version = version+'-'+phase
