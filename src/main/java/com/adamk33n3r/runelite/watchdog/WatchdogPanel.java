@@ -109,6 +109,7 @@ public class WatchdogPanel extends PluginPanel {
         Arrays.stream(TriggerType.values())
             .forEach(tType -> {
                 JMenuItem c = new JMenuItem(WordUtils.capitalizeFully(tType.name().replaceAll("_", " ")));
+                c.setToolTipText(tType.getTooltip());
                 c.putClientProperty(TriggerType.class, tType);
                 c.addActionListener(actionListener);
                 popupMenu.add(c);
@@ -159,29 +160,9 @@ public class WatchdogPanel extends PluginPanel {
     }
 
     private void createAlert(TriggerType triggerType) {
-        Alert createdAlert = null;
-        switch (triggerType) {
-            case GAME_MESSAGE:
-                createdAlert = new ChatAlert();
-                break;
-            case NOTIFICATION_FIRED:
-                createdAlert = new NotificationFiredAlert();
-                break;
-            case STAT_CHANGED:
-                createdAlert = new StatChangedAlert();
-                break;
-            case XP_DROP:
-                createdAlert = new XPDropAlert();
-                break;
-            case SOUND_FIRED:
-                createdAlert = new SoundFiredAlert();
-                break;
-        }
-
-        if (createdAlert != null) {
-            this.alertManager.addAlert(createdAlert);
-            this.openAlert(createdAlert);
-        }
+        Alert createdAlert = WatchdogPlugin.getInstance().getInjector().getInstance(triggerType.getImplClass());
+        this.alertManager.addAlert(createdAlert);
+        this.openAlert(createdAlert);
     }
 
     private PluginPanel createPluginPanel(Alert alert) {

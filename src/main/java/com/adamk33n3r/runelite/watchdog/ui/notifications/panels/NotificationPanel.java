@@ -1,6 +1,6 @@
 package com.adamk33n3r.runelite.watchdog.ui.notifications.panels;
 
-import com.adamk33n3r.runelite.watchdog.Util;
+import com.adamk33n3r.runelite.watchdog.NotificationType;
 import com.adamk33n3r.runelite.watchdog.notifications.Notification;
 import com.adamk33n3r.runelite.watchdog.ui.StretchedStackedLayout;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
@@ -39,10 +39,10 @@ public abstract class NotificationPanel extends JPanel {
     private static final ImageIcon EXPAND_ICON;
     private static final ImageIcon DELETE_ICON;
     private static final ImageIcon DELETE_ICON_HOVER;
-    private static final ImageIcon FOCUS_ICON;
-    private static final ImageIcon FOCUS_ICON_HOVER;
-    private static final ImageIcon FOCUS_SELECTED_ICON;
-    private static final ImageIcon FOCUS_SELECTED_ICON_HOVER;
+    private static final ImageIcon FOREGROUND_ICON;
+    private static final ImageIcon FOREGROUND_ICON_HOVER;
+    private static final ImageIcon BACKGROUND_ICON;
+    private static final ImageIcon BACKGROUND_ICON_HOVER;
     public static final ImageIcon TEST_ICON;
     public static final ImageIcon TEST_ICON_HOVER;
     protected static final ImageIcon VOLUME_ICON;
@@ -52,7 +52,8 @@ public abstract class NotificationPanel extends JPanel {
         final BufferedImage collapseImg = ImageUtil.loadImageResource(LootTrackerPlugin.class, "collapsed.png");
         final BufferedImage expandedImg = ImageUtil.loadImageResource(LootTrackerPlugin.class, "expanded.png");
         final BufferedImage deleteImg = ImageUtil.loadImageResource(TimeTrackingPlugin.class, "delete_icon.png");
-        final BufferedImage focusImg = ImageUtil.loadImageResource(NotificationPanel.class, "focus_icon.png");
+        final BufferedImage foregroundImg = ImageUtil.loadImageResource(NotificationPanel.class, "foreground_icon.png");
+        final BufferedImage backgroundImg = ImageUtil.loadImageResource(NotificationPanel.class, "background_icon.png");
         final BufferedImage testImg = ImageUtil.loadImageResource(NotificationPanel.class, "test_icon.png");
         final BufferedImage volumeImg = ImageUtil.loadImageResource(NotificationPanel.class, "volume_icon.png");
         final BufferedImage clockIcon = ImageUtil.loadImageResource(NotificationPanel.class, "clock_icon.png");
@@ -61,10 +62,10 @@ public abstract class NotificationPanel extends JPanel {
         EXPAND_ICON = new ImageIcon(expandedImg);
         DELETE_ICON = new ImageIcon(deleteImg);
         DELETE_ICON_HOVER = new ImageIcon(ImageUtil.luminanceOffset(deleteImg, -80));
-        FOCUS_ICON = new ImageIcon(ImageUtil.luminanceOffset(focusImg, -80));
-        FOCUS_ICON_HOVER = new ImageIcon(ImageUtil.luminanceOffset(focusImg, -120));
-        FOCUS_SELECTED_ICON = new ImageIcon(focusImg);
-        FOCUS_SELECTED_ICON_HOVER = new ImageIcon(ImageUtil.luminanceOffset(focusImg, -80));
+        FOREGROUND_ICON = new ImageIcon(foregroundImg);
+        FOREGROUND_ICON_HOVER = new ImageIcon(ImageUtil.luminanceOffset(foregroundImg, -80));
+        BACKGROUND_ICON = new ImageIcon(backgroundImg);
+        BACKGROUND_ICON_HOVER = new ImageIcon(ImageUtil.luminanceOffset(backgroundImg, -80));
         TEST_ICON = new ImageIcon(testImg);
         TEST_ICON_HOVER = new ImageIcon(ImageUtil.luminanceOffset(testImg, -80));
         VOLUME_ICON = new ImageIcon(ImageUtil.luminanceOffset(volumeImg, -80));
@@ -77,15 +78,9 @@ public abstract class NotificationPanel extends JPanel {
         BorderFactory.createMatteBorder(0, 0, 1, 0, ColorScheme.DARK_GRAY_COLOR),
         BorderFactory.createMatteBorder(5, 10, 5, 0, ColorScheme.DARKER_GRAY_COLOR));
 
-    private static final Border NAME_BOTTOM_BORDER2 = new CompoundBorder(
-        BorderFactory.createMatteBorder(0, 0, 1, 0, ColorScheme.DARK_GRAY_COLOR),
-        BorderFactory.createLineBorder(ColorScheme.DARKER_GRAY_COLOR));
-
     public NotificationPanel(Notification notification, Runnable onChangeListener, PanelUtils.ButtonClickListener onRemove) {
         this.setLayout(new BorderLayout());
         this.setBorder(new EmptyBorder(3, 0, 0, 0));
-//        this.setBorder(new TitledBorder(new EtchedBorder(), Util.humanReadableClass(notification), TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, null, Color.WHITE));
-//        this.setBackground(ColorScheme.PROGRESS_ERROR_COLOR);
         JPanel container = new JPanel(new StretchedStackedLayout(3, 3));
         container.setBackground(ColorScheme.DARKER_GRAY_COLOR);
 
@@ -97,22 +92,24 @@ public abstract class NotificationPanel extends JPanel {
         nameWrapper.setBorder(new CompoundBorder(
             BorderFactory.createMatteBorder(0, 0, 1, 0, ColorScheme.DARK_GRAY_COLOR),
             BorderFactory.createMatteBorder(5, 10, 5, 0, ColorScheme.DARKER_GRAY_COLOR)));
-        nameWrapper.add(new JLabel(Util.humanReadableClass(notification)), BorderLayout.WEST);
+        NotificationType notificationType = notification.getType();
+        JLabel nameLabel = new JLabel(notificationType.getName());
+        nameLabel.setToolTipText(notificationType.getTooltip());
+        nameWrapper.add(nameLabel, BorderLayout.WEST);
 
         // Right buttons
-//        JPanel rightActions = new JPanel(new DynamicGridLayout(1, 0, 3, 3));
         JPanel rightActions = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
         rightActions.setBorder(new EmptyBorder(4, 0, 0, 0));
         rightActions.setBackground(ColorScheme.DARKER_GRAY_COLOR);
         nameWrapper.add(rightActions, BorderLayout.EAST);
 
         JButton focusBtn = PanelUtils.createToggleActionButton(
-            FOCUS_SELECTED_ICON,
-            FOCUS_SELECTED_ICON_HOVER,
-            FOCUS_ICON,
-            FOCUS_ICON_HOVER,
-            "Disable firing while game is in focus",
-            "Enable firing while game is in focus",
+            FOREGROUND_ICON,
+            FOREGROUND_ICON_HOVER,
+            BACKGROUND_ICON,
+            BACKGROUND_ICON_HOVER,
+            "Switch to only fire notification while the game is in the background",
+            "Enable notification while the game is in the foreground",
             notification.isFireWhenFocused(),
             btn -> {
                 notification.setFireWhenFocused(btn.isSelected());

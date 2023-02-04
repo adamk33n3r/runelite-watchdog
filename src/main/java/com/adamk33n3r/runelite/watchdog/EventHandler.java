@@ -16,6 +16,7 @@ import net.runelite.api.events.ChatMessage;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.SoundEffectPlayed;
 import net.runelite.api.events.StatChanged;
+import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.NotificationFired;
 import net.runelite.client.util.Text;
@@ -23,6 +24,8 @@ import net.runelite.client.util.Text;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
+import java.awt.TrayIcon;
 import java.time.Instant;
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -31,6 +34,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Slf4j
+@Singleton
 public class EventHandler {
     @Inject
     private Client client;
@@ -38,10 +42,22 @@ public class EventHandler {
     @Inject
     private AlertManager alertManager;
 
+    @Inject
+    private EventBus eventBus;
+
     private final Map<Alert, Instant> lastTriggered = new HashMap<>();
 
     private final Map<Skill, Integer> previousSkillLevelTable = new EnumMap<>(Skill.class);
     private final Map<Skill, Integer> previousSkillXPTable = new EnumMap<>(Skill.class);
+
+    private boolean ignoreNotificationFired = false;
+
+    public synchronized void notify(String message) {
+        this.ignoreNotificationFired = true;
+        // The event bus is synchronous
+        this.eventBus.post(new NotificationFired(message, TrayIcon.MessageType.NONE));
+        this.ignoreNotificationFired = false;
+    }
 
     //region Chat Message
     @Subscribe
@@ -92,6 +108,11 @@ public class EventHandler {
     //region Notification
     @Subscribe
     public void onNotificationFired(NotificationFired notificationFired) {
+        // This flag is set when we are firing our own events, so we don't cause an infinite loop/stack overflow
+        if (this.ignoreNotificationFired) {
+            return;
+        }
+
         this.alertManager.getAlerts().stream()
             .filter(alert -> alert instanceof NotificationFiredAlert)
             .map(alert -> (NotificationFiredAlert) alert)

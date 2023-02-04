@@ -5,6 +5,7 @@ import com.adamk33n3r.runelite.watchdog.NotificationType;
 import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
 import com.adamk33n3r.runelite.watchdog.notifications.GameMessage;
 import com.adamk33n3r.runelite.watchdog.notifications.Notification;
+import com.adamk33n3r.runelite.watchdog.notifications.NotificationEvent;
 import com.adamk33n3r.runelite.watchdog.notifications.Overhead;
 import com.adamk33n3r.runelite.watchdog.notifications.Overlay;
 import com.adamk33n3r.runelite.watchdog.notifications.ScreenFlash;
@@ -25,7 +26,6 @@ import net.runelite.client.ui.components.colorpicker.ColorPickerManager;
 import com.google.inject.Injector;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.text.WordUtils;
 
 import javax.inject.Inject;
 import javax.swing.JButton;
@@ -67,7 +67,8 @@ public class NotificationsPanel extends JPanel {
             this.alertManager.saveAlerts();
         };
         Arrays.stream(NotificationType.values()).sorted().forEach(nType -> {
-            JMenuItem c = new JMenuItem(WordUtils.capitalizeFully(nType.name().replace("_", " ")));
+            JMenuItem c = new JMenuItem(nType.getName());
+            c.setToolTipText(nType.getTooltip());
             c.putClientProperty(NotificationType.class, nType);
             c.addActionListener(actionListener);
             popupMenu.add(c);
@@ -119,32 +120,12 @@ public class NotificationsPanel extends JPanel {
             notificationPanel.add(new OverheadNotificationPanel((Overhead) notification, this.alertManager::saveAlerts, removeNotification));
         else if (notification instanceof Overlay)
             notificationPanel.add(new OverlayNotificationPanel((Overlay) notification, this.colorPickerManager, this.alertManager::saveAlerts, removeNotification));
+        else if (notification instanceof NotificationEvent)
+            notificationPanel.add(new MessageNotificationPanel((NotificationEvent) notification, this.alertManager::saveAlerts, removeNotification));
     }
 
     private void createNotification(NotificationType notificationType) {
         Injector injector = WatchdogPlugin.getInstance().getInjector();
-        switch (notificationType) {
-            case GAME_MESSAGE:
-                this.notifications.add(injector.getInstance(GameMessage.class));
-                break;
-            case SCREEN_FLASH:
-                this.notifications.add(injector.getInstance(ScreenFlash.class));
-                break;
-            case TEXT_TO_SPEECH:
-                this.notifications.add(injector.getInstance(TextToSpeech.class));
-                break;
-            case SOUND:
-                this.notifications.add(injector.getInstance(Sound.class));
-                break;
-            case TRAY_NOTIFICATION:
-                this.notifications.add(injector.getInstance(TrayNotification.class));
-                break;
-            case OVERHEAD:
-                this.notifications.add(injector.getInstance(Overhead.class));
-                break;
-            case OVERLAY:
-                this.notifications.add(injector.getInstance(Overlay.class));
-                break;
-        }
+        this.notifications.add(injector.getInstance(notificationType.getImplClass()));
     }
 }

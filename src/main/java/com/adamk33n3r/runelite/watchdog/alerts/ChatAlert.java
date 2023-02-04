@@ -16,9 +16,4 @@ public class ChatAlert extends Alert {
     public ChatAlert(String name) {
         super(name);
     }
-
-    @Override
-    public String getDisplayName() {
-        return "Game Message Alert";
-    }
 }

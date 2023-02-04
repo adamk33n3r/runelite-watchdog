@@ -1,12 +1,13 @@
 package com.adamk33n3r.runelite.watchdog.alerts;
 
-import com.adamk33n3r.runelite.watchdog.Util;
+import com.adamk33n3r.runelite.watchdog.TriggerType;
 import com.adamk33n3r.runelite.watchdog.notifications.Notification;
 
 import lombok.Getter;
 import lombok.Setter;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Getter
@@ -27,7 +28,10 @@ public abstract class Alert {
         this.debounceTime = 0;
     }
 
-    public String getDisplayName() {
-        return Util.humanReadableClass(this);
+    public TriggerType getType() {
+        return Arrays.stream(TriggerType.values())
+            .filter(tType -> tType.getImplClass() == this.getClass())
+            .findFirst()
+            .orElse(null);
     }
 }
