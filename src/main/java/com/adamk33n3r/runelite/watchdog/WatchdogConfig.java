@@ -13,6 +13,7 @@ public interface WatchdogConfig extends Config {
     String ALERTS = "alerts";
     String PLUGIN_VERSION = "pluginVersion";
     String ENABLE_TTS = "enableTTS";
+    String MOUSE_MOVEMENT_CANCELS_FLASH = "mouseMovementCancelsFlash";
     String OVERLAY_LAYER = "overlayLayer";
     String OVERLAY_FONT_TYPE = "overlayFontType";
     String OVERLAY_SHOW_TIME = "overlayShowTime";
@@ -34,9 +35,24 @@ public interface WatchdogConfig extends Config {
     default String pluginVersion() { return null; }
 
     @ConfigSection(
+        name = "Screen Flash",
+        description = "The options that control the screen flash notifications",
+        position = 0
+    )
+    String screenFlashSection = "screenFlashSection";
+
+    @ConfigItem(
+        keyName = MOUSE_MOVEMENT_CANCELS_FLASH,
+        name = "Mouse Movement Cancels",
+        description = "Cancel the screen flash with mouse movement as well as click and keyboard",
+        section = screenFlashSection
+    )
+    default boolean mouseMovementCancels() { return true; }
+
+    @ConfigSection(
         name = "Overlay",
         description = "The options that control the overlay notifications",
-        position = 0
+        position = 1
     )
     String overlaySection = "overlaySection";
 

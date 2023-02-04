@@ -22,8 +22,12 @@ import java.time.Instant;
 public class FlashOverlay extends Overlay {
     @Inject
     private Client client;
+
     @Inject
     private ClientUI clientUI;
+
+    @Inject
+    private WatchdogConfig config;
 
     private Instant flashStart;
     private long mouseLastPressedMillis;
@@ -47,6 +51,7 @@ public class FlashOverlay extends Overlay {
         if (this.flashStart == null) {
             return null;
         }
+
         if (Instant.now().minusMillis(2000).isAfter(this.flashStart)) {
             switch (this.screenFlash.getFlashNotification())
             {
@@ -57,7 +62,7 @@ public class FlashOverlay extends Overlay {
                 case SOLID_UNTIL_CANCELLED:
                 case FLASH_UNTIL_CANCELLED:
                     // Any interaction with the client since the notification started will cancel it after the minimum duration
-                    if ((client.getMouseIdleTicks() < 2000 / Constants.CLIENT_TICK_LENGTH
+                    if (((client.getMouseIdleTicks() < 2000 / Constants.CLIENT_TICK_LENGTH && this.config.mouseMovementCancels())
                         || client.getKeyboardIdleTicks() < 2000 / Constants.CLIENT_TICK_LENGTH
                         || client.getMouseLastPressedMillis() > mouseLastPressedMillis) && clientUI.isFocused())
                     {
