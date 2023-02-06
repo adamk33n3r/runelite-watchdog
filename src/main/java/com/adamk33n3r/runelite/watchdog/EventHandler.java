@@ -51,6 +51,7 @@ public class EventHandler {
     private final Map<Skill, Integer> previousSkillXPTable = new EnumMap<>(Skill.class);
 
     private boolean ignoreNotificationFired = false;
+    private boolean ignoreSoundEffectPlayed = false;
 
     public synchronized void notify(String message) {
         this.ignoreNotificationFired = true;

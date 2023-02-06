@@ -84,6 +84,6 @@ public class TextToSpeechNotificationPanel extends NotificationPanel {
         VolumeSlider volumeSlider = new VolumeSlider(notification);
         volumeSlider.setBackground(ColorScheme.MEDIUM_GRAY_COLOR);
         volumeSlider.addChangeListener(e -> onChangeListener.run());
-        this.settings.add(PanelUtils.createIconComponent(VOLUME_ICON, "The volume to playback sound", volumeSlider));
+        this.settings.add(PanelUtils.createIconComponent(VOLUME_ICON, "The volume to playback speech", volumeSlider));
     }
 }

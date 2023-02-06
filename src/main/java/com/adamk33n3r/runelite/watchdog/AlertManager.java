@@ -62,6 +62,7 @@ public class AlertManager {
             .registerSubtype(TrayNotification.class)
             .registerSubtype(TextToSpeech.class)
             .registerSubtype(Sound.class)
+            .registerSubtype(SoundEffect.class)
             .registerSubtype(ScreenFlash.class)
             .registerSubtype(GameMessage.class)
             .registerSubtype(Overhead.class)
@@ -154,6 +155,14 @@ public class AlertManager {
 
                     return alert;
                 });
+
+                // Not sure why I thought it was a good idea to store the decibels in the JSON
+                log.debug("Need to convert all Sound and TTS gain back to 0,10 scale.");
+                this.alerts.stream()
+                    .flatMap(alert -> alert.getNotifications().stream())
+                    .filter(notification -> notification instanceof Sound)
+                    .map(notification -> (Sound) notification)
+                    .forEach(sound -> sound.setGain(Util.scale(sound.getGain(), -25, 5, 0, 10)));
             }
 
             this.configManager.setConfiguration(WatchdogConfig.CONFIG_GROUP_NAME, WatchdogConfig.PLUGIN_VERSION, currentVersion.getVersion());

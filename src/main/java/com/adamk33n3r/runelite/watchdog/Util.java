@@ -115,9 +115,27 @@ public class Util {
     }
 
     public static String processTriggerValues(String string, String[] triggerValues) {
+        if (string == null) {
+            return null;
+        }
+
         for (int i = 0; i < triggerValues.length; i++) {
             string = string.replaceAll("\\$"+(i+1), triggerValues[i]);
         }
+
         return string;
+    }
+
+    /**
+     * Scale a number from one range to another
+     * @param val the number to scale
+     * @param srcMin min source range
+     * @param srcMax max source range
+     * @param destMin min dest range
+     * @param destMax max dest range
+     * @return the scaled number
+     */
+    public static int scale(int val, float srcMin, float srcMax, float destMin, float destMax) {
+        return Math.round(((val - srcMin) / (srcMax - srcMin)) * (destMax - destMin) + destMin);
     }
 }

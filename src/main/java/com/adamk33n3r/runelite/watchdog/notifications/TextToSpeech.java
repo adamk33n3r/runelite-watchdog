@@ -26,7 +26,7 @@ import static net.runelite.client.RuneLite.CACHE_DIR;
 @Slf4j
 public class TextToSpeech extends MessageNotification implements IAudioNotification {
     @Getter @Setter
-    private int gain = -10;
+    private int gain = 5;
     @Getter @Setter
     private int rate = 1;
     @Getter @Setter
@@ -69,8 +69,9 @@ public class TextToSpeech extends MessageNotification implements IAudioNotificat
             clip.open(inputStream);
             inputStream.close();
             FloatControl volume = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
-            volume.setValue(this.gain);
-            log.debug("volume: " + this.gain);
+            int decibels = Util.scale(this.gain, 0, 10, -25, 5);
+            volume.setValue(decibels);
+            log.debug("volume: " + decibels);
             clip.start();
             clip.addLineListener(event -> {
                 if (event.getType() == LineEvent.Type.STOP) {

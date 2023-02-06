@@ -1,6 +1,5 @@
 package com.adamk33n3r.runelite.watchdog;
 
-import lombok.AccessLevel;
 import lombok.Getter;
 
 import java.io.IOException;
@@ -8,7 +7,7 @@ import java.io.InputStream;
 import java.util.Properties;
 
 public class WatchdogProperties {
-    @Getter(AccessLevel.PACKAGE)
+    @Getter()
     private static final Properties properties = new Properties();
 
     static {

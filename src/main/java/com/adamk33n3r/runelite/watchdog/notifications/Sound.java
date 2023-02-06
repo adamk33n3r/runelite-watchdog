@@ -53,8 +53,9 @@ public class Sound extends AudioNotification {
                     return false;
                 }
                 FloatControl volume = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
-                volume.setValue(this.gain);
-                log.debug("volume: " + this.gain);
+                int decibels = Util.scale(this.gain, 0, 10, -25, 5);
+                volume.setValue(decibels);
+                log.debug("volume: " + decibels);
                 clip.loop(0);
                 return true;
             }
