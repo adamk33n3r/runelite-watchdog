@@ -7,6 +7,7 @@ import com.adamk33n3r.runelite.watchdog.notifications.Overhead;
 import com.adamk33n3r.runelite.watchdog.notifications.Overlay;
 import com.adamk33n3r.runelite.watchdog.notifications.ScreenFlash;
 import com.adamk33n3r.runelite.watchdog.notifications.Sound;
+import com.adamk33n3r.runelite.watchdog.notifications.SoundEffect;
 import com.adamk33n3r.runelite.watchdog.notifications.TextToSpeech;
 import com.adamk33n3r.runelite.watchdog.notifications.TrayNotification;
 
@@ -18,7 +19,8 @@ import lombok.Getter;
 public enum NotificationType {
     GAME_MESSAGE("Game Message", "Put a game message in your chat", GameMessage.class),
     SCREEN_FLASH("Screen Flash", "Flash your screen a custom color", ScreenFlash.class),
-    SOUND("Sound", "Play a custom sound", Sound.class),
+    SOUND_EFFECT("Sound Effect", "Play a builtin sound effect", SoundEffect.class),
+    SOUND("Custom Sound", "Play a custom sound", Sound.class),
     TEXT_TO_SPEECH("Text to Speech", "Synthesize speech", TextToSpeech.class),
     TRAY_NOTIFICATION("Tray Notification", "Create a tray notification", TrayNotification.class),
     OVERHEAD("Overhead", "Display overhead text", Overhead.class),

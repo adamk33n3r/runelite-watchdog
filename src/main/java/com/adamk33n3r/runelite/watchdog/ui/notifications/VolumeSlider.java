@@ -7,11 +7,8 @@ import javax.swing.JSlider;
 public class VolumeSlider extends JSlider {
 
     public VolumeSlider(IAudioNotification audioNotification) {
-        super(0, 10, (audioNotification.getGain() + 25) / 3);
-//        this.setPaintTicks(true);
+        super(0, 10, audioNotification.getGain());
         this.setSnapToTicks(true);
-        this.addChangeListener(ev -> {
-            audioNotification.setGain(this.getValue() * 3 - 25);
-        });
+        this.addChangeListener(ev -> audioNotification.setGain(this.getValue()));
     }
 }

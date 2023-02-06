@@ -6,5 +6,5 @@ import lombok.Setter;
 public abstract class AudioNotification extends Notification implements IAudioNotification {
     @Getter
     @Setter
-    protected int gain;
+    protected int gain = 8;
 }

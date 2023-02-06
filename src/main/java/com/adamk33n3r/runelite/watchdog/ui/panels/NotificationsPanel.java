@@ -10,6 +10,7 @@ import com.adamk33n3r.runelite.watchdog.notifications.Overhead;
 import com.adamk33n3r.runelite.watchdog.notifications.Overlay;
 import com.adamk33n3r.runelite.watchdog.notifications.ScreenFlash;
 import com.adamk33n3r.runelite.watchdog.notifications.Sound;
+import com.adamk33n3r.runelite.watchdog.notifications.SoundEffect;
 import com.adamk33n3r.runelite.watchdog.notifications.TextToSpeech;
 import com.adamk33n3r.runelite.watchdog.notifications.TrayNotification;
 import com.adamk33n3r.runelite.watchdog.ui.dropdownbutton.DropDownButtonFactory;
@@ -17,6 +18,7 @@ import com.adamk33n3r.runelite.watchdog.ui.notifications.panels.MessageNotificat
 import com.adamk33n3r.runelite.watchdog.ui.notifications.panels.OverheadNotificationPanel;
 import com.adamk33n3r.runelite.watchdog.ui.notifications.panels.OverlayNotificationPanel;
 import com.adamk33n3r.runelite.watchdog.ui.notifications.panels.ScreenFlashNotificationPanel;
+import com.adamk33n3r.runelite.watchdog.ui.notifications.panels.SoundEffectNotificationPanel;
 import com.adamk33n3r.runelite.watchdog.ui.notifications.panels.SoundNotificationPanel;
 import com.adamk33n3r.runelite.watchdog.ui.notifications.panels.TextToSpeechNotificationPanel;
 
@@ -112,6 +114,8 @@ public class NotificationsPanel extends JPanel {
             notificationPanel.add(new TextToSpeechNotificationPanel((TextToSpeech) notification, this.alertManager::saveAlerts, removeNotification));
         else if (notification instanceof Sound)
             notificationPanel.add(new SoundNotificationPanel((Sound)notification, this.alertManager::saveAlerts, removeNotification));
+        else if (notification instanceof SoundEffect)
+            notificationPanel.add(new SoundEffectNotificationPanel((SoundEffect)notification, this.alertManager::saveAlerts, removeNotification));
         else if (notification instanceof TrayNotification)
             notificationPanel.add(new MessageNotificationPanel((TrayNotification)notification, this.alertManager::saveAlerts, removeNotification));
         else if (notification instanceof ScreenFlash)
