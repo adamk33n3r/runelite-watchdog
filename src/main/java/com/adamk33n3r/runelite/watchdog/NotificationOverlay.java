@@ -3,13 +3,11 @@ package com.adamk33n3r.runelite.watchdog;
 import com.adamk33n3r.runelite.watchdog.notifications.Overlay;
 
 import net.runelite.api.Client;
-import net.runelite.client.config.FontType;
 import net.runelite.client.ui.ClientUI;
 import net.runelite.client.ui.overlay.OverlayMenuEntry;
 import net.runelite.client.ui.overlay.OverlayPanel;
 import net.runelite.client.ui.overlay.OverlayPosition;
 import net.runelite.client.ui.overlay.OverlayPriority;
-import net.runelite.client.ui.overlay.components.LineComponent;
 import net.runelite.client.ui.overlay.components.PanelComponent;
 import net.runelite.client.ui.overlay.components.TitleComponent;
 

@@ -5,7 +5,6 @@ import com.adamk33n3r.runelite.watchdog.alerts.ChatAlert;
 import com.adamk33n3r.runelite.watchdog.alerts.NotificationFiredAlert;
 import com.adamk33n3r.runelite.watchdog.alerts.SoundFiredAlert;
 import com.adamk33n3r.runelite.watchdog.alerts.StatChangedAlert;
-import com.adamk33n3r.runelite.watchdog.alerts.StatDrainAlert;
 import com.adamk33n3r.runelite.watchdog.alerts.XPDropAlert;
 import com.adamk33n3r.runelite.watchdog.ui.AlertListItem;
 import com.adamk33n3r.runelite.watchdog.ui.ImportExportDialog;
@@ -15,12 +14,14 @@ import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
 
 import net.runelite.api.Skill;
 import net.runelite.client.plugins.config.ConfigPlugin;
+import net.runelite.client.plugins.info.InfoPanel;
 import net.runelite.client.plugins.timetracking.TimeTrackingPlugin;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.DynamicGridLayout;
 import net.runelite.client.ui.MultiplexingPluginPanel;
 import net.runelite.client.ui.PluginPanel;
 import net.runelite.client.util.ImageUtil;
+import net.runelite.client.util.LinkBrowser;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -36,8 +37,10 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
+import javax.swing.border.EmptyBorder;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionListener;
@@ -47,8 +50,20 @@ import java.util.Arrays;
 @Slf4j
 public class WatchdogPanel extends PluginPanel {
     @Inject
-    @Named("wikiPage.soundIDs")
+    @Named("watchdog.wikiPage.soundIDs")
     private String SOUND_ID_WIKI_PAGE;
+
+    @Inject
+    @Named("watchdog.helpURL")
+    private String HELP_URL;
+
+    @Inject
+    @Named("watchdog.discordURL")
+    private String DISCORD_URL;
+
+    @Inject
+    @Named("watchdog.pluginVersion")
+    private String PLUGIN_VERSION;
 
     @Getter
     private final MultiplexingPluginPanel muxer = new MultiplexingPluginPanel(this);
@@ -57,6 +72,10 @@ public class WatchdogPanel extends PluginPanel {
     private AlertManager alertManager;
 
     public static final ImageIcon ADD_ICON;
+    public static final ImageIcon HELP_ICON;
+    public static final ImageIcon HELP_ICON_HOVER;
+    public static final ImageIcon DISCORD_ICON;
+    public static final ImageIcon DISCORD_ICON_HOVER;
     public static final ImageIcon CONFIG_ICON;
     public static final ImageIcon CONFIG_ICON_HOVER;
     public static final ImageIcon REGEX_ICON;
@@ -65,15 +84,23 @@ public class WatchdogPanel extends PluginPanel {
     public static final ImageIcon REGEX_SELECTED_ICON_HOVER;
 
     static {
-        BufferedImage addIcon = ImageUtil.loadImageResource(TimeTrackingPlugin.class, "add_icon.png");
+        final BufferedImage addIcon = ImageUtil.loadImageResource(TimeTrackingPlugin.class, "add_icon.png");
         ADD_ICON = new ImageIcon(addIcon);
 
-        BufferedImage configIcon = ImageUtil.loadImageResource(ConfigPlugin.class, "config_edit_icon.png");
+        final BufferedImage helpIcon = ImageUtil.loadImageResource(WatchdogPanel.class, "help_icon.png");
+        HELP_ICON = new ImageIcon(helpIcon);
+        HELP_ICON_HOVER = new ImageIcon(ImageUtil.luminanceOffset(helpIcon, -100));
+
+        final BufferedImage discordIcon = ImageUtil.loadImageResource(InfoPanel.class, "discord_icon.png");
+        DISCORD_ICON = new ImageIcon(discordIcon);
+        DISCORD_ICON_HOVER = new ImageIcon(ImageUtil.luminanceOffset(discordIcon, -100));
+
+        final BufferedImage configIcon = ImageUtil.loadImageResource(ConfigPlugin.class, "config_edit_icon.png");
         CONFIG_ICON = new ImageIcon(configIcon);
         CONFIG_ICON_HOVER = new ImageIcon(ImageUtil.luminanceOffset(configIcon, -100));
 
-        BufferedImage regexIcon = ImageUtil.loadImageResource(AlertPanel.class, "regex_icon.png");
-        BufferedImage regexIconSelected = ImageUtil.loadImageResource(AlertPanel.class, "regex_icon_selected.png");
+        final BufferedImage regexIcon = ImageUtil.loadImageResource(AlertPanel.class, "regex_icon.png");
+        final BufferedImage regexIconSelected = ImageUtil.loadImageResource(AlertPanel.class, "regex_icon_selected.png");
         REGEX_ICON = new ImageIcon(ImageUtil.luminanceOffset(regexIcon, -80));
         REGEX_ICON_HOVER = new ImageIcon(ImageUtil.luminanceOffset(regexIcon, -120));
         REGEX_SELECTED_ICON = new ImageIcon(regexIconSelected);
@@ -85,16 +112,33 @@ public class WatchdogPanel extends PluginPanel {
         this.setLayout(new BorderLayout(0, 5));
         this.setBackground(ColorScheme.DARK_GRAY_COLOR);
 
-        JPanel newAlertPanel = new JPanel(new BorderLayout());
-        JLabel title = new JLabel("Watchdog");
+        JPanel topPanel = new JPanel(new BorderLayout());
+        JPanel titlePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        titlePanel.setBorder(new EmptyBorder(5, 0, 0, 0));
+        JLabel title = new JLabel(WatchdogPlugin.getInstance().getName());
         title.setFont(title.getFont().deriveFont(Font.BOLD));
         title.setHorizontalAlignment(JLabel.LEFT);
         title.setForeground(Color.WHITE);
-        newAlertPanel.add(title);
+        titlePanel.add(title);
+        JLabel version = new JLabel("v"+PLUGIN_VERSION);
+        version.setFont(version.getFont().deriveFont(10f));
+        version.setBorder(new EmptyBorder(5, 0, 0, 0));
+        titlePanel.add(version);
+        topPanel.add(titlePanel);
 
         JPanel actionButtons = new JPanel();
 
-        JButton configButton = PanelUtils.createActionButton(CONFIG_ICON, CONFIG_ICON_HOVER, "Open Config", btn -> {
+        JButton discordButton = PanelUtils.createActionButton(DISCORD_ICON, DISCORD_ICON_HOVER, "Discord", btn -> {
+            LinkBrowser.browse(DISCORD_URL);
+        });
+        actionButtons.add(discordButton);
+
+        JButton helpButton = PanelUtils.createActionButton(HELP_ICON, HELP_ICON_HOVER, "Wiki", btn -> {
+            LinkBrowser.browse(HELP_URL);
+        });
+        actionButtons.add(helpButton);
+
+        JButton configButton = PanelUtils.createActionButton(CONFIG_ICON, CONFIG_ICON_HOVER, "Config", btn -> {
             WatchdogPlugin.getInstance().openConfiguration();
         });
         actionButtons.add(configButton);
@@ -118,9 +162,9 @@ public class WatchdogPanel extends PluginPanel {
         addDropDownButton.setToolTipText("Create New Alert");
         actionButtons.add(addDropDownButton);
 
-        newAlertPanel.add(actionButtons, BorderLayout.EAST);
+        topPanel.add(actionButtons, BorderLayout.EAST);
 
-        this.add(newAlertPanel, BorderLayout.NORTH);
+        this.add(topPanel, BorderLayout.NORTH);
 
         JPanel alertPanel = new JPanel(new BorderLayout());
         JPanel alertWrapperWrapper = new JPanel(new DynamicGridLayout(0, 1, 3, 3));

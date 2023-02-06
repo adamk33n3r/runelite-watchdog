@@ -2,7 +2,6 @@ package com.adamk33n3r.runelite.watchdog;
 
 import net.runelite.client.ui.overlay.components.ComponentConstants;
 import net.runelite.client.ui.overlay.components.LayoutableRenderableEntity;
-import net.runelite.client.ui.overlay.components.LineComponent;
 import net.runelite.client.ui.overlay.components.TextComponent;
 import net.runelite.client.util.Text;
 

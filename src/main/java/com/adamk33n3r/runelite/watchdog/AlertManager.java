@@ -17,11 +17,8 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 import javax.swing.SwingUtilities;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Slf4j
 @Singleton
@@ -41,7 +38,7 @@ public class AlertManager {
     private WatchdogPanel watchdogPanel;
 
     @Inject
-    @Named("pluginVersion")
+    @Named("watchdog.pluginVersion")
     private String pluginVersion;
 
     private static final Type ALERT_LIST_TYPE;

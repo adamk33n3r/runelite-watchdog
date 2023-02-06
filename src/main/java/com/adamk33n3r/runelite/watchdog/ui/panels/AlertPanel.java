@@ -2,7 +2,6 @@ package com.adamk33n3r.runelite.watchdog.ui.panels;
 
 import com.adamk33n3r.runelite.watchdog.AlertManager;
 import com.adamk33n3r.runelite.watchdog.TriggerType;
-import com.adamk33n3r.runelite.watchdog.Util;
 import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
 import com.adamk33n3r.runelite.watchdog.alerts.Alert;
 import com.adamk33n3r.runelite.watchdog.ui.HorizontalRuleBorder;

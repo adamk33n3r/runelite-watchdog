@@ -1,7 +1,8 @@
 ![Guard_dog_resize](https://user-images.githubusercontent.com/1350444/149637084-270521ab-2d96-4c54-a7b4-71357fb6b291.png)
 
 # Watchdog
-[![](https://img.shields.io/endpoint?url=https://i.pluginhub.info/shields/installs/plugin/watchdog)](https://runelite.net/plugin-hub/show/watchdog)
+[![Plugin Hub](https://img.shields.io/endpoint?url=https://i.pluginhub.info/shields/installs/plugin/watchdog)](https://runelite.net/plugin-hub/show/watchdog)
+[![Discord](https://img.shields.io/discord/1064234152314015875?color=%235865F2&label=Watchdog&logo=discord&logoColor=white&style=flat)](https://discord.gg/n8mxYAHJR9)
 
 Create custom alerts triggered by
 - Chat/Game Messages (supports glob pattern or regex)
@@ -19,7 +20,7 @@ with any amount of unique notification types like
 - Overlay
 
 ## Example
-![image](https://user-images.githubusercontent.com/1350444/210900848-4c177374-9b74-4cb3-b7a7-92c29596ff40.png)
+![Example](https://user-images.githubusercontent.com/1350444/210900848-4c177374-9b74-4cb3-b7a7-92c29596ff40.png)
 
 ## Capture Groups
 With glob patterns (or regex) and capture groups you can make your notifications dynamic. Using glob patterns you wrap

@@ -25,7 +25,7 @@ public class WatchdogProperties {
                 properties.getProperty("VERSION_MAJOR"),
                 properties.getProperty("VERSION_MINOR"),
                 properties.getProperty("VERSION_PATCH"));
-            properties.put("pluginVersion", pluginVersion);
+            properties.put("watchdog.pluginVersion", pluginVersion);
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
