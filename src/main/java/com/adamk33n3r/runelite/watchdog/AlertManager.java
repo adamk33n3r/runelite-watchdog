@@ -160,8 +160,8 @@ public class AlertManager {
                 log.debug("Need to convert all Sound and TTS gain back to 0,10 scale.");
                 this.alerts.stream()
                     .flatMap(alert -> alert.getNotifications().stream())
-                    .filter(notification -> notification instanceof Sound)
-                    .map(notification -> (Sound) notification)
+                    .filter(notification -> notification instanceof IAudioNotification)
+                    .map(notification -> (IAudioNotification) notification)
                     .forEach(sound -> sound.setGain(Util.scale(sound.getGain(), -25, 5, 0, 10)));
             }
 
