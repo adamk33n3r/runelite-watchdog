@@ -4,7 +4,6 @@ import com.adamk33n3r.runelite.watchdog.alerts.*;
 import com.adamk33n3r.runelite.watchdog.notifications.*;
 
 import net.runelite.client.config.ConfigManager;
-import net.runelite.client.util.RuntimeTypeAdapterFactory;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -17,8 +16,11 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 import javax.swing.SwingUtilities;
 import java.lang.reflect.Type;
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Singleton
@@ -51,6 +53,8 @@ public class AlertManager {
     private void init() {
         // Add new alert types here
         final RuntimeTypeAdapterFactory<Alert> alertTypeFactory = RuntimeTypeAdapterFactory.of(Alert.class)
+            .ignoreSubtype("IdleAlert")
+            .ignoreSubtype("ResourceAlert")
             .registerSubtype(ChatAlert.class)
             .registerSubtype(NotificationFiredAlert.class)
             .registerSubtype(StatDrainAlert.class)
@@ -100,18 +104,16 @@ public class AlertManager {
             if (!append) {
                 this.alerts.clear();
             }
-            this.alerts.addAll(this.gson.fromJson(json, ALERT_LIST_TYPE));
+            this.gson.<List<Alert>>fromJson(json, ALERT_LIST_TYPE)
+                .parallelStream()
+                .filter(Objects::nonNull)
+                .forEach(this.alerts::add);
             // Save immediately to save new properties
             this.saveAlerts();
         }
 
         // Inject dependencies
         for (Alert alert : this.alerts) {
-            // Shouldn't ever happen...but just in case.
-            if (alert == null) {
-                continue;
-            }
-
             WatchdogPlugin.getInstance().getInjector().injectMembers(alert);
             for (INotification notification : alert.getNotifications()) {
                 WatchdogPlugin.getInstance().getInjector().injectMembers(notification);
