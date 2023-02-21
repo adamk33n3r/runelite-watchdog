@@ -10,13 +10,13 @@ import com.adamk33n3r.runelite.watchdog.ui.AlertListItem;
 import com.adamk33n3r.runelite.watchdog.ui.ImportExportDialog;
 import com.adamk33n3r.runelite.watchdog.ui.dropdownbutton.DropDownButtonFactory;
 import com.adamk33n3r.runelite.watchdog.ui.panels.AlertPanel;
+import com.adamk33n3r.runelite.watchdog.ui.panels.HistoryPanel;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
 
 import net.runelite.api.Skill;
 import net.runelite.client.plugins.config.ConfigPlugin;
 import net.runelite.client.plugins.info.InfoPanel;
 import net.runelite.client.plugins.timetracking.TimeTrackingPlugin;
-import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.DynamicGridLayout;
 import net.runelite.client.ui.MultiplexingPluginPanel;
 import net.runelite.client.ui.PluginPanel;
@@ -29,6 +29,7 @@ import org.apache.commons.text.WordUtils;
 
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.inject.Provider;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -68,12 +69,18 @@ public class WatchdogPanel extends PluginPanel {
     @Getter
     private final MultiplexingPluginPanel muxer = new MultiplexingPluginPanel(this);
 
+    @Getter
+    @Inject
+    private Provider<HistoryPanel> historyPanelProvider;
+
     @Inject
     private AlertManager alertManager;
 
     public static final ImageIcon ADD_ICON;
     public static final ImageIcon HELP_ICON;
     public static final ImageIcon HELP_ICON_HOVER;
+    public static final ImageIcon HISTORY_ICON;
+    public static final ImageIcon HISTORY_ICON_HOVER;
     public static final ImageIcon DISCORD_ICON;
     public static final ImageIcon DISCORD_ICON_HOVER;
     public static final ImageIcon CONFIG_ICON;
@@ -90,6 +97,10 @@ public class WatchdogPanel extends PluginPanel {
         final BufferedImage helpIcon = ImageUtil.loadImageResource(WatchdogPanel.class, "help_icon.png");
         HELP_ICON = new ImageIcon(helpIcon);
         HELP_ICON_HOVER = new ImageIcon(ImageUtil.luminanceOffset(helpIcon, -100));
+
+        final BufferedImage historyIcon = ImageUtil.loadImageResource(WatchdogPanel.class, "history_icon.png");
+        HISTORY_ICON = new ImageIcon(ImageUtil.luminanceOffset(historyIcon, -40));
+        HISTORY_ICON_HOVER = new ImageIcon(ImageUtil.luminanceOffset(historyIcon, -160));
 
         final BufferedImage discordIcon = ImageUtil.loadImageResource(InfoPanel.class, "discord_icon.png");
         DISCORD_ICON = new ImageIcon(discordIcon);
@@ -110,7 +121,6 @@ public class WatchdogPanel extends PluginPanel {
     public void rebuild() {
         this.removeAll();
         this.setLayout(new BorderLayout(0, 5));
-        this.setBackground(ColorScheme.DARK_GRAY_COLOR);
 
         JPanel topPanel = new JPanel(new BorderLayout());
         JPanel titlePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -142,6 +152,11 @@ public class WatchdogPanel extends PluginPanel {
             WatchdogPlugin.getInstance().openConfiguration();
         });
         actionButtons.add(configButton);
+
+        JButton historyButton = PanelUtils.createActionButton(HISTORY_ICON, HISTORY_ICON_HOVER, "History", btn -> {
+            this.muxer.pushState(this.historyPanelProvider.get());
+        });
+        actionButtons.add(historyButton);
 
         JPopupMenu popupMenu = new JPopupMenu();
         ActionListener actionListener = e -> {

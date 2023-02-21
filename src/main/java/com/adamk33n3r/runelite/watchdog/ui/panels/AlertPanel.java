@@ -118,7 +118,11 @@ public class AlertPanel extends PluginPanel {
             TEST_ICON,
             TEST_ICON_HOVER,
             "Test the whole alert",
-            btn -> alert.getNotifications().forEach(notification -> notification.fireForced(new String[]{ "1", "2", "3", "4", "5" }))
+            btn -> {
+                String[] triggerValues = {"1", "2", "3", "4", "5"};
+                WatchdogPlugin.getInstance().getPanel().getHistoryPanelProvider().get().addEntry(alert, triggerValues);
+                alert.getNotifications().forEach(notification -> notification.fireForced(triggerValues));
+            }
         );
         rightButtons.add(testAlert);
 

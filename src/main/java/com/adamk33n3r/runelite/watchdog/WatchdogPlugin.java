@@ -19,6 +19,7 @@ import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.plugins.config.ConfigPlugin;
 import net.runelite.client.ui.ClientToolbar;
+import net.runelite.client.ui.MultiplexingPluginPanel;
 import net.runelite.client.ui.NavigationButton;
 import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.ui.overlay.OverlayMenuEntry;
@@ -82,6 +83,7 @@ public class WatchdogPlugin extends Plugin {
     @Inject
     private Provider<ConfigPlugin> configPluginProvider;
 
+    @Getter
     private WatchdogPanel panel;
 
     private NavigationButton navButton;
@@ -97,6 +99,7 @@ public class WatchdogPlugin extends Plugin {
     public void configure(Binder binder) {
         Properties properties = WatchdogProperties.getProperties();
         Names.bindProperties(binder, properties);
+        binder.bind(MultiplexingPluginPanel.class).toProvider(() -> alertManager.getWatchdogPanel().getMuxer());
     }
 
     @Override
