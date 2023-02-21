@@ -105,7 +105,7 @@ public class AlertManager {
                 this.alerts.clear();
             }
             this.gson.<List<Alert>>fromJson(json, ALERT_LIST_TYPE)
-                .parallelStream()
+                .stream()
                 .filter(Objects::nonNull)
                 .forEach(this.alerts::add);
             // Save immediately to save new properties
