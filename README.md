@@ -19,8 +19,9 @@ with any amount of unique notification types like
 - Overhead Text
 - Overlay
 
-## Example
-![Example](https://user-images.githubusercontent.com/1350444/210900848-4c177374-9b74-4cb3-b7a7-92c29596ff40.png)
+## Examples
+![Attack Drained Example](https://user-images.githubusercontent.com/1350444/221425644-0211c4d7-2838-4e63-986a-8ab313052ad5.png)
+![Harvest Example](https://user-images.githubusercontent.com/1350444/221425625-4e246cb6-eff0-4f8f-855f-80fd7b36bc9d.png)
 
 ## Capture Groups
 With glob patterns (or regex) and capture groups you can make your notifications dynamic. Using glob patterns you wrap
