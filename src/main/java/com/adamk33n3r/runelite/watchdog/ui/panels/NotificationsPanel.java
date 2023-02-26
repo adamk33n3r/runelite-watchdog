@@ -132,6 +132,7 @@ public class NotificationsPanel extends JPanel {
     private Notification createNotification(NotificationType notificationType) {
         Injector injector = WatchdogPlugin.getInstance().getInjector();
         Notification notification = injector.getInstance(notificationType.getImplClass());
+        notification.setAlert(this.alert);
         this.alert.getNotifications().add(notification);
         return notification;
     }
