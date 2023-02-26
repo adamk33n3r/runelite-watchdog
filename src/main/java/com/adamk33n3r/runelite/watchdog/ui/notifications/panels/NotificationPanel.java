@@ -21,6 +21,7 @@ import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
 
 public abstract class NotificationPanel extends JPanel {
@@ -94,14 +95,20 @@ public abstract class NotificationPanel extends JPanel {
         nameWrapper.add(rightActions, BorderLayout.EAST);
 
 
-        UpDownArrows upDownArrows = new UpDownArrows("Move Notification up", btn -> {
-            System.out.println("move notif up");
-            System.out.println(notification.getAlert());
-            notification.getAlert().moveNotificationUp(notification);
+        UpDownArrows upDownArrows = new UpDownArrows("Move Notification up (hold shift for top)", (btn, modifiers) -> {
+            if ((modifiers & ActionEvent.SHIFT_MASK) != 0) {
+                notification.getAlert().moveNotificationToTop(notification);
+            } else {
+                notification.getAlert().moveNotificationUp(notification);
+            }
             onChangeListener.run();
             parentPanel.rebuild();
-        }, "Move Notification down", btn -> {
-            notification.getAlert().moveNotificationDown(notification);
+        }, "Move Notification down (hold shift for bottom)", (btn, modifiers) -> {
+            if ((modifiers & ActionEvent.SHIFT_MASK) != 0) {
+                notification.getAlert().moveNotificationToBottom(notification);
+            } else {
+                notification.getAlert().moveNotificationDown(notification);
+            }
             onChangeListener.run();
             parentPanel.rebuild();
         }, true);
@@ -115,7 +122,7 @@ public abstract class NotificationPanel extends JPanel {
             "Switch to only fire notification while the game is in the background",
             "Enable notification while the game is in the foreground",
             notification.isFireWhenFocused(),
-            btn -> {
+            (btn, modifiers) -> {
                 notification.setFireWhenFocused(btn.isSelected());
                 onChangeListener.run();
             });
@@ -125,7 +132,7 @@ public abstract class NotificationPanel extends JPanel {
             TEST_ICON,
             TEST_ICON_HOVER,
             "Test the notification",
-            btn -> notification.fireForced(new String[]{ "1", "2", "3", "4", "5" }));
+            (btn, modifiers) -> notification.fireForced(new String[]{ "1", "2", "3", "4", "5" }));
         rightActions.add(testBtn);
 
         JButton deleteBtn = PanelUtils.createActionButton(

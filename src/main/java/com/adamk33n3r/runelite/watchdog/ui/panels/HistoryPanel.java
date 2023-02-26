@@ -49,7 +49,7 @@ public class HistoryPanel extends PluginPanel {
             BACK_ICON,
             BACK_ICON_HOVER,
             "Back",
-            btn -> this.muxer.get().popState()
+            (btn, modifiers) -> this.muxer.get().popState()
         );
         backButton.setPreferredSize(new Dimension(22, 16));
         backButton.setBorder(new EmptyBorder(0, 0, 0, 5));

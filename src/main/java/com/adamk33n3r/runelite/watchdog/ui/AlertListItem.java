@@ -13,11 +13,9 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.border.EmptyBorder;
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
 
 public class AlertListItem extends JPanel {
@@ -51,16 +49,24 @@ public class AlertListItem extends JPanel {
         final JPanel actionButtons = new JPanel(new DynamicGridLayout(1, 0, 0, 0));
         this.add(actionButtons, BorderLayout.LINE_END);
 
-        UpDownArrows upDownArrows = new UpDownArrows("Move Alert up", btn -> {
-            alertManager.moveAlertUp(alert);
+        UpDownArrows upDownArrows = new UpDownArrows("Move Alert up (hold shift for top)", (btn, modifiers) -> {
+            if ((modifiers & ActionEvent.SHIFT_MASK) != 0) {
+                alertManager.moveAlertToTop(alert);
+            } else {
+                alertManager.moveAlertUp(alert);
+            }
             panel.rebuild();
-        }, "Move Alert down", btn -> {
-            alertManager.moveAlertDown(alert);
+        }, "Move Alert down (hold shift for bottom)", (btn, modifiers) -> {
+            if ((modifiers & ActionEvent.SHIFT_MASK) != 0) {
+                alertManager.moveAlertToBottom(alert);
+            } else {
+                alertManager.moveAlertDown(alert);
+            }
             panel.rebuild();
         }, true);
         actionButtons.add(upDownArrows);
 
-        final JButton deleteButton = PanelUtils.createActionButton(DELETE_ICON, DELETE_ICON_HOVER, "Delete Alert", btn -> {
+        final JButton deleteButton = PanelUtils.createActionButton(DELETE_ICON, DELETE_ICON_HOVER, "Delete Alert", (btn, modifiers) -> {
             int result = JOptionPane.showConfirmDialog(this, "Are you sure you want to delete the " + alert.getName() + " alert?", "Delete?", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE);
             if (result == JOptionPane.YES_OPTION) {
                 alertManager.removeAlert(alert);

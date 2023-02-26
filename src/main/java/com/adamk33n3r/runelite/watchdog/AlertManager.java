@@ -91,6 +91,18 @@ public class AlertManager {
         SwingUtilities.invokeLater(this.watchdogPanel::rebuild);
     }
 
+    public void moveAlertToTop(Alert alert) {
+        this.alerts.remove(alert);
+        this.alerts.add(0, alert);
+        this.saveAlerts();
+    }
+
+    public void moveAlertToBottom(Alert alert) {
+        this.alerts.remove(alert);
+        this.alerts.add(alert);
+        this.saveAlerts();
+    }
+
     public void moveAlertUp(Alert alert) {
         int curIdx = this.alerts.indexOf(alert);
         int newIdx = curIdx - 1;

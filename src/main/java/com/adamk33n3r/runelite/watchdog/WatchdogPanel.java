@@ -138,22 +138,22 @@ public class WatchdogPanel extends PluginPanel {
 
         JPanel actionButtons = new JPanel();
 
-        JButton discordButton = PanelUtils.createActionButton(DISCORD_ICON, DISCORD_ICON_HOVER, "Discord", btn -> {
+        JButton discordButton = PanelUtils.createActionButton(DISCORD_ICON, DISCORD_ICON_HOVER, "Discord", (btn, modifiers) -> {
             LinkBrowser.browse(DISCORD_URL);
         });
         actionButtons.add(discordButton);
 
-        JButton helpButton = PanelUtils.createActionButton(HELP_ICON, HELP_ICON_HOVER, "Wiki", btn -> {
+        JButton helpButton = PanelUtils.createActionButton(HELP_ICON, HELP_ICON_HOVER, "Wiki", (btn, modifiers) -> {
             LinkBrowser.browse(HELP_URL);
         });
         actionButtons.add(helpButton);
 
-        JButton configButton = PanelUtils.createActionButton(CONFIG_ICON, CONFIG_ICON_HOVER, "Config", btn -> {
+        JButton configButton = PanelUtils.createActionButton(CONFIG_ICON, CONFIG_ICON_HOVER, "Config", (btn, modifiers) -> {
             WatchdogPlugin.getInstance().openConfiguration();
         });
         actionButtons.add(configButton);
 
-        JButton historyButton = PanelUtils.createActionButton(HISTORY_ICON, HISTORY_ICON_HOVER, "History", btn -> {
+        JButton historyButton = PanelUtils.createActionButton(HISTORY_ICON, HISTORY_ICON_HOVER, "History", (btn, modifiers) -> {
             this.muxer.pushState(this.historyPanelProvider.get());
         });
         actionButtons.add(historyButton);
@@ -242,7 +242,7 @@ public class WatchdogPanel extends PluginPanel {
                         "Disable regex",
                         "Enable regex",
                         chatAlert.isRegexEnabled(),
-                        btn -> {
+                        (btn, modifiers) -> {
                             chatAlert.setRegexEnabled(btn.isSelected());
                             this.alertManager.saveAlerts();
                         }
@@ -267,7 +267,7 @@ public class WatchdogPanel extends PluginPanel {
                         "Disable regex",
                         "Enable regex",
                         notificationFiredAlert.isRegexEnabled(),
-                        btn -> {
+                        (btn, modifiers) -> {
                             notificationFiredAlert.setRegexEnabled(btn.isSelected());
                             this.alertManager.saveAlerts();
                         }

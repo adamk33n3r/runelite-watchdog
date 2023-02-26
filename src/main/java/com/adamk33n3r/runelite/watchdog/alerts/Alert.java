@@ -35,6 +35,16 @@ public abstract class Alert {
             .orElse(null);
     }
 
+    public void moveNotificationToTop(Notification notification) {
+        this.notifications.remove(notification);
+        this.notifications.add(0, notification);
+    }
+
+    public void moveNotificationToBottom(Notification notification) {
+        this.notifications.remove(notification);
+        this.notifications.add(notification);
+    }
+
     public void moveNotificationUp(Notification notification) {
         int curIdx = this.notifications.indexOf(notification);
         int newIdx = curIdx - 1;

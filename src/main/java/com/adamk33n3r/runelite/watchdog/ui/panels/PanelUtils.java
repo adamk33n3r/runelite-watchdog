@@ -142,18 +142,18 @@ public class PanelUtils {
         actionButton.setIcon(icon);
         actionButton.setRolloverIcon(rolloverIcon);
         actionButton.setToolTipText(tooltip);
-        actionButton.addActionListener(ev -> listener.clickPerformed(actionButton));
+        actionButton.addActionListener(ev -> listener.clickPerformed(actionButton, ev.getModifiers()));
         return actionButton;
     }
 
     public interface ButtonClickListener {
-        void clickPerformed(JButton button);
+        void clickPerformed(JButton button, int modifiers);
     }
 
     public static JButton createToggleActionButton(ImageIcon onIcon, ImageIcon onRolloverIcon, ImageIcon offIcon, ImageIcon offRolloverIcon, String onTooltip, String offTooltip, boolean initialValue, ButtonClickListener listener) {
-        JButton actionButton = createActionButton(offIcon, offRolloverIcon, offTooltip, btn -> {
+        JButton actionButton = createActionButton(offIcon, offRolloverIcon, offTooltip, (btn, modifiers) -> {
             btn.setSelected(!btn.isSelected());
-            listener.clickPerformed(btn);
+            listener.clickPerformed(btn, modifiers);
         });
         SwingUtil.addModalTooltip(actionButton, onTooltip, offTooltip);
         actionButton.setSelectedIcon(onIcon);

@@ -27,7 +27,6 @@ import net.runelite.client.ui.DynamicGridLayout;
 import net.runelite.client.ui.components.colorpicker.ColorPickerManager;
 
 import com.google.inject.Injector;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.inject.Inject;
@@ -39,7 +38,6 @@ import javax.swing.JPopupMenu;
 import java.awt.BorderLayout;
 import java.awt.event.ActionListener;
 import java.util.Arrays;
-import java.util.List;
 
 import static com.adamk33n3r.runelite.watchdog.WatchdogPanel.ADD_ICON;
 
@@ -102,7 +100,7 @@ public class NotificationsPanel extends JPanel {
         JPanel notificationPanel = new JPanel(new DynamicGridLayout(0, 1, 3, 3));
         this.notificationContainer.add(notificationPanel);
 
-        PanelUtils.ButtonClickListener removeNotification = btn -> {
+        PanelUtils.ButtonClickListener removeNotification = (btn, modifiers) -> {
             this.alert.getNotifications().remove(notification);
             this.notificationContainer.remove(notificationPanel);
             this.notificationContainer.revalidate();

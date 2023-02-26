@@ -104,7 +104,7 @@ public class AlertPanel extends PluginPanel {
             EXPORT_ICON,
             EXPORT_ICON_HOVER,
             "Export this alert",
-            btn -> {
+            (btn, modifiers) -> {
                 ImportExportDialog importExportDialog = new ImportExportDialog(
                     SwingUtilities.getWindowAncestor(this),
                     this.alertManager.getGson().toJson(new Alert[] { alert })
@@ -118,7 +118,7 @@ public class AlertPanel extends PluginPanel {
             TEST_ICON,
             TEST_ICON_HOVER,
             "Test the whole alert",
-            btn -> {
+            (btn, modifiers) -> {
                 String[] triggerValues = {"1", "2", "3", "4", "5"};
                 WatchdogPlugin.getInstance().getPanel().getHistoryPanelProvider().get().addEntry(alert, triggerValues);
                 alert.getNotifications().forEach(notification -> notification.fireForced(triggerValues));
@@ -140,7 +140,7 @@ public class AlertPanel extends PluginPanel {
             BACK_ICON,
             BACK_ICON_HOVER,
             "Back",
-            btn -> {
+            (btn, modifiers) -> {
                 this.alertManager.saveAlerts();
                 this.muxer.popState();
             }
