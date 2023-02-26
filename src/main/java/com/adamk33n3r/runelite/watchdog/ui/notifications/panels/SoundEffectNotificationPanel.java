@@ -3,6 +3,7 @@ package com.adamk33n3r.runelite.watchdog.ui.notifications.panels;
 import com.adamk33n3r.runelite.watchdog.WatchdogProperties;
 import com.adamk33n3r.runelite.watchdog.notifications.SoundEffect;
 import com.adamk33n3r.runelite.watchdog.ui.notifications.VolumeSlider;
+import com.adamk33n3r.runelite.watchdog.ui.panels.NotificationsPanel;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
 
 import net.runelite.client.plugins.info.JRichTextPane;
@@ -12,8 +13,8 @@ import javax.swing.JSpinner;
 
 public class SoundEffectNotificationPanel extends NotificationPanel {
 
-    public SoundEffectNotificationPanel(SoundEffect soundEffect, Runnable onChangeListener, PanelUtils.ButtonClickListener onRemove) {
-        super(soundEffect, onChangeListener, onRemove);
+    public SoundEffectNotificationPanel(SoundEffect soundEffect, NotificationsPanel parentPanel, Runnable onChangeListener, PanelUtils.ButtonClickListener onRemove) {
+        super(soundEffect, parentPanel, onChangeListener, onRemove);
 
         JRichTextPane richTextPane = new JRichTextPane();
         richTextPane.setContentType("text/html");

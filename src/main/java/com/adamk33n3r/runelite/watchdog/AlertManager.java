@@ -16,11 +16,9 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 import javax.swing.SwingUtilities;
 import java.lang.reflect.Type;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Singleton
@@ -93,6 +91,34 @@ public class AlertManager {
         SwingUtilities.invokeLater(this.watchdogPanel::rebuild);
     }
 
+    public void moveAlertUp(Alert alert) {
+        int curIdx = this.alerts.indexOf(alert);
+        int newIdx = curIdx - 1;
+
+        if (newIdx < 0) {
+            return;
+        }
+
+        this.alerts.remove(alert);
+        this.alerts.add(newIdx, alert);
+        this.saveAlerts();
+    }
+
+    public void moveAlertDown(Alert alert) {
+        int curIdx = this.alerts.indexOf(alert);
+        int newIdx = curIdx + 1;
+
+        if (newIdx >= this.alerts.size()) {
+            return;
+        }
+
+        this.alerts.remove(alert);
+        this.alerts.add(newIdx, alert);
+        this.saveAlerts();
+    }
+
+    public void moveNotificationUp(Alert alert, Notification notification) {}
+
     public void loadAlerts() {
         final String json = this.configManager.getConfiguration(WatchdogConfig.CONFIG_GROUP_NAME, WatchdogConfig.ALERTS);
         this.importAlerts(json, false);
@@ -117,6 +143,7 @@ public class AlertManager {
             WatchdogPlugin.getInstance().getInjector().injectMembers(alert);
             for (INotification notification : alert.getNotifications()) {
                 WatchdogPlugin.getInstance().getInjector().injectMembers(notification);
+                notification.setAlert(alert);
             }
         }
 

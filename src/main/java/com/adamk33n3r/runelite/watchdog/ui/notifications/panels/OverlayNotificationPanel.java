@@ -1,6 +1,7 @@
 package com.adamk33n3r.runelite.watchdog.ui.notifications.panels;
 
 import com.adamk33n3r.runelite.watchdog.notifications.Overlay;
+import com.adamk33n3r.runelite.watchdog.ui.panels.NotificationsPanel;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
 
 import net.runelite.client.ui.components.ColorJButton;
@@ -13,8 +14,8 @@ import javax.swing.JSpinner;
 public class OverlayNotificationPanel extends MessageNotificationPanel {
     private JPanel displayTime;
 
-    public OverlayNotificationPanel(Overlay notification, ColorPickerManager colorPickerManager, Runnable onChangeListener, PanelUtils.ButtonClickListener onRemove) {
-        super(notification, onChangeListener, onRemove);
+    public OverlayNotificationPanel(Overlay notification, NotificationsPanel parentPanel, ColorPickerManager colorPickerManager, Runnable onChangeListener, PanelUtils.ButtonClickListener onRemove) {
+        super(notification, parentPanel, onChangeListener, onRemove);
 
         ColorJButton colorPicker = PanelUtils.createColorPicker(
             "Pick a color",
