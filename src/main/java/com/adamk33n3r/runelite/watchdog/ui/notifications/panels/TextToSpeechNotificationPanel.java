@@ -7,6 +7,7 @@ import com.adamk33n3r.runelite.watchdog.notifications.TextToSpeech;
 import com.adamk33n3r.runelite.watchdog.ui.FlatTextArea;
 import com.adamk33n3r.runelite.watchdog.ui.notifications.VoiceChooser;
 import com.adamk33n3r.runelite.watchdog.ui.notifications.VolumeSlider;
+import com.adamk33n3r.runelite.watchdog.ui.panels.NotificationsPanel;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
 
 import net.runelite.client.ui.ColorScheme;
@@ -34,8 +35,8 @@ public class TextToSpeechNotificationPanel extends NotificationPanel {
         SPEED_ICON = new ImageIcon(ImageUtil.luminanceOffset(speedImg, -80));
     }
 
-    public TextToSpeechNotificationPanel(TextToSpeech notification, Runnable onChangeListener, PanelUtils.ButtonClickListener onRemove) {
-        super(notification, onChangeListener, onRemove);
+    public TextToSpeechNotificationPanel(TextToSpeech notification, NotificationsPanel parentPanel, Runnable onChangeListener, PanelUtils.ButtonClickListener onRemove) {
+        super(notification, parentPanel, onChangeListener, onRemove);
 
         if (!WatchdogPlugin.getInstance().getConfig().ttsEnabled()) {
             JLabel ttsLabel = new JLabel("<html>Enable TTS in the config to use this Notification type</html>");

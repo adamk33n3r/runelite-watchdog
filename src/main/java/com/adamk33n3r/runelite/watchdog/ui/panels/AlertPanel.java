@@ -253,7 +253,7 @@ public class AlertPanel extends PluginPanel {
     }
 
     public PluginPanel build() {
-        NotificationsPanel notificationPanel = new NotificationsPanel(this.alert.getNotifications());
+        NotificationsPanel notificationPanel = new NotificationsPanel(this.alert);
         WatchdogPlugin.getInstance().getInjector().injectMembers(notificationPanel);
         notificationPanel.setBorder(new HorizontalRuleBorder(10));
         this.container.add(notificationPanel);

@@ -1,6 +1,7 @@
 package com.adamk33n3r.runelite.watchdog.ui.notifications.panels;
 
 import com.adamk33n3r.runelite.watchdog.notifications.ScreenFlash;
+import com.adamk33n3r.runelite.watchdog.ui.panels.NotificationsPanel;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
 
 import net.runelite.client.config.FlashNotification;
@@ -12,8 +13,8 @@ import javax.swing.JComboBox;
 import java.util.Arrays;
 
 public class ScreenFlashNotificationPanel extends NotificationPanel {
-    public ScreenFlashNotificationPanel(ScreenFlash screenFlash, ColorPickerManager colorPickerManager, Runnable onChangeListener, PanelUtils.ButtonClickListener onRemove) {
-        super(screenFlash, onChangeListener, onRemove);
+    public ScreenFlashNotificationPanel(ScreenFlash screenFlash, NotificationsPanel parentPanel, ColorPickerManager colorPickerManager, Runnable onChangeListener, PanelUtils.ButtonClickListener onRemove) {
+        super(screenFlash, parentPanel, onChangeListener, onRemove);
 
         ColorJButton colorPickerBtn = PanelUtils.createColorPicker(
             "Pick a color",

@@ -34,4 +34,28 @@ public abstract class Alert {
             .findFirst()
             .orElse(null);
     }
+
+    public void moveNotificationUp(Notification notification) {
+        int curIdx = this.notifications.indexOf(notification);
+        int newIdx = curIdx - 1;
+
+        if (newIdx < 0) {
+            return;
+        }
+
+        this.notifications.remove(notification);
+        this.notifications.add(newIdx, notification);
+    }
+
+    public void moveNotificationDown(Notification notification) {
+        int curIdx = this.notifications.indexOf(notification);
+        int newIdx = curIdx + 1;
+
+        if (newIdx >= this.notifications.size()) {
+            return;
+        }
+
+        this.notifications.remove(notification);
+        this.notifications.add(newIdx, notification);
+    }
 }

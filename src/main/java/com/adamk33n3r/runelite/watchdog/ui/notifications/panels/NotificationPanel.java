@@ -2,11 +2,12 @@ package com.adamk33n3r.runelite.watchdog.ui.notifications.panels;
 
 import com.adamk33n3r.runelite.watchdog.NotificationType;
 import com.adamk33n3r.runelite.watchdog.notifications.Notification;
+import com.adamk33n3r.runelite.watchdog.ui.AlertListItem;
 import com.adamk33n3r.runelite.watchdog.ui.StretchedStackedLayout;
+import com.adamk33n3r.runelite.watchdog.ui.UpDownArrows;
+import com.adamk33n3r.runelite.watchdog.ui.panels.NotificationsPanel;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
 
-import net.runelite.client.plugins.loottracker.LootTrackerPlugin;
-import net.runelite.client.plugins.timetracking.TimeTrackingPlugin;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.util.ImageUtil;
 
@@ -35,10 +36,6 @@ public abstract class NotificationPanel extends JPanel {
     // info - github
     // config - edit/back
 
-    private static final ImageIcon COLLAPSE_ICON;
-    private static final ImageIcon EXPAND_ICON;
-    private static final ImageIcon DELETE_ICON;
-    private static final ImageIcon DELETE_ICON_HOVER;
     private static final ImageIcon FOREGROUND_ICON;
     private static final ImageIcon FOREGROUND_ICON_HOVER;
     private static final ImageIcon BACKGROUND_ICON;
@@ -49,19 +46,12 @@ public abstract class NotificationPanel extends JPanel {
     protected static final ImageIcon CLOCK_ICON;
 
     static {
-        final BufferedImage collapseImg = ImageUtil.loadImageResource(LootTrackerPlugin.class, "collapsed.png");
-        final BufferedImage expandedImg = ImageUtil.loadImageResource(LootTrackerPlugin.class, "expanded.png");
-        final BufferedImage deleteImg = ImageUtil.loadImageResource(TimeTrackingPlugin.class, "delete_icon.png");
         final BufferedImage foregroundImg = ImageUtil.loadImageResource(NotificationPanel.class, "foreground_icon.png");
         final BufferedImage backgroundImg = ImageUtil.loadImageResource(NotificationPanel.class, "background_icon.png");
         final BufferedImage testImg = ImageUtil.loadImageResource(NotificationPanel.class, "test_icon.png");
         final BufferedImage volumeImg = ImageUtil.loadImageResource(NotificationPanel.class, "volume_icon.png");
         final BufferedImage clockIcon = ImageUtil.loadImageResource(NotificationPanel.class, "clock_icon.png");
 
-        COLLAPSE_ICON = new ImageIcon(collapseImg);
-        EXPAND_ICON = new ImageIcon(expandedImg);
-        DELETE_ICON = new ImageIcon(deleteImg);
-        DELETE_ICON_HOVER = new ImageIcon(ImageUtil.luminanceOffset(deleteImg, -80));
         FOREGROUND_ICON = new ImageIcon(foregroundImg);
         FOREGROUND_ICON_HOVER = new ImageIcon(ImageUtil.luminanceOffset(foregroundImg, -80));
         BACKGROUND_ICON = new ImageIcon(backgroundImg);
@@ -78,7 +68,7 @@ public abstract class NotificationPanel extends JPanel {
         BorderFactory.createMatteBorder(0, 0, 1, 0, ColorScheme.DARK_GRAY_COLOR),
         BorderFactory.createMatteBorder(5, 10, 5, 0, ColorScheme.DARKER_GRAY_COLOR));
 
-    public NotificationPanel(Notification notification, Runnable onChangeListener, PanelUtils.ButtonClickListener onRemove) {
+    public NotificationPanel(Notification notification, NotificationsPanel parentPanel, Runnable onChangeListener, PanelUtils.ButtonClickListener onRemove) {
         this.setLayout(new BorderLayout());
         this.setBorder(new EmptyBorder(3, 0, 0, 0));
         JPanel container = new JPanel(new StretchedStackedLayout(3, 3));
@@ -103,6 +93,20 @@ public abstract class NotificationPanel extends JPanel {
         rightActions.setBackground(ColorScheme.DARKER_GRAY_COLOR);
         nameWrapper.add(rightActions, BorderLayout.EAST);
 
+
+        UpDownArrows upDownArrows = new UpDownArrows("Move Notification up", btn -> {
+            System.out.println("move notif up");
+            System.out.println(notification.getAlert());
+            notification.getAlert().moveNotificationUp(notification);
+            onChangeListener.run();
+            parentPanel.rebuild();
+        }, "Move Notification down", btn -> {
+            notification.getAlert().moveNotificationDown(notification);
+            onChangeListener.run();
+            parentPanel.rebuild();
+        }, true);
+        rightActions.add(upDownArrows);
+
         JButton focusBtn = PanelUtils.createToggleActionButton(
             FOREGROUND_ICON,
             FOREGROUND_ICON_HOVER,
@@ -125,8 +129,8 @@ public abstract class NotificationPanel extends JPanel {
         rightActions.add(testBtn);
 
         JButton deleteBtn = PanelUtils.createActionButton(
-            DELETE_ICON,
-            DELETE_ICON_HOVER,
+            AlertListItem.DELETE_ICON,
+            AlertListItem.DELETE_ICON_HOVER,
             "Remove this notification",
             onRemove);
         rightActions.add(deleteBtn);

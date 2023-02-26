@@ -1,6 +1,7 @@
 package com.adamk33n3r.runelite.watchdog.notifications;
 
 import com.adamk33n3r.runelite.watchdog.NotificationType;
+import com.adamk33n3r.runelite.watchdog.alerts.Alert;
 
 import net.runelite.client.ui.ClientUI;
 
@@ -16,6 +17,9 @@ public abstract class Notification implements INotification {
 
     @Getter @Setter
     private boolean fireWhenFocused = true;
+
+    @Getter @Setter
+    protected transient Alert alert;
 
     protected boolean shouldFire() {
         return !this.clientUI.isFocused() || this.fireWhenFocused;
