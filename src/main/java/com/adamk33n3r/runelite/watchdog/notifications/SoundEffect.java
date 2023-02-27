@@ -1,10 +1,9 @@
 package com.adamk33n3r.runelite.watchdog.notifications;
 
 import com.adamk33n3r.runelite.watchdog.Util;
-import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
+import com.adamk33n3r.runelite.watchdog.WatchdogConfig;
 
 import net.runelite.api.Client;
-import net.runelite.api.SoundEffectID;
 import net.runelite.api.SoundEffectVolume;
 import net.runelite.client.callback.ClientThread;
 
@@ -16,13 +15,19 @@ import javax.inject.Inject;
 @Getter
 @Setter
 public class SoundEffect extends AudioNotification {
-    private int soundID = SoundEffectID.GE_ADD_OFFER_DINGALING;
+    private int soundID;
 
     @Inject
     private transient Client client;
 
     @Inject
     private transient ClientThread clientThread;
+
+    @Inject
+    public SoundEffect(WatchdogConfig config) {
+        this.gain = config.defaultSoundEffectVolume();
+        this.soundID = config.defaultSoundEffectID();
+    }
 
     @Override
     protected void fireImpl(String[] triggerValues) {

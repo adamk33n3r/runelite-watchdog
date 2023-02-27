@@ -1,21 +1,28 @@
 package com.adamk33n3r.runelite.watchdog.notifications;
 
 import com.adamk33n3r.runelite.watchdog.Util;
+import com.adamk33n3r.runelite.watchdog.WatchdogConfig;
 import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
-
-import net.runelite.client.util.ColorUtil;
 
 import lombok.Getter;
 import lombok.Setter;
 
+import javax.inject.Inject;
 import java.awt.Color;
 
 @Getter
 @Setter
 public class Overlay extends MessageNotification {
-    private Color color = ColorUtil.fromHex("#46FF0000");
+    private Color color;
     private boolean sticky = false;
     private int timeToLive = 5;
+
+    @Inject
+    public Overlay(WatchdogConfig config) {
+        this.color = config.defaultOverlayColor();
+        this.sticky = config.defaultOverlaySticky();
+        this.timeToLive = config.defaultOverlayTTL();
+    }
 
     @Override
     protected void fireImpl(String[] triggerValues) {

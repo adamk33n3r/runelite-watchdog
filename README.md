@@ -19,6 +19,8 @@ with any amount of unique notification types like
 - Overhead Text
 - Overlay
 
+_You can set defaults for the notifications in the plugin config_
+
 ## Examples
 ![Attack Drained Example](https://user-images.githubusercontent.com/1350444/221425644-0211c4d7-2838-4e63-986a-8ab313052ad5.png)
 ![Harvest Example](https://user-images.githubusercontent.com/1350444/221425625-4e246cb6-eff0-4f8f-855f-80fd7b36bc9d.png)

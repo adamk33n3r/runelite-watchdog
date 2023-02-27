@@ -10,7 +10,6 @@ import java.awt.TrayIcon;
 public class TrayNotification extends MessageNotification {
     @Override
     protected void fireImpl(String[] triggerValues) {
-        log.debug("Fire TrayNotification");
         if (this.clientUI.getTrayIcon() != null) {
             this.clientUI.getTrayIcon().displayMessage(
                 "Watchdog",
