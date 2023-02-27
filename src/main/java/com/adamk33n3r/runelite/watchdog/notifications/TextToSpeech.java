@@ -1,6 +1,7 @@
 package com.adamk33n3r.runelite.watchdog.notifications;
 
 import com.adamk33n3r.runelite.watchdog.Util;
+import com.adamk33n3r.runelite.watchdog.WatchdogConfig;
 import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
 import com.adamk33n3r.runelite.watchdog.notifications.tts.Voice;
 
@@ -8,6 +9,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
+import javax.inject.Inject;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
@@ -26,11 +28,18 @@ import static net.runelite.client.RuneLite.CACHE_DIR;
 @Slf4j
 public class TextToSpeech extends MessageNotification implements IAudioNotification {
     @Getter @Setter
-    private int gain = 5;
+    private int gain;
     @Getter @Setter
-    private int rate = 1;
+    private int rate;
     @Getter @Setter
-    private Voice voice = Voice.GEORGE;
+    private Voice voice;
+
+    @Inject
+    public TextToSpeech(WatchdogConfig config) {
+        this.gain = config.defaultTTSVolume();
+        this.rate = config.defaultTTSRate();
+        this.voice = config.defaultTTSVoice();
+    }
 
     @Override
     protected void fireImpl(String[] triggerValues) {
@@ -49,6 +58,7 @@ public class TextToSpeech extends MessageNotification implements IAudioNotificat
 
             // If the cache file exists, load and play it. Else fetch it from the server and cache it.
             if (soundFile.exists()) {
+                log.debug("Using cached file");
                 inputStream = AudioSystem.getAudioInputStream(soundFile);
             } else {
                 String request = String.format("https://ttsplugin.com?m=%s&r=%d&v=%d", encodedMessage, rate, voice.id);
@@ -71,7 +81,6 @@ public class TextToSpeech extends MessageNotification implements IAudioNotificat
             FloatControl volume = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
             int decibels = Util.scale(this.gain, 0, 10, -25, 5);
             volume.setValue(decibels);
-            log.debug("volume: " + decibels);
             clip.start();
             clip.addLineListener(event -> {
                 if (event.getType() == LineEvent.Type.STOP) {

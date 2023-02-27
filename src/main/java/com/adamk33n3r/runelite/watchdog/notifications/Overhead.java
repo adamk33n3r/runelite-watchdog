@@ -1,6 +1,7 @@
 package com.adamk33n3r.runelite.watchdog.notifications;
 
 import com.adamk33n3r.runelite.watchdog.Util;
+import com.adamk33n3r.runelite.watchdog.WatchdogConfig;
 
 import net.runelite.api.Client;
 
@@ -15,12 +16,17 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class Overhead extends MessageNotification {
     @Getter @Setter
-    private int displayTime = 1;
+    private int displayTime;
 
     @Inject
     private transient Client client;
     @Inject
     private transient ScheduledExecutorService executor;
+
+    @Inject
+    public Overhead(WatchdogConfig config) {
+        this.displayTime = config.defaultOverHeadDisplayTime();
+    }
 
     @Override
     protected void fireImpl(String[] triggerValues) {
