@@ -27,6 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
+import javax.swing.SwingUtilities;
 import java.awt.TrayIcon;
 import java.time.Instant;
 import java.util.EnumMap;
@@ -230,7 +231,9 @@ public class EventHandler {
 
         // If the alert hasn't been fired yet, or has been enough time, set the last trigger time to now and fire.
         if (!this.lastTriggered.containsKey(alert) || Instant.now().compareTo(this.lastTriggered.get(alert).plusMillis(alert.getDebounceTime())) >= 0) {
-            this.historyPanelProvider.get().addEntry(alert, triggerValues);
+            SwingUtilities.invokeLater(() -> {
+                this.historyPanelProvider.get().addEntry(alert, triggerValues);
+            });
             this.lastTriggered.put(alert, Instant.now());
             alert.getNotifications().forEach(notification -> notification.fire(triggerValues));
         }

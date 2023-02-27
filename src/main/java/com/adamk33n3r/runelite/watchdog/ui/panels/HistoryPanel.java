@@ -16,7 +16,6 @@ import javax.inject.Singleton;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -87,17 +86,15 @@ public class HistoryPanel extends PluginPanel {
     }
 
     public void addEntry(Alert alert, String[] triggerValues) {
-        SwingUtilities.invokeLater(() -> {
-            HistoryEntryPanel historyEntryPanel = new HistoryEntryPanel(alert, triggerValues);
-            this.previousAlerts.add(0, historyEntryPanel);
-            this.historyItems.add(historyEntryPanel, 0);
-            if (this.historyItems.getComponents().length > MAX_HISTORY_ITEMS) {
-                this.previousAlerts.remove(this.previousAlerts.size() - 1);
-                this.historyItems.remove(this.historyItems.getComponents().length - 1);
-            }
-            this.revalidate();
-            this.repaint();
-        });
+        HistoryEntryPanel historyEntryPanel = new HistoryEntryPanel(alert, triggerValues);
+        this.previousAlerts.add(0, historyEntryPanel);
+        this.historyItems.add(historyEntryPanel, 0);
+        if (this.historyItems.getComponents().length > MAX_HISTORY_ITEMS) {
+            this.previousAlerts.remove(this.previousAlerts.size() - 1);
+            this.historyItems.remove(this.historyItems.getComponents().length - 1);
+        }
+        this.revalidate();
+        this.repaint();
     }
 
     private void updateFilter(String search) {
