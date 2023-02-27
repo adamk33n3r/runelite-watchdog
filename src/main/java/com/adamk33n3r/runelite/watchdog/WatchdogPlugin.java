@@ -14,6 +14,7 @@ import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.events.OverlayMenuClicked;
+import net.runelite.client.events.ProfileChanged;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
@@ -181,6 +182,11 @@ public class WatchdogPlugin extends Plugin {
                 this.panel.rebuild();
             }
         }
+    }
+
+    @Subscribe
+    private void onProfileChanged(ProfileChanged profileChanged) {
+        this.alertManager.loadAlerts();
     }
 
     @Provides
