@@ -4,6 +4,8 @@
 [![Plugin Hub](https://img.shields.io/endpoint?url=https://i.pluginhub.info/shields/installs/plugin/watchdog)](https://runelite.net/plugin-hub/show/watchdog)
 [![Discord](https://img.shields.io/discord/1064234152314015875?color=%235865F2&label=Watchdog&logo=discord&logoColor=white&style=flat)](https://discord.gg/n8mxYAHJR9)
 
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/T6T0JH18I)
+
 Create custom alerts triggered by
 - Chat/Game Messages (supports glob pattern or regex)
 - Stat Drain/Change
