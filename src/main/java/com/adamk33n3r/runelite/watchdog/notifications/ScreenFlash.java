@@ -2,6 +2,7 @@ package com.adamk33n3r.runelite.watchdog.notifications;
 
 import com.adamk33n3r.runelite.watchdog.WatchdogConfig;
 import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
+import com.adamk33n3r.runelite.watchdog.alerts.FlashMode;
 
 import net.runelite.client.config.FlashNotification;
 
@@ -15,12 +16,17 @@ import java.awt.Color;
 @Setter
 public class ScreenFlash extends Notification {
     private Color color;
+    private FlashMode flashMode;
+    private int flashDuration;
+
+    @Deprecated
     private FlashNotification flashNotification;
 
     @Inject
     public ScreenFlash(WatchdogConfig config) {
         this.color = config.defaultScreenFlashColor();
-        this.flashNotification = config.defaultScreenFlashType();
+        this.flashMode = config.defaultScreenFlashMode();
+        this.flashDuration = config.defaultScreenFlashDuration();
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.adamk33n3r.runelite.watchdog;
 
+import com.adamk33n3r.runelite.watchdog.alerts.FlashMode;
 import com.adamk33n3r.runelite.watchdog.notifications.ScreenFlash;
 
 import net.runelite.api.Client;
@@ -30,9 +31,12 @@ public class FlashOverlay extends Overlay {
     private WatchdogConfig config;
 
     private Instant flashStart;
+    private int gameCycleStart;
     private long mouseLastPressedMillis;
 
     private ScreenFlash screenFlash;
+
+    private static final int MIN_MILLISECONDS_BEFORE_CANCELLED = 2000;
 
     public FlashOverlay() {
         this.setPosition(OverlayPosition.DYNAMIC);
@@ -42,41 +46,36 @@ public class FlashOverlay extends Overlay {
     public void flash(ScreenFlash screenFlash) {
         this.screenFlash = screenFlash;
         this.flashStart = Instant.now();
+        this.gameCycleStart = this.client.getGameCycle();
         this.mouseLastPressedMillis = client.getMouseLastPressedMillis();
     }
 
     @Override
     public Dimension render(Graphics2D graphics) {
-        // Copied from Notifier
+        // Adapted from Notifier
         if (this.flashStart == null) {
             return null;
         }
 
-        if (Instant.now().minusMillis(2000).isAfter(this.flashStart)) {
-            switch (this.screenFlash.getFlashNotification())
-            {
-                case FLASH_TWO_SECONDS:
-                case SOLID_TWO_SECONDS:
-                    flashStart = null;
-                    return null;
-                case SOLID_UNTIL_CANCELLED:
-                case FLASH_UNTIL_CANCELLED:
-                    // Any interaction with the client since the notification started will cancel it after the minimum duration
-                    if (((client.getMouseIdleTicks() < 2000 / Constants.CLIENT_TICK_LENGTH && this.config.mouseMovementCancels())
-                        || client.getKeyboardIdleTicks() < 2000 / Constants.CLIENT_TICK_LENGTH
-                        || client.getMouseLastPressedMillis() > mouseLastPressedMillis) && clientUI.isFocused())
-                    {
-                        flashStart = null;
-                        return null;
-                    }
-                    break;
+        if (this.screenFlash.getFlashDuration() == 0) {
+            // Any interaction with the client since the notification started will cancel it after the minimum duration
+            if (Instant.now().minusMillis(MIN_MILLISECONDS_BEFORE_CANCELLED).isAfter(this.flashStart)
+                && ((client.getMouseIdleTicks() < MIN_MILLISECONDS_BEFORE_CANCELLED / Constants.CLIENT_TICK_LENGTH && this.config.mouseMovementCancels())
+                || client.getKeyboardIdleTicks() < MIN_MILLISECONDS_BEFORE_CANCELLED / Constants.CLIENT_TICK_LENGTH
+                || client.getMouseLastPressedMillis() > mouseLastPressedMillis) && clientUI.isFocused()
+            ) {
+                flashStart = null;
+                return null;
             }
+        } else if (Instant.now().minusSeconds(this.screenFlash.getFlashDuration()).isAfter(this.flashStart)) {
+            flashStart = null;
+            return null;
         }
+
         // Me: This can be weird depending on which game cycle the flash is fired
-        if (client.getGameCycle() % 40 >= 20
+        if ((this.client.getGameCycle() - this.gameCycleStart) % 40 >= 20
             // For solid colour, fall through every time.
-            && (this.screenFlash.getFlashNotification() == FlashNotification.FLASH_TWO_SECONDS
-            || this.screenFlash.getFlashNotification() == FlashNotification.FLASH_UNTIL_CANCELLED))
+            && this.screenFlash.getFlashMode() == FlashMode.FLASH)
         {
             return null;
         }

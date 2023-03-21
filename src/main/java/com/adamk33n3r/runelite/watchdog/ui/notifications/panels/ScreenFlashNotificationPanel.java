@@ -1,5 +1,6 @@
 package com.adamk33n3r.runelite.watchdog.ui.notifications.panels;
 
+import com.adamk33n3r.runelite.watchdog.alerts.FlashMode;
 import com.adamk33n3r.runelite.watchdog.notifications.ScreenFlash;
 import com.adamk33n3r.runelite.watchdog.ui.panels.NotificationsPanel;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
@@ -10,6 +11,7 @@ import net.runelite.client.ui.components.colorpicker.ColorPickerManager;
 
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JComboBox;
+import javax.swing.JSpinner;
 import java.util.Arrays;
 
 public class ScreenFlashNotificationPanel extends NotificationPanel {
@@ -29,17 +31,23 @@ public class ScreenFlashNotificationPanel extends NotificationPanel {
             });
         this.settings.add(colorPickerBtn);
 
-        JComboBox<FlashNotification> flashNotificationSelect = new JComboBox<>(Arrays.stream(FlashNotification.values()).filter(fn -> fn != FlashNotification.DISABLED).toArray(FlashNotification[]::new));
-        flashNotificationSelect.setToolTipText("The screen flash mode");
-        flashNotificationSelect.setSelectedItem(screenFlash.getFlashNotification());
-        flashNotificationSelect.setRenderer((list, value, index, isSelected, cellHasFocus) -> {
-            list.setToolTipText(value.toString());
+        JComboBox<FlashMode> flashModeSelect = new JComboBox<>(FlashMode.values());
+        flashModeSelect.setToolTipText("The screen flash mode");
+        flashModeSelect.setSelectedItem(screenFlash.getFlashMode());
+        flashModeSelect.setRenderer((list, value, index, isSelected, cellHasFocus) -> {
+            list.setToolTipText(value.getTooltip());
             return new DefaultListCellRenderer().getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
         });
-        flashNotificationSelect.addActionListener(e -> {
-            screenFlash.setFlashNotification(flashNotificationSelect.getItemAt(flashNotificationSelect.getSelectedIndex()));
+        flashModeSelect.addActionListener(e -> {
+            screenFlash.setFlashMode(flashModeSelect.getItemAt(flashModeSelect.getSelectedIndex()));
             onChangeListener.run();
         });
-        this.settings.add(flashNotificationSelect);
+        this.settings.add(flashModeSelect);
+
+        JSpinner flashDuration = PanelUtils.createSpinner(screenFlash.getFlashDuration(), 0, 10, 1, val -> {
+            screenFlash.setFlashDuration(val);
+            onChangeListener.run();
+        });
+        this.settings.add(PanelUtils.createIconComponent(CLOCK_ICON, "Duration of flash, use 0 to flash until cancelled", flashDuration));
     }
 }

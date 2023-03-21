@@ -1,5 +1,6 @@
 package com.adamk33n3r.runelite.watchdog;
 
+import com.adamk33n3r.runelite.watchdog.alerts.FlashMode;
 import com.adamk33n3r.runelite.watchdog.notifications.tts.Voice;
 
 import net.runelite.api.SoundEffectID;
@@ -44,6 +45,8 @@ public interface WatchdogConfig extends Config {
     String MOUSE_MOVEMENT_CANCELS_FLASH = "mouseMovementCancelsFlash";
     String DEFAULT_SCREEN_FLASH_COLOR = "defaultScreenFlashColor";
     String DEFAULT_SCREEN_FLASH_TYPE = "defaultScreenFlashType";
+    String DEFAULT_SCREEN_FLASH_MODE = "defaultScreenFlashMode";
+    String DEFAULT_SCREEN_FLASH_DURATION = "defaultScreenFlashDuration";
 
     // Sound
     String DEFAULT_SOUND_VOLUME = "defaultSoundVolume";
@@ -202,6 +205,25 @@ public interface WatchdogConfig extends Config {
         position = 2
     )
     default FlashNotification defaultScreenFlashType() { return FlashNotification.SOLID_TWO_SECONDS; }
+
+    @ConfigItem(
+        keyName = DEFAULT_SCREEN_FLASH_MODE,
+        name = "Default Flash Mode",
+        description = "The default flash mode",
+        section = screenFlashSection,
+        position = 3
+    )
+    default FlashMode defaultScreenFlashMode() { return FlashMode.FLASH; }
+
+    @ConfigItem(
+        keyName = DEFAULT_SCREEN_FLASH_DURATION,
+        name = "Default Flash Duration",
+        description = "The default flash duration in seconds",
+        section = screenFlashSection,
+        position = 3
+    )
+    @Units(Units.SECONDS)
+    default int defaultScreenFlashDuration() { return 2; }
     //endregion
 
     //region Sound

@@ -41,6 +41,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
@@ -63,6 +64,10 @@ public class WatchdogPanel extends PluginPanel {
     private String DISCORD_URL;
 
     @Inject
+    @Named("watchdog.kofiURL")
+    private String KOFI_URL;
+
+    @Inject
     @Named("watchdog.pluginVersion")
     private String PLUGIN_VERSION;
 
@@ -83,6 +88,8 @@ public class WatchdogPanel extends PluginPanel {
     public static final ImageIcon HISTORY_ICON_HOVER;
     public static final ImageIcon DISCORD_ICON;
     public static final ImageIcon DISCORD_ICON_HOVER;
+    public static final ImageIcon KOFI_ICON;
+    public static final ImageIcon KOFI_ICON_HOVER;
     public static final ImageIcon CONFIG_ICON;
     public static final ImageIcon CONFIG_ICON_HOVER;
     public static final ImageIcon REGEX_ICON;
@@ -105,6 +112,10 @@ public class WatchdogPanel extends PluginPanel {
         final BufferedImage discordIcon = ImageUtil.loadImageResource(InfoPanel.class, "discord_icon.png");
         DISCORD_ICON = new ImageIcon(discordIcon);
         DISCORD_ICON_HOVER = new ImageIcon(ImageUtil.luminanceOffset(discordIcon, -100));
+
+        final BufferedImage kofiIcon = ImageUtil.loadImageResource(WatchdogPanel.class, "kofi_icon.png");
+        KOFI_ICON = new ImageIcon(kofiIcon);
+        KOFI_ICON_HOVER = new ImageIcon(ImageUtil.luminanceOffset(kofiIcon, -100));
 
         final BufferedImage configIcon = ImageUtil.loadImageResource(ConfigPlugin.class, "config_edit_icon.png");
         CONFIG_ICON = new ImageIcon(configIcon);
@@ -142,6 +153,12 @@ public class WatchdogPanel extends PluginPanel {
             LinkBrowser.browse(DISCORD_URL);
         });
         actionButtons.add(discordButton);
+
+        JButton kofiButton = PanelUtils.createActionButton(KOFI_ICON, KOFI_ICON_HOVER, "Buy me a coffee :)", (btn, modifiers) -> {
+            LinkBrowser.browse(KOFI_URL);
+        });
+        kofiButton.setPreferredSize(new Dimension(17, 17));
+        actionButtons.add(kofiButton);
 
         JButton helpButton = PanelUtils.createActionButton(HELP_ICON, HELP_ICON_HOVER, "Wiki", (btn, modifiers) -> {
             LinkBrowser.browse(HELP_URL);
