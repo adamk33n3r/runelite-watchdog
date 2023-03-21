@@ -4,6 +4,7 @@ import com.adamk33n3r.runelite.watchdog.alerts.*;
 import com.adamk33n3r.runelite.watchdog.notifications.*;
 
 import net.runelite.client.config.ConfigManager;
+import net.runelite.client.config.FlashNotification;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -204,6 +205,19 @@ public class AlertManager {
                     .filter(notification -> notification instanceof IAudioNotification)
                     .map(notification -> (IAudioNotification) notification)
                     .forEach(sound -> sound.setGain(Util.scale(sound.getGain(), -25, 5, 0, 10)));
+            }
+
+            if (configVersion.compareTo(new Version("2.8.0")) < 0) {
+                this.alerts.stream()
+                    .flatMap(alert -> alert.getNotifications().stream())
+                    .filter(notification -> notification instanceof ScreenFlash)
+                    .map(notification -> (ScreenFlash) notification)
+                    .forEach(screenFlash -> {
+                        FlashNotification oldEnum = screenFlash.getFlashNotification();
+                        screenFlash.setFlashMode((oldEnum == FlashNotification.SOLID_TWO_SECONDS || oldEnum == FlashNotification.SOLID_UNTIL_CANCELLED) ? FlashMode.SOLID : FlashMode.FLASH);
+                        screenFlash.setFlashDuration((oldEnum == FlashNotification.FLASH_TWO_SECONDS || oldEnum == FlashNotification.SOLID_TWO_SECONDS) ? 2 : 0);
+                        screenFlash.setFlashNotification(null);
+                    });
             }
 
             this.configManager.setConfiguration(WatchdogConfig.CONFIG_GROUP_NAME, WatchdogConfig.PLUGIN_VERSION, currentVersion.getVersion());

@@ -225,7 +225,7 @@ public class PanelUtils {
                     colorPickerBtn.setColor(c);
                     colorPickerBtn.setText("#" + ColorUtil.colorToAlphaHexCode(c).toUpperCase());
                 });
-                colorPicker.setOnClose(onChange::accept);
+                colorPicker.setOnClose(onChange);
                 colorPicker.setVisible(true);
             }
         });
