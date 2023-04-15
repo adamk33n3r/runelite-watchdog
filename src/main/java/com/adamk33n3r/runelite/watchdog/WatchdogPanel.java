@@ -34,6 +34,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
@@ -48,6 +49,8 @@ import java.awt.GridLayout;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.util.Arrays;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 @Slf4j
 public class WatchdogPanel extends PluginPanel {
@@ -241,6 +244,18 @@ public class WatchdogPanel extends PluginPanel {
         this.openAlert(createdAlert);
     }
 
+    private boolean isPatternInvalid(String pattern, boolean isRegex) {
+        try {
+            Pattern.compile(isRegex ? pattern : Util.createRegexFromGlob(pattern));
+            return false;
+        } catch (PatternSyntaxException ex) {
+            JLabel errorLabel = new JLabel("<html>" + ex.getMessage().replaceAll("\n", "<br/>").replaceAll(" ", "&nbsp;") + "</html>");
+            errorLabel.setFont(new Font("Monospaced", Font.PLAIN, 12));
+            JOptionPane.showMessageDialog(this, errorLabel, "Error in regex/pattern", JOptionPane.ERROR_MESSAGE);
+            return true;
+        }
+    }
+
     private PluginPanel createPluginPanel(Alert alert) {
         if (alert instanceof ChatAlert) {
             ChatAlert chatAlert = (ChatAlert) alert;
@@ -248,6 +263,9 @@ public class WatchdogPanel extends PluginPanel {
                 .addAlertDefaults(alert)
                 .addInputGroupWithSuffix(
                     PanelUtils.createTextArea("Enter the message to trigger on...", "The message to trigger on. Supports glob (*)", chatAlert.getMessage(), msg -> {
+                        // Check pattern compile
+                        if (this.isPatternInvalid(msg, chatAlert.isRegexEnabled()))
+                            return;
                         chatAlert.setMessage(msg);
                         this.alertManager.saveAlerts();
                     }),
@@ -273,6 +291,8 @@ public class WatchdogPanel extends PluginPanel {
                 .addAlertDefaults(alert)
                 .addInputGroupWithSuffix(
                     PanelUtils.createTextArea("Enter the message to trigger on...", "The message to trigger on. Supports glob (*)", notificationFiredAlert.getMessage(), msg -> {
+                        if (this.isPatternInvalid(msg, notificationFiredAlert.isRegexEnabled()))
+                            return;
                         notificationFiredAlert.setMessage(msg);
                         this.alertManager.saveAlerts();
                     }),
