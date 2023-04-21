@@ -1,11 +1,6 @@
 package com.adamk33n3r.runelite.watchdog;
 
-import com.adamk33n3r.runelite.watchdog.alerts.Alert;
-import com.adamk33n3r.runelite.watchdog.alerts.ChatAlert;
-import com.adamk33n3r.runelite.watchdog.alerts.NotificationFiredAlert;
-import com.adamk33n3r.runelite.watchdog.alerts.SoundFiredAlert;
-import com.adamk33n3r.runelite.watchdog.alerts.StatChangedAlert;
-import com.adamk33n3r.runelite.watchdog.alerts.XPDropAlert;
+import com.adamk33n3r.runelite.watchdog.alerts.*;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -17,6 +12,8 @@ public enum TriggerType {
     STAT_CHANGED("Stat Changed", "Stat changes like boosts or drains", StatChangedAlert.class),
     XP_DROP("XP Drop", "Get an xp drop", XPDropAlert.class),
     SOUND_FIRED("Sound Fired", "When a sound effect plays", SoundFiredAlert.class),
+    SPAWNED_OBJECT("Spawned Object", "When an object, player, or npc spawns or despawns", SpawnedAlert.class),
+    INVENTORY("Inventory", "When your inventory is full, empty, or contains certain items", InventoryAlert.class),
     // Keep this last so that people maybe won't try to use it over the chat one
     NOTIFICATION_FIRED("Notification Fired", "When other plugins fire notifications", NotificationFiredAlert.class),
     ;

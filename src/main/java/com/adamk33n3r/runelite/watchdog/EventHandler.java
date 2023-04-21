@@ -2,24 +2,48 @@ package com.adamk33n3r.runelite.watchdog;
 
 import com.adamk33n3r.runelite.watchdog.alerts.Alert;
 import com.adamk33n3r.runelite.watchdog.alerts.ChatAlert;
+import com.adamk33n3r.runelite.watchdog.alerts.InventoryAlert;
 import com.adamk33n3r.runelite.watchdog.alerts.NotificationFiredAlert;
+import com.adamk33n3r.runelite.watchdog.alerts.RegexMatcher;
 import com.adamk33n3r.runelite.watchdog.alerts.SoundFiredAlert;
+import com.adamk33n3r.runelite.watchdog.alerts.SpawnedAlert;
 import com.adamk33n3r.runelite.watchdog.alerts.StatChangedAlert;
 import com.adamk33n3r.runelite.watchdog.alerts.XPDropAlert;
 import com.adamk33n3r.runelite.watchdog.ui.panels.HistoryPanel;
 
+import net.runelite.api.Actor;
 import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
 import net.runelite.api.GameState;
+import net.runelite.api.InventoryID;
+import net.runelite.api.ItemComposition;
+import net.runelite.api.ObjectComposition;
 import net.runelite.api.Skill;
+import net.runelite.api.TileObject;
 import net.runelite.api.events.AreaSoundEffectPlayed;
 import net.runelite.api.events.ChatMessage;
+import net.runelite.api.events.DecorativeObjectDespawned;
+import net.runelite.api.events.DecorativeObjectSpawned;
+import net.runelite.api.events.GameObjectDespawned;
+import net.runelite.api.events.GameObjectSpawned;
 import net.runelite.api.events.GameStateChanged;
+import net.runelite.api.events.GroundObjectDespawned;
+import net.runelite.api.events.GroundObjectSpawned;
+import net.runelite.api.events.ItemContainerChanged;
+import net.runelite.api.events.ItemDespawned;
+import net.runelite.api.events.ItemSpawned;
+import net.runelite.api.events.NpcDespawned;
+import net.runelite.api.events.NpcSpawned;
+import net.runelite.api.events.PlayerDespawned;
+import net.runelite.api.events.PlayerSpawned;
 import net.runelite.api.events.SoundEffectPlayed;
 import net.runelite.api.events.StatChanged;
+import net.runelite.api.events.WallObjectDespawned;
+import net.runelite.api.events.WallObjectSpawned;
 import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.NotificationFired;
+import net.runelite.client.game.ItemManager;
 import net.runelite.client.util.Text;
 
 import lombok.extern.slf4j.Slf4j;
@@ -30,17 +54,32 @@ import javax.inject.Singleton;
 import javax.swing.SwingUtilities;
 import java.awt.TrayIcon;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static com.adamk33n3r.runelite.watchdog.alerts.SpawnedAlert.SpawnedDespawned.DESPAWNED;
+import static com.adamk33n3r.runelite.watchdog.alerts.SpawnedAlert.SpawnedDespawned.SPAWNED;
+import static com.adamk33n3r.runelite.watchdog.alerts.SpawnedAlert.SpawnedType.DECORATIVE_OBJECT;
+import static com.adamk33n3r.runelite.watchdog.alerts.SpawnedAlert.SpawnedType.GAME_OBJECT;
+import static com.adamk33n3r.runelite.watchdog.alerts.SpawnedAlert.SpawnedType.GROUND_OBJECT;
+import static com.adamk33n3r.runelite.watchdog.alerts.SpawnedAlert.SpawnedType.ITEM;
+import static com.adamk33n3r.runelite.watchdog.alerts.SpawnedAlert.SpawnedType.NPC;
+import static com.adamk33n3r.runelite.watchdog.alerts.SpawnedAlert.SpawnedType.PLAYER;
+import static com.adamk33n3r.runelite.watchdog.alerts.SpawnedAlert.SpawnedType.WALL_OBJECT;
 
 @Slf4j
 @Singleton
 public class EventHandler {
     @Inject
     private Client client;
+
+    @Inject
+    private ItemManager itemManager;
 
     @Inject
     private AlertManager alertManager;
@@ -97,16 +136,11 @@ public class EventHandler {
             .filter(alert -> alert instanceof ChatAlert)
             .map(alert -> (ChatAlert) alert)
 //            .filter(chatAlert -> chatAlert.getChatMessageType() == chatMessage.getType())
-            .forEach(alert -> {
-                String regex = alert.isRegexEnabled() ? alert.getMessage() : Util.createRegexFromGlob(alert.getMessage());
-                Matcher matcher = Pattern.compile(regex, alert.isRegexEnabled() ? 0 : Pattern.CASE_INSENSITIVE).matcher(unformattedMessage);
-                if (!matcher.matches()) return;
+            .forEach(chatAlert -> {
+                String[] groups = this.matchPattern(chatAlert, unformattedMessage);
+                if (groups == null) return;
 
-                String[] groups = new String[matcher.groupCount()];
-                for (int i = 0; i < matcher.groupCount(); i++) {
-                    groups[i] = matcher.group(i+1);
-                }
-                this.fireAlert(alert, groups);
+                this.fireAlert(chatAlert, groups);
             });
     }
     //endregion
@@ -122,16 +156,11 @@ public class EventHandler {
         this.alertManager.getAlerts().stream()
             .filter(alert -> alert instanceof NotificationFiredAlert)
             .map(alert -> (NotificationFiredAlert) alert)
-            .forEach(alert -> {
-                String regex = alert.isRegexEnabled() ? alert.getMessage() : Util.createRegexFromGlob(alert.getMessage());
-                Matcher matcher = Pattern.compile(regex, alert.isRegexEnabled() ? 0 : Pattern.CASE_INSENSITIVE).matcher(notificationFired.getMessage());
-                if (!matcher.matches()) return;
+            .forEach(notificationFiredAlert -> {
+                String[] groups = this.matchPattern(notificationFiredAlert, notificationFired.getMessage());
+                if (groups == null) return;
 
-                String[] groups = new String[matcher.groupCount()];
-                for (int i = 0; i < matcher.groupCount(); i++) {
-                    groups[i] = matcher.group(i + 1);
-                }
-                this.fireAlert(alert, groups);
+                this.fireAlert(notificationFiredAlert, groups);
             });
     }
     //endregion
@@ -220,8 +249,141 @@ public class EventHandler {
     }
     //endregion
 
+    //region Inventory
+    @Subscribe
+    private void onItemContainerChanged(ItemContainerChanged itemContainerChanged) {
+        // Ignore everything but inventory
+        if (itemContainerChanged.getItemContainer().getId() != InventoryID.INVENTORY.getId())
+            return;
+        this.alertManager.getAlerts().stream()
+            .filter(alert -> alert instanceof InventoryAlert)
+            .map(alert -> (InventoryAlert) alert)
+            .forEach(inventoryAlert -> {
+                if (inventoryAlert.getInventoryAlertType() == InventoryAlert.InventoryAlertType.FULL && itemContainerChanged.getItemContainer().getItems().length == 28) {
+                    this.fireAlert(inventoryAlert, inventoryAlert.getInventoryAlertType().getName());
+                } else if (inventoryAlert.getInventoryAlertType() == InventoryAlert.InventoryAlertType.EMPTY && itemContainerChanged.getItemContainer().getItems().length == 0) {
+                    this.fireAlert(inventoryAlert, inventoryAlert.getInventoryAlertType().getName());
+                } else if (inventoryAlert.getInventoryAlertType() == InventoryAlert.InventoryAlertType.ITEM) {
+                    Map<Integer, Integer> allItems = new HashMap<>();
+                    Arrays.stream(itemContainerChanged.getItemContainer().getItems())
+                        .forEach(item -> allItems.merge(item.getId(), item.getQuantity(), Integer::sum));
+                    allItems.entrySet().stream()
+                        .filter(itemCount -> inventoryAlert.getItemQuantity() == 0 || itemCount.getValue() == inventoryAlert.getItemQuantity())
+                        .map(itemCount -> this.matchPattern(inventoryAlert, this.itemManager.getItemComposition(itemCount.getKey()).getName()))
+                        .filter(Objects::nonNull)
+                        .findFirst()
+                        .ifPresent(groups -> this.fireAlert(inventoryAlert, groups));
+                }
+            });
+    }
+    //endregion
+
+    //region Spawned
+    @Subscribe
+    private void onItemSpawned(ItemSpawned itemSpawned) {
+        ItemComposition comp = this.itemManager.getItemComposition(itemSpawned.getItem().getId());
+        this.onSpawned(comp.getName(), SPAWNED, ITEM);
+    }
+    @Subscribe
+    private void onItemDespawned(ItemDespawned itemDespawned) {
+        ItemComposition comp = this.itemManager.getItemComposition(itemDespawned.getItem().getId());
+        this.onSpawned(comp.getName(), DESPAWNED, ITEM);
+    }
+    @Subscribe
+    private void onNpcSpawned(NpcSpawned npcSpawned) {
+        this.onActorSpawned(npcSpawned.getNpc(), NPC);
+    }
+    @Subscribe
+    private void onNpcDespawned(NpcDespawned npcDespawned) {
+        this.onActorDespawned(npcDespawned.getNpc(), NPC);
+    }
+    @Subscribe
+    private void onPlayerSpawned(PlayerSpawned playerSpawned) {
+        this.onActorSpawned(playerSpawned.getPlayer(), PLAYER);
+    }
+    @Subscribe
+    private void onPlayerDespawned(PlayerDespawned playerDespawned) {
+        this.onActorDespawned(playerDespawned.getPlayer(), PLAYER);
+    }
+    private void onActorSpawned(Actor actor, SpawnedAlert.SpawnedType type) {
+        this.onSpawned(actor.getName(), SPAWNED, type);
+    }
+    private void onActorDespawned(Actor actor, SpawnedAlert.SpawnedType type) {
+        this.onSpawned(actor.getName(), DESPAWNED, type);
+    }
+
+    @Subscribe
+    private void onGroundObjectSpawned(GroundObjectSpawned groundObjectSpawned) {
+        this.onTileObjectSpawned(groundObjectSpawned.getGroundObject(), SPAWNED, GROUND_OBJECT);
+    }
+    @Subscribe
+    private void onGroundObjectDespawned(GroundObjectDespawned groundObjectDespawned) {
+        this.onTileObjectSpawned(groundObjectDespawned.getGroundObject(), DESPAWNED, GROUND_OBJECT);
+    }
+
+    @Subscribe
+    private void onDecorativeObjectSpawned(DecorativeObjectSpawned decorativeObjectSpawned) {
+        this.onTileObjectSpawned(decorativeObjectSpawned.getDecorativeObject(), SPAWNED, DECORATIVE_OBJECT);
+    }
+    @Subscribe
+    private void onDecorativeObjectDespawned(DecorativeObjectDespawned decorativeObjectDespawned) {
+        this.onTileObjectSpawned(decorativeObjectDespawned.getDecorativeObject(), DESPAWNED, DECORATIVE_OBJECT);
+    }
+
+    @Subscribe
+    private void onGameObjectSpawned(GameObjectSpawned gameObjectSpawned) {
+        System.out.println(this.client.getObjectDefinition(gameObjectSpawned.getGameObject().getId()).getName());
+        this.onTileObjectSpawned(gameObjectSpawned.getGameObject(), SPAWNED, GAME_OBJECT);
+    }
+    @Subscribe
+    private void onGameObjectDespawned(GameObjectDespawned gameObjectDespawned) {
+        this.onTileObjectSpawned(gameObjectDespawned.getGameObject(), DESPAWNED, GAME_OBJECT);
+    }
+
+    @Subscribe
+    private void onWallObjectSpawned(WallObjectSpawned wallObjectSpawned) {
+        this.onTileObjectSpawned(wallObjectSpawned.getWallObject(), SPAWNED, WALL_OBJECT);
+    }
+    @Subscribe
+    private void onWallObjectDespawned(WallObjectDespawned wallObjectDespawned) {
+        this.onTileObjectSpawned(wallObjectDespawned.getWallObject(), DESPAWNED, WALL_OBJECT);
+    }
+
+    private void onTileObjectSpawned(TileObject tileObject, SpawnedAlert.SpawnedDespawned mode, SpawnedAlert.SpawnedType type) {
+        final ObjectComposition comp = this.client.getObjectDefinition(tileObject.getId());
+        final ObjectComposition impostor = comp.getImpostorIds() != null ? comp.getImpostor() : comp;
+        this.onSpawned(impostor.getName(), mode, type);
+    }
+
+    private void onSpawned(String name, SpawnedAlert.SpawnedDespawned mode, SpawnedAlert.SpawnedType type) {
+        this.alertManager.getAlerts().stream()
+            .filter(alert -> alert instanceof SpawnedAlert)
+            .map(alert -> (SpawnedAlert) alert)
+            .filter(spawnedAlert -> spawnedAlert.getSpawnedDespawned() == mode)
+            .filter(spawnedAlert -> spawnedAlert.getSpawnedType() == type)
+            .forEach(spawnedAlert -> {
+                String[] groups = this.matchPattern(spawnedAlert, name);
+                if (groups == null) return;
+
+                this.fireAlert(spawnedAlert, groups);
+            });
+    }
+    //endregion
+
+    private String[] matchPattern(RegexMatcher regexMatcher, String input) {
+        String regex = regexMatcher.isRegexEnabled() ? regexMatcher.getPattern() : Util.createRegexFromGlob(regexMatcher.getPattern());
+        Matcher matcher = Pattern.compile(regex, regexMatcher.isRegexEnabled() ? 0 : Pattern.CASE_INSENSITIVE).matcher(input);
+        if (!matcher.matches()) return null;
+
+        String[] groups = new String[matcher.groupCount()];
+        for (int i = 0; i < matcher.groupCount(); i++) {
+            groups[i] = matcher.group(i+1);
+        }
+        return groups;
+    }
+
     private void fireAlert(Alert alert, String triggerValue) {
-       this.fireAlert(alert, new String[] { triggerValue });
+        this.fireAlert(alert, new String[] { triggerValue });
     }
 
     private void fireAlert(Alert alert, String[] triggerValues) {
