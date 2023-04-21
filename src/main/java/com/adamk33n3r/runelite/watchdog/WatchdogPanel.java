@@ -1,11 +1,6 @@
 package com.adamk33n3r.runelite.watchdog;
 
-import com.adamk33n3r.runelite.watchdog.alerts.Alert;
-import com.adamk33n3r.runelite.watchdog.alerts.ChatAlert;
-import com.adamk33n3r.runelite.watchdog.alerts.NotificationFiredAlert;
-import com.adamk33n3r.runelite.watchdog.alerts.SoundFiredAlert;
-import com.adamk33n3r.runelite.watchdog.alerts.StatChangedAlert;
-import com.adamk33n3r.runelite.watchdog.alerts.XPDropAlert;
+import com.adamk33n3r.runelite.watchdog.alerts.*;
 import com.adamk33n3r.runelite.watchdog.ui.AlertListItem;
 import com.adamk33n3r.runelite.watchdog.ui.ImportExportDialog;
 import com.adamk33n3r.runelite.watchdog.ui.dropdownbutton.DropDownButtonFactory;
@@ -95,10 +90,6 @@ public class WatchdogPanel extends PluginPanel {
     public static final ImageIcon KOFI_ICON_HOVER;
     public static final ImageIcon CONFIG_ICON;
     public static final ImageIcon CONFIG_ICON_HOVER;
-    public static final ImageIcon REGEX_ICON;
-    public static final ImageIcon REGEX_ICON_HOVER;
-    public static final ImageIcon REGEX_SELECTED_ICON;
-    public static final ImageIcon REGEX_SELECTED_ICON_HOVER;
 
     static {
         final BufferedImage addIcon = ImageUtil.loadImageResource(TimeTrackingPlugin.class, "add_icon.png");
@@ -123,13 +114,6 @@ public class WatchdogPanel extends PluginPanel {
         final BufferedImage configIcon = ImageUtil.loadImageResource(ConfigPlugin.class, "config_edit_icon.png");
         CONFIG_ICON = new ImageIcon(configIcon);
         CONFIG_ICON_HOVER = new ImageIcon(ImageUtil.luminanceOffset(configIcon, -100));
-
-        final BufferedImage regexIcon = ImageUtil.loadImageResource(AlertPanel.class, "regex_icon.png");
-        final BufferedImage regexIconSelected = ImageUtil.loadImageResource(AlertPanel.class, "regex_icon_selected.png");
-        REGEX_ICON = new ImageIcon(ImageUtil.luminanceOffset(regexIcon, -80));
-        REGEX_ICON_HOVER = new ImageIcon(ImageUtil.luminanceOffset(regexIcon, -120));
-        REGEX_SELECTED_ICON = new ImageIcon(regexIconSelected);
-        REGEX_SELECTED_ICON_HOVER = new ImageIcon(ImageUtil.luminanceOffset(regexIconSelected, -80));
     }
 
     public void rebuild() {
@@ -244,72 +228,19 @@ public class WatchdogPanel extends PluginPanel {
         this.openAlert(createdAlert);
     }
 
-    private boolean isPatternInvalid(String pattern, boolean isRegex) {
-        try {
-            Pattern.compile(isRegex ? pattern : Util.createRegexFromGlob(pattern));
-            return false;
-        } catch (PatternSyntaxException ex) {
-            JLabel errorLabel = new JLabel("<html>" + ex.getMessage().replaceAll("\n", "<br/>").replaceAll(" ", "&nbsp;") + "</html>");
-            errorLabel.setFont(new Font("Monospaced", Font.PLAIN, 12));
-            JOptionPane.showMessageDialog(this, errorLabel, "Error in regex/pattern", JOptionPane.ERROR_MESSAGE);
-            return true;
-        }
-    }
-
     private PluginPanel createPluginPanel(Alert alert) {
         if (alert instanceof ChatAlert) {
             ChatAlert chatAlert = (ChatAlert) alert;
             return AlertPanel.create(this.muxer, alert)
                 .addAlertDefaults(alert)
-                .addInputGroupWithSuffix(
-                    PanelUtils.createTextArea("Enter the message to trigger on...", "The message to trigger on. Supports glob (*)", chatAlert.getMessage(), msg -> {
-                        // Check pattern compile
-                        if (this.isPatternInvalid(msg, chatAlert.isRegexEnabled()))
-                            return;
-                        chatAlert.setMessage(msg);
-                        this.alertManager.saveAlerts();
-                    }),
-                    PanelUtils.createToggleActionButton(
-                        REGEX_SELECTED_ICON,
-                        REGEX_SELECTED_ICON_HOVER,
-                        REGEX_ICON,
-                        REGEX_ICON_HOVER,
-                        "Disable regex",
-                        "Enable regex",
-                        chatAlert.isRegexEnabled(),
-                        (btn, modifiers) -> {
-                            chatAlert.setRegexEnabled(btn.isSelected());
-                            this.alertManager.saveAlerts();
-                        }
-                    )
-                )
+                .addRegexMatcher(chatAlert, "Enter the message to trigger on...", "The message to trigger on. Supports glob (*)")
                 .addLabel("<html><i>Note: Will not trigger on<br>player chat messages</i></html>")
                 .build();
         } else if (alert instanceof NotificationFiredAlert) {
             NotificationFiredAlert notificationFiredAlert = (NotificationFiredAlert) alert;
             return AlertPanel.create(this.muxer, alert)
                 .addAlertDefaults(alert)
-                .addInputGroupWithSuffix(
-                    PanelUtils.createTextArea("Enter the message to trigger on...", "The message to trigger on. Supports glob (*)", notificationFiredAlert.getMessage(), msg -> {
-                        if (this.isPatternInvalid(msg, notificationFiredAlert.isRegexEnabled()))
-                            return;
-                        notificationFiredAlert.setMessage(msg);
-                        this.alertManager.saveAlerts();
-                    }),
-                    PanelUtils.createToggleActionButton(
-                        REGEX_SELECTED_ICON,
-                        REGEX_SELECTED_ICON_HOVER,
-                        REGEX_ICON,
-                        REGEX_ICON_HOVER,
-                        "Disable regex",
-                        "Enable regex",
-                        notificationFiredAlert.isRegexEnabled(),
-                        (btn, modifiers) -> {
-                            notificationFiredAlert.setRegexEnabled(btn.isSelected());
-                            this.alertManager.saveAlerts();
-                        }
-                    )
-                )
+                .addRegexMatcher(notificationFiredAlert, "Enter the message to trigger on...", "The message to trigger on. Supports glob (*)")
                 .build();
         } else if (alert instanceof StatChangedAlert) {
             StatChangedAlert statChangedAlert = (StatChangedAlert) alert;
@@ -325,12 +256,35 @@ public class WatchdogPanel extends PluginPanel {
                 .addSelect("Skill", "The skill to track", Skill.class, xpDropAlert.getSkill(), xpDropAlert::setSkill)
                 .addSpinner("Gained Amount", "How much xp needed to trigger this alert", xpDropAlert.getGainedAmount(), xpDropAlert::setGainedAmount)
                 .build();
-        } else if (alert instanceof  SoundFiredAlert) {
+        } else if (alert instanceof SoundFiredAlert) {
             SoundFiredAlert soundFiredAlert = (SoundFiredAlert) alert;
             return AlertPanel.create(this.muxer, alert)
                 .addAlertDefaults(alert)
                 .addRichTextPane("<html>Go to <a href='" + SOUND_ID_WIKI_PAGE + "'>this wiki page</a> to get a list<br>of sound ids</html>")
                 .addSpinner("Sound ID", "The ID of the sound", soundFiredAlert.getSoundID(), soundFiredAlert::setSoundID, 0, 99999, 1)
+                .build();
+        } else if (alert instanceof SpawnedAlert) {
+            SpawnedAlert spawnedAlert = (SpawnedAlert) alert;
+            return AlertPanel.create(this.muxer, alert)
+                .addAlertDefaults(alert)
+                .addSelect("Spawned/Despawned", "Spawned or Despawned", SpawnedAlert.SpawnedDespawned.class, spawnedAlert.getSpawnedDespawned(), spawnedAlert::setSpawnedDespawned)
+                .addSelect("Type", "The type of object to trigger on", SpawnedAlert.SpawnedType.class, spawnedAlert.getSpawnedType(), spawnedAlert::setSpawnedType)
+                .addRegexMatcher(spawnedAlert, "Enter the object to trigger on...", "The name to trigger on. Supports glob (*)")
+                .build();
+        } else if (alert instanceof InventoryAlert) {
+            InventoryAlert inventoryAlert = (InventoryAlert) alert;
+            return AlertPanel.create(this.muxer, alert)
+                .addAlertDefaults(alert)
+                .addSelect("Type", "Type", InventoryAlert.InventoryAlertType.class, inventoryAlert.getInventoryAlertType(), (val) -> {
+                    inventoryAlert.setInventoryAlertType(val);
+                    this.muxer.popState();
+                    this.openAlert(alert);
+                })
+                .addIf(
+                    panel -> panel.addRegexMatcher(inventoryAlert, "Enter the name of the item to trigger on...", "The name to trigger on. Supports glob (*)")
+                        .addSpinner("Quantity", "The quantity of item to trigger on, use 0 for every time", inventoryAlert.getItemQuantity(), inventoryAlert::setItemQuantity),
+                    () -> inventoryAlert.getInventoryAlertType() == InventoryAlert.InventoryAlertType.ITEM
+                )
                 .build();
         }
 

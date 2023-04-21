@@ -59,7 +59,9 @@ public class AlertManager {
             .registerSubtype(StatDrainAlert.class)
             .registerSubtype(StatChangedAlert.class)
             .registerSubtype(XPDropAlert.class)
-            .registerSubtype(SoundFiredAlert.class);
+            .registerSubtype(SoundFiredAlert.class)
+            .registerSubtype(SpawnedAlert.class)
+            .registerSubtype(InventoryAlert.class);
         // Add new notification types here
         final RuntimeTypeAdapterFactory<Notification> notificationTypeFactory = RuntimeTypeAdapterFactory.of(Notification.class)
             .registerSubtype(TrayNotification.class)

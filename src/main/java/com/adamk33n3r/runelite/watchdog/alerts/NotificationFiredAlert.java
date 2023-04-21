@@ -5,9 +5,19 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class NotificationFiredAlert extends Alert {
-    private String message;
+public class NotificationFiredAlert extends Alert implements RegexMatcher {
+    private String message = "";
     private boolean regexEnabled = false;
+
+    @Override
+    public String getPattern() {
+        return this.message;
+    }
+
+    @Override
+    public void setPattern(String pattern) {
+        this.message = pattern;
+    }
 
     public NotificationFiredAlert() {
         super("New Notification Fired Alert");
