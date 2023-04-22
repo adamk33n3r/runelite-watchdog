@@ -48,8 +48,9 @@ public class ImportExportDialog extends JDialog {
             }
             String json = textArea.getText();
             try {
-                WatchdogPlugin.getInstance().getAlertManager().importAlerts(json, append);
-                this.setVisible(false);
+                if (WatchdogPlugin.getInstance().getAlertManager().importAlerts(json, append, true)) {
+                    this.setVisible(false);
+                }
             } catch (Exception ex) {
                 log.error("Error parsing json: " + ex);
                 JOptionPane.showMessageDialog(this, "There was an error parsing the alert json", "Error parsing JSON", JOptionPane.ERROR_MESSAGE);
