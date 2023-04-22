@@ -2,6 +2,7 @@ package com.adamk33n3r.runelite.watchdog;
 
 import com.adamk33n3r.runelite.watchdog.alerts.*;
 import com.adamk33n3r.runelite.watchdog.notifications.*;
+import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
 
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.config.FlashNotification;
@@ -20,6 +21,8 @@ import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 @Slf4j
 @Singleton
@@ -136,19 +139,32 @@ public class AlertManager {
 
     public void loadAlerts() {
         final String json = this.configManager.getConfiguration(WatchdogConfig.CONFIG_GROUP_NAME, WatchdogConfig.ALERTS);
-        this.importAlerts(json, false);
+        this.importAlerts(json, false, false);
         this.handleUpgrades();
     }
 
-    public void importAlerts(String json, boolean append) {
+    public boolean importAlerts(String json, boolean append, boolean checkRegex) {
         if (!Strings.isNullOrEmpty(json)) {
             if (!append) {
                 this.alerts.clear();
             }
-            this.gson.<List<Alert>>fromJson(json, ALERT_LIST_TYPE)
-                .stream()
-                .filter(Objects::nonNull)
-                .forEach(this.alerts::add);
+            List<Alert> importedAlerts = this.gson.fromJson(json, ALERT_LIST_TYPE);
+            Supplier<Stream<Alert>> alertStream = () -> importedAlerts.stream().filter(Objects::nonNull);
+
+            // Validate regex properties
+            if (checkRegex && !alertStream.get().allMatch(alert -> {
+                if (alert instanceof RegexMatcher) {
+                    RegexMatcher matcher = (RegexMatcher) alert;
+                    return PanelUtils.isPatternValid(this.watchdogPanel, matcher.getPattern(), matcher.isRegexEnabled());
+                }
+
+                return true;
+            })) {
+                return false;
+            }
+
+            alertStream.get().forEach(this.alerts::add);
+
             // Save immediately to save new properties
             this.saveAlerts();
         }
@@ -163,6 +179,7 @@ public class AlertManager {
         }
 
         SwingUtilities.invokeLater(this.watchdogPanel::rebuild);
+        return true;
     }
 
     public void saveAlerts() {

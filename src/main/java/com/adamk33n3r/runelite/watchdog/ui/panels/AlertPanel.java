@@ -1,6 +1,9 @@
 package com.adamk33n3r.runelite.watchdog.ui.panels;
 
-import com.adamk33n3r.runelite.watchdog.*;
+import com.adamk33n3r.runelite.watchdog.AlertManager;
+import com.adamk33n3r.runelite.watchdog.Displayable;
+import com.adamk33n3r.runelite.watchdog.TriggerType;
+import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
 import com.adamk33n3r.runelite.watchdog.alerts.Alert;
 import com.adamk33n3r.runelite.watchdog.alerts.RegexMatcher;
 import com.adamk33n3r.runelite.watchdog.ui.HorizontalRuleBorder;
@@ -28,8 +31,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
 
 import static com.adamk33n3r.runelite.watchdog.ui.notifications.panels.NotificationPanel.TEST_ICON;
 import static com.adamk33n3r.runelite.watchdog.ui.notifications.panels.NotificationPanel.TEST_ICON_HOVER;
@@ -291,7 +292,7 @@ public class AlertPanel extends PluginPanel {
     public AlertPanel addRegexMatcher(RegexMatcher regexMatcher, String placeholder, String tooltip) {
         return this.addInputGroupWithSuffix(
             PanelUtils.createTextArea(placeholder, tooltip, regexMatcher.getPattern(), msg -> {
-                if (this.isPatternInvalid(msg, regexMatcher.isRegexEnabled()))
+                if (!PanelUtils.isPatternValid(this, msg, regexMatcher.isRegexEnabled()))
                     return;
                 regexMatcher.setPattern(msg);
                 this.alertManager.saveAlerts();
@@ -311,17 +312,4 @@ public class AlertPanel extends PluginPanel {
             )
         );
     }
-
-    private boolean isPatternInvalid(String pattern, boolean isRegex) {
-        try {
-            Pattern.compile(isRegex ? pattern : Util.createRegexFromGlob(pattern));
-            return false;
-        } catch (PatternSyntaxException ex) {
-            JLabel errorLabel = new JLabel("<html>" + ex.getMessage().replaceAll("\n", "<br/>").replaceAll(" ", "&nbsp;") + "</html>");
-            errorLabel.setFont(new Font("Monospaced", Font.PLAIN, 12));
-            JOptionPane.showMessageDialog(this, errorLabel, "Error in regex/pattern", JOptionPane.ERROR_MESSAGE);
-            return true;
-        }
-    }
-
 }

@@ -1,5 +1,6 @@
 package com.adamk33n3r.runelite.watchdog.ui.panels;
 
+import com.adamk33n3r.runelite.watchdog.Util;
 import com.adamk33n3r.runelite.watchdog.ui.PlaceholderTextArea;
 
 import net.runelite.client.ui.DynamicGridLayout;
@@ -15,6 +16,7 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.JTextArea;
@@ -26,6 +28,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
@@ -38,6 +41,8 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.Arrays;
 import java.util.function.Consumer;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 import java.util.stream.Collectors;
 
 public class PanelUtils {
@@ -231,5 +236,17 @@ public class PanelUtils {
         });
 
         return colorPickerBtn;
+    }
+
+    public static boolean isPatternValid(Component parent, String pattern, boolean isRegex) {
+        try {
+            Pattern.compile(isRegex ? pattern : Util.createRegexFromGlob(pattern));
+            return true;
+        } catch (PatternSyntaxException ex) {
+            JLabel errorLabel = new JLabel("<html>" + ex.getMessage().replaceAll("\n", "<br/>").replaceAll(" ", "&nbsp;") + "</html>");
+            errorLabel.setFont(new Font("Monospaced", Font.PLAIN, 12));
+            JOptionPane.showMessageDialog(parent, errorLabel, "Error in regex/pattern", JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
     }
 }
