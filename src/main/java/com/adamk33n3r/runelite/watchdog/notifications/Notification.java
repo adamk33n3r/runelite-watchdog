@@ -43,8 +43,8 @@ public abstract class Notification implements INotification {
 
     public NotificationType getType() {
         return Arrays.stream(NotificationType.values())
-                .filter(nType -> nType.getImplClass() == this.getClass())
-                .findFirst()
-                .orElse(null);
+            .filter(nType -> nType.getImplClass() == this.getClass())
+            .findFirst()
+            .orElse(null);
     }
 }
