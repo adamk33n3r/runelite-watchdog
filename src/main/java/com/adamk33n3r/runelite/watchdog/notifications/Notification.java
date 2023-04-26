@@ -2,9 +2,11 @@ package com.adamk33n3r.runelite.watchdog.notifications;
 
 import com.adamk33n3r.runelite.watchdog.NotificationType;
 import com.adamk33n3r.runelite.watchdog.alerts.Alert;
+
+import net.runelite.client.ui.ClientUI;
+
 import lombok.Getter;
 import lombok.Setter;
-import net.runelite.client.ui.ClientUI;
 
 import javax.inject.Inject;
 import java.util.Arrays;
@@ -13,12 +15,10 @@ public abstract class Notification implements INotification {
     @Inject
     protected transient ClientUI clientUI;
 
-    @Getter
-    @Setter
+    @Getter @Setter
     private boolean fireWhenFocused = true;
 
-    @Getter
-    @Setter
+    @Getter @Setter
     protected transient Alert alert;
 
     protected boolean shouldFire() {
