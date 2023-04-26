@@ -2,11 +2,9 @@ package com.adamk33n3r.runelite.watchdog.notifications;
 
 import com.adamk33n3r.runelite.watchdog.NotificationType;
 import com.adamk33n3r.runelite.watchdog.alerts.Alert;
-
-import net.runelite.client.ui.ClientUI;
-
 import lombok.Getter;
 import lombok.Setter;
+import net.runelite.client.ui.ClientUI;
 
 import javax.inject.Inject;
 import java.util.Arrays;
@@ -15,10 +13,12 @@ public abstract class Notification implements INotification {
     @Inject
     protected transient ClientUI clientUI;
 
-    @Getter @Setter
+    @Getter
+    @Setter
     private boolean fireWhenFocused = true;
 
-    @Getter @Setter
+    @Getter
+    @Setter
     protected transient Alert alert;
 
     protected boolean shouldFire() {
@@ -28,7 +28,10 @@ public abstract class Notification implements INotification {
     @Override
     public void fire(String[] triggerValues) {
         if (this.shouldFire()) {
-            this.fireImpl(triggerValues);
+            Thread t = new Thread(() -> {
+                this.fireImpl(triggerValues);
+            });
+            t.start();
         }
     }
 
@@ -40,8 +43,8 @@ public abstract class Notification implements INotification {
 
     public NotificationType getType() {
         return Arrays.stream(NotificationType.values())
-            .filter(nType -> nType.getImplClass() == this.getClass())
-            .findFirst()
-            .orElse(null);
+                .filter(nType -> nType.getImplClass() == this.getClass())
+                .findFirst()
+                .orElse(null);
     }
 }
