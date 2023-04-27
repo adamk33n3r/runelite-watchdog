@@ -28,7 +28,10 @@ public abstract class Notification implements INotification {
     @Override
     public void fire(String[] triggerValues) {
         if (this.shouldFire()) {
-            this.fireImpl(triggerValues);
+            Thread t = new Thread(() -> {
+                this.fireImpl(triggerValues);
+            });
+            t.start();
         }
     }
 
