@@ -11,15 +11,20 @@ Create custom alerts triggered by
 - Stat Drain/Change
 - Sound Fired (trigger on a sound effect playing)
 - Notifications (supports glob pattern or regex. allows you to hook into existing notifications, even if you have the alerts off in Runelite. For example low prayer, idle, tempoross, etc) 
+- Inventory Changes
+- Object/Item/NPC Spawned
+- XP Drop
 
 with any amount of unique notification types like
 - Game Message
 - Screen Flash
 - Custom Sound
+- In-Game Sound Effect
 - Text to Speech
 - Tray Notification
 - Overhead Text
 - Overlay
+- RuneLite Notification (to trigger things like RL Tray Notifications)
 
 _You can set defaults for the notifications in the plugin config_
 
