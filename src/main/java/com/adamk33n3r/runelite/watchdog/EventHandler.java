@@ -16,6 +16,7 @@ import net.runelite.api.ChatMessageType;
 import net.runelite.api.Client;
 import net.runelite.api.GameState;
 import net.runelite.api.InventoryID;
+import net.runelite.api.Item;
 import net.runelite.api.ItemComposition;
 import net.runelite.api.ObjectComposition;
 import net.runelite.api.Skill;
@@ -259,17 +260,19 @@ public class EventHandler {
             .filter(alert -> alert instanceof InventoryAlert)
             .map(alert -> (InventoryAlert) alert)
             .forEach(inventoryAlert -> {
-                if (inventoryAlert.getInventoryAlertType() == InventoryAlert.InventoryAlertType.FULL && itemContainerChanged.getItemContainer().getItems().length == 28) {
+                Item[] items = itemContainerChanged.getItemContainer().getItems();
+                long itemCount = Arrays.stream(items).filter(item -> item.getId() > -1).count();
+                if (inventoryAlert.getInventoryAlertType() == InventoryAlert.InventoryAlertType.FULL && itemCount == 28) {
                     this.fireAlert(inventoryAlert, inventoryAlert.getInventoryAlertType().getName());
-                } else if (inventoryAlert.getInventoryAlertType() == InventoryAlert.InventoryAlertType.EMPTY && itemContainerChanged.getItemContainer().getItems().length == 0) {
+                } else if (inventoryAlert.getInventoryAlertType() == InventoryAlert.InventoryAlertType.EMPTY && itemCount == 0) {
                     this.fireAlert(inventoryAlert, inventoryAlert.getInventoryAlertType().getName());
                 } else if (inventoryAlert.getInventoryAlertType() == InventoryAlert.InventoryAlertType.ITEM) {
                     Map<Integer, Integer> allItems = new HashMap<>();
-                    Arrays.stream(itemContainerChanged.getItemContainer().getItems())
+                    Arrays.stream(items)
                         .forEach(item -> allItems.merge(item.getId(), item.getQuantity(), Integer::sum));
                     allItems.entrySet().stream()
-                        .filter(itemCount -> inventoryAlert.getItemQuantity() == 0 || itemCount.getValue() == inventoryAlert.getItemQuantity())
-                        .map(itemCount -> this.matchPattern(inventoryAlert, this.itemManager.getItemComposition(itemCount.getKey()).getName()))
+                        .filter(itemWithCount -> inventoryAlert.getItemQuantity() == 0 || itemWithCount.getValue() == inventoryAlert.getItemQuantity())
+                        .map(itemWithCount -> this.matchPattern(inventoryAlert, this.itemManager.getItemComposition(itemWithCount.getKey()).getName()))
                         .filter(Objects::nonNull)
                         .findFirst()
                         .ifPresent(groups -> this.fireAlert(inventoryAlert, groups));
@@ -332,7 +335,6 @@ public class EventHandler {
 
     @Subscribe
     private void onGameObjectSpawned(GameObjectSpawned gameObjectSpawned) {
-        System.out.println(this.client.getObjectDefinition(gameObjectSpawned.getGameObject().getId()).getName());
         this.onTileObjectSpawned(gameObjectSpawned.getGameObject(), SPAWNED, GAME_OBJECT);
     }
     @Subscribe
