@@ -1,5 +1,6 @@
 package com.adamk33n3r.runelite.watchdog.notifications;
 
+import com.adamk33n3r.runelite.watchdog.SoundEffectIDWrapper;
 import com.adamk33n3r.runelite.watchdog.Util;
 import com.adamk33n3r.runelite.watchdog.WatchdogConfig;
 
@@ -16,6 +17,7 @@ import javax.inject.Inject;
 @Setter
 public class SoundEffect extends AudioNotification {
     private int soundID;
+    private SoundEffectIDWrapper.SoundEffect soundEffect = SoundEffectIDWrapper.GE_TRADE_OK;
 
     @Inject
     private transient Client client;
