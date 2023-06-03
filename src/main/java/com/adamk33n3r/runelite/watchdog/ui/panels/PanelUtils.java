@@ -14,6 +14,7 @@ import net.runelite.client.util.SwingUtil;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -153,6 +154,10 @@ public class PanelUtils {
 
     public interface ButtonClickListener {
         void clickPerformed(JButton button, int modifiers);
+    }
+
+    public interface OnRemove {
+        void elementRemoved(JComponent removed);
     }
 
     public static JButton createToggleActionButton(ImageIcon onIcon, ImageIcon onRolloverIcon, ImageIcon offIcon, ImageIcon offRolloverIcon, String onTooltip, String offTooltip, boolean initialValue, ButtonClickListener listener) {

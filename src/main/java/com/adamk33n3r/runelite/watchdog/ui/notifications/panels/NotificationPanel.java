@@ -4,12 +4,14 @@ import com.adamk33n3r.runelite.watchdog.NotificationType;
 import com.adamk33n3r.runelite.watchdog.notifications.Notification;
 import com.adamk33n3r.runelite.watchdog.ui.AlertListItem;
 import com.adamk33n3r.runelite.watchdog.ui.StretchedStackedLayout;
-import com.adamk33n3r.runelite.watchdog.ui.UpDownArrows;
 import com.adamk33n3r.runelite.watchdog.ui.panels.NotificationsPanel;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
 
 import net.runelite.client.ui.ColorScheme;
+import net.runelite.client.ui.components.MouseDragEventForwarder;
 import net.runelite.client.util.ImageUtil;
+
+import lombok.Getter;
 
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
@@ -21,7 +23,6 @@ import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
-import java.awt.event.ActionEvent;
 import java.awt.image.BufferedImage;
 
 public abstract class NotificationPanel extends JPanel {
@@ -63,13 +64,17 @@ public abstract class NotificationPanel extends JPanel {
         CLOCK_ICON = new ImageIcon(ImageUtil.luminanceOffset(clockIcon, -80));
     }
 
+    @Getter
+    protected Notification notification;
     protected JPanel settings = new JPanel(new StretchedStackedLayout(3, 3));
 
     private static final Border NAME_BOTTOM_BORDER = new CompoundBorder(
         BorderFactory.createMatteBorder(0, 0, 1, 0, ColorScheme.DARK_GRAY_COLOR),
         BorderFactory.createMatteBorder(5, 10, 5, 0, ColorScheme.DARKER_GRAY_COLOR));
 
-    public NotificationPanel(Notification notification, NotificationsPanel parentPanel, Runnable onChangeListener, PanelUtils.ButtonClickListener onRemove) {
+    public NotificationPanel(Notification notification, NotificationsPanel parentPanel, Runnable onChangeListener, PanelUtils.OnRemove onRemove) {
+        this.notification = notification;
+
         this.setLayout(new BorderLayout());
         this.setBorder(new EmptyBorder(3, 0, 0, 0));
         JPanel container = new JPanel(new StretchedStackedLayout(3, 3));
@@ -88,31 +93,17 @@ public abstract class NotificationPanel extends JPanel {
         nameLabel.setToolTipText(notificationType.getTooltip());
         nameWrapper.add(nameLabel, BorderLayout.WEST);
 
+        MouseDragEventForwarder mouseDragEventForwarder = new MouseDragEventForwarder(parentPanel.getNotificationContainer());
+        nameWrapper.addMouseListener(mouseDragEventForwarder);
+        nameWrapper.addMouseMotionListener(mouseDragEventForwarder);
+        nameLabel.addMouseListener(mouseDragEventForwarder);
+        nameLabel.addMouseMotionListener(mouseDragEventForwarder);
+
         // Right buttons
         JPanel rightActions = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
         rightActions.setBorder(new EmptyBorder(4, 0, 0, 0));
         rightActions.setBackground(ColorScheme.DARKER_GRAY_COLOR);
         nameWrapper.add(rightActions, BorderLayout.EAST);
-
-
-        UpDownArrows upDownArrows = new UpDownArrows("Move Notification up (hold shift for top)", (btn, modifiers) -> {
-            if ((modifiers & ActionEvent.SHIFT_MASK) != 0) {
-                notification.getAlert().moveNotificationToTop(notification);
-            } else {
-                notification.getAlert().moveNotificationUp(notification);
-            }
-            onChangeListener.run();
-            parentPanel.rebuild();
-        }, "Move Notification down (hold shift for bottom)", (btn, modifiers) -> {
-            if ((modifiers & ActionEvent.SHIFT_MASK) != 0) {
-                notification.getAlert().moveNotificationToBottom(notification);
-            } else {
-                notification.getAlert().moveNotificationDown(notification);
-            }
-            onChangeListener.run();
-            parentPanel.rebuild();
-        }, true);
-        rightActions.add(upDownArrows);
 
         JButton focusBtn = PanelUtils.createToggleActionButton(
             FOREGROUND_ICON,
@@ -139,7 +130,7 @@ public abstract class NotificationPanel extends JPanel {
             AlertListItem.DELETE_ICON,
             AlertListItem.DELETE_ICON_HOVER,
             "Remove this notification",
-            onRemove);
+            (btn, modifiers) -> onRemove.elementRemoved(this));
         rightActions.add(deleteBtn);
 
         this.settings.setBorder(new EmptyBorder(5, 10, 5, 10));

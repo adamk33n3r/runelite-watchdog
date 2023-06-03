@@ -15,7 +15,7 @@ import javax.swing.JSpinner;
 import java.util.Arrays;
 
 public class ScreenFlashNotificationPanel extends NotificationPanel {
-    public ScreenFlashNotificationPanel(ScreenFlash screenFlash, NotificationsPanel parentPanel, ColorPickerManager colorPickerManager, Runnable onChangeListener, PanelUtils.ButtonClickListener onRemove) {
+    public ScreenFlashNotificationPanel(ScreenFlash screenFlash, NotificationsPanel parentPanel, ColorPickerManager colorPickerManager, Runnable onChangeListener, PanelUtils.OnRemove onRemove) {
         super(screenFlash, parentPanel, onChangeListener, onRemove);
 
         ColorJButton colorPickerBtn = PanelUtils.createColorPicker(

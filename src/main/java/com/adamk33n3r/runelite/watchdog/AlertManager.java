@@ -45,9 +45,11 @@ public class AlertManager {
     @Named("watchdog.pluginVersion")
     private String pluginVersion;
 
-    private static final Type ALERT_LIST_TYPE;
+    public static final Type ALERT_TYPE;
+    public static final Type ALERT_LIST_TYPE;
 
     static {
+        ALERT_TYPE = new TypeToken<Alert>() {}.getType();
         ALERT_LIST_TYPE = new TypeToken<List<Alert>>() {}.getType();
     }
 
@@ -97,6 +99,19 @@ public class AlertManager {
         SwingUtilities.invokeLater(this.watchdogPanel::rebuild);
     }
 
+    public void cloneAlert(Alert alert) {
+        String json = this.gson.toJson(alert, ALERT_TYPE);
+        Alert clonedAlert = this.gson.fromJson(json, ALERT_TYPE);
+        clonedAlert.setName(clonedAlert.getName() + " Clone");
+        this.addAlert(clonedAlert);
+    }
+
+    public void moveAlertTo(Alert alert, int pos) {
+        this.alerts.remove(alert);
+        this.alerts.add(pos, alert);
+        this.saveAlerts();
+    }
+
     public void moveAlertToTop(Alert alert) {
         this.alerts.remove(alert);
         this.alerts.add(0, alert);
@@ -134,8 +149,6 @@ public class AlertManager {
         this.alerts.add(newIdx, alert);
         this.saveAlerts();
     }
-
-    public void moveNotificationUp(Alert alert, Notification notification) {}
 
     public void loadAlerts() {
         final String json = this.configManager.getConfiguration(WatchdogConfig.CONFIG_GROUP_NAME, WatchdogConfig.ALERTS);
@@ -243,5 +256,4 @@ public class AlertManager {
             this.saveAlerts();
         }
     }
-
 }
