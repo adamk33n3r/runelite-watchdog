@@ -12,9 +12,9 @@ import net.runelite.api.Skill;
 import net.runelite.client.plugins.config.ConfigPlugin;
 import net.runelite.client.plugins.info.InfoPanel;
 import net.runelite.client.plugins.timetracking.TimeTrackingPlugin;
-import net.runelite.client.ui.DynamicGridLayout;
 import net.runelite.client.ui.MultiplexingPluginPanel;
 import net.runelite.client.ui.PluginPanel;
+import net.runelite.client.ui.components.DragAndDropReorderPane;
 import net.runelite.client.util.ImageUtil;
 import net.runelite.client.util.LinkBrowser;
 
@@ -29,10 +29,10 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
+import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
 import java.awt.BorderLayout;
@@ -44,8 +44,6 @@ import java.awt.GridLayout;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.util.Arrays;
-import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
 
 @Slf4j
 public class WatchdogPanel extends PluginPanel {
@@ -90,6 +88,8 @@ public class WatchdogPanel extends PluginPanel {
     public static final ImageIcon KOFI_ICON_HOVER;
     public static final ImageIcon CONFIG_ICON;
     public static final ImageIcon CONFIG_ICON_HOVER;
+    public static final ImageIcon EXPORT_ICON = new ImageIcon(ImageUtil.loadImageResource(ConfigPlugin.class, "mdi_export.png"));
+    public static final ImageIcon IMPORT_ICON = new ImageIcon(ImageUtil.loadImageResource(WatchdogPanel.class, "mdi_import.png"));
 
     static {
         final BufferedImage addIcon = ImageUtil.loadImageResource(TimeTrackingPlugin.class, "add_icon.png");
@@ -185,23 +185,32 @@ public class WatchdogPanel extends PluginPanel {
 
         this.add(topPanel, BorderLayout.NORTH);
 
+        DragAndDropReorderPane dragAndDropReorderPane = new DragAndDropReorderPane();
+        dragAndDropReorderPane.addDragListener((c) -> {
+            int pos = dragAndDropReorderPane.getPosition(c);
+            AlertListItem alertListItem = (AlertListItem) c;
+//            log.debug("drag listener: " + alertListItem.getAlert().getName() + " to " + pos);
+            alertManager.moveAlertTo(alertListItem.getAlert(), pos);
+        });
         JPanel alertPanel = new JPanel(new BorderLayout());
-        JPanel alertWrapperWrapper = new JPanel(new DynamicGridLayout(0, 1, 3, 3));
-        alertPanel.add(alertWrapperWrapper, BorderLayout.NORTH);
+        alertPanel.add(dragAndDropReorderPane, BorderLayout.NORTH);
+
         for (Alert alert : this.alertManager.getAlerts()) {
-            AlertListItem alertListItem = new AlertListItem(this, this.alertManager, alert);
-            alertWrapperWrapper.add(alertListItem);
+            AlertListItem alertListItem = new AlertListItem(this, this.alertManager, alert, dragAndDropReorderPane);
+            dragAndDropReorderPane.add(alertListItem);
         }
         this.add(new JScrollPane(alertPanel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER), BorderLayout.CENTER);
 
         JPanel importExportGroup = new JPanel(new GridLayout(1, 2, 5, 0));
-        JButton importButton = new JButton("Import");
+        JButton importButton = new JButton("Import", IMPORT_ICON);
+        importButton.setHorizontalTextPosition(SwingConstants.LEFT);
         importButton.addActionListener(ev -> {
             ImportExportDialog importExportDialog = new ImportExportDialog(SwingUtilities.getWindowAncestor(this));
             importExportDialog.setVisible(true);
         });
         importExportGroup.add(importButton);
-        JButton exportButton = new JButton("Export");
+        JButton exportButton = new JButton("Export", EXPORT_ICON);
+        exportButton.setHorizontalTextPosition(SwingConstants.LEFT);
         exportButton.addActionListener(ev -> {
             ImportExportDialog importExportDialog = new ImportExportDialog(SwingUtilities.getWindowAncestor(this), WatchdogPlugin.getInstance().getConfig().alerts());
             importExportDialog.setVisible(true);

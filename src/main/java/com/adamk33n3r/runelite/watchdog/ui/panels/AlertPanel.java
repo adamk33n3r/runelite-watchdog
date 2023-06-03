@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import static com.adamk33n3r.runelite.watchdog.AlertManager.ALERT_LIST_TYPE;
 import static com.adamk33n3r.runelite.watchdog.ui.notifications.panels.NotificationPanel.TEST_ICON;
 import static com.adamk33n3r.runelite.watchdog.ui.notifications.panels.NotificationPanel.TEST_ICON_HOVER;
 
@@ -107,7 +108,7 @@ public class AlertPanel extends PluginPanel {
             (btn, modifiers) -> {
                 ImportExportDialog importExportDialog = new ImportExportDialog(
                     SwingUtilities.getWindowAncestor(this),
-                    this.alertManager.getGson().toJson(new Alert[] { alert })
+                    this.alertManager.getGson().toJson(new Alert[] { alert }, ALERT_LIST_TYPE)
                 );
                 importExportDialog.setVisible(true);
             }

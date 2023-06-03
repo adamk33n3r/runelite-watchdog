@@ -14,8 +14,10 @@ import com.adamk33n3r.runelite.watchdog.notifications.Sound;
 import com.adamk33n3r.runelite.watchdog.notifications.SoundEffect;
 import com.adamk33n3r.runelite.watchdog.notifications.TextToSpeech;
 import com.adamk33n3r.runelite.watchdog.notifications.TrayNotification;
+import com.adamk33n3r.runelite.watchdog.ui.AlertListItem;
 import com.adamk33n3r.runelite.watchdog.ui.dropdownbutton.DropDownButtonFactory;
 import com.adamk33n3r.runelite.watchdog.ui.notifications.panels.MessageNotificationPanel;
+import com.adamk33n3r.runelite.watchdog.ui.notifications.panels.NotificationPanel;
 import com.adamk33n3r.runelite.watchdog.ui.notifications.panels.OverheadNotificationPanel;
 import com.adamk33n3r.runelite.watchdog.ui.notifications.panels.OverlayNotificationPanel;
 import com.adamk33n3r.runelite.watchdog.ui.notifications.panels.ScreenFlashNotificationPanel;
@@ -24,9 +26,11 @@ import com.adamk33n3r.runelite.watchdog.ui.notifications.panels.SoundNotificatio
 import com.adamk33n3r.runelite.watchdog.ui.notifications.panels.TextToSpeechNotificationPanel;
 
 import net.runelite.client.ui.DynamicGridLayout;
+import net.runelite.client.ui.components.DragAndDropReorderPane;
 import net.runelite.client.ui.components.colorpicker.ColorPickerManager;
 
 import com.google.inject.Injector;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.inject.Inject;
@@ -51,12 +55,21 @@ public class NotificationsPanel extends JPanel {
     @Inject
     private AlertManager alertManager;
 
-    private final JPanel notificationContainer;
+    @Getter
+    private final DragAndDropReorderPane notificationContainer;
 
     public NotificationsPanel(Alert alert) {
         this.alert = alert;
         this.setLayout(new DynamicGridLayout(0, 1, 3, 3));
-        this.notificationContainer = new JPanel(new DynamicGridLayout(0, 1, 3, 3));
+        this.notificationContainer = new DragAndDropReorderPane();
+        this.notificationContainer.addDragListener((c) -> {
+            int pos = this.notificationContainer.getPosition(c);
+            NotificationPanel notificationPanel = (NotificationPanel) c;
+            Notification notification = notificationPanel.getNotification();
+//            log.debug("drag listener: " + notification.getType().getName() + " to " + pos);
+            notification.getAlert().moveNotificationTo(notification, pos);
+            this.alertManager.saveAlerts();
+        });
 
         JPopupMenu popupMenu = new JPopupMenu();
         ActionListener actionListener = e -> {
@@ -97,34 +110,35 @@ public class NotificationsPanel extends JPanel {
     }
 
     private void addPanel(Notification notification) {
-        JPanel notificationPanel = new JPanel(new DynamicGridLayout(0, 1, 3, 3));
-        this.notificationContainer.add(notificationPanel);
-
-        PanelUtils.ButtonClickListener removeNotification = (btn, modifiers) -> {
+        PanelUtils.OnRemove removeNotification = (removedPanel) -> {
             this.alert.getNotifications().remove(notification);
-            this.notificationContainer.remove(notificationPanel);
+            this.notificationContainer.remove(removedPanel);
             this.notificationContainer.revalidate();
             this.alertManager.saveAlerts();
         };
 
-        if (notification instanceof GameMessage)
-            notificationPanel.add(new MessageNotificationPanel((GameMessage)notification, this, this.alertManager::saveAlerts, removeNotification));
-        else if (notification instanceof TextToSpeech)
-            notificationPanel.add(new TextToSpeechNotificationPanel((TextToSpeech) notification, this, this.alertManager::saveAlerts, removeNotification));
+        NotificationPanel notificationPanel = null;
+        if (notification instanceof GameMessage) {
+            notificationPanel = new MessageNotificationPanel((GameMessage) notification, this, this.alertManager::saveAlerts, removeNotification);
+        } else if (notification instanceof TextToSpeech)
+            notificationPanel = new TextToSpeechNotificationPanel((TextToSpeech) notification, this, this.alertManager::saveAlerts, removeNotification);
         else if (notification instanceof Sound)
-            notificationPanel.add(new SoundNotificationPanel((Sound)notification, this, this.alertManager::saveAlerts, removeNotification));
+            notificationPanel = new SoundNotificationPanel((Sound)notification, this, this.alertManager::saveAlerts, removeNotification);
         else if (notification instanceof SoundEffect)
-            notificationPanel.add(new SoundEffectNotificationPanel((SoundEffect)notification, this, this.alertManager::saveAlerts, removeNotification));
+            notificationPanel = new SoundEffectNotificationPanel((SoundEffect)notification, this, this.alertManager::saveAlerts, removeNotification);
         else if (notification instanceof TrayNotification)
-            notificationPanel.add(new MessageNotificationPanel((TrayNotification)notification, this, this.alertManager::saveAlerts, removeNotification));
+            notificationPanel = new MessageNotificationPanel((TrayNotification)notification, this, this.alertManager::saveAlerts, removeNotification);
         else if (notification instanceof ScreenFlash)
-            notificationPanel.add(new ScreenFlashNotificationPanel((ScreenFlash) notification, this, this.colorPickerManager, this.alertManager::saveAlerts, removeNotification));
+            notificationPanel = new ScreenFlashNotificationPanel((ScreenFlash) notification, this, this.colorPickerManager, this.alertManager::saveAlerts, removeNotification);
         else if (notification instanceof Overhead)
-            notificationPanel.add(new OverheadNotificationPanel((Overhead) notification, this, this.alertManager::saveAlerts, removeNotification));
+            notificationPanel = new OverheadNotificationPanel((Overhead) notification, this, this.alertManager::saveAlerts, removeNotification);
         else if (notification instanceof Overlay)
-            notificationPanel.add(new OverlayNotificationPanel((Overlay) notification, this, this.colorPickerManager, this.alertManager::saveAlerts, removeNotification));
+            notificationPanel = new OverlayNotificationPanel((Overlay) notification, this, this.colorPickerManager, this.alertManager::saveAlerts, removeNotification);
         else if (notification instanceof NotificationEvent)
-            notificationPanel.add(new MessageNotificationPanel((NotificationEvent) notification, this, this.alertManager::saveAlerts, removeNotification));
+            notificationPanel = new MessageNotificationPanel((NotificationEvent) notification, this, this.alertManager::saveAlerts, removeNotification);
+
+        if (notificationPanel != null)
+            this.notificationContainer.add(notificationPanel);
     }
 
     private Notification createNotification(NotificationType notificationType) {

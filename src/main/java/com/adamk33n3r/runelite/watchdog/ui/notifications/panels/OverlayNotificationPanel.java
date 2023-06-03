@@ -14,7 +14,7 @@ import javax.swing.JSpinner;
 public class OverlayNotificationPanel extends MessageNotificationPanel {
     private JPanel displayTime;
 
-    public OverlayNotificationPanel(Overlay notification, NotificationsPanel parentPanel, ColorPickerManager colorPickerManager, Runnable onChangeListener, PanelUtils.ButtonClickListener onRemove) {
+    public OverlayNotificationPanel(Overlay notification, NotificationsPanel parentPanel, ColorPickerManager colorPickerManager, Runnable onChangeListener, PanelUtils.OnRemove onRemove) {
         super(notification, parentPanel, onChangeListener, onRemove);
 
         ColorJButton colorPicker = PanelUtils.createColorPicker(

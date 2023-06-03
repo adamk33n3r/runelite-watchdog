@@ -35,7 +35,7 @@ public class TextToSpeechNotificationPanel extends NotificationPanel {
         SPEED_ICON = new ImageIcon(ImageUtil.luminanceOffset(speedImg, -80));
     }
 
-    public TextToSpeechNotificationPanel(TextToSpeech notification, NotificationsPanel parentPanel, Runnable onChangeListener, PanelUtils.ButtonClickListener onRemove) {
+    public TextToSpeechNotificationPanel(TextToSpeech notification, NotificationsPanel parentPanel, Runnable onChangeListener, PanelUtils.OnRemove onRemove) {
         super(notification, parentPanel, onChangeListener, onRemove);
 
         if (!WatchdogPlugin.getInstance().getConfig().ttsEnabled()) {

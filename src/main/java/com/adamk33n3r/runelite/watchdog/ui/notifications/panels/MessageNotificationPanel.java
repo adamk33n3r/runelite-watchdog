@@ -12,7 +12,7 @@ import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 
 public class MessageNotificationPanel extends NotificationPanel {
-    public MessageNotificationPanel(MessageNotification notification, NotificationsPanel parentPanel, Runnable onChangeListener, PanelUtils.ButtonClickListener onRemove) {
+    public MessageNotificationPanel(MessageNotification notification, NotificationsPanel parentPanel, Runnable onChangeListener, PanelUtils.OnRemove onRemove) {
         super(notification, parentPanel, onChangeListener, onRemove);
 
         FlatTextArea flatTextArea = new FlatTextArea("Enter your message...", true);

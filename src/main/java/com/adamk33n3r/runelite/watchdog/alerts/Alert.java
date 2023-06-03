@@ -35,6 +35,11 @@ public abstract class Alert {
             .orElse(null);
     }
 
+    public void moveNotificationTo(Notification notification, int pos) {
+        this.notifications.remove(notification);
+        this.notifications.add(pos, notification);
+    }
+
     public void moveNotificationToTop(Notification notification) {
         this.notifications.remove(notification);
         this.notifications.add(0, notification);

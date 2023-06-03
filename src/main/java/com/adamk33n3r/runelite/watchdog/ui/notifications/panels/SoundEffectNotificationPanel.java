@@ -13,7 +13,7 @@ import javax.swing.JSpinner;
 
 public class SoundEffectNotificationPanel extends NotificationPanel {
 
-    public SoundEffectNotificationPanel(SoundEffect soundEffect, NotificationsPanel parentPanel, Runnable onChangeListener, PanelUtils.ButtonClickListener onRemove) {
+    public SoundEffectNotificationPanel(SoundEffect soundEffect, NotificationsPanel parentPanel, Runnable onChangeListener, PanelUtils.OnRemove onRemove) {
         super(soundEffect, parentPanel, onChangeListener, onRemove);
 
         JRichTextPane richTextPane = new JRichTextPane();
