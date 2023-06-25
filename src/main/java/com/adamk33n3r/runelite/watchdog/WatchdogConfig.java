@@ -22,6 +22,7 @@ import java.awt.Color;
 public interface WatchdogConfig extends Config {
     String CONFIG_GROUP_NAME = "watchdog";
     Color DEFAULT_NOTIFICATION_COLOR = ColorUtil.fromHex("#46FF0000");
+    Color DEFAULT_NOTIFICATION_TEXT_COLOR = Color.WHITE;
 
     // Hidden
     String ALERTS = "alerts";
@@ -38,6 +39,7 @@ public interface WatchdogConfig extends Config {
     String OVERLAY_FONT_TYPE = "overlayFontType";
     String OVERLAY_SHOW_TIME = "overlayShowTime";
     String DEFAULT_OVERLAY_STICKY = "defaultOverlaySticky";
+    String DEFAULT_OVERLAY_TEXT_COLOR = "defaultOverlayTextColor";
     String DEFAULT_OVERLAY_COLOR = "defaultOverlayColor";
     String DEFAULT_OVERLAY_TTL = "defaultOverlayTTL";
 
@@ -160,11 +162,20 @@ public interface WatchdogConfig extends Config {
     default int defaultOverlayTTL() { return 5; }
 
     @ConfigItem(
-        keyName = DEFAULT_OVERLAY_COLOR,
-        name = "Default Color",
-        description = "The default color",
+        keyName = DEFAULT_OVERLAY_TEXT_COLOR,
+        name = "Default Text Color",
+        description = "The default text color",
         section = overlaySection,
         position = 5
+    )
+    default Color defaultOverlayTextColor() { return DEFAULT_NOTIFICATION_TEXT_COLOR; }
+
+    @ConfigItem(
+        keyName = DEFAULT_OVERLAY_COLOR,
+        name = "Default Background Color",
+        description = "The default background color",
+        section = overlaySection,
+        position = 6
     )
     @Alpha
     default Color defaultOverlayColor() { return DEFAULT_NOTIFICATION_COLOR; }

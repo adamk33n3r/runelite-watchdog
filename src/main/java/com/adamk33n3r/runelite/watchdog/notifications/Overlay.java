@@ -14,12 +14,14 @@ import java.awt.Color;
 @Setter
 public class Overlay extends MessageNotification {
     private Color color;
+    private Color textColor;
     private boolean sticky = false;
     private int timeToLive = 5;
 
     @Inject
     public Overlay(WatchdogConfig config) {
         this.color = config.defaultOverlayColor();
+        this.textColor = config.defaultOverlayTextColor();
         this.sticky = config.defaultOverlaySticky();
         this.timeToLive = config.defaultOverlayTTL();
     }

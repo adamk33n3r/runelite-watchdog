@@ -17,6 +17,21 @@ public class OverlayNotificationPanel extends MessageNotificationPanel {
     public OverlayNotificationPanel(Overlay notification, NotificationsPanel parentPanel, ColorPickerManager colorPickerManager, Runnable onChangeListener, PanelUtils.OnRemove onRemove) {
         super(notification, parentPanel, onChangeListener, onRemove);
 
+        ColorJButton fgColorPicker = PanelUtils.createColorPicker(
+            "Pick a color",
+            "The foreground color of the notification",
+            "Foreground Color",
+            this,
+            notification.getTextColor(),
+            colorPickerManager,
+            false,
+            val -> {
+                notification.setTextColor(val);
+                onChangeListener.run();
+            }
+        );
+        this.settings.add(fgColorPicker);
+
         ColorJButton colorPicker = PanelUtils.createColorPicker(
             "Pick a color",
             "The background color of the notification",
@@ -24,6 +39,7 @@ public class OverlayNotificationPanel extends MessageNotificationPanel {
             this,
             notification.getColor(),
             colorPickerManager,
+            true,
             val -> {
                 notification.setColor(val);
                 onChangeListener.run();
