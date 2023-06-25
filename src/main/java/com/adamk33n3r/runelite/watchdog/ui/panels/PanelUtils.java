@@ -213,7 +213,7 @@ public class PanelUtils {
         return spinner;
     }
 
-    public static ColorJButton createColorPicker(String placeholder, String tooltip, String windowTitle, Component parentComponent, Color initialValue, ColorPickerManager colorPickerManager, Consumer<Color> onChange) {
+    public static ColorJButton createColorPicker(String placeholder, String tooltip, String windowTitle, Component parentComponent, Color initialValue, ColorPickerManager colorPickerManager, boolean showAlpha, Consumer<Color> onChange) {
         ColorJButton colorPickerBtn = new ColorJButton(placeholder, Color.BLACK);
         if (initialValue != null) {
             String colorHex = "#" + ColorUtil.colorToAlphaHexCode(initialValue).toUpperCase();
@@ -229,7 +229,7 @@ public class PanelUtils {
                     SwingUtilities.getWindowAncestor(colorPickerBtn),
                     colorPickerBtn.getColor(),
                     windowTitle,
-                    false);
+                    !showAlpha);
                 colorPicker.setLocation(parentComponent.getLocationOnScreen());
                 colorPicker.setOnColorChange(c -> {
                     colorPickerBtn.setColor(c);

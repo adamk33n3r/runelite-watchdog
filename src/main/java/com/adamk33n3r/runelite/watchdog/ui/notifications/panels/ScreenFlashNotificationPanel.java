@@ -25,6 +25,7 @@ public class ScreenFlashNotificationPanel extends NotificationPanel {
             this,
             screenFlash.getColor(),
             colorPickerManager,
+            true,
             val -> {
                 screenFlash.setColor(val);
                 onChangeListener.run();

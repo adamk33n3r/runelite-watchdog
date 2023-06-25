@@ -61,10 +61,12 @@ public class NotificationOverlay extends OverlayPanel {
             this.getChildren().clear();
             this.getChildren().add(WrappedTitleComponent.builder()
                 .text(this.message)
+                .color(this.overlayNotification.getTextColor())
                 .build());
             if (config.overlayShowTime()) {
                 this.getChildren().add(WrappedTitleComponent.builder()
                     .text(formatDuration(ChronoUnit.MILLIS.between(this.timeStarted, Instant.now()), "m'm' s's' 'ago'"))
+                    .color(this.overlayNotification.getTextColor())
                     .build());
             }
 
