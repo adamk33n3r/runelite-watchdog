@@ -108,7 +108,7 @@ public class AlertPanel extends PluginPanel {
             (btn, modifiers) -> {
                 ImportExportDialog importExportDialog = new ImportExportDialog(
                     SwingUtilities.getWindowAncestor(this),
-                    this.alertManager.getGson().toJson(new Alert[] { alert }, ALERT_LIST_TYPE)
+                    this.alertManager.getGson().toJson(new Alert[] { alert })
                 );
                 importExportDialog.setVisible(true);
             }
