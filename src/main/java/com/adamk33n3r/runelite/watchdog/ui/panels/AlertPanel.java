@@ -278,7 +278,7 @@ public class AlertPanel extends PluginPanel {
                 alert.getDebounceTime(),
                 alert::setDebounceTime,
                 0,
-                60000,
+                8640000, // 6 hours - max time a player can be logged in
                 100
             );
     }
