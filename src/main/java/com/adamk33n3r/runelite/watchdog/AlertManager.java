@@ -252,6 +252,18 @@ public class AlertManager {
                     });
             }
 
+            if (configVersion.compareTo(new Version("2.13.0")) < 0) {
+                this.alerts.stream()
+                    .flatMap(alert -> alert.getNotifications().stream())
+                    .filter(notification -> notification instanceof Overlay)
+                    .map(notification -> (Overlay) notification)
+                    .forEach(overlay -> {
+                        if (overlay.getTextColor() == null) {
+                            overlay.setTextColor(WatchdogConfig.DEFAULT_NOTIFICATION_TEXT_COLOR);
+                        }
+                    });
+            }
+
             this.configManager.setConfiguration(WatchdogConfig.CONFIG_GROUP_NAME, WatchdogConfig.PLUGIN_VERSION, currentVersion.getVersion());
             this.saveAlerts();
         }

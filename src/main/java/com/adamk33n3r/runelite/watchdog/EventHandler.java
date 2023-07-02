@@ -354,6 +354,9 @@ public class EventHandler {
     private void onTileObjectSpawned(TileObject tileObject, SpawnedAlert.SpawnedDespawned mode, SpawnedAlert.SpawnedType type) {
         final ObjectComposition comp = this.client.getObjectDefinition(tileObject.getId());
         final ObjectComposition impostor = comp.getImpostorIds() != null ? comp.getImpostor() : comp;
+        if (impostor == null) {
+            return;
+        }
         this.onSpawned(impostor.getName(), mode, type);
     }
 
