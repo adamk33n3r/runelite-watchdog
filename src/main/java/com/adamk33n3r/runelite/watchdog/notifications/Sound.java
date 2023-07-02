@@ -12,13 +12,11 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 import javax.sound.sampled.FloatControl;
-import javax.sound.sampled.LineUnavailableException;
-import javax.sound.sampled.UnsupportedAudioFileException;
+import javax.sound.sampled.LineEvent;
 import java.awt.Toolkit;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.CompletableFuture;
 
@@ -52,20 +50,26 @@ public class Sound extends AudioNotification {
             File soundFile = new File(path);
             if (soundFile.exists()) {
                 Clip clip = AudioSystem.getClip();
-
                 try (InputStream fileStream = new BufferedInputStream(new FileInputStream(soundFile));
                      AudioInputStream sound = AudioSystem.getAudioInputStream(fileStream)) {
                     clip.open(sound);
-                } catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
+                    FloatControl volume = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
+                    int decibels = Util.scale(this.gain, 0, 10, -25, 5);
+                    volume.setValue(decibels);
+                    log.debug("volume: " + decibels);
+                    clip.loop(0);
+                    clip.addLineListener(event -> {
+                        if (event.getType() == LineEvent.Type.STOP) {
+                            clip.close();
+                        }
+                    });
+                    return true;
+                } catch (Exception e) {
+//                } catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
                     log.warn("Unable to load sound", e);
+                    clip.close();
                     return false;
                 }
-                FloatControl volume = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
-                int decibels = Util.scale(this.gain, 0, 10, -25, 5);
-                volume.setValue(decibels);
-                log.debug("volume: " + decibels);
-                clip.loop(0);
-                return true;
             }
         } catch (Exception e) {
             log.error(e.getMessage());
