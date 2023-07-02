@@ -358,13 +358,14 @@ public class EventHandler {
     }
 
     private void onSpawned(String name, SpawnedAlert.SpawnedDespawned mode, SpawnedAlert.SpawnedType type) {
+        String unformattedName = Text.removeFormattingTags(name);
         this.alertManager.getAlerts().stream()
             .filter(alert -> alert instanceof SpawnedAlert)
             .map(alert -> (SpawnedAlert) alert)
             .filter(spawnedAlert -> spawnedAlert.getSpawnedDespawned() == mode)
             .filter(spawnedAlert -> spawnedAlert.getSpawnedType() == type)
             .forEach(spawnedAlert -> {
-                String[] groups = this.matchPattern(spawnedAlert, name);
+                String[] groups = this.matchPattern(spawnedAlert, unformattedName);
                 if (groups == null) return;
 
                 this.fireAlert(spawnedAlert, groups);
