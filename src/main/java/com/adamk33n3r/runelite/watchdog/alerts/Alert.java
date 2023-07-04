@@ -3,25 +3,27 @@ package com.adamk33n3r.runelite.watchdog.alerts;
 import com.adamk33n3r.runelite.watchdog.TriggerType;
 import com.adamk33n3r.runelite.watchdog.notifications.Notification;
 
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 @Getter
+@Setter
 public abstract class Alert {
-    @Setter
     private boolean enabled = true;
-
-    @Setter
     private String name;
-
-    @Setter
     private int debounceTime;
 
-    private final List<Notification> notifications = new ArrayList<>();
+    @Nullable
+    private transient AlertGroup parent;
+
+    @Setter(AccessLevel.PROTECTED)
+    private List<Notification> notifications = new ArrayList<>();
 
     public Alert(String name) {
         this.name = name;
@@ -72,5 +74,20 @@ public abstract class Alert {
 
         this.notifications.remove(notification);
         this.notifications.add(newIdx, notification);
+    }
+
+    @Nullable
+    public List<AlertGroup> getAncestors() {
+        if (this.parent == null) {
+            return null;
+        }
+
+        ArrayList<AlertGroup> ancestors = new ArrayList<>();
+        AlertGroup alertGroup = this.parent;
+        do {
+            ancestors.add(0, alertGroup);
+        } while ((alertGroup = alertGroup.getParent()) != null);
+
+        return ancestors;
     }
 }

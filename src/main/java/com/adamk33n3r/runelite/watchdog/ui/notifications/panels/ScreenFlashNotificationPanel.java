@@ -5,14 +5,12 @@ import com.adamk33n3r.runelite.watchdog.notifications.ScreenFlash;
 import com.adamk33n3r.runelite.watchdog.ui.panels.NotificationsPanel;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
 
-import net.runelite.client.config.FlashNotification;
 import net.runelite.client.ui.components.ColorJButton;
 import net.runelite.client.ui.components.colorpicker.ColorPickerManager;
 
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JComboBox;
 import javax.swing.JSpinner;
-import java.util.Arrays;
 
 public class ScreenFlashNotificationPanel extends NotificationPanel {
     public ScreenFlashNotificationPanel(ScreenFlash screenFlash, NotificationsPanel parentPanel, ColorPickerManager colorPickerManager, Runnable onChangeListener, PanelUtils.OnRemove onRemove) {

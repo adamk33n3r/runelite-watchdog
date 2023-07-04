@@ -5,7 +5,6 @@ import com.adamk33n3r.runelite.watchdog.notifications.ScreenFlash;
 
 import net.runelite.api.Client;
 import net.runelite.api.Constants;
-import net.runelite.client.config.FlashNotification;
 import net.runelite.client.ui.ClientUI;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;

@@ -85,9 +85,6 @@ public abstract class NotificationPanel extends JPanel {
 
         nameWrapper.setBackground(ColorScheme.DARKER_GRAY_COLOR);
         nameWrapper.setBorder(NAME_BOTTOM_BORDER);
-        nameWrapper.setBorder(new CompoundBorder(
-            BorderFactory.createMatteBorder(0, 0, 1, 0, ColorScheme.DARK_GRAY_COLOR),
-            BorderFactory.createMatteBorder(5, 10, 5, 0, ColorScheme.DARKER_GRAY_COLOR)));
         NotificationType notificationType = notification.getType();
         JLabel nameLabel = new JLabel(notificationType.getName());
         nameLabel.setToolTipText(notificationType.getTooltip());

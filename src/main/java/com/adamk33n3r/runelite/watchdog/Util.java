@@ -1,6 +1,29 @@
 package com.adamk33n3r.runelite.watchdog;
 
+import com.adamk33n3r.runelite.watchdog.alerts.Alert;
+import com.adamk33n3r.runelite.watchdog.alerts.AlertGroup;
+
+import java.util.List;
+
 public class Util {
+    public static void setParentsOnAlerts(List<Alert> alerts) {
+        for (Alert alert : alerts) {
+            if (alert instanceof AlertGroup) {
+                AlertGroup group = (AlertGroup) alert;
+                setParentsOnAlertsHelper(group);
+            }
+        }
+    }
+
+    private static void setParentsOnAlertsHelper(AlertGroup parent) {
+        for (Alert childAlert : parent.getAlerts()) {
+            childAlert.setParent(parent);
+            if (childAlert instanceof AlertGroup) {
+                setParentsOnAlertsHelper((AlertGroup) childAlert);
+            }
+        }
+    }
+
     public static <T> T defaultArg(T thing, T defaultValue) {
         if (thing instanceof String) {
             String string = (String) thing;

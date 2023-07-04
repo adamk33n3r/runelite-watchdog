@@ -1,7 +1,11 @@
 package com.adamk33n3r.runelite.watchdog.ui.panels;
 
+import com.adamk33n3r.runelite.watchdog.TriggerType;
 import com.adamk33n3r.runelite.watchdog.Util;
+import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
+import com.adamk33n3r.runelite.watchdog.alerts.Alert;
 import com.adamk33n3r.runelite.watchdog.ui.PlaceholderTextArea;
+import com.adamk33n3r.runelite.watchdog.ui.dropdownbutton.DropDownButtonFactory;
 
 import net.runelite.client.ui.DynamicGridLayout;
 import net.runelite.client.ui.components.ColorJButton;
@@ -11,27 +15,9 @@ import net.runelite.client.util.ColorUtil;
 import net.runelite.client.util.ImageUtil;
 import net.runelite.client.util.SwingUtil;
 
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComponent;
-import javax.swing.JFileChooser;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JSpinner;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
-import javax.swing.SpinnerNumberModel;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.GridLayout;
-import java.awt.Insets;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
@@ -45,6 +31,8 @@ import java.util.function.Consumer;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 import java.util.stream.Collectors;
+
+import static com.adamk33n3r.runelite.watchdog.WatchdogPanel.ADD_ICON;
 
 public class PanelUtils {
     private static final ImageIcon FOLDER_ICON;
@@ -253,5 +241,30 @@ public class PanelUtils {
             JOptionPane.showMessageDialog(parent, errorLabel, "Error in regex/pattern", JOptionPane.ERROR_MESSAGE);
             return false;
         }
+    }
+
+    public static JButton createAlertDropDownButton(Consumer<Alert> onCreate) {
+        ActionListener actionListener = e -> {
+            JMenuItem menuItem = (JMenuItem) e.getSource();
+            TriggerType tType = (TriggerType) menuItem.getClientProperty(TriggerType.class);
+            Alert createdAlert = WatchdogPlugin.getInstance().getInjector().getInstance(tType.getImplClass());
+            onCreate.accept(createdAlert);
+        };
+
+        JPopupMenu popupMenu = new JPopupMenu();
+        popupMenu.add(new JMenuItem(TriggerType.ALERT_GROUP.getName()));
+        popupMenu.addSeparator();
+        Arrays.stream(TriggerType.values())
+            .filter(tType -> tType != TriggerType.ALERT_GROUP)
+            .forEach(tType -> {
+                JMenuItem c = new JMenuItem(tType.getName());
+                c.setToolTipText(tType.getTooltip());
+                c.putClientProperty(TriggerType.class, tType);
+                c.addActionListener(actionListener);
+                popupMenu.add(c);
+            });
+        JButton addDropDownButton = DropDownButtonFactory.createDropDownButton(ADD_ICON, popupMenu);
+        addDropDownButton.setToolTipText("Create New Alert");
+        return addDropDownButton;
     }
 }

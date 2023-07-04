@@ -3,12 +3,11 @@ package com.adamk33n3r.runelite.watchdog;
 import com.adamk33n3r.runelite.watchdog.alerts.*;
 import com.adamk33n3r.runelite.watchdog.ui.AlertListItem;
 import com.adamk33n3r.runelite.watchdog.ui.ImportExportDialog;
-import com.adamk33n3r.runelite.watchdog.ui.dropdownbutton.DropDownButtonFactory;
-import com.adamk33n3r.runelite.watchdog.ui.panels.AlertPanel;
+import com.adamk33n3r.runelite.watchdog.ui.alerts.*;
+import com.adamk33n3r.runelite.watchdog.ui.panels.AlertListPanel;
 import com.adamk33n3r.runelite.watchdog.ui.panels.HistoryPanel;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
 
-import net.runelite.api.Skill;
 import net.runelite.client.plugins.config.ConfigPlugin;
 import net.runelite.client.plugins.info.InfoPanel;
 import net.runelite.client.plugins.timetracking.TimeTrackingPlugin;
@@ -20,7 +19,6 @@ import net.runelite.client.util.LinkBrowser;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.text.WordUtils;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -28,9 +26,7 @@ import javax.inject.Provider;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
-import javax.swing.JMenuItem;
 import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
@@ -41,16 +37,12 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
-import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
-import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class WatchdogPanel extends PluginPanel {
-    @Inject
-    @Named("watchdog.wikiPage.soundIDs")
-    private String SOUND_ID_WIKI_PAGE;
-
     @Inject
     @Named("watchdog.helpURL")
     private String HELP_URL;
@@ -127,8 +119,9 @@ public class WatchdogPanel extends PluginPanel {
         title.setFont(title.getFont().deriveFont(Font.BOLD));
         title.setHorizontalAlignment(JLabel.LEFT);
         title.setForeground(Color.WHITE);
+        title.setToolTipText("Watchdog v" + PLUGIN_VERSION);
         titlePanel.add(title);
-        JLabel version = new JLabel("v"+PLUGIN_VERSION);
+        JLabel version = new JLabel("v" + PLUGIN_VERSION);
         version.setFont(version.getFont().deriveFont(10f));
         version.setBorder(new EmptyBorder(5, 0, 0, 0));
         titlePanel.add(version);
@@ -159,27 +152,30 @@ public class WatchdogPanel extends PluginPanel {
 
         JButton historyButton = PanelUtils.createActionButton(HISTORY_ICON, HISTORY_ICON_HOVER, "History", (btn, modifiers) -> {
             this.muxer.pushState(this.historyPanelProvider.get());
+//            System.out.println(this.alertManager.getAllEnabledAlertsOfType(InventoryAlert.class).count());
+//            this.alertManager.getAllEnabledAlertsOfType(InventoryAlert.class)
+//                .forEach(alert -> {
+//                    List<AlertGroup> ancestors = alert.getAncestors();
+//                    if (ancestors != null) {
+//                        String isEnabled = ancestors.stream().allMatch(Alert::isEnabled) ? "Enabled: " : "Disabled: ";
+//                        System.out.print(isEnabled);
+//                        String ancestorStr = ancestors.stream().map(ancestor -> ancestor.getName() + (ancestor.isEnabled() ? "*" : "")).collect(Collectors.joining(" -> "));
+//                        System.out.print(ancestorStr);
+//                        System.out.print(" -> ");
+//                    } else {
+//                        System.out.print(alert.isEnabled() ? "Enabled: " : "Disabled: ");
+//                    }
+//                    System.out.print(alert.getName());
+//                    System.out.println();
+//                });
         });
         actionButtons.add(historyButton);
 
-        JPopupMenu popupMenu = new JPopupMenu();
-        ActionListener actionListener = e -> {
-            JMenuItem menuItem = (JMenuItem) e.getSource();
-            TriggerType tType = (TriggerType) menuItem.getClientProperty(TriggerType.class);
-            this.createAlert(tType);
-        };
-
-        Arrays.stream(TriggerType.values())
-            .forEach(tType -> {
-                JMenuItem c = new JMenuItem(WordUtils.capitalizeFully(tType.name().replaceAll("_", " ")));
-                c.setToolTipText(tType.getTooltip());
-                c.putClientProperty(TriggerType.class, tType);
-                c.addActionListener(actionListener);
-                popupMenu.add(c);
-            });
-        JButton addDropDownButton = DropDownButtonFactory.createDropDownButton(ADD_ICON, popupMenu);
-        addDropDownButton.setToolTipText("Create New Alert");
-        actionButtons.add(addDropDownButton);
+        JButton alertDropDownButton = PanelUtils.createAlertDropDownButton(createdAlert -> {
+            this.alertManager.addAlert(createdAlert);
+            this.openAlert(createdAlert);
+        });
+        actionButtons.add(alertDropDownButton);
 
         topPanel.add(actionButtons, BorderLayout.EAST);
 
@@ -192,13 +188,8 @@ public class WatchdogPanel extends PluginPanel {
 //            log.debug("drag listener: " + alertListItem.getAlert().getName() + " to " + pos);
             alertManager.moveAlertTo(alertListItem.getAlert(), pos);
         });
-        JPanel alertPanel = new JPanel(new BorderLayout());
-        alertPanel.add(dragAndDropReorderPane, BorderLayout.NORTH);
 
-        for (Alert alert : this.alertManager.getAlerts()) {
-            AlertListItem alertListItem = new AlertListItem(this, this.alertManager, alert, dragAndDropReorderPane);
-            dragAndDropReorderPane.add(alertListItem);
-        }
+        AlertListPanel alertPanel = new AlertListPanel(this.alertManager.getAlerts(), dragAndDropReorderPane, this::rebuild);
         this.add(new JScrollPane(alertPanel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER), BorderLayout.CENTER);
 
         JPanel importExportGroup = new JPanel(new GridLayout(1, 2, 5, 0));
@@ -231,70 +222,23 @@ public class WatchdogPanel extends PluginPanel {
         }
     }
 
-    private void createAlert(TriggerType triggerType) {
-        Alert createdAlert = WatchdogPlugin.getInstance().getInjector().getInstance(triggerType.getImplClass());
-        this.alertManager.addAlert(createdAlert);
-        this.openAlert(createdAlert);
-    }
-
     private PluginPanel createPluginPanel(Alert alert) {
         if (alert instanceof ChatAlert) {
-            ChatAlert chatAlert = (ChatAlert) alert;
-            return AlertPanel.create(this.muxer, alert)
-                .addAlertDefaults(alert)
-                .addRegexMatcher(chatAlert, "Enter the message to trigger on...", "The message to trigger on. Supports glob (*)")
-                .addLabel("<html><i>Note: Will not trigger on<br>player chat messages</i></html>")
-                .build();
+            return new GameMessageAlertPanel(this, (ChatAlert) alert);
         } else if (alert instanceof NotificationFiredAlert) {
-            NotificationFiredAlert notificationFiredAlert = (NotificationFiredAlert) alert;
-            return AlertPanel.create(this.muxer, alert)
-                .addAlertDefaults(alert)
-                .addRegexMatcher(notificationFiredAlert, "Enter the message to trigger on...", "The message to trigger on. Supports glob (*)")
-                .build();
+            return new NotificationFiredAlertPanel(this, (NotificationFiredAlert) alert);
         } else if (alert instanceof StatChangedAlert) {
-            StatChangedAlert statChangedAlert = (StatChangedAlert) alert;
-            return AlertPanel.create(this.muxer, alert)
-                .addAlertDefaults(alert)
-                .addSelect("Skill", "The skill to track", Skill.class, statChangedAlert.getSkill(), statChangedAlert::setSkill)
-                .addSpinner("Changed Amount", "The difference in level to trigger the alert. Can be positive for boost and negative for drain", statChangedAlert.getChangedAmount(), statChangedAlert::setChangedAmount)
-                .build();
+            return new StatChangedAlertPanel(this, (StatChangedAlert) alert);
         } else if (alert instanceof XPDropAlert) {
-            XPDropAlert xpDropAlert = (XPDropAlert) alert;
-            return AlertPanel.create(this.muxer, alert)
-                .addAlertDefaults(alert)
-                .addSelect("Skill", "The skill to track", Skill.class, xpDropAlert.getSkill(), xpDropAlert::setSkill)
-                .addSpinner("Gained Amount", "How much xp needed to trigger this alert", xpDropAlert.getGainedAmount(), xpDropAlert::setGainedAmount)
-                .build();
+            return new XPDropAlertPanel(this, (XPDropAlert) alert);
         } else if (alert instanceof SoundFiredAlert) {
-            SoundFiredAlert soundFiredAlert = (SoundFiredAlert) alert;
-            return AlertPanel.create(this.muxer, alert)
-                .addAlertDefaults(alert)
-                .addRichTextPane("<html>Go to <a href='" + SOUND_ID_WIKI_PAGE + "'>this wiki page</a> to get a list<br>of sound ids</html>")
-                .addSpinner("Sound ID", "The ID of the sound", soundFiredAlert.getSoundID(), soundFiredAlert::setSoundID, 0, 99999, 1)
-                .build();
+            return new SoundFiredAlertPanel(this, (SoundFiredAlert) alert);
         } else if (alert instanceof SpawnedAlert) {
-            SpawnedAlert spawnedAlert = (SpawnedAlert) alert;
-            return AlertPanel.create(this.muxer, alert)
-                .addAlertDefaults(alert)
-                .addSelect("Spawned/Despawned", "Spawned or Despawned", SpawnedAlert.SpawnedDespawned.class, spawnedAlert.getSpawnedDespawned(), spawnedAlert::setSpawnedDespawned)
-                .addSelect("Type", "The type of object to trigger on", SpawnedAlert.SpawnedType.class, spawnedAlert.getSpawnedType(), spawnedAlert::setSpawnedType)
-                .addRegexMatcher(spawnedAlert, "Enter the object to trigger on...", "The name to trigger on. Supports glob (*)")
-                .build();
+            return new SpawnedAlertPanel(this, (SpawnedAlert) alert);
         } else if (alert instanceof InventoryAlert) {
-            InventoryAlert inventoryAlert = (InventoryAlert) alert;
-            return AlertPanel.create(this.muxer, alert)
-                .addAlertDefaults(alert)
-                .addSelect("Type", "Type", InventoryAlert.InventoryAlertType.class, inventoryAlert.getInventoryAlertType(), (val) -> {
-                    inventoryAlert.setInventoryAlertType(val);
-                    this.muxer.popState();
-                    this.openAlert(alert);
-                })
-                .addIf(
-                    panel -> panel.addRegexMatcher(inventoryAlert, "Enter the name of the item to trigger on...", "The name to trigger on. Supports glob (*)")
-                        .addSpinner("Quantity", "The quantity of item to trigger on, use 0 for every time", inventoryAlert.getItemQuantity(), inventoryAlert::setItemQuantity),
-                    () -> inventoryAlert.getInventoryAlertType() == InventoryAlert.InventoryAlertType.ITEM
-                )
-                .build();
+            return new InventoryAlertPanel(this, (InventoryAlert) alert);
+        } else if (alert instanceof AlertGroup) {
+            return new AlertGroupPanel(this, (AlertGroup) alert);
         }
 
         return null;

@@ -14,7 +14,6 @@ import com.adamk33n3r.runelite.watchdog.notifications.Sound;
 import com.adamk33n3r.runelite.watchdog.notifications.SoundEffect;
 import com.adamk33n3r.runelite.watchdog.notifications.TextToSpeech;
 import com.adamk33n3r.runelite.watchdog.notifications.TrayNotification;
-import com.adamk33n3r.runelite.watchdog.ui.AlertListItem;
 import com.adamk33n3r.runelite.watchdog.ui.dropdownbutton.DropDownButtonFactory;
 import com.adamk33n3r.runelite.watchdog.ui.notifications.panels.MessageNotificationPanel;
 import com.adamk33n3r.runelite.watchdog.ui.notifications.panels.NotificationPanel;

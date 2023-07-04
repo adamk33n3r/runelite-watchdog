@@ -3,8 +3,10 @@ package com.adamk33n3r.runelite.watchdog.ui.panels;
 import com.adamk33n3r.runelite.watchdog.AlertManager;
 import com.adamk33n3r.runelite.watchdog.Displayable;
 import com.adamk33n3r.runelite.watchdog.TriggerType;
+import com.adamk33n3r.runelite.watchdog.WatchdogPanel;
 import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
 import com.adamk33n3r.runelite.watchdog.alerts.Alert;
+import com.adamk33n3r.runelite.watchdog.alerts.AlertGroup;
 import com.adamk33n3r.runelite.watchdog.alerts.RegexMatcher;
 import com.adamk33n3r.runelite.watchdog.ui.HorizontalRuleBorder;
 import com.adamk33n3r.runelite.watchdog.ui.ImportExportDialog;
@@ -32,24 +34,24 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import static com.adamk33n3r.runelite.watchdog.AlertManager.ALERT_LIST_TYPE;
 import static com.adamk33n3r.runelite.watchdog.ui.notifications.panels.NotificationPanel.TEST_ICON;
 import static com.adamk33n3r.runelite.watchdog.ui.notifications.panels.NotificationPanel.TEST_ICON_HOVER;
 
 @Slf4j
-public class AlertPanel extends PluginPanel {
+public abstract class AlertPanel<T extends Alert> extends PluginPanel {
     private final ScrollablePanel container;
-    private final MultiplexingPluginPanel muxer;
-    private final Alert alert;
+    protected final WatchdogPanel watchdogPanel;
+    protected final MultiplexingPluginPanel muxer;
+    protected final T alert;
     private final JPanel wrapper;
     private final JScrollPane scroll;
 
     private final AlertManager alertManager;
 
-    static final ImageIcon BACK_ICON;
-    static final ImageIcon BACK_ICON_HOVER;
-    static final ImageIcon EXPORT_ICON;
-    static final ImageIcon EXPORT_ICON_HOVER;
+    public static final ImageIcon BACK_ICON;
+    public static final ImageIcon BACK_ICON_HOVER;
+    public static final ImageIcon EXPORT_ICON;
+    public static final ImageIcon EXPORT_ICON_HOVER;
     public static final ImageIcon REGEX_ICON;
     public static final ImageIcon REGEX_ICON_HOVER;
     public static final ImageIcon REGEX_SELECTED_ICON;
@@ -72,10 +74,11 @@ public class AlertPanel extends PluginPanel {
         REGEX_SELECTED_ICON_HOVER = new ImageIcon(ImageUtil.luminanceOffset(regexIconSelected, -80));
     }
 
-    private AlertPanel(MultiplexingPluginPanel muxer, Alert alert) {
+    public AlertPanel(WatchdogPanel watchdogPanel, T alert) {
         super(false);
 
-        this.muxer = muxer;
+        this.watchdogPanel = watchdogPanel;
+        this.muxer = watchdogPanel.getMuxer();
         this.alert = alert;
         this.alertManager = WatchdogPlugin.getInstance().getAlertManager();
 
@@ -115,17 +118,19 @@ public class AlertPanel extends PluginPanel {
         );
         rightButtons.add(exportAlertBtn);
 
-        JButton testAlert = PanelUtils.createActionButton(
-            TEST_ICON,
-            TEST_ICON_HOVER,
-            "Test the whole alert",
-            (btn, modifiers) -> {
-                String[] triggerValues = {"1", "2", "3", "4", "5"};
-                WatchdogPlugin.getInstance().getPanel().getHistoryPanelProvider().get().addEntry(alert, triggerValues);
-                alert.getNotifications().forEach(notification -> notification.fireForced(triggerValues));
-            }
-        );
-        rightButtons.add(testAlert);
+        if (!(alert instanceof AlertGroup)) {
+            JButton testAlert = PanelUtils.createActionButton(
+                TEST_ICON,
+                TEST_ICON_HOVER,
+                "Test the whole alert",
+                (btn, modifiers) -> {
+                    String[] triggerValues = {"1", "2", "3", "4", "5"};
+                    WatchdogPlugin.getInstance().getPanel().getHistoryPanelProvider().get().addEntry(alert, triggerValues);
+                    alert.getNotifications().forEach(notification -> notification.fireForced(triggerValues));
+                }
+            );
+            rightButtons.add(testAlert);
+        }
 
         ToggleButton toggleButton = new ToggleButton();
         toggleButton.setSelected(alert.isEnabled());
@@ -155,17 +160,13 @@ public class AlertPanel extends PluginPanel {
         this.add(wrapper, BorderLayout.CENTER);
     }
 
-    public static AlertPanel create(MultiplexingPluginPanel muxer, Alert alert) {
-        return new AlertPanel(muxer, alert);
-    }
-
-    public AlertPanel addLabel(String label) {
+    public AlertPanel<T> addLabel(String label) {
         JLabel labelComp = new JLabel(label);
         this.container.add(labelComp);
         return this;
     }
 
-    public AlertPanel addRichTextPane(String text) {
+    public AlertPanel<T> addRichTextPane(String text) {
         JRichTextPane richTextPane = new JRichTextPane();
         richTextPane.setContentType("text/html");
         richTextPane.setText(text);
@@ -174,7 +175,7 @@ public class AlertPanel extends PluginPanel {
         return this;
     }
 
-    public AlertPanel addTextField(String placeholder, String tooltip, String initialValue, Consumer<String> saveAction) {
+    public AlertPanel<T> addTextField(String placeholder, String tooltip, String initialValue, Consumer<String> saveAction) {
         PlaceholderTextField textField = new PlaceholderTextField(initialValue);
         textField.setPlaceholder(placeholder);
         textField.setToolTipText(tooltip);
@@ -194,7 +195,7 @@ public class AlertPanel extends PluginPanel {
         return this;
     }
 
-    public AlertPanel addTextArea(String placeholder, String tooltip, String initialValue, Consumer<String> saveAction) {
+    public AlertPanel<T> addTextArea(String placeholder, String tooltip, String initialValue, Consumer<String> saveAction) {
         JTextArea textArea = PanelUtils.createTextArea(placeholder, tooltip, initialValue, val -> {
             saveAction.accept(val);
             this.alertManager.saveAlerts();
@@ -203,11 +204,11 @@ public class AlertPanel extends PluginPanel {
         return this;
     }
 
-    public AlertPanel addSpinner(String name, String tooltip, int initialValue, Consumer<Integer> saveAction) {
+    public AlertPanel<T> addSpinner(String name, String tooltip, int initialValue, Consumer<Integer> saveAction) {
         return this.addSpinner(name, tooltip, initialValue, saveAction, -99, 99, 1);
     }
 
-    public AlertPanel addSpinner(String name, String tooltip, int initialValue, Consumer<Integer> saveAction, int min, int max, int step) {
+    public AlertPanel<T> addSpinner(String name, String tooltip, int initialValue, Consumer<Integer> saveAction, int min, int max, int step) {
         JSpinner spinner = PanelUtils.createSpinner(initialValue, min, max, step, val -> {
             saveAction.accept(val);
             this.alertManager.saveAlerts();
@@ -216,8 +217,8 @@ public class AlertPanel extends PluginPanel {
         return this;
     }
 
-    public <T extends Enum<T>> AlertPanel addSelect(String name, String tooltip, Class<T> enumType, T initialValue, Consumer<T> saveAction) {
-        JComboBox<T> select = new JComboBox<>(enumType.getEnumConstants());
+    public <E extends Enum<E>> AlertPanel<T> addSelect(String name, String tooltip, Class<E> enumType, E initialValue, Consumer<E> saveAction) {
+        JComboBox<E> select = new JComboBox<>(enumType.getEnumConstants());
         select.setSelectedItem(initialValue);
         select.setRenderer((list, value, index, isSelected, cellHasFocus) -> {
             if (value instanceof Displayable) {
@@ -236,7 +237,7 @@ public class AlertPanel extends PluginPanel {
         return this;
     }
 
-    public AlertPanel addCheckbox(String name, String tooltip, boolean initialValue, Consumer<Boolean> saveAction) {
+    public AlertPanel<T> addCheckbox(String name, String tooltip, boolean initialValue, Consumer<Boolean> saveAction) {
         JCheckBox checkbox = PanelUtils.createCheckbox(name, tooltip, initialValue, val -> {
             saveAction.accept(val);
             this.alertManager.saveAlerts();
@@ -245,11 +246,11 @@ public class AlertPanel extends PluginPanel {
         return this;
     }
 
-    public AlertPanel addInputGroupWithSuffix(JComponent mainComponent, JComponent suffix) {
+    public AlertPanel<T> addInputGroupWithSuffix(JComponent mainComponent, JComponent suffix) {
         return this.addInputGroup(mainComponent, null, Collections.singletonList(suffix));
     }
 
-    public AlertPanel addInputGroup(JComponent mainComponent, List<JComponent> prefixes, List<JComponent> suffixes) {
+    public AlertPanel<T> addInputGroup(JComponent mainComponent, List<JComponent> prefixes, List<JComponent> suffixes) {
         InputGroup textFieldGroup = new InputGroup(mainComponent)
             .addPrefixes(prefixes)
             .addSuffixes(suffixes);
@@ -257,40 +258,27 @@ public class AlertPanel extends PluginPanel {
         return this;
     }
 
-    public PluginPanel build() {
-        NotificationsPanel notificationPanel = new NotificationsPanel(this.alert);
-        WatchdogPlugin.getInstance().getInjector().injectMembers(notificationPanel);
-        notificationPanel.setBorder(new HorizontalRuleBorder(10));
-        this.container.add(notificationPanel);
-        // I don't know why but sometimes the scroll pane is starting scrolled down 1 element, and we have to wait a tick to reset it
-//        SwingUtilities.invokeLater(() -> {
-//            this.scroll.getVerticalScrollBar();//.setValue(0);
-//        });
-
-        return this;
-    }
-
-    public AlertPanel addAlertDefaults(Alert alert) {
-        return this.addTextField("Enter the alert name...", "Name of Alert", alert.getName(), alert::setName)
+    public AlertPanel<T> addAlertDefaults() {
+        return this.addTextField("Enter the alert name...", "Name of Alert", this.alert.getName(), this.alert::setName)
             .addSpinner(
                 "Debounce Time (ms)",
                 "How long to wait before allowing this alert to trigger again in milliseconds",
-                alert.getDebounceTime(),
-                alert::setDebounceTime,
+                this.alert.getDebounceTime(),
+                this.alert::setDebounceTime,
                 0,
                 8640000, // 6 hours - max time a player can be logged in
                 100
             );
     }
 
-    public AlertPanel addIf(Consumer<AlertPanel> panel, Supplier<Boolean> ifFunc) {
+    public AlertPanel<T> addIf(Consumer<AlertPanel<T>> panel, Supplier<Boolean> ifFunc) {
         if (ifFunc.get()) {
             panel.accept(this);
         }
         return this;
     }
 
-    public AlertPanel addRegexMatcher(RegexMatcher regexMatcher, String placeholder, String tooltip) {
+    public AlertPanel<T> addRegexMatcher(RegexMatcher regexMatcher, String placeholder, String tooltip) {
         return this.addInputGroupWithSuffix(
             PanelUtils.createTextArea(placeholder, tooltip, regexMatcher.getPattern(), msg -> {
                 if (!PanelUtils.isPatternValid(this, msg, regexMatcher.isRegexEnabled()))
@@ -312,5 +300,33 @@ public class AlertPanel extends PluginPanel {
                 }
             )
         );
+    }
+
+    public AlertPanel<T> addNotifications() {
+        NotificationsPanel notificationPanel = new NotificationsPanel(this.alert);
+        WatchdogPlugin.getInstance().getInjector().injectMembers(notificationPanel);
+        notificationPanel.setBorder(new HorizontalRuleBorder(10));
+        this.container.add(notificationPanel);
+
+        return this;
+    }
+
+    public AlertPanel<T> addSubPanel(JPanel sub) {
+        this.container.add(sub);
+
+        return this;
+    }
+
+    protected abstract void build();
+    protected void rebuild() {
+        this.container.removeAll();
+        this.build();
+        this.revalidate();
+        this.repaint();
+    }
+
+    @Override
+    public void onActivate() {
+        this.rebuild();
     }
 }
