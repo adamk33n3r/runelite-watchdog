@@ -196,7 +196,10 @@ public class WatchdogPanel extends PluginPanel {
         JButton importButton = new JButton("Import", IMPORT_ICON);
         importButton.setHorizontalTextPosition(SwingConstants.LEFT);
         importButton.addActionListener(ev -> {
-            ImportExportDialog importExportDialog = new ImportExportDialog(SwingUtilities.getWindowAncestor(this));
+            ImportExportDialog importExportDialog = new ImportExportDialog(
+                SwingUtilities.getWindowAncestor(this),
+                (json, append) -> WatchdogPlugin.getInstance().getAlertManager().importAlerts(json, this.alertManager.getAlerts(), append, true)
+            );
             importExportDialog.setVisible(true);
         });
         importExportGroup.add(importButton);

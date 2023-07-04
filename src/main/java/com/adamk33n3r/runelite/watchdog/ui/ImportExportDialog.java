@@ -20,11 +20,12 @@ import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionListener;
 import java.util.function.Function;
+import java.util.function.BiFunction;
 
 @Slf4j
 public class ImportExportDialog extends JDialog {
     // Import
-    public ImportExportDialog(Component parent) {
+    public ImportExportDialog(Component parent, BiFunction<String, Boolean, Boolean> onImport) {
         this.setTitle("Import");
         this.setSize(500, 250);
         this.setLocationRelativeTo(parent);
@@ -48,7 +49,7 @@ public class ImportExportDialog extends JDialog {
             }
             String json = textArea.getText();
             try {
-                if (WatchdogPlugin.getInstance().getAlertManager().importAlerts(json, append, true)) {
+                if (onImport.apply(json, append)) {
                     this.setVisible(false);
                 }
             } catch (Exception ex) {

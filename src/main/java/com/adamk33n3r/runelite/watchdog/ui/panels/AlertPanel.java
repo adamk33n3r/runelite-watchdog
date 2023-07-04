@@ -34,6 +34,8 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import static com.adamk33n3r.runelite.watchdog.WatchdogPanel.IMPORT_ICON;
+import static com.adamk33n3r.runelite.watchdog.WatchdogPanel.EXPORT_ICON;
 import static com.adamk33n3r.runelite.watchdog.ui.notifications.panels.NotificationPanel.TEST_ICON;
 import static com.adamk33n3r.runelite.watchdog.ui.notifications.panels.NotificationPanel.TEST_ICON_HOVER;
 
@@ -50,7 +52,7 @@ public abstract class AlertPanel<T extends Alert> extends PluginPanel {
 
     public static final ImageIcon BACK_ICON;
     public static final ImageIcon BACK_ICON_HOVER;
-    public static final ImageIcon EXPORT_ICON;
+    public static final ImageIcon IMPORT_ICON_HOVER;
     public static final ImageIcon EXPORT_ICON_HOVER;
     public static final ImageIcon REGEX_ICON;
     public static final ImageIcon REGEX_ICON_HOVER;
@@ -62,9 +64,8 @@ public abstract class AlertPanel<T extends Alert> extends PluginPanel {
         BACK_ICON = new ImageIcon(backIcon);
         BACK_ICON_HOVER = new ImageIcon(ImageUtil.alphaOffset(backIcon, -120));
 
-        final BufferedImage exportIcon = ImageUtil.loadImageResource(AlertPanel.class, "export_icon.png");
-        EXPORT_ICON = new ImageIcon(exportIcon);
-        EXPORT_ICON_HOVER = new ImageIcon(ImageUtil.alphaOffset(exportIcon, -120));
+        IMPORT_ICON_HOVER = new ImageIcon(ImageUtil.alphaOffset(IMPORT_ICON.getImage(), -120));
+        EXPORT_ICON_HOVER = new ImageIcon(ImageUtil.alphaOffset(EXPORT_ICON.getImage(), -120));
 
         final BufferedImage regexIcon = ImageUtil.loadImageResource(AlertPanel.class, "regex_icon.png");
         final BufferedImage regexIconSelected = ImageUtil.loadImageResource(AlertPanel.class, "regex_icon_selected.png");
@@ -104,6 +105,38 @@ public abstract class AlertPanel<T extends Alert> extends PluginPanel {
 
         JPanel rightButtons = new JPanel(new GridLayout(1, 0));
 
+        if (alert instanceof AlertGroup) {
+            JButton importAlertBtn = PanelUtils.createActionButton(
+                IMPORT_ICON,
+                IMPORT_ICON_HOVER,
+                "Import alert into this group",
+                (btn, modifiers) -> {
+                    ImportExportDialog importExportDialog = new ImportExportDialog(
+                        SwingUtilities.getWindowAncestor(this),
+                        (json, append) -> {
+                            boolean result = WatchdogPlugin.getInstance().getAlertManager().importAlerts(json, ((AlertGroup) alert).getAlerts(), append, true);
+                            this.rebuild();
+                            return result;
+                        }
+                    );
+                    importExportDialog.setVisible(true);
+                }
+            );
+            rightButtons.add(importAlertBtn);
+        } else {
+            JButton testAlert = PanelUtils.createActionButton(
+                TEST_ICON,
+                TEST_ICON_HOVER,
+                "Test the whole alert",
+                (btn, modifiers) -> {
+                    String[] triggerValues = {"1", "2", "3", "4", "5"};
+                    WatchdogPlugin.getInstance().getPanel().getHistoryPanelProvider().get().addEntry(alert, triggerValues);
+                    alert.getNotifications().forEach(notification -> notification.fireForced(triggerValues));
+                }
+            );
+            rightButtons.add(testAlert);
+        }
+
         JButton exportAlertBtn = PanelUtils.createActionButton(
             EXPORT_ICON,
             EXPORT_ICON_HOVER,
@@ -117,20 +150,6 @@ public abstract class AlertPanel<T extends Alert> extends PluginPanel {
             }
         );
         rightButtons.add(exportAlertBtn);
-
-        if (!(alert instanceof AlertGroup)) {
-            JButton testAlert = PanelUtils.createActionButton(
-                TEST_ICON,
-                TEST_ICON_HOVER,
-                "Test the whole alert",
-                (btn, modifiers) -> {
-                    String[] triggerValues = {"1", "2", "3", "4", "5"};
-                    WatchdogPlugin.getInstance().getPanel().getHistoryPanelProvider().get().addEntry(alert, triggerValues);
-                    alert.getNotifications().forEach(notification -> notification.fireForced(triggerValues));
-                }
-            );
-            rightButtons.add(testAlert);
-        }
 
         ToggleButton toggleButton = new ToggleButton();
         toggleButton.setSelected(alert.isEnabled());

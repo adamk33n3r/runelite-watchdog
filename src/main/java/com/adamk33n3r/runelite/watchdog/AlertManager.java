@@ -111,18 +111,21 @@ public class AlertManager {
     public Stream<Alert> getAllEnabledAlerts() {
         return this.getAllAlerts().filter(Alert::isEnabled);
     }
+
     public <T extends Alert> Stream<T> getAllEnabledAlertsOfType(Class<T> type) {
         return this.getAllEnabledAlerts()
             .filter(type::isInstance)
             .map(type::cast);
     }
+
     public Stream<Alert> getAllAlerts() {
-        return this.getAllAlertsHelper(this.alerts.stream());
+        return this.getAllAlertsFrom(this.alerts.stream());
     }
-    private Stream<Alert> getAllAlertsHelper(Stream<Alert> alerts) {
+
+    public Stream<Alert> getAllAlertsFrom(Stream<Alert> alerts) {
         return alerts.flatMap(alert -> {
             if (alert instanceof AlertGroup) {
-                return getAllAlertsHelper(((AlertGroup) alert).getAlerts().stream());
+                return getAllAlertsFrom(((AlertGroup) alert).getAlerts().stream());
             }
             return Stream.of(alert);
         });
@@ -195,40 +198,43 @@ public class AlertManager {
 
     public void loadAlerts() {
         final String json = this.configManager.getConfiguration(WatchdogConfig.CONFIG_GROUP_NAME, WatchdogConfig.ALERTS);
-        this.importAlerts(json, false, false);
+        this.importAlerts(json, this.alerts, false, false);
         this.handleUpgrades();
     }
 
-    public boolean importAlerts(String json, boolean append, boolean checkRegex) {
-        if (!Strings.isNullOrEmpty(json)) {
-            if (!append) {
-                this.alerts.clear();
-            }
-            List<Alert> importedAlerts = this.gson.fromJson(json, ALERT_LIST_TYPE);
-            Supplier<Stream<Alert>> alertStream = () -> importedAlerts.stream().filter(Objects::nonNull);
-
-            // Validate regex properties
-            if (checkRegex && !alertStream.get().allMatch(alert -> {
-                if (alert instanceof RegexMatcher) {
-                    RegexMatcher matcher = (RegexMatcher) alert;
-                    return PanelUtils.isPatternValid(this.watchdogPanel, matcher.getPattern(), matcher.isRegexEnabled());
-                }
-
-                return true;
-            })) {
-                return false;
-            }
-
-            alertStream.get().forEach(this.alerts::add);
-
-            // Save immediately to save new properties
-            this.saveAlerts();
+    public boolean importAlerts(String json, List<Alert> alerts, boolean append, boolean checkRegex) {
+        if (Strings.isNullOrEmpty(json)) {
+            return false;
         }
 
-        Util.setParentsOnAlerts(this.alerts);
+        if (!append) {
+            alerts.clear();
+        }
+
+        List<Alert> importedAlerts = this.gson.fromJson(json, ALERT_LIST_TYPE);
+        Supplier<Stream<Alert>> alertStream = () -> importedAlerts.stream().filter(Objects::nonNull);
+
+        // Validate regex properties
+        if (checkRegex && !alertStream.get().allMatch(alert -> {
+            if (alert instanceof RegexMatcher) {
+                RegexMatcher matcher = (RegexMatcher) alert;
+                return PanelUtils.isPatternValid(this.watchdogPanel, matcher.getPattern(), matcher.isRegexEnabled());
+            }
+
+            return true;
+        })) {
+            return false;
+        }
+
+        alertStream.get().forEach(alerts::add);
+
+        // Save immediately to save new properties
+        this.saveAlerts();
+
+        Util.setParentsOnAlerts(alerts);
 
         // Inject dependencies
-        this.getAllAlerts()
+        this.getAllAlertsFrom(alertStream.get())
             .filter(alert -> !(alert instanceof AlertGroup))
             .forEach(alert -> {
                 WatchdogPlugin.getInstance().getInjector().injectMembers(alert);
