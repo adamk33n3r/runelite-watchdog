@@ -1,12 +1,13 @@
 package com.adamk33n3r.runelite.watchdog;
 
 import com.adamk33n3r.runelite.watchdog.alerts.*;
-import com.adamk33n3r.runelite.watchdog.ui.AlertListItem;
+import com.adamk33n3r.runelite.watchdog.ui.AlertListItemNew;
 import com.adamk33n3r.runelite.watchdog.ui.ImportExportDialog;
 import com.adamk33n3r.runelite.watchdog.ui.alerts.*;
 import com.adamk33n3r.runelite.watchdog.ui.panels.AlertListPanel;
 import com.adamk33n3r.runelite.watchdog.ui.panels.HistoryPanel;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
+import com.adamk33n3r.runelite.watchdog.hub.AlertHubPanel;
 
 import net.runelite.client.plugins.config.ConfigPlugin;
 import net.runelite.client.plugins.info.InfoPanel;
@@ -38,8 +39,6 @@ import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.image.BufferedImage;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 public class WatchdogPanel extends PluginPanel {
@@ -59,12 +58,23 @@ public class WatchdogPanel extends PluginPanel {
     @Named("watchdog.pluginVersion")
     private String PLUGIN_VERSION;
 
+    @Inject
+    @Named("watchdog.pluginVersionFull")
+    private String PLUGIN_VERSION_FULL;
+
+    @Inject
+    @Named("VERSION_PHASE")
+    private String PLUGIN_VERSION_PHASE;
+
     @Getter
     private final MultiplexingPluginPanel muxer = new MultiplexingPluginPanel(this);
 
     @Getter
     @Inject
     private Provider<HistoryPanel> historyPanelProvider;
+
+    @Inject
+    private Provider<AlertHubPanel> alertHubPanelProvider;
 
     @Inject
     private AlertManager alertManager;
@@ -119,9 +129,10 @@ public class WatchdogPanel extends PluginPanel {
         title.setFont(title.getFont().deriveFont(Font.BOLD));
         title.setHorizontalAlignment(JLabel.LEFT);
         title.setForeground(Color.WHITE);
-        title.setToolTipText("Watchdog v" + PLUGIN_VERSION);
+        boolean isPreRelease = !PLUGIN_VERSION_PHASE.equals("release") && !PLUGIN_VERSION_PHASE.isEmpty();
+        title.setToolTipText("Watchdog v" + (isPreRelease ? PLUGIN_VERSION_FULL : PLUGIN_VERSION));
         titlePanel.add(title);
-        JLabel version = new JLabel("v" + PLUGIN_VERSION);
+        JLabel version = new JLabel("v" + (isPreRelease ? PLUGIN_VERSION_FULL : PLUGIN_VERSION));
         version.setFont(version.getFont().deriveFont(10f));
         version.setBorder(new EmptyBorder(5, 0, 0, 0));
         titlePanel.add(version);
@@ -184,13 +195,16 @@ public class WatchdogPanel extends PluginPanel {
         DragAndDropReorderPane dragAndDropReorderPane = new DragAndDropReorderPane();
         dragAndDropReorderPane.addDragListener((c) -> {
             int pos = dragAndDropReorderPane.getPosition(c);
-            AlertListItem alertListItem = (AlertListItem) c;
+            AlertListItemNew alertListItem = (AlertListItemNew) c;
 //            log.debug("drag listener: " + alertListItem.getAlert().getName() + " to " + pos);
             alertManager.moveAlertTo(alertListItem.getAlert(), pos);
         });
 
         AlertListPanel alertPanel = new AlertListPanel(this.alertManager.getAlerts(), dragAndDropReorderPane, this::rebuild);
-        this.add(new JScrollPane(alertPanel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER), BorderLayout.CENTER);
+//        this.add(alertPanel, BorderLayout.CENTER);
+        JScrollPane scroll = new JScrollPane(alertPanel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+//        scroll.setMaximumSize(new Dimension(PluginPanel.PANEL_WIDTH, 999));
+        this.add(scroll, BorderLayout.CENTER);
 
         JPanel importExportGroup = new JPanel(new GridLayout(1, 2, 5, 0));
         JButton importButton = new JButton("Import", IMPORT_ICON);
@@ -210,7 +224,18 @@ public class WatchdogPanel extends PluginPanel {
             importExportDialog.setVisible(true);
         });
         importExportGroup.add(exportButton);
-        this.add(importExportGroup, BorderLayout.SOUTH);
+
+        JPanel bottomPanel = new JPanel(new GridLayout(0, 1, 3, 3));
+        bottomPanel.add(importExportGroup);
+        JButton hubButton = new JButton("Alert Hub", Icons.DOWNLOAD_ICON);
+        hubButton.setHorizontalTextPosition(SwingConstants.LEFT);
+        hubButton.addActionListener(ev -> {
+            AlertHubPanel alertHubPanel = this.alertHubPanelProvider.get();
+//            alertHubPanel.reloadList();
+            this.muxer.pushState(alertHubPanel);
+        });
+        bottomPanel.add(hubButton);
+        this.add(bottomPanel, BorderLayout.SOUTH);
 
         // Need this for rebuild for some reason
         this.revalidate();

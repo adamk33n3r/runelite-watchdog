@@ -51,9 +51,10 @@ versionProps['VERSION_BUILD'] = build.toString()
 versionProps['VERSION_PHASE'] = phase
 versionProps.store(versionPropsFile.newWriter(), null)
 
-version = major+'.'+minor+'.'+patch+'.'+build
+version = major+'.'+minor+'.'+patch
 if (!phase.empty)
 	version = version+'-'+phase
+version = version+'+'+build
 sourceCompatibility = '1.8'
 
 tasks.withType(JavaCompile) {

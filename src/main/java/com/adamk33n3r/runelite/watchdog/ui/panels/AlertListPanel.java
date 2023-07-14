@@ -3,12 +3,12 @@ package com.adamk33n3r.runelite.watchdog.ui.panels;
 import com.adamk33n3r.runelite.watchdog.AlertManager;
 import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
 import com.adamk33n3r.runelite.watchdog.alerts.Alert;
-import com.adamk33n3r.runelite.watchdog.ui.AlertListItem;
+import com.adamk33n3r.runelite.watchdog.ui.AlertListItemNew;
 
 import net.runelite.client.ui.components.DragAndDropReorderPane;
 
-import javax.swing.JPanel;
-import java.awt.BorderLayout;
+import javax.swing.*;
+import java.awt.*;
 import java.util.List;
 
 public class AlertListPanel extends JPanel {
@@ -16,9 +16,9 @@ public class AlertListPanel extends JPanel {
         this.setLayout(new BorderLayout());
         AlertManager alertManager = WatchdogPlugin.getInstance().getAlertManager();
         alerts.forEach((subAlert) -> {
-            AlertListItem alertListItem = new AlertListItem(WatchdogPlugin.getInstance().getPanel(), alertManager, subAlert, alerts, dragAndDropReorderPane, onChange);
+            AlertListItemNew alertListItem = new AlertListItemNew(WatchdogPlugin.getInstance().getPanel(), alertManager, subAlert, alerts, dragAndDropReorderPane, onChange);
             dragAndDropReorderPane.add(alertListItem);
         });
-        this.add(dragAndDropReorderPane, BorderLayout.NORTH);
+        this.add(dragAndDropReorderPane, BorderLayout.CENTER);
     }
 }

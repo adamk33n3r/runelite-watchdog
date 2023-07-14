@@ -5,10 +5,12 @@ import com.adamk33n3r.runelite.watchdog.notifications.IMessageNotification;
 import com.adamk33n3r.runelite.watchdog.ui.PlaceholderTextField;
 import com.adamk33n3r.runelite.watchdog.ui.StretchedStackedLayout;
 
+import com.google.common.base.Splitter;
 import net.runelite.client.ui.MultiplexingPluginPanel;
 import net.runelite.client.ui.PluginPanel;
 
 import lombok.extern.slf4j.Slf4j;
+import net.runelite.client.util.Text;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -22,7 +24,11 @@ import javax.swing.event.DocumentListener;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.adamk33n3r.runelite.watchdog.ui.panels.AlertPanel.BACK_ICON;
 import static com.adamk33n3r.runelite.watchdog.ui.panels.AlertPanel.BACK_ICON_HOVER;
@@ -35,6 +41,7 @@ public class HistoryPanel extends PluginPanel {
     private final List<HistoryEntryPanel> previousAlerts = new ArrayList<>();
 
     private static final int MAX_HISTORY_ITEMS = 100;
+    private static final Splitter SPLITTER = Splitter.on(" ").trimResults().omitEmptyStrings();
 
     @Inject
     public HistoryPanel(Provider<MultiplexingPluginPanel> muxer) {
@@ -97,23 +104,23 @@ public class HistoryPanel extends PluginPanel {
         this.repaint();
     }
 
+    // TODO: Abstract this out into a filterpanel type thing
     private void updateFilter(String search) {
         this.historyItems.removeAll();
         String upperSearch = search.toUpperCase();
         this.previousAlerts.stream().filter(historyEntryPanel -> {
             Alert alert = historyEntryPanel.getAlert();
-            boolean alertName = alert.getName().toUpperCase().contains(upperSearch);
-            boolean typeName = alert.getType().getName().toUpperCase().contains(upperSearch);
-            boolean notifications = alert.getNotifications().stream().anyMatch(notification -> {
-                boolean notifName = notification.getType().getName().toUpperCase().contains(upperSearch);
-                boolean message = false;
+            Stream<String> keywords = Stream.concat(Stream.of(
+                alert.getName(),
+                alert.getType().getName()
+            ), alert.getNotifications().stream().flatMap(notification -> {
+                Stream<String> notificationType = Stream.of(notification.getType().getName());
                 if (notification instanceof IMessageNotification) {
-                    message = ((IMessageNotification) notification).getMessage().toUpperCase().contains(upperSearch);
+                    return Stream.concat(notificationType, Stream.of(((IMessageNotification) notification).getMessage()));
                 }
-
-                return notifName || message;
-            });
-            return alertName || typeName || notifications;
+                return notificationType;
+            })).map(String::toUpperCase);
+            return Text.matchesSearchTerms(SPLITTER.split(upperSearch), keywords.collect(Collectors.toList()));
         }).forEach(this.historyItems::add);
         this.revalidate();
         // Idk why I need to repaint sometimes and the PluginListPanel doesn't

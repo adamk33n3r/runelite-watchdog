@@ -5,6 +5,7 @@ import com.adamk33n3r.runelite.watchdog.WatchdogPanel;
 import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
 import com.adamk33n3r.runelite.watchdog.alerts.AlertGroup;
 import com.adamk33n3r.runelite.watchdog.ui.AlertListItem;
+import com.adamk33n3r.runelite.watchdog.ui.AlertListItemNew;
 import com.adamk33n3r.runelite.watchdog.ui.HorizontalRuleBorder;
 import com.adamk33n3r.runelite.watchdog.ui.panels.AlertListPanel;
 import com.adamk33n3r.runelite.watchdog.ui.panels.AlertPanel;
@@ -45,7 +46,7 @@ public class AlertGroupPanel extends AlertPanel<AlertGroup> {
         DragAndDropReorderPane dragAndDropReorderPane = new DragAndDropReorderPane();
         dragAndDropReorderPane.addDragListener((c) -> {
             int pos = dragAndDropReorderPane.getPosition(c);
-            AlertListItem alertListItem = (AlertListItem) c;
+            AlertListItemNew alertListItem = (AlertListItemNew) c;
             this.alert.getAlerts().remove(alertListItem.getAlert());
             this.alert.getAlerts().add(pos, alertListItem.getAlert());
             alertManager.saveAlerts();
