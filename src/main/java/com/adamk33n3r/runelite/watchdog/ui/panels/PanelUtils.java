@@ -252,7 +252,11 @@ public class PanelUtils {
         };
 
         JPopupMenu popupMenu = new JPopupMenu();
-        popupMenu.add(new JMenuItem(TriggerType.ALERT_GROUP.getName()));
+        JMenuItem alertGroupMenuItem = new JMenuItem(TriggerType.ALERT_GROUP.getName());
+        alertGroupMenuItem.setToolTipText(TriggerType.ALERT_GROUP.getTooltip());
+        alertGroupMenuItem.putClientProperty(TriggerType.class, TriggerType.ALERT_GROUP);
+        alertGroupMenuItem.addActionListener(actionListener);
+        popupMenu.add(alertGroupMenuItem);
         popupMenu.addSeparator();
         Arrays.stream(TriggerType.values())
             .filter(tType -> tType != TriggerType.ALERT_GROUP)

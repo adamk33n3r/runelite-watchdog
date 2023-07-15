@@ -37,8 +37,8 @@ public class AlertManifest {
 //            this.getCategory().getName()
         );
         if (this.getTags() != null) {
-            return Stream.concat(keywords, this.getTags().stream()).collect(Collectors.toList());
+            return Stream.concat(keywords, this.getTags().stream()).map(String::toUpperCase).collect(Collectors.toList());
         }
-        return keywords.collect(Collectors.toList());
+        return keywords.map(String::toUpperCase).collect(Collectors.toList());
     }
 }

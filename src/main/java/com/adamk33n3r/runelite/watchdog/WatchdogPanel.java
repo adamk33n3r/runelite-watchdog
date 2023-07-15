@@ -3,6 +3,7 @@ package com.adamk33n3r.runelite.watchdog;
 import com.adamk33n3r.runelite.watchdog.alerts.*;
 import com.adamk33n3r.runelite.watchdog.ui.AlertListItemNew;
 import com.adamk33n3r.runelite.watchdog.ui.ImportExportDialog;
+import com.adamk33n3r.runelite.watchdog.ui.StretchedStackedLayout;
 import com.adamk33n3r.runelite.watchdog.ui.alerts.*;
 import com.adamk33n3r.runelite.watchdog.ui.panels.AlertListPanel;
 import com.adamk33n3r.runelite.watchdog.ui.panels.HistoryPanel;
@@ -24,13 +25,7 @@ import lombok.extern.slf4j.Slf4j;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Provider;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.SwingConstants;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -120,7 +115,7 @@ public class WatchdogPanel extends PluginPanel {
 
     public void rebuild() {
         this.removeAll();
-        this.setLayout(new BorderLayout(0, 5));
+        this.setLayout(new BorderLayout(0, 0));
 
         JPanel topPanel = new JPanel(new BorderLayout());
         JPanel titlePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -201,9 +196,9 @@ public class WatchdogPanel extends PluginPanel {
         });
 
         AlertListPanel alertPanel = new AlertListPanel(this.alertManager.getAlerts(), dragAndDropReorderPane, this::rebuild);
-//        this.add(alertPanel, BorderLayout.CENTER);
-        JScrollPane scroll = new JScrollPane(alertPanel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-//        scroll.setMaximumSize(new Dimension(PluginPanel.PANEL_WIDTH, 999));
+        JPanel wrapper = new JPanel(new StretchedStackedLayout(3, 3));
+        wrapper.add(alertPanel);
+        JScrollPane scroll = new JScrollPane(wrapper, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         this.add(scroll, BorderLayout.CENTER);
 
         JPanel importExportGroup = new JPanel(new GridLayout(1, 2, 5, 0));

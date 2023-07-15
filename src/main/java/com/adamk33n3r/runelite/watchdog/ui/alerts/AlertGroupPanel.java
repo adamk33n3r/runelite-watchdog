@@ -7,6 +7,7 @@ import com.adamk33n3r.runelite.watchdog.alerts.AlertGroup;
 import com.adamk33n3r.runelite.watchdog.ui.AlertListItem;
 import com.adamk33n3r.runelite.watchdog.ui.AlertListItemNew;
 import com.adamk33n3r.runelite.watchdog.ui.HorizontalRuleBorder;
+import com.adamk33n3r.runelite.watchdog.ui.StretchedStackedLayout;
 import com.adamk33n3r.runelite.watchdog.ui.panels.AlertListPanel;
 import com.adamk33n3r.runelite.watchdog.ui.panels.AlertPanel;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
@@ -39,10 +40,11 @@ public class AlertGroupPanel extends AlertPanel<AlertGroup> {
         });
 
         buttonPanel.add(alertDropDownButton, BorderLayout.EAST);
-        JPanel subGroupPanel = new JPanel(new DynamicGridLayout(0, 1, 3, 3));
+        JPanel subGroupPanel = new JPanel(new StretchedStackedLayout(3, 3));
         subGroupPanel.setBorder(new HorizontalRuleBorder(10));
         subGroupPanel.add(buttonPanel);
         this.addSubPanel(subGroupPanel);
+
         DragAndDropReorderPane dragAndDropReorderPane = new DragAndDropReorderPane();
         dragAndDropReorderPane.addDragListener((c) -> {
             int pos = dragAndDropReorderPane.getPosition(c);

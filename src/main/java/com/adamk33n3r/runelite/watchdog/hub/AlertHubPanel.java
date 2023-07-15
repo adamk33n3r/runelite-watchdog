@@ -1,9 +1,7 @@
 package com.adamk33n3r.runelite.watchdog.hub;
 
-import com.adamk33n3r.runelite.watchdog.ui.PlaceholderTextField;
-import com.adamk33n3r.runelite.watchdog.ui.StretchedStackedLayout;
+import com.adamk33n3r.runelite.watchdog.ui.SearchBar;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
-import com.adamk33n3r.runelite.watchdog.ui.panels.ScrollablePanel;
 
 import com.google.common.base.Splitter;
 import net.runelite.client.ui.ColorScheme;
@@ -17,17 +15,13 @@ import net.runelite.client.util.Text;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
-import javax.inject.Singleton;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import java.awt.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static com.adamk33n3r.runelite.watchdog.ui.panels.AlertPanel.BACK_ICON;
 import static com.adamk33n3r.runelite.watchdog.ui.panels.AlertPanel.BACK_ICON_HOVER;
@@ -95,26 +89,7 @@ public class AlertHubPanel extends PluginPanel {
         GroupLayout layout = new GroupLayout(this);
         this.setLayout(layout);
         this.setBackground(ColorScheme.PROGRESS_ERROR_COLOR);
-        this.searchBar = new IconTextField();
-        this.searchBar.setIcon(IconTextField.Icon.SEARCH);
-        this.searchBar.setBackground(ColorScheme.DARKER_GRAY_COLOR);
-        this.searchBar.setHoverBackgroundColor(ColorScheme.DARK_GRAY_HOVER_COLOR);
-        this.searchBar.getDocument().addDocumentListener(new DocumentListener() {
-            @Override
-            public void insertUpdate(DocumentEvent e) {
-                updateFilter(searchBar.getText());
-            }
-
-            @Override
-            public void removeUpdate(DocumentEvent e) {
-                updateFilter(searchBar.getText());
-            }
-
-            @Override
-            public void changedUpdate(DocumentEvent e) {
-                updateFilter(searchBar.getText());
-            }
-        });
+        this.searchBar = new SearchBar(this::updateFilter);
 
         this.container = new JPanel(new DynamicGridLayout(0, 1, 0, 5));
 //        this.container.setMaximumSize(new Dimension(PANEL_WIDTH, 9999));
@@ -132,7 +107,7 @@ public class AlertHubPanel extends PluginPanel {
             .addGap(5)
             .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                 .addComponent(backButton, 24, 24, 24)
-                .addComponent(searchBar, 24, 24, 24))
+                .addComponent(this.searchBar, 24, 24, 24))
             .addGap(10)
             .addComponent(scrollPane)
         );
@@ -142,7 +117,7 @@ public class AlertHubPanel extends PluginPanel {
                 .addGap(7)
                 .addComponent(backButton)
                 .addGap(3)
-                .addComponent(searchBar)
+                .addComponent(this.searchBar)
                 .addGap(7))
             .addComponent(scrollPane)
         );

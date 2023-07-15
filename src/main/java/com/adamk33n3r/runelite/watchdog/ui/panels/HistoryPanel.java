@@ -3,6 +3,7 @@ package com.adamk33n3r.runelite.watchdog.ui.panels;
 import com.adamk33n3r.runelite.watchdog.alerts.Alert;
 import com.adamk33n3r.runelite.watchdog.notifications.IMessageNotification;
 import com.adamk33n3r.runelite.watchdog.ui.PlaceholderTextField;
+import com.adamk33n3r.runelite.watchdog.ui.SearchBar;
 import com.adamk33n3r.runelite.watchdog.ui.StretchedStackedLayout;
 
 import com.google.common.base.Splitter;
@@ -15,9 +16,7 @@ import net.runelite.client.util.Text;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
-import javax.swing.JButton;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
+import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -34,7 +33,7 @@ import static com.adamk33n3r.runelite.watchdog.ui.panels.AlertPanel.BACK_ICON;
 import static com.adamk33n3r.runelite.watchdog.ui.panels.AlertPanel.BACK_ICON_HOVER;
 
 @Slf4j
-@Singleton
+//@Singleton
 public class HistoryPanel extends PluginPanel {
     private final Provider<MultiplexingPluginPanel> muxer;
     private final ScrollablePanel historyItems;
@@ -61,25 +60,7 @@ public class HistoryPanel extends PluginPanel {
         backButton.setPreferredSize(new Dimension(22, 16));
         backButton.setBorder(new EmptyBorder(0, 0, 0, 5));
         topPanel.add(backButton, BorderLayout.WEST);
-        PlaceholderTextField filterTextField = new PlaceholderTextField();
-        filterTextField.setPlaceholder("Filter");
-        filterTextField.getDocument().addDocumentListener(new DocumentListener() {
-            @Override
-            public void insertUpdate(DocumentEvent e) {
-                updateFilter(filterTextField.getText());
-            }
-
-            @Override
-            public void removeUpdate(DocumentEvent e) {
-                updateFilter(filterTextField.getText());
-            }
-
-            @Override
-            public void changedUpdate(DocumentEvent e) {
-                updateFilter(filterTextField.getText());
-            }
-        });
-        topPanel.add(filterTextField);
+        topPanel.add(new SearchBar(this::updateFilter));
         this.add(topPanel, BorderLayout.NORTH);
 
         this.historyItems = new ScrollablePanel(new StretchedStackedLayout(3, 3));

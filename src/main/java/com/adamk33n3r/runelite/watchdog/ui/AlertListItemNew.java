@@ -7,7 +7,7 @@ import com.adamk33n3r.runelite.watchdog.alerts.Alert;
 import com.adamk33n3r.runelite.watchdog.alerts.AlertGroup;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
 
-import net.runelite.client.plugins.screenmarkers.ScreenMarkerPlugin;
+import net.runelite.client.plugins.config.ConfigPlugin;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.DynamicGridLayout;
 import net.runelite.client.ui.PluginPanel;
@@ -20,6 +20,8 @@ import javax.swing.*;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.util.List;
 
@@ -33,89 +35,143 @@ public class AlertListItemNew extends JPanel {
 //        final BufferedImage editImg = ImageUtil.loadImageResource(ScreenMarkerPlugin.class, "border_color_icon.png");
 //        EDIT_ICON = new ImageIcon(editImg);
 //    }
+    private static final ImageIcon SECTION_EXPAND_ICON;
+    private static final ImageIcon SECTION_EXPAND_ICON_HOVER;
+    private static final ImageIcon SECTION_RETRACT_ICON;
+    private static final ImageIcon SECTION_RETRACT_ICON_HOVER;
+
+    static {
+        BufferedImage sectionRetractIcon = ImageUtil.loadImageResource(ConfigPlugin.class, "/util/arrow_right.png");
+        sectionRetractIcon = ImageUtil.luminanceOffset(sectionRetractIcon, -121);
+        SECTION_EXPAND_ICON = new ImageIcon(sectionRetractIcon);
+        SECTION_EXPAND_ICON_HOVER = new ImageIcon(ImageUtil.alphaOffset(sectionRetractIcon, -100));
+        final BufferedImage sectionExpandIcon = ImageUtil.rotateImage(sectionRetractIcon, Math.PI / 2);
+        SECTION_RETRACT_ICON = new ImageIcon(sectionExpandIcon);
+        SECTION_RETRACT_ICON_HOVER = new ImageIcon(ImageUtil.alphaOffset(sectionExpandIcon, -100));
+    }
 
     private static final int ROW_HEIGHT = 30;
     private static final int PADDING = 2;
+    private final MouseDragEventForwarder mouseDragEventForwarder;
+    private final AlertManager alertManager;
+    private final WatchdogPanel panel;
+
+    private boolean collapsed = true;
 
     @Getter
     private final Alert alert;
 
     public AlertListItemNew(WatchdogPanel panel, AlertManager alertManager, Alert alert, List<Alert> parentList, JComponent parent, Runnable onChange) {
+        this.panel = panel;
         this.alert = alert;
+        this.alertManager = alertManager;
         this.setLayout(new BorderLayout(5, 0));
         this.setBorder(new EmptyBorder(PADDING, 0, PADDING, 0));
         this.setMaximumSize(new Dimension(PluginPanel.PANEL_WIDTH, 999));
         this.setAlignmentX(JPanel.LEFT_ALIGNMENT);
 //        this.setPreferredSize(new Dimension(PluginPanel.PANEL_WIDTH, ROW_HEIGHT + PADDING * 2));
         this.setBackground(ColorScheme.DARK_GRAY_COLOR);
-        MouseDragEventForwarder mouseDragEventForwarder = new MouseDragEventForwarder(parent);
+        this.mouseDragEventForwarder = new MouseDragEventForwarder(parent);
 
-        JPanel container = new JPanel(new StretchedStackedLayout(3, 3));
+        this.rebuild();
+    }
+
+    public void rebuild() {
+        this.removeAll();
+
+        final JPanel container = new JPanel(new StretchedStackedLayout(3, 3));
         container.setBackground(ColorScheme.DARKER_GRAY_COLOR);
-        JPanel topWrapper = new JPanel(new BorderLayout(3, 3));
+        final JPanel topWrapper = new JPanel(new BorderLayout(3, 3));
         container.add(topWrapper);
 
         topWrapper.setBackground(ColorScheme.DARKER_GRAY_COLOR);
         topWrapper.setBorder(new CompoundBorder(
-            BorderFactory.createMatteBorder(0, 0, 1, 0, ColorScheme.DARK_GRAY_COLOR),
+            BorderFactory.createMatteBorder(0, 0, this.collapsed ? 0 : 2, 0, ColorScheme.DARK_GRAY_COLOR),
             BorderFactory.createMatteBorder(5, 10, 5, 0, ColorScheme.DARKER_GRAY_COLOR)));
 
-        ToggleButton toggleButton = new ToggleButton();
-        toggleButton.setSelected(alert.isEnabled());
+        final ToggleButton toggleButton = new ToggleButton();
+        toggleButton.setSelected(this.alert.isEnabled());
         toggleButton.addItemListener(i -> {
-            alert.setEnabled(toggleButton.isSelected());
-            alertManager.saveAlerts();
+            this.alert.setEnabled(toggleButton.isSelected());
+            this.alertManager.saveAlerts();
         });
 //            toggleButton.setOpaque(false);
         topWrapper.add(toggleButton, BorderLayout.WEST);
 
-        JPanel nameWrapper = new JPanel(new DynamicGridLayout(1, 0, 2, 2));
+        final JPanel nameWrapper = new JPanel(new DynamicGridLayout(1, 0, 2, 2));
         nameWrapper.setBackground(ColorScheme.DARKER_GRAY_COLOR);
         topWrapper.add(nameWrapper, BorderLayout.CENTER);
 
-        JLabel nameLabel = new JLabel(alert.getName());
-        nameLabel.setToolTipText(alert.getName());
+        if (this.alert instanceof AlertGroup) {
+            final JButton collapseButton = PanelUtils.createActionButton(
+                this.collapsed ? SECTION_EXPAND_ICON : SECTION_RETRACT_ICON,
+                this.collapsed ? SECTION_EXPAND_ICON_HOVER : SECTION_RETRACT_ICON_HOVER,
+                this.collapsed ? "Expand" : "Collapse",
+                (btn, evt) -> {
+                    this.collapsed = !this.collapsed;
+                    this.rebuild();
+                    this.revalidate();
+                }
+            );
+            nameWrapper.add(collapseButton);
+        }
+
+        final JLabel nameLabel = new JLabel(this.alert.getName());
+        nameLabel.setToolTipText(this.alert.getName());
         nameWrapper.add(nameLabel);
 
-        topWrapper.addMouseListener(mouseDragEventForwarder);
-        topWrapper.addMouseMotionListener(mouseDragEventForwarder);
-        nameWrapper.addMouseListener(mouseDragEventForwarder);
-        nameWrapper.addMouseMotionListener(mouseDragEventForwarder);
-        nameLabel.addMouseListener(mouseDragEventForwarder);
-        nameLabel.addMouseMotionListener(mouseDragEventForwarder);
+        topWrapper.addMouseListener(this.mouseDragEventForwarder);
+        topWrapper.addMouseMotionListener(this.mouseDragEventForwarder);
+        nameWrapper.addMouseListener(this.mouseDragEventForwarder);
+        nameWrapper.addMouseMotionListener(this.mouseDragEventForwarder);
+        nameLabel.addMouseListener(this.mouseDragEventForwarder);
+        nameLabel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getButton() == MouseEvent.BUTTON1) {
+                    collapsed = !collapsed;
+                    rebuild();
+                    revalidate();
+                }
+            }
+        });
+        nameLabel.addMouseMotionListener(this.mouseDragEventForwarder);
 
-        JPanel rightActions = new JPanel(new FlowLayout(FlowLayout.RIGHT, 3, 0));
+        final JPanel rightActions = new JPanel(new FlowLayout(FlowLayout.RIGHT, 3, 0));
         rightActions.setBorder(new EmptyBorder(4, 0, 0, 0));
         rightActions.setBackground(ColorScheme.DARKER_GRAY_COLOR);
         topWrapper.add(rightActions, BorderLayout.EAST);
 
         rightActions.add(PanelUtils.createActionButton(Icons.EDIT_ICON, Icons.EDIT_ICON, "Edit Alert", (btn, modifiers) -> {
-            panel.openAlert(alert);
+            this.panel.openAlert(this.alert);
         }));
 
         rightActions.add(PanelUtils.createActionButton(Icons.CLONE_ICON, Icons.CLONE_ICON, "Clone Alert", (btn, modifiers) -> {
-            alertManager.cloneAlert(alert);
+            this.alertManager.cloneAlert(this.alert);
         }));
 
         final JButton deleteButton = PanelUtils.createActionButton(Icons.DELETE_ICON, Icons.DELETE_ICON, "Delete Alert", (btn, modifiers) -> {
-            int result = JOptionPane.showConfirmDialog(this, "Are you sure you want to delete the " + alert.getName() + " alert?", "Delete?", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE);
+            int result = JOptionPane.showConfirmDialog(this, "Are you sure you want to delete the " + this.alert.getName() + " alert?", "Delete?", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE);
             if (result == JOptionPane.YES_OPTION) {
-                alertManager.removeAlert(alert);
+                this.alertManager.removeAlert(this.alert);
             }
         });
         rightActions.add(deleteButton);
 
-        JPanel settings = new JPanel(new StretchedStackedLayout(3, 3));
-        settings.setBorder(new EmptyBorder(5, 10, 5, 10));
-        settings.setBackground(ColorScheme.DARKER_GRAY_COLOR);
-        settings.add(new JLabel("settings place"));
-        JButton jButton = new JButton("open");
-        jButton.addActionListener((ev) -> {
-            panel.openAlert(alert);
-        });
-        settings.add(jButton);
-        container.add(settings);
+        if (this.alert instanceof AlertGroup && !this.collapsed) {
+            final JPanel settings = new JPanel(new StretchedStackedLayout(3, 3));
+            settings.setBorder(new EmptyBorder(0, 10, 5, 10));
+            settings.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+            List<Alert> subAlerts = ((AlertGroup) this.alert).getAlerts();
+            for (Alert subAlert : subAlerts) {
+                settings.add(new JLabel(subAlert.getName()));
+            }
+            if (subAlerts.size() == 0) {
+                settings.add(new JLabel("No alerts in group"));
+            }
+            container.add(settings);
+        }
 
-        this.add(container);
+        this.add(container, BorderLayout.CENTER);
     }
 }
