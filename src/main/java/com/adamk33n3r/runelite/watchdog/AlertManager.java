@@ -39,6 +39,7 @@ public class AlertManager {
 
     @Getter
     @Inject
+//    i need to move this to be created on the ui thread i guess... :/
     private WatchdogPanel watchdogPanel;
 
     @Inject
@@ -59,6 +60,7 @@ public class AlertManager {
         final RuntimeTypeAdapterFactory<Alert> alertTypeFactory = RuntimeTypeAdapterFactory.of(Alert.class)
             .ignoreSubtype("IdleAlert")
             .ignoreSubtype("ResourceAlert")
+            .ignoreSubtype("AlertGroup")
             .registerSubtype(ChatAlert.class)
             .registerSubtype(NotificationFiredAlert.class)
             .registerSubtype(StatDrainAlert.class)

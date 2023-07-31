@@ -8,18 +8,22 @@ import com.adamk33n3r.runelite.watchdog.ui.panels.AlertPanel;
 import com.adamk33n3r.runelite.watchdog.ui.panels.HistoryPanel;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
 
+import com.google.common.base.Splitter;
 import net.runelite.api.Skill;
 import net.runelite.client.plugins.config.ConfigPlugin;
 import net.runelite.client.plugins.info.InfoPanel;
 import net.runelite.client.plugins.timetracking.TimeTrackingPlugin;
+import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.MultiplexingPluginPanel;
 import net.runelite.client.ui.PluginPanel;
 import net.runelite.client.ui.components.DragAndDropReorderPane;
+import net.runelite.client.ui.components.IconTextField;
 import net.runelite.client.util.ImageUtil;
 import net.runelite.client.util.LinkBrowser;
 
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import net.runelite.client.util.Text;
 import org.apache.commons.text.WordUtils;
 
 import javax.inject.Inject;
@@ -35,6 +39,8 @@ import javax.swing.JScrollPane;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -43,7 +49,9 @@ import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 @Slf4j
 public class WatchdogPanel extends PluginPanel {
@@ -76,6 +84,12 @@ public class WatchdogPanel extends PluginPanel {
 
     @Inject
     private AlertManager alertManager;
+
+    private String filterText = "";
+    private static final Splitter SPLITTER = Splitter.on(" ").trimResults().omitEmptyStrings();
+//    private IconTextField searchBar;
+    DragAndDropReorderPane dragAndDropReorderPane = new DragAndDropReorderPane();
+    private final List<AlertListItem> alertListItems = new ArrayList<>();
 
     public static final ImageIcon ADD_ICON;
     public static final ImageIcon HELP_ICON;
@@ -116,9 +130,21 @@ public class WatchdogPanel extends PluginPanel {
         CONFIG_ICON_HOVER = new ImageIcon(ImageUtil.luminanceOffset(configIcon, -100));
     }
 
+    public WatchdogPanel() {
+        super(false);
+        this.dragAndDropReorderPane.addDragListener((c) -> {
+            int pos = this.dragAndDropReorderPane.getPosition(c);
+            AlertListItem alertListItem = (AlertListItem) c;
+//            log.debug("drag listener: " + alertListItem.getAlert().getName() + " to " + pos);
+            alertManager.moveAlertTo(alertListItem.getAlert(), pos);
+        });
+    }
+
     public void rebuild() {
         this.removeAll();
-        this.setLayout(new BorderLayout(0, 5));
+        this.setLayout(new BorderLayout(0, 3));
+        System.out.println("rebuilding");
+        this.setBackground(ColorScheme.PROGRESS_ERROR_COLOR);
 
         JPanel topPanel = new JPanel(new BorderLayout());
         JPanel titlePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -135,6 +161,7 @@ public class WatchdogPanel extends PluginPanel {
         topPanel.add(titlePanel);
 
         JPanel actionButtons = new JPanel();
+        actionButtons.setBackground(ColorScheme.GRAND_EXCHANGE_LIMIT);
 
         JButton discordButton = PanelUtils.createActionButton(DISCORD_ICON, DISCORD_ICON_HOVER, "Discord", (btn, modifiers) -> {
             LinkBrowser.browse(DISCORD_URL);
@@ -183,22 +210,47 @@ public class WatchdogPanel extends PluginPanel {
 
         topPanel.add(actionButtons, BorderLayout.EAST);
 
+        // TODO: CATEGORY_TAGS.forEach(searchBar.getSuggestionListModel()::addElement);
+        IconTextField searchBar = new IconTextField();
+        searchBar.setText(this.filterText);
+        searchBar.setForeground(Color.WHITE);
+        searchBar.setPreferredSize(new Dimension(24, 24));
+        searchBar.setIcon(IconTextField.Icon.SEARCH);
+        searchBar.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+        searchBar.setHoverBackgroundColor(ColorScheme.DARKER_GRAY_HOVER_COLOR);
+        searchBar.getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                filter(searchBar.getText());
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                filter(searchBar.getText());
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                filter(searchBar.getText());
+            }
+        });
+        topPanel.add(searchBar, BorderLayout.SOUTH);
+
         this.add(topPanel, BorderLayout.NORTH);
 
-        DragAndDropReorderPane dragAndDropReorderPane = new DragAndDropReorderPane();
-        dragAndDropReorderPane.addDragListener((c) -> {
-            int pos = dragAndDropReorderPane.getPosition(c);
-            AlertListItem alertListItem = (AlertListItem) c;
-//            log.debug("drag listener: " + alertListItem.getAlert().getName() + " to " + pos);
-            alertManager.moveAlertTo(alertListItem.getAlert(), pos);
-        });
         JPanel alertPanel = new JPanel(new BorderLayout());
         alertPanel.add(dragAndDropReorderPane, BorderLayout.NORTH);
 
-        for (Alert alert : this.alertManager.getAlerts()) {
-            AlertListItem alertListItem = new AlertListItem(this, this.alertManager, alert, dragAndDropReorderPane);
-            dragAndDropReorderPane.add(alertListItem);
-        }
+        this.alertListItems.clear();
+        this.dragAndDropReorderPane.removeAll();
+        this.alertManager.getAlerts().stream()
+            .map(alert -> new AlertListItem(this, this.alertManager, alert, this.dragAndDropReorderPane))
+            .forEach(alertListItem -> {
+                this.alertListItems.add(alertListItem);
+                this.dragAndDropReorderPane.add(alertListItem);
+            });
+        if (!this.filterText.isEmpty())
+            this.filter(this.filterText);
         this.add(new JScrollPane(alertPanel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER), BorderLayout.CENTER);
 
         JPanel importExportGroup = new JPanel(new GridLayout(1, 2, 5, 0));
@@ -303,5 +355,14 @@ public class WatchdogPanel extends PluginPanel {
     @Override
     public void onActivate() {
         this.rebuild();
+    }
+
+    private void filter(String text) {
+        this.filterText = text;
+        this.dragAndDropReorderPane.removeAll();
+        this.alertListItems.stream()
+            .filter(alertListItem -> Text.matchesSearchTerms(SPLITTER.split(this.filterText.toUpperCase()), alertListItem.getAlert().getKeywords()))
+            .forEach(this.dragAndDropReorderPane::add);
+        this.revalidate();
     }
 }
