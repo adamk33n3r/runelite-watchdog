@@ -12,6 +12,7 @@ import javax.sound.sampled.AudioSystem;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import java.util.Arrays;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class SoundNotificationPanel extends NotificationPanel {
@@ -19,17 +20,17 @@ public class SoundNotificationPanel extends NotificationPanel {
     public SoundNotificationPanel(Sound sound, NotificationsPanel parentPanel, Runnable onChangeListener, PanelUtils.OnRemove onRemove) {
         super(sound, parentPanel, onChangeListener, onRemove);
 
-        Stream<String> supportedExtensions = Stream.concat(
+        String[] supportedExtensions = Stream.concat(
             Arrays.stream(AudioSystem.getAudioFileTypes())
                 .map(AudioFileFormat.Type::getExtension),
             Stream.of("mp3")
-        );
-        this.settings.add(new JLabel("Supports " + String.join(", ", supportedExtensions.map(ext -> '.' + ext).toArray(String[]::new))));
+        ).toArray(String[]::new);
+        this.settings.add(new JLabel("Supports " + Arrays.stream(supportedExtensions).map(ext -> '.' + ext).collect(Collectors.joining(", "))));
         this.settings.add(PanelUtils.createFileChooser(null, "Path to the sound file", ev -> {
             JFileChooser fileChooser = (JFileChooser) ev.getSource();
             sound.setPath(fileChooser.getSelectedFile().getAbsolutePath());
             onChangeListener.run();
-        }, sound.getPath(), "Sound Files", supportedExtensions.toArray(String[]::new)));
+        }, sound.getPath(), "Sound Files", supportedExtensions));
 
         VolumeSlider volumeSlider = new VolumeSlider(sound);
         volumeSlider.setBackground(ColorScheme.MEDIUM_GRAY_COLOR);

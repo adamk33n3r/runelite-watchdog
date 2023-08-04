@@ -1,6 +1,7 @@
 package com.adamk33n3r.runelite.watchdog;
 
 import com.adamk33n3r.runelite.watchdog.alerts.*;
+import com.adamk33n3r.runelite.watchdog.elevenlabs.ElevenLabs;
 import com.adamk33n3r.runelite.watchdog.ui.AlertListItem;
 import com.adamk33n3r.runelite.watchdog.ui.ImportExportDialog;
 import com.adamk33n3r.runelite.watchdog.ui.SearchBar;
@@ -22,9 +23,12 @@ import net.runelite.client.ui.components.IconTextField;
 import net.runelite.client.util.ImageUtil;
 import net.runelite.client.util.LinkBrowser;
 
+import jaco.mp3.player.MP3Player;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.client.util.Text;
+
+import okhttp3.OkHttpClient;
 import org.apache.commons.text.WordUtils;
 
 import javax.inject.Inject;
@@ -51,6 +55,7 @@ import java.awt.GridLayout;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
@@ -91,6 +96,8 @@ public class WatchdogPanel extends PluginPanel {
 //    private IconTextField searchBar;
     DragAndDropReorderPane dragAndDropReorderPane = new DragAndDropReorderPane();
     private final List<AlertListItem> alertListItems = new ArrayList<>();
+    @Inject
+    private OkHttpClient httpClient;
 
     public static final ImageIcon ADD_ICON;
     public static final ImageIcon HELP_ICON;
@@ -159,6 +166,16 @@ public class WatchdogPanel extends PluginPanel {
         version.setBorder(new EmptyBorder(5, 0, 0, 0));
         titlePanel.add(version);
         topPanel.add(titlePanel);
+
+        JButton test_ai_voice = new JButton("test ai voice");
+        test_ai_voice.addActionListener((ev) -> {
+//            ElevenLabs.getVoices(this.httpClient);
+            WatchdogPlugin.getInstance().getSoundPlayer().play(new File("C:\\Users\\adamg\\Music\\notification.wav"), 10);
+            WatchdogPlugin.getInstance().getSoundPlayer().play(new File("C:\\Users\\adamg\\Music\\Yeet.mp3"), 10);
+            WatchdogPlugin.getInstance().getSoundPlayer().play(new File("C:\\Users\\adamg\\Music\\metal_gear_solid.mp3"), 10);
+            WatchdogPlugin.getInstance().getSoundPlayer().play(new File("C:\\Users\\adamg\\Music\\notification.wav"), 10);
+        });
+        topPanel.add(test_ai_voice, BorderLayout.NORTH);
 
         JPanel actionButtons = new JPanel();
 

@@ -9,6 +9,7 @@ import com.adamk33n3r.runelite.watchdog.notifications.TrayNotification;
 import net.runelite.api.Client;
 import net.runelite.api.ItemID;
 import net.runelite.api.MenuAction;
+import net.runelite.api.events.GameTick;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
@@ -36,6 +37,9 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 import static net.runelite.api.MenuAction.RUNELITE_OVERLAY_CONFIG;
 
@@ -87,10 +91,19 @@ public class WatchdogPlugin extends Plugin {
     @Getter
     private WatchdogPanel panel;
 
+    @Getter
+    @Inject
+    private SoundPlayer soundPlayer;
+
+    @Inject
+    private ScheduledExecutorService executor;
+
     private NavigationButton navButton;
 
     @Getter
     private static WatchdogPlugin instance;
+
+    private ScheduledFuture<?> soundPlayerFuture;
 
     public WatchdogPlugin() {
         instance = this;
@@ -142,6 +155,29 @@ public class WatchdogPlugin extends Plugin {
             this.clientToolbar.removeNavigation(this.navButton);
             this.clientToolbar.addNavigation(this.navButton);
         });
+
+        this.startSoundPlayerTimer();
+    }
+
+    private void startSoundPlayerTimer() {
+        log.debug(this.soundPlayerFuture == null ? "it is null" : "it is not null");
+        if (this.soundPlayerFuture != null && !this.soundPlayerFuture.isCancelled()) {
+            return;
+        }
+
+        log.debug("startSoundPlayerTimer:"+this.config.putSoundsIntoQueue());
+
+        // Don't start the timer if we're not queuing sounds
+        if (!this.config.putSoundsIntoQueue()) {
+            return;
+        }
+
+        this.soundPlayerFuture = this.executor.scheduleAtFixedRate(
+            () -> this.soundPlayer.processQueue(),
+            0,
+            100,
+            TimeUnit.MILLISECONDS
+        );
     }
 
     @Override
@@ -155,6 +191,11 @@ public class WatchdogPlugin extends Plugin {
     public void openConfiguration() {
         // We don't have access to the ConfigPlugin so let's just emulate an overlay click
         this.eventBus.post(new OverlayMenuClicked(new OverlayMenuEntry(RUNELITE_OVERLAY_CONFIG, null, null), this.notificationOverlay));
+    }
+
+    @Subscribe
+    public void onGameTick(GameTick gameTick) {
+        this.soundPlayer.processQueue();
     }
 
     @Subscribe
@@ -180,6 +221,14 @@ public class WatchdogPlugin extends Plugin {
                     this.panel.getMuxer().popState();
                 }
                 this.panel.rebuild();
+            } else if (configChanged.getKey().equals(WatchdogConfig.PUT_SOUNDS_INTO_QUEUE)) {
+                log.debug("sound queue config changed:"+this.config.putSoundsIntoQueue());
+                if (this.config.putSoundsIntoQueue()) {
+                    this.startSoundPlayerTimer();
+                } else {
+                    this.getSoundPlayer().clearQueue();
+                    this.soundPlayerFuture.cancel(false);
+                }
             }
         }
     }
