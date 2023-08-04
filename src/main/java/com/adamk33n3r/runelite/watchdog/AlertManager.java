@@ -59,6 +59,7 @@ public class AlertManager {
         final RuntimeTypeAdapterFactory<Alert> alertTypeFactory = RuntimeTypeAdapterFactory.of(Alert.class)
             .ignoreSubtype("IdleAlert")
             .ignoreSubtype("ResourceAlert")
+            .ignoreSubtype("AlertGroup")
             .registerSubtype(ChatAlert.class)
             .registerSubtype(NotificationFiredAlert.class)
             .registerSubtype(StatDrainAlert.class)
