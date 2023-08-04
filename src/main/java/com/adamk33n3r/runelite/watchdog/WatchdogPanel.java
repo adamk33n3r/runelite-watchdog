@@ -3,6 +3,7 @@ package com.adamk33n3r.runelite.watchdog;
 import com.adamk33n3r.runelite.watchdog.alerts.*;
 import com.adamk33n3r.runelite.watchdog.ui.AlertListItem;
 import com.adamk33n3r.runelite.watchdog.ui.ImportExportDialog;
+import com.adamk33n3r.runelite.watchdog.ui.SearchBar;
 import com.adamk33n3r.runelite.watchdog.ui.dropdownbutton.DropDownButtonFactory;
 import com.adamk33n3r.runelite.watchdog.ui.panels.AlertPanel;
 import com.adamk33n3r.runelite.watchdog.ui.panels.HistoryPanel;
@@ -135,7 +136,6 @@ public class WatchdogPanel extends PluginPanel {
         this.dragAndDropReorderPane.addDragListener((c) -> {
             int pos = this.dragAndDropReorderPane.getPosition(c);
             AlertListItem alertListItem = (AlertListItem) c;
-//            log.debug("drag listener: " + alertListItem.getAlert().getName() + " to " + pos);
             alertManager.moveAlertTo(alertListItem.getAlert(), pos);
         });
     }
@@ -143,8 +143,7 @@ public class WatchdogPanel extends PluginPanel {
     public void rebuild() {
         this.removeAll();
         this.setLayout(new BorderLayout(0, 3));
-        System.out.println("rebuilding");
-        this.setBackground(ColorScheme.PROGRESS_ERROR_COLOR);
+        this.setBackground(ColorScheme.DARK_GRAY_COLOR);
 
         JPanel topPanel = new JPanel(new BorderLayout());
         JPanel titlePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
@@ -155,13 +154,13 @@ public class WatchdogPanel extends PluginPanel {
         title.setForeground(Color.WHITE);
         titlePanel.add(title);
         JLabel version = new JLabel("v"+PLUGIN_VERSION);
+        title.setToolTipText(version.getText());
         version.setFont(version.getFont().deriveFont(10f));
         version.setBorder(new EmptyBorder(5, 0, 0, 0));
         titlePanel.add(version);
         topPanel.add(titlePanel);
 
         JPanel actionButtons = new JPanel();
-        actionButtons.setBackground(ColorScheme.GRAND_EXCHANGE_LIMIT);
 
         JButton discordButton = PanelUtils.createActionButton(DISCORD_ICON, DISCORD_ICON_HOVER, "Discord", (btn, modifiers) -> {
             LinkBrowser.browse(DISCORD_URL);
@@ -210,35 +209,17 @@ public class WatchdogPanel extends PluginPanel {
 
         topPanel.add(actionButtons, BorderLayout.EAST);
 
-        // TODO: CATEGORY_TAGS.forEach(searchBar.getSuggestionListModel()::addElement);
-        IconTextField searchBar = new IconTextField();
-        searchBar.setText(this.filterText);
-        searchBar.setForeground(Color.WHITE);
-        searchBar.setPreferredSize(new Dimension(24, 24));
-        searchBar.setIcon(IconTextField.Icon.SEARCH);
-        searchBar.setBackground(ColorScheme.DARKER_GRAY_COLOR);
-        searchBar.setHoverBackgroundColor(ColorScheme.DARKER_GRAY_HOVER_COLOR);
-        searchBar.getDocument().addDocumentListener(new DocumentListener() {
-            @Override
-            public void insertUpdate(DocumentEvent e) {
-                filter(searchBar.getText());
-            }
-
-            @Override
-            public void removeUpdate(DocumentEvent e) {
-                filter(searchBar.getText());
-            }
-
-            @Override
-            public void changedUpdate(DocumentEvent e) {
-                filter(searchBar.getText());
-            }
-        });
-        topPanel.add(searchBar, BorderLayout.SOUTH);
+        SearchBar searchBar = new SearchBar(this::filter);
+        Arrays.stream(TriggerType.values()).map(TriggerType::getName).forEach(searchBar.getSuggestionListModel()::addElement);
+        JPanel searchWrapper = new JPanel(new BorderLayout(0, 6));
+        searchWrapper.add(searchBar);
+        searchWrapper.setBorder(new EmptyBorder(0, 5, 0, 5));
+        topPanel.add(searchWrapper, BorderLayout.SOUTH);
 
         this.add(topPanel, BorderLayout.NORTH);
 
         JPanel alertPanel = new JPanel(new BorderLayout());
+        alertPanel.setBorder(new EmptyBorder(0, 5, 0, 5));
         alertPanel.add(dragAndDropReorderPane, BorderLayout.NORTH);
 
         this.alertListItems.clear();

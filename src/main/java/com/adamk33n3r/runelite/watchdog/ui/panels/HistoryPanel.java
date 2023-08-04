@@ -3,6 +3,7 @@ package com.adamk33n3r.runelite.watchdog.ui.panels;
 import com.adamk33n3r.runelite.watchdog.alerts.Alert;
 import com.adamk33n3r.runelite.watchdog.notifications.IMessageNotification;
 import com.adamk33n3r.runelite.watchdog.ui.PlaceholderTextField;
+import com.adamk33n3r.runelite.watchdog.ui.SearchBar;
 import com.adamk33n3r.runelite.watchdog.ui.StretchedStackedLayout;
 
 import net.runelite.client.ui.MultiplexingPluginPanel;
@@ -54,25 +55,8 @@ public class HistoryPanel extends PluginPanel {
         backButton.setPreferredSize(new Dimension(22, 16));
         backButton.setBorder(new EmptyBorder(0, 0, 0, 5));
         topPanel.add(backButton, BorderLayout.WEST);
-        PlaceholderTextField filterTextField = new PlaceholderTextField();
-        filterTextField.setPlaceholder("Filter");
-        filterTextField.getDocument().addDocumentListener(new DocumentListener() {
-            @Override
-            public void insertUpdate(DocumentEvent e) {
-                updateFilter(filterTextField.getText());
-            }
-
-            @Override
-            public void removeUpdate(DocumentEvent e) {
-                updateFilter(filterTextField.getText());
-            }
-
-            @Override
-            public void changedUpdate(DocumentEvent e) {
-                updateFilter(filterTextField.getText());
-            }
-        });
-        topPanel.add(filterTextField);
+        SearchBar searchBar = new SearchBar(this::updateFilter);
+        topPanel.add(searchBar);
         this.add(topPanel, BorderLayout.NORTH);
 
         this.historyItems = new ScrollablePanel(new StretchedStackedLayout(3, 3));
