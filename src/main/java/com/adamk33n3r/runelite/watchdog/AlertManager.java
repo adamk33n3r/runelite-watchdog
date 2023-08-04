@@ -39,7 +39,6 @@ public class AlertManager {
 
     @Getter
     @Inject
-//    i need to move this to be created on the ui thread i guess... :/
     private WatchdogPanel watchdogPanel;
 
     @Inject
