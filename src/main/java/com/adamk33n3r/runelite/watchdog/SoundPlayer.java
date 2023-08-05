@@ -11,6 +11,7 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 import javax.sound.sampled.FloatControl;
 import javax.sound.sampled.LineEvent;
+import javax.swing.*;
 import java.awt.*;
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -59,7 +60,7 @@ public class SoundPlayer {
     public void play(File soundFile, int volume) {
         this.queue.add(Pair.of(soundFile, volume));
         if (!WatchdogPlugin.getInstance().getConfig().putSoundsIntoQueue()) {
-            this.playNext(this.createMP3Player());
+            SwingUtilities.invokeLater(() -> this.playNext(this.createMP3Player()));
         }
     }
 
@@ -114,7 +115,7 @@ public class SoundPlayer {
     }
 
     private MP3Player createMP3Player() {
-        MP3PlayerExt mp3Player = new MP3PlayerExt();
+        MP3Player mp3Player = new MP3Player();
         mp3Player.setRepeat(false);
         return mp3Player;
     }

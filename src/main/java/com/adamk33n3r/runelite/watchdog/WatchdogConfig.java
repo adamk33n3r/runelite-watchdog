@@ -93,7 +93,7 @@ public interface WatchdogConfig extends Config {
 
     @ConfigItem(
         keyName = PUT_SOUNDS_INTO_QUEUE,
-        name = "Put Sound Into Queue",
+        name = "Put Sounds Into Queue",
         description = "When this is on, all sounds will be queued up so that they will not overlap"
     )
     default boolean putSoundsIntoQueue() { return true; }

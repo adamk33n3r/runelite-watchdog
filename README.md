@@ -42,18 +42,6 @@ capture groups to create your own message.
 For example, you could have a TTS notification set to `Go get your $1 in $2!` which would make it say something like
 `Go get your Ranarr in Ardougne!`.
 
-## Examples
-![image](https://user-images.githubusercontent.com/1350444/210900848-4c177374-9b74-4cb3-b7a7-92c29596ff40.png)
-
-### Capture Groups
-With glob patterns (or regex) and capture groups you can make your notifications dynamic.
-Say you have a Notification Fired Alert with the Message set to `Your {*} is ready to harvest in {*}`.
-This will capture the crop and the location which you can then use in your notifications.
-In message type notifications like Text to Speech, Tray Notification, or Game Message you can use those
-capture groups to create your own message.
-For example, you could have a TTS notification set to `Go get your $1 in $2!` which would make it say something like
-`Go get your Ranarr in Ardougne!`.
-
 You can also use capture groups in a Sound Notification to create a dynamic file path. It's a little tricky since you
 have to have a dummy file that has the capture group values in the name so that the path can be read with the variables.
 But if you select a file with the name `$1.wav` for example you can then have other files in the same directory like
