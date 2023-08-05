@@ -1,6 +1,7 @@
 package com.adamk33n3r.runelite.watchdog;
 
 import com.adamk33n3r.runelite.watchdog.alerts.FlashMode;
+import com.adamk33n3r.runelite.watchdog.notifications.tts.TTSSource;
 import com.adamk33n3r.runelite.watchdog.notifications.tts.Voice;
 
 import net.runelite.api.SoundEffectID;
@@ -61,9 +62,11 @@ public interface WatchdogConfig extends Config {
 
     // TTS
     String DEFAULT_TTS_VOLUME = "defaultTTSVolume";
+    String DEFAULT_TTS_SOURCE = "defaultTTSSource";
     String DEFAULT_TTS_VOICE = "defaultTTSVoice";
     String DEFAULT_TTS_RATE = "defaultTTSRate";
     String ELEVEN_LABS_API_KEY = "elevenLabsAPIKey";
+    String DEFAULT_ELEVEN_LABS_VOICE = "defaultElevenLabsVoice";
 
     //region Hidden
     @ConfigItem(
@@ -316,12 +319,28 @@ public interface WatchdogConfig extends Config {
     default int defaultTTSVolume() { return 5; }
 
     @ConfigItem(
+        keyName = DEFAULT_TTS_SOURCE,
+        name = "Default Source",
+        description = "The default source",
+        section = ttsSection
+    )
+    default TTSSource defaultTTSSource() { return TTSSource.LEGACY; }
+
+    @ConfigItem(
         keyName = DEFAULT_TTS_VOICE,
-        name = "Default Voice",
-        description = "The default voice",
+        name = "Default Legacy Voice",
+        description = "The default legacy voice",
         section = ttsSection
     )
     default Voice defaultTTSVoice() { return Voice.GEORGE; }
+
+    @ConfigItem(
+        keyName = DEFAULT_ELEVEN_LABS_VOICE,
+        name = "Default Eleven Labs Voice",
+        description = "The default Eleven Labs voice",
+        section = ttsSection
+    )
+    default String defaultElevenLabsVoice() { return null; }
 
     @ConfigItem(
         keyName = DEFAULT_TTS_RATE,
@@ -331,5 +350,13 @@ public interface WatchdogConfig extends Config {
     )
     @Range(min = 1, max = 5)
     default int defaultTTSRate() { return 1; }
+
+    @ConfigItem(
+        keyName = ELEVEN_LABS_API_KEY,
+        name = "Eleven Labs API Key",
+        description = "Enter your API key",
+        section = ttsSection
+    )
+    default String elevenLabsAPIKey() { return ""; }
     //endregion
 }

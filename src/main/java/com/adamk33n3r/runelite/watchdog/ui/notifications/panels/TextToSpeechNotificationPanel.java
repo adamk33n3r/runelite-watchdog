@@ -2,8 +2,12 @@ package com.adamk33n3r.runelite.watchdog.ui.notifications.panels;
 
 import com.adamk33n3r.runelite.watchdog.LengthLimitFilter;
 import com.adamk33n3r.runelite.watchdog.SimpleDocumentListener;
+import com.adamk33n3r.runelite.watchdog.WatchdogPanel;
 import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
+import com.adamk33n3r.runelite.watchdog.elevenlabs.ElevenLabs;
+import com.adamk33n3r.runelite.watchdog.elevenlabs.Voice;
 import com.adamk33n3r.runelite.watchdog.notifications.TextToSpeech;
+import com.adamk33n3r.runelite.watchdog.notifications.tts.TTSSource;
 import com.adamk33n3r.runelite.watchdog.ui.FlatTextArea;
 import com.adamk33n3r.runelite.watchdog.ui.notifications.VoiceChooser;
 import com.adamk33n3r.runelite.watchdog.ui.notifications.VolumeSlider;
@@ -13,10 +17,7 @@ import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.util.ImageUtil;
 
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JSlider;
+import javax.swing.*;
 import javax.swing.text.AbstractDocument;
 import java.awt.Font;
 import java.awt.event.FocusEvent;
@@ -37,6 +38,14 @@ public class TextToSpeechNotificationPanel extends NotificationPanel {
 
     public TextToSpeechNotificationPanel(TextToSpeech notification, NotificationsPanel parentPanel, Runnable onChangeListener, PanelUtils.OnRemove onRemove) {
         super(notification, parentPanel, onChangeListener, onRemove);
+
+        this.rebuild();
+    }
+
+    private void rebuild() {
+        this.settings.removeAll();
+
+        TextToSpeech notification = (TextToSpeech) this.notification;
 
         if (!WatchdogPlugin.getInstance().getConfig().ttsEnabled()) {
             JLabel ttsLabel = new JLabel("<html>Enable TTS in the config to use this Notification type</html>");
@@ -67,20 +76,49 @@ public class TextToSpeechNotificationPanel extends NotificationPanel {
         });
         this.settings.add(flatTextArea);
 
-
-        JSlider rateSlider = new JSlider(1, 5, notification.getRate());
-        rateSlider.setBackground(ColorScheme.MEDIUM_GRAY_COLOR);
-        rateSlider.addChangeListener(ev -> {
-            notification.setRate(rateSlider.getValue());
+        JComboBox<TTSSource> sourceSelect = PanelUtils.createSelect(TTSSource.values(), notification.getSource(), (selected) -> {
+            notification.setSource(selected);
             onChangeListener.run();
+            this.rebuild();
+            this.revalidate();
         });
-        this.settings.add(PanelUtils.createIconComponent(SPEED_ICON, "The speed of the generated speech", rateSlider));
+        this.settings.add(sourceSelect);
 
-        // Should be an icon of a head looking right with the same "sound waves" of the volume icon
-        // "speech" icon
-        VoiceChooser voiceChooser = new VoiceChooser(notification);
-        this.settings.add(PanelUtils.createIconComponent(SPEECH_ICON, "The voice to generate speech with", voiceChooser));
-        voiceChooser.addActionListener(e -> onChangeListener.run());
+        switch (notification.getSource()) {
+            case ELEVEN_LABS:
+                JComboBox<Voice> voiceSelect = PanelUtils.createSelect(new Voice[]{}, null, Voice::getName, (voice) -> {
+                    notification.setElevenLabsVoiceId(voice.getVoiceId());
+                    //Not serialized
+                    notification.setElevenLabsVoice(voice);
+                });
+                ElevenLabs.getVoices(WatchdogPlugin.getInstance().getHttpClient(), (voices) -> {
+                    SwingUtilities.invokeLater(() -> {
+                        // Need to store the id prior to adding because after the first thing is added it's selected
+                        String storedID = notification.getElevenLabsVoiceId();
+                        voices.getVoices().forEach((voice) -> {
+                            voiceSelect.addItem(voice);
+                            if (voice.getVoiceId().equals(storedID)) {
+                                voiceSelect.setSelectedItem(voice);
+                            }
+                        });
+                    });
+                });
+                this.settings.add(voiceSelect);
+                break;
+            case LEGACY:
+                JSlider rateSlider = new JSlider(1, 5, notification.getRate());
+                rateSlider.setBackground(ColorScheme.MEDIUM_GRAY_COLOR);
+                rateSlider.addChangeListener(ev -> {
+                    notification.setRate(rateSlider.getValue());
+                    onChangeListener.run();
+                });
+                this.settings.add(PanelUtils.createIconComponent(SPEED_ICON, "The speed of the generated speech", rateSlider));
+
+                VoiceChooser voiceChooser = new VoiceChooser(notification);
+                voiceChooser.addActionListener(e -> onChangeListener.run());
+                this.settings.add(PanelUtils.createIconComponent(SPEECH_ICON, "The voice to generate speech with", voiceChooser));
+                break;
+        }
 
         VolumeSlider volumeSlider = new VolumeSlider(notification);
         volumeSlider.setBackground(ColorScheme.MEDIUM_GRAY_COLOR);
