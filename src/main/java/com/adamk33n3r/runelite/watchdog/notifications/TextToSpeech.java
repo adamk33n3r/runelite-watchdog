@@ -54,12 +54,9 @@ public class TextToSpeech extends MessageNotification implements IAudioNotificat
             watchdogPath.mkdirs();
             File soundFile = new File(watchdogPath, String.format("%s-%d-%d.wav", encodedMessage, rate, voice.id));
 
-            AudioInputStream inputStream;
-
             // If the cache file exists, load and play it. Else fetch it from the server and cache it.
             if (soundFile.exists()) {
                 log.debug("Using cached file");
-                inputStream = AudioSystem.getAudioInputStream(soundFile);
             } else {
                 String request = String.format("https://ttsplugin.com?m=%s&r=%d&v=%d", encodedMessage, rate, voice.id);
                 URLConnection conn = new URL(request).openConnection();
@@ -73,20 +70,8 @@ public class TextToSpeech extends MessageNotification implements IAudioNotificat
                 try (FileOutputStream fileOutputStream = new FileOutputStream(soundFile)) {
                     fileOutputStream.write(bytes);
                 }
-                inputStream = AudioSystem.getAudioInputStream(new ByteArrayInputStream(bytes));
             }
-            Clip clip = AudioSystem.getClip();
-            clip.open(inputStream);
-            inputStream.close();
-            FloatControl volume = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
-            int decibels = Util.scale(this.gain, 0, 10, -25, 5);
-            volume.setValue(decibels);
-            clip.start();
-            clip.addLineListener(event -> {
-                if (event.getType() == LineEvent.Type.STOP) {
-                    clip.close();
-                }
-            });
+            WatchdogPlugin.getInstance().getSoundPlayer().play(soundFile, this.gain);
         } catch (Exception ex) {
             ex.printStackTrace();
         }

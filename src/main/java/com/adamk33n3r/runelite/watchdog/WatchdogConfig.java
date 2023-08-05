@@ -51,6 +51,7 @@ public interface WatchdogConfig extends Config {
     String DEFAULT_SCREEN_FLASH_DURATION = "defaultScreenFlashDuration";
 
     // Sound
+    String PUT_SOUNDS_INTO_QUEUE = "putSoundsIntoQueue";
     String DEFAULT_SOUND_VOLUME = "defaultSoundVolume";
     String DEFAULT_SOUND_PATH = "defaultSoundPath";
 
@@ -62,6 +63,7 @@ public interface WatchdogConfig extends Config {
     String DEFAULT_TTS_VOLUME = "defaultTTSVolume";
     String DEFAULT_TTS_VOICE = "defaultTTSVoice";
     String DEFAULT_TTS_RATE = "defaultTTSRate";
+    String ELEVEN_LABS_API_KEY = "elevenLabsAPIKey";
 
     //region Hidden
     @ConfigItem(
@@ -88,6 +90,13 @@ public interface WatchdogConfig extends Config {
         warning = "Using TTS will submit your IP address to a 3rd party website not controlled or verified by the RuneLite Developers."
     )
     default boolean ttsEnabled() { return false; }
+
+    @ConfigItem(
+        keyName = PUT_SOUNDS_INTO_QUEUE,
+        name = "Put Sounds Into Queue",
+        description = "When this is on, all sounds will be queued up so that they will not overlap"
+    )
+    default boolean putSoundsIntoQueue() { return true; }
 
     //region Overhead
     @ConfigSection(
