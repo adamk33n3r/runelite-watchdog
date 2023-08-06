@@ -93,11 +93,9 @@ public class TextToSpeechNotificationPanel extends NotificationPanel {
                 });
                 ElevenLabs.getVoices(WatchdogPlugin.getInstance().getHttpClient(), (voices) -> {
                     SwingUtilities.invokeLater(() -> {
-                        // Need to store the id prior to adding because after the first thing is added it's selected
-                        String storedID = notification.getElevenLabsVoiceId();
                         voices.getVoices().forEach((voice) -> {
                             voiceSelect.addItem(voice);
-                            if (voice.getVoiceId().equals(storedID)) {
+                            if (voice.getName().equals(WatchdogPlugin.getInstance().getConfig().defaultElevenLabsVoice())) {
                                 voiceSelect.setSelectedItem(voice);
                             }
                         });

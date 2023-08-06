@@ -321,7 +321,7 @@ public interface WatchdogConfig extends Config {
     @ConfigItem(
         keyName = DEFAULT_TTS_SOURCE,
         name = "Default Source",
-        description = "The default source",
+        description = "The default source (Eleven Labs needs your own API Key)",
         section = ttsSection
     )
     default TTSSource defaultTTSSource() { return TTSSource.LEGACY; }
@@ -333,14 +333,6 @@ public interface WatchdogConfig extends Config {
         section = ttsSection
     )
     default Voice defaultTTSVoice() { return Voice.GEORGE; }
-
-    @ConfigItem(
-        keyName = DEFAULT_ELEVEN_LABS_VOICE,
-        name = "Default Eleven Labs Voice",
-        description = "The default Eleven Labs voice",
-        section = ttsSection
-    )
-    default String defaultElevenLabsVoice() { return null; }
 
     @ConfigItem(
         keyName = DEFAULT_TTS_RATE,
@@ -358,5 +350,13 @@ public interface WatchdogConfig extends Config {
         section = ttsSection
     )
     default String elevenLabsAPIKey() { return ""; }
+
+    @ConfigItem(
+        keyName = DEFAULT_ELEVEN_LABS_VOICE,
+        name = "Default Eleven Labs Voice",
+        description = "Matches on the name of the voice exactly",
+        section = ttsSection
+    )
+    default String defaultElevenLabsVoice() { return null; }
     //endregion
 }

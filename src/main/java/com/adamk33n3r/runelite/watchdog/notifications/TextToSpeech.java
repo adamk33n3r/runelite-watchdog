@@ -48,12 +48,6 @@ public class TextToSpeech extends MessageNotification implements IAudioNotificat
         this.rate = config.defaultTTSRate();
         this.legacyVoice = config.defaultTTSVoice();
         this.source = config.defaultTTSSource();
-        this.elevenLabsVoiceId = config.defaultElevenLabsVoice();
-        if (this.elevenLabsVoiceId != null && !this.elevenLabsVoiceId.isEmpty()) {
-            ElevenLabs.getVoice(WatchdogPlugin.getInstance().getHttpClient(), this.elevenLabsVoiceId, (voice) -> {
-                this.elevenLabsVoice = voice;
-            });
-        }
     }
 
     @Override
