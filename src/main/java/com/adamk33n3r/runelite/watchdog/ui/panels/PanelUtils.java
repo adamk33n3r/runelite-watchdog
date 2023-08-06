@@ -1,5 +1,6 @@
 package com.adamk33n3r.runelite.watchdog.ui.panels;
 
+import com.adamk33n3r.runelite.watchdog.Displayable;
 import com.adamk33n3r.runelite.watchdog.Util;
 import com.adamk33n3r.runelite.watchdog.ui.PlaceholderTextArea;
 
@@ -11,19 +12,10 @@ import net.runelite.client.util.ColorUtil;
 import net.runelite.client.util.ImageUtil;
 import net.runelite.client.util.SwingUtil;
 
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComponent;
-import javax.swing.JFileChooser;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JSpinner;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
-import javax.swing.SpinnerNumberModel;
-import javax.swing.SwingUtilities;
+import org.apache.commons.text.WordUtils;
+
+import javax.annotation.Nullable;
+import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -42,6 +34,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.Arrays;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 import java.util.stream.Collectors;
@@ -241,6 +234,49 @@ public class PanelUtils {
         });
 
         return colorPickerBtn;
+    }
+
+    public static <T extends Enum<T>> JComboBox<T> createSelect(T[] items, T initialValue, Consumer<T> onChange) {
+        JComboBox<T> select = new JComboBox<>(items);
+        select.setSelectedItem(initialValue);
+        select.setRenderer((list, value, index, isSelected, cellHasFocus) -> {
+            if (value instanceof Displayable) {
+                list.setToolTipText(((Displayable) value).getTooltip());
+                return new DefaultListCellRenderer().getListCellRendererComponent(list, ((Displayable) value).getName(), index, isSelected, cellHasFocus);
+            }
+            String titleized = value == null ? "null" : WordUtils.capitalizeFully(value.name());
+            list.setToolTipText(titleized);
+            return new DefaultListCellRenderer().getListCellRendererComponent(list, titleized, index, isSelected, cellHasFocus);
+        });
+        select.addActionListener(e -> {
+            onChange.accept(select.getItemAt(select.getSelectedIndex()));
+        });
+
+        return select;
+    }
+
+    public static <T> JComboBox<T> createSelect(T[] items, T initialValue, @Nullable Function<T, String> onRender, Consumer<T> onChange) {
+        JComboBox<T> select = new JComboBox<>(items);
+        select.setSelectedItem(initialValue);
+        select.setRenderer((list, value, index, isSelected, cellHasFocus) -> {
+            if (onRender != null) {
+                String title = value == null ? "Loading..." : onRender.apply(value);
+                return new DefaultListCellRenderer().getListCellRendererComponent(list, title, index, isSelected, cellHasFocus);
+            }
+
+            if (value instanceof Displayable) {
+                list.setToolTipText(((Displayable) value).getTooltip());
+                return new DefaultListCellRenderer().getListCellRendererComponent(list, ((Displayable) value).getName(), index, isSelected, cellHasFocus);
+            }
+            String titleized = value == null ? "null" : WordUtils.capitalizeFully(value.toString());
+            list.setToolTipText(titleized);
+            return new DefaultListCellRenderer().getListCellRendererComponent(list, titleized, index, isSelected, cellHasFocus);
+        });
+        select.addActionListener(e -> {
+            onChange.accept(select.getItemAt(select.getSelectedIndex()));
+        });
+
+        return select;
     }
 
     public static boolean isPatternValid(Component parent, String pattern, boolean isRegex) {

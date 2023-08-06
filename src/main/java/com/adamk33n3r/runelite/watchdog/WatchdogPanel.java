@@ -161,16 +161,6 @@ public class WatchdogPanel extends PluginPanel {
         titlePanel.add(version);
         topPanel.add(titlePanel);
 
-//        JButton test_ai_voice = new JButton("test ai voice");
-//        test_ai_voice.addActionListener((ev) -> {
-////            ElevenLabs.getVoices(this.httpClient);
-//            WatchdogPlugin.getInstance().getSoundPlayer().play(new File("C:\\Users\\adamg\\Music\\notification.wav"), 10);
-//            WatchdogPlugin.getInstance().getSoundPlayer().play(new File("C:\\Users\\adamg\\Music\\Yeet.mp3"), 10);
-//            WatchdogPlugin.getInstance().getSoundPlayer().play(new File("C:\\Users\\adamg\\Music\\metal_gear_solid.mp3"), 10);
-//            WatchdogPlugin.getInstance().getSoundPlayer().play(new File("C:\\Users\\adamg\\Music\\notification.wav"), 10);
-//        });
-//        topPanel.add(test_ai_voice, BorderLayout.NORTH);
-
         JPanel actionButtons = new JPanel();
 
         JButton discordButton = PanelUtils.createActionButton(DISCORD_ICON, DISCORD_ICON_HOVER, "Discord", (btn, modifiers) -> {

@@ -32,6 +32,7 @@ import com.google.inject.Provides;
 import com.google.inject.name.Names;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.OkHttpClient;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -94,6 +95,10 @@ public class WatchdogPlugin extends Plugin {
     @Getter
     @Inject
     private SoundPlayer soundPlayer;
+
+    @Getter
+    @Inject
+    private OkHttpClient httpClient;
 
     @Inject
     private ScheduledExecutorService executor;
