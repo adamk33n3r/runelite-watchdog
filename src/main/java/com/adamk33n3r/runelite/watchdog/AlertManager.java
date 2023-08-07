@@ -59,13 +59,13 @@ public class AlertManager {
         final RuntimeTypeAdapterFactory<Alert> alertTypeFactory = RuntimeTypeAdapterFactory.of(Alert.class)
             .ignoreSubtype("IdleAlert")
             .ignoreSubtype("ResourceAlert")
+            .ignoreSubtype("SoundFiredAlert")
             .ignoreSubtype("AlertGroup")
             .registerSubtype(ChatAlert.class)
             .registerSubtype(NotificationFiredAlert.class)
             .registerSubtype(StatDrainAlert.class)
             .registerSubtype(StatChangedAlert.class)
             .registerSubtype(XPDropAlert.class)
-            .registerSubtype(SoundFiredAlert.class)
             .registerSubtype(SpawnedAlert.class)
             .registerSubtype(InventoryAlert.class);
         // Add new notification types here
