@@ -56,10 +56,6 @@ import java.util.List;
 @Slf4j
 public class WatchdogPanel extends PluginPanel {
     @Inject
-    @Named("watchdog.wikiPage.soundIDs")
-    private String SOUND_ID_WIKI_PAGE;
-
-    @Inject
     @Named("watchdog.helpURL")
     private String HELP_URL;
 
@@ -298,13 +294,6 @@ public class WatchdogPanel extends PluginPanel {
                 .addAlertDefaults(alert)
                 .addSelect("Skill", "The skill to track", Skill.class, xpDropAlert.getSkill(), xpDropAlert::setSkill)
                 .addSpinner("Gained Amount", "How much xp needed to trigger this alert", xpDropAlert.getGainedAmount(), xpDropAlert::setGainedAmount)
-                .build();
-        } else if (alert instanceof SoundFiredAlert) {
-            SoundFiredAlert soundFiredAlert = (SoundFiredAlert) alert;
-            return AlertPanel.create(this.muxer, alert)
-                .addAlertDefaults(alert)
-                .addRichTextPane("<html>Go to <a href='" + SOUND_ID_WIKI_PAGE + "'>this wiki page</a> to get a list<br>of sound ids</html>")
-                .addSpinner("Sound ID", "The ID of the sound", soundFiredAlert.getSoundID(), soundFiredAlert::setSoundID, 0, 99999, 1)
                 .build();
         } else if (alert instanceof SpawnedAlert) {
             SpawnedAlert spawnedAlert = (SpawnedAlert) alert;

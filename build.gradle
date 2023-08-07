@@ -40,10 +40,15 @@ def versionPropsFile = file("src/main/resources/${group.replace('.', '/')}/versi
 if (versionPropsFile.exists())
 	versionProps.load(versionPropsFile.newReader())
 
+def updateBuildNumber = 1
+if (tasks.findByName('shadowJar')) {
+	updateBuildNumber = 0
+}
+
 def major = (versionProps['VERSION_MAJOR'] as String ?: '0').toInteger()
 def minor = (versionProps['VERSION_MINOR'] as String ?: '0').toInteger()
 def patch = (versionProps['VERSION_PATCH'] as String ?: '0').toInteger()
-def build = (versionProps['VERSION_BUILD'] as String ?: '0').toInteger() + 1
+def build = (versionProps['VERSION_BUILD'] as String ?: '0').toInteger() + updateBuildNumber
 def phase = (versionProps['VERSION_PHASE'] as String ?: '')
 versionProps['VERSION_MAJOR'] = major.toString()
 versionProps['VERSION_MINOR'] = minor.toString()
