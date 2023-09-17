@@ -43,6 +43,7 @@ public interface WatchdogConfig extends Config {
     String DEFAULT_OVERLAY_TEXT_COLOR = "defaultOverlayTextColor";
     String DEFAULT_OVERLAY_COLOR = "defaultOverlayColor";
     String DEFAULT_OVERLAY_TTL = "defaultOverlayTTL";
+    String DEFAULT_OVERLAY_IMAGE_PATH = "defaultOverlayImagePath";
 
     // Screen Flash
     String MOUSE_MOVEMENT_CANCELS_FLASH = "mouseMovementCancelsFlash";
@@ -191,6 +192,15 @@ public interface WatchdogConfig extends Config {
     )
     @Alpha
     default Color defaultOverlayColor() { return DEFAULT_NOTIFICATION_COLOR; }
+
+    @ConfigItem(
+        keyName = DEFAULT_OVERLAY_IMAGE_PATH,
+        name = "Default Image Path",
+        description = "The default image path",
+        section = overlaySection,
+        position = 7
+    )
+    default String defaultOverlayImagePath() { return ""; }
     //endregion
 
     //region Screen Flash
