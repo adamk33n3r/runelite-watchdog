@@ -7,9 +7,7 @@ import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
 import net.runelite.client.ui.components.ColorJButton;
 import net.runelite.client.ui.components.colorpicker.ColorPickerManager;
 
-import javax.swing.JCheckBox;
-import javax.swing.JPanel;
-import javax.swing.JSpinner;
+import javax.swing.*;
 
 public class OverlayNotificationPanel extends MessageNotificationPanel {
     private JPanel displayTime;
@@ -68,5 +66,11 @@ public class OverlayNotificationPanel extends MessageNotificationPanel {
         if (!notification.isSticky()) {
             this.settings.add(this.displayTime);
         }
+
+        this.settings.add(PanelUtils.createFileChooser(null, "Path to the image file", ev -> {
+            JFileChooser fileChooser = (JFileChooser) ev.getSource();
+            notification.setImagePath(fileChooser.getSelectedFile().getAbsolutePath());
+            onChangeListener.run();
+        }, notification.getImagePath(), "Image Files", "png", "jpg"));
     }
 }
