@@ -139,7 +139,12 @@ public class AlertManager {
     }
 
     public void removeAlert(Alert alert) {
-        this.alerts.remove(alert);
+        AlertGroup parent = alert.getParent();
+        if (parent != null) {
+            parent.getAlerts().remove(alert);
+        } else {
+            this.alerts.remove(alert);
+        }
         this.saveAlerts();
 
         SwingUtilities.invokeLater(this.watchdogPanel::rebuild);
