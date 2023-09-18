@@ -27,7 +27,6 @@ import static com.adamk33n3r.runelite.watchdog.ui.panels.AlertPanel.BACK_ICON;
 import static com.adamk33n3r.runelite.watchdog.ui.panels.AlertPanel.BACK_ICON_HOVER;
 
 @Slf4j
-//@Singleton
 public class AlertHubPanel extends PluginPanel {
     private final Provider<MultiplexingPluginPanel> muxer;
     private final AlertHubClient alertHubClient;
@@ -94,14 +93,15 @@ public class AlertHubPanel extends PluginPanel {
         this.container = new JPanel(new DynamicGridLayout(0, 1, 0, 5));
 //        this.container.setMaximumSize(new Dimension(PANEL_WIDTH, 9999));
         this.container.setBackground(ColorScheme.GRAND_EXCHANGE_LIMIT);
-        this.container.setBorder(BorderFactory.createEmptyBorder(0, 7, 15, 7));
+//        this.container.setBorder(BorderFactory.createEmptyBorder(0, 7, 15, 7));
 //        this.container.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-//        JPanel wrapper = new JPanel(new BorderLayout());
-//        wrapper.add(this.container, BorderLayout.CENTER);
-        JScrollPane scrollPane = new JScrollPane(this.container, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        JPanel wrapper = new JPanel(new BorderLayout());
+        wrapper.add(this.container, BorderLayout.NORTH);
+        JScrollPane scrollPane = new JScrollPane(wrapper, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         scrollPane.setBackground(ColorScheme.GRAND_EXCHANGE_ALCH);
         scrollPane.setMaximumSize(new Dimension(PANEL_WIDTH + SCROLLBAR_WIDTH, 9999));
+        this.container.setMaximumSize(new Dimension(PANEL_WIDTH + SCROLLBAR_WIDTH, 9999));
 
         layout.setVerticalGroup(layout.createSequentialGroup()
             .addGap(5)
@@ -132,7 +132,7 @@ public class AlertHubPanel extends PluginPanel {
 
         try {
             List<AlertManifest> alertManifests = this.alertHubClient.downloadManifest();
-            System.out.println(alertManifests.stream().map(AlertManifest::toString).collect(Collectors.joining(", ")));
+//            System.out.println(alertManifests.stream().map(AlertManifest::toString).collect(Collectors.joining(", ")));
             this.reloadList(alertManifests);
         } catch (IOException e) {
             e.printStackTrace();

@@ -48,10 +48,34 @@ public class AlertHubClient {
             "[]",
             false
         ), new AlertManifest(
+            "testAlert",
+            "284hfu43hhfiu24rf",
+            "Test Alert",
+            "This is a test alert on the hub",
+            "4",
+            "adamk33n3r",
+            AlertHubCategory.COMBAT,
+            Arrays.asList("afk", "combat"),
+            new URL("https://github.com/adamk33n3r/runelite-watchdog"),
+            "[]",
+            false
+        ), new AlertManifest(
+            "testAlert",
+            "284hfu43hhfiu24rf",
+            "Test Alert",
+            "This is a test alert on the hub",
+            "4",
+            "adamk33n3r",
+            AlertHubCategory.COMBAT,
+            Arrays.asList("afk", "combat"),
+            new URL("https://github.com/adamk33n3r/runelite-watchdog"),
+            "[]",
+            false
+        ), new AlertManifest(
             "testAlert2",
             "284hfu43hhfiu24rf",
             "Test Alert 2",
-            "This is a test alert on the hub",
+            "This is a test alert on the hub with an extra long description to test wrapping",
             "4",
             "adamk33n3r",
             AlertHubCategory.SKILLING,

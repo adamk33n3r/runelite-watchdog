@@ -125,16 +125,18 @@ public class AlertListItemNew extends JPanel {
         nameWrapper.addMouseListener(this.mouseDragEventForwarder);
         nameWrapper.addMouseMotionListener(this.mouseDragEventForwarder);
         nameLabel.addMouseListener(this.mouseDragEventForwarder);
-        nameLabel.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                if (e.getButton() == MouseEvent.BUTTON1) {
-                    collapsed = !collapsed;
-                    rebuild();
-                    revalidate();
+        if (alert instanceof AlertGroup) {
+            nameLabel.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    if (e.getButton() == MouseEvent.BUTTON1) {
+                        collapsed = !collapsed;
+                        rebuild();
+                        revalidate();
+                    }
                 }
-            }
-        });
+            });
+        }
         nameLabel.addMouseMotionListener(this.mouseDragEventForwarder);
 
         final JPanel rightActions = new JPanel(new FlowLayout(FlowLayout.RIGHT, 3, 0));
