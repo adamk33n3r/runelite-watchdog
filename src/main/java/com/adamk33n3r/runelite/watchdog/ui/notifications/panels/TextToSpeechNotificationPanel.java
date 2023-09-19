@@ -86,6 +86,15 @@ public class TextToSpeechNotificationPanel extends NotificationPanel {
 
         switch (notification.getSource()) {
             case ELEVEN_LABS:
+                if (WatchdogPlugin.getInstance().getConfig().elevenLabsAPIKey().isEmpty()) {
+                    JLabel ttsLabel = new JLabel("<html>Add your API key in the config to use Eleven Labs</html>");
+                    ttsLabel.setFont(new Font(ttsLabel.getFont().getFontName(), Font.ITALIC | Font.BOLD, ttsLabel.getFont().getSize()));
+                    this.settings.add(ttsLabel);
+                    JButton settingsBtn = new JButton("Open Config");
+                    settingsBtn.addActionListener(ev -> WatchdogPlugin.getInstance().openConfiguration());
+                    this.settings.add(settingsBtn);
+                    return;
+                }
                 JComboBox<Voice> voiceSelect = PanelUtils.createSelect(new Voice[]{}, null, Voice::getName, (voice) -> {
                     notification.setElevenLabsVoiceId(voice.getVoiceId());
                     //Not serialized
