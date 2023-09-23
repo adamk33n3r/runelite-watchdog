@@ -1,6 +1,7 @@
 package com.adamk33n3r.runelite.watchdog;
 
 import com.adamk33n3r.runelite.watchdog.alerts.FlashMode;
+import com.adamk33n3r.runelite.watchdog.notifications.tts.TTSSource;
 import com.adamk33n3r.runelite.watchdog.notifications.tts.Voice;
 
 import net.runelite.api.SoundEffectID;
@@ -42,6 +43,7 @@ public interface WatchdogConfig extends Config {
     String DEFAULT_OVERLAY_TEXT_COLOR = "defaultOverlayTextColor";
     String DEFAULT_OVERLAY_COLOR = "defaultOverlayColor";
     String DEFAULT_OVERLAY_TTL = "defaultOverlayTTL";
+    String DEFAULT_OVERLAY_IMAGE_PATH = "defaultOverlayImagePath";
 
     // Screen Flash
     String MOUSE_MOVEMENT_CANCELS_FLASH = "mouseMovementCancelsFlash";
@@ -51,6 +53,7 @@ public interface WatchdogConfig extends Config {
     String DEFAULT_SCREEN_FLASH_DURATION = "defaultScreenFlashDuration";
 
     // Sound
+    String PUT_SOUNDS_INTO_QUEUE = "putSoundsIntoQueue";
     String DEFAULT_SOUND_VOLUME = "defaultSoundVolume";
     String DEFAULT_SOUND_PATH = "defaultSoundPath";
 
@@ -60,8 +63,11 @@ public interface WatchdogConfig extends Config {
 
     // TTS
     String DEFAULT_TTS_VOLUME = "defaultTTSVolume";
+    String DEFAULT_TTS_SOURCE = "defaultTTSSource";
     String DEFAULT_TTS_VOICE = "defaultTTSVoice";
     String DEFAULT_TTS_RATE = "defaultTTSRate";
+    String ELEVEN_LABS_API_KEY = "elevenLabsAPIKey";
+    String DEFAULT_ELEVEN_LABS_VOICE = "defaultElevenLabsVoice";
 
     //region Hidden
     @ConfigItem(
@@ -88,6 +94,13 @@ public interface WatchdogConfig extends Config {
         warning = "Using TTS will submit your IP address to a 3rd party website not controlled or verified by the RuneLite Developers."
     )
     default boolean ttsEnabled() { return false; }
+
+    @ConfigItem(
+        keyName = PUT_SOUNDS_INTO_QUEUE,
+        name = "Put Sounds Into Queue",
+        description = "When this is on, all sounds will be queued up so that they will not overlap"
+    )
+    default boolean putSoundsIntoQueue() { return true; }
 
     //region Overhead
     @ConfigSection(
@@ -179,6 +192,15 @@ public interface WatchdogConfig extends Config {
     )
     @Alpha
     default Color defaultOverlayColor() { return DEFAULT_NOTIFICATION_COLOR; }
+
+    @ConfigItem(
+        keyName = DEFAULT_OVERLAY_IMAGE_PATH,
+        name = "Default Image Path",
+        description = "The default image path",
+        section = overlaySection,
+        position = 7
+    )
+    default String defaultOverlayImagePath() { return ""; }
     //endregion
 
     //region Screen Flash
@@ -307,9 +329,17 @@ public interface WatchdogConfig extends Config {
     default int defaultTTSVolume() { return 5; }
 
     @ConfigItem(
+        keyName = DEFAULT_TTS_SOURCE,
+        name = "Default Source",
+        description = "The default source (Eleven Labs needs your own API Key)",
+        section = ttsSection
+    )
+    default TTSSource defaultTTSSource() { return TTSSource.LEGACY; }
+
+    @ConfigItem(
         keyName = DEFAULT_TTS_VOICE,
-        name = "Default Voice",
-        description = "The default voice",
+        name = "Default Legacy Voice",
+        description = "The default legacy voice",
         section = ttsSection
     )
     default Voice defaultTTSVoice() { return Voice.GEORGE; }
@@ -322,5 +352,21 @@ public interface WatchdogConfig extends Config {
     )
     @Range(min = 1, max = 5)
     default int defaultTTSRate() { return 1; }
+
+    @ConfigItem(
+        keyName = ELEVEN_LABS_API_KEY,
+        name = "Eleven Labs API Key",
+        description = "Enter your API key",
+        section = ttsSection
+    )
+    default String elevenLabsAPIKey() { return ""; }
+
+    @ConfigItem(
+        keyName = DEFAULT_ELEVEN_LABS_VOICE,
+        name = "Default Eleven Labs Voice",
+        description = "Matches on the name of the voice exactly",
+        section = ttsSection
+    )
+    default String defaultElevenLabsVoice() { return null; }
     //endregion
 }

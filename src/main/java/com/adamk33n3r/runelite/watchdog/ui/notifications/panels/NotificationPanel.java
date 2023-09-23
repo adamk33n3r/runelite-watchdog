@@ -66,6 +66,8 @@ public abstract class NotificationPanel extends JPanel {
 
     @Getter
     protected Notification notification;
+    protected Runnable onChangeListener;
+    protected PanelUtils.OnRemove onRemove;
     protected JPanel settings = new JPanel(new StretchedStackedLayout(3, 3));
 
     private static final Border NAME_BOTTOM_BORDER = new CompoundBorder(
@@ -74,6 +76,8 @@ public abstract class NotificationPanel extends JPanel {
 
     public NotificationPanel(Notification notification, NotificationsPanel parentPanel, Runnable onChangeListener, PanelUtils.OnRemove onRemove) {
         this.notification = notification;
+        this.onChangeListener = onChangeListener;
+        this.onRemove = onRemove;
 
         this.setLayout(new BorderLayout());
         this.setBorder(new EmptyBorder(3, 0, 0, 0));

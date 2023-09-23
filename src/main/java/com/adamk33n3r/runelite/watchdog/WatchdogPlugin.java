@@ -31,11 +31,16 @@ import com.google.inject.Provides;
 import com.google.inject.name.Names;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.OkHttpClient;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 import static net.runelite.api.MenuAction.RUNELITE_OVERLAY_CONFIG;
 
@@ -87,10 +92,22 @@ public class WatchdogPlugin extends Plugin {
     @Getter
     private WatchdogPanel panel;
 
+    @Getter
+    @Inject
+    private SoundPlayer soundPlayer;
+
+    @Getter
+    @Inject
+    private OkHttpClient httpClient;
+
     private NavigationButton navButton;
 
     @Getter
     private static WatchdogPlugin instance;
+
+    private ScheduledFuture<?> soundPlayerFuture;
+
+    private final ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
 
     public WatchdogPlugin() {
         instance = this;
@@ -142,6 +159,26 @@ public class WatchdogPlugin extends Plugin {
             this.clientToolbar.removeNavigation(this.navButton);
             this.clientToolbar.addNavigation(this.navButton);
         });
+
+        this.startSoundPlayerTimer();
+    }
+
+    private void startSoundPlayerTimer() {
+        if (this.soundPlayerFuture != null && !this.soundPlayerFuture.isCancelled()) {
+            return;
+        }
+
+        // Don't start the timer if we're not queuing sounds
+        if (!this.config.putSoundsIntoQueue()) {
+            return;
+        }
+
+        this.soundPlayerFuture = this.executor.scheduleAtFixedRate(
+            () -> this.soundPlayer.processQueue(),
+            0,
+            100,
+            TimeUnit.MILLISECONDS
+        );
     }
 
     @Override
@@ -180,6 +217,14 @@ public class WatchdogPlugin extends Plugin {
                     this.panel.getMuxer().popState();
                 }
                 this.panel.rebuild();
+            } else if (configChanged.getKey().equals(WatchdogConfig.PUT_SOUNDS_INTO_QUEUE)) {
+                log.debug("sound queue config changed:"+this.config.putSoundsIntoQueue());
+                if (this.config.putSoundsIntoQueue()) {
+                    this.startSoundPlayerTimer();
+                } else {
+                    this.getSoundPlayer().clearQueue();
+                    this.soundPlayerFuture.cancel(false);
+                }
             }
         }
     }

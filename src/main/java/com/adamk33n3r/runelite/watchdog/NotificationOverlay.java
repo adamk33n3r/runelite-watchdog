@@ -10,13 +10,18 @@ import net.runelite.client.ui.overlay.OverlayPosition;
 import net.runelite.client.ui.overlay.OverlayPriority;
 import net.runelite.client.ui.overlay.components.PanelComponent;
 import net.runelite.client.ui.overlay.components.TitleComponent;
+import net.runelite.client.util.ImageUtil;
 
+import javax.imageio.ImageIO;
 import javax.inject.Inject;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -43,9 +48,17 @@ public class NotificationOverlay extends OverlayPanel {
         private final Instant timeStarted;
         private final Overlay overlayNotification;
         private final String message;
+        private BufferedImage image;
 
         public OverlayNotificationData(Overlay overlayNotification, String message) {
             this.overlayNotification = overlayNotification;
+            if (overlayNotification.getImagePath() != null && !overlayNotification.getImagePath().isEmpty()) {
+                try {
+                    this.image = ImageUtil.resizeImage(ImageIO.read(new File(overlayNotification.getImagePath())), 128, 128, true);
+                } catch(IOException e) {
+                    e.printStackTrace();
+                }
+            }
             this.message = message;
             this.timeStarted = Instant.now();
             this.setWrap(false);
@@ -62,11 +75,16 @@ public class NotificationOverlay extends OverlayPanel {
             this.getChildren().add(WrappedTitleComponent.builder()
                 .text(this.message)
                 .color(this.overlayNotification.getTextColor())
+                .preferredSize(this.getPreferredSize())
                 .build());
+            if (this.image != null) {
+                this.getChildren().add(new CenteredImageComponent(this.image));
+            }
             if (config.overlayShowTime()) {
                 this.getChildren().add(WrappedTitleComponent.builder()
                     .text(formatDuration(ChronoUnit.MILLIS.between(this.timeStarted, Instant.now()), "m'm' s's' 'ago'"))
                     .color(this.overlayNotification.getTextColor())
+                    .preferredSize(this.getPreferredSize())
                     .build());
             }
 

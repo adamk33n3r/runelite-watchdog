@@ -9,7 +9,6 @@
 Create custom alerts triggered by
 - Chat/Game Messages (supports glob pattern or regex)
 - Stat Drain/Change
-- Sound Fired (trigger on a sound effect playing)
 - Notifications (supports glob pattern or regex. allows you to hook into existing notifications, even if you have the alerts off in Runelite. For example low prayer, idle, tempoross, etc) 
 - Inventory Changes
 - Object/Item/NPC Spawned
@@ -20,7 +19,7 @@ with any amount of unique notification types like
 - Screen Flash
 - Custom Sound
 - In-Game Sound Effect
-- Text to Speech
+- Text to Speech (Now supports using Eleven Labs)
 - Tray Notification
 - Overhead Text
 - Overlay

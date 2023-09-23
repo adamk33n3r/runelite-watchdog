@@ -11,6 +11,8 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Getter
 @Setter
@@ -89,5 +91,14 @@ public abstract class Alert {
         } while ((alertGroup = alertGroup.getParent()) != null);
 
         return ancestors;
+    }
+
+    public List<String> getKeywords() {
+        return Stream.concat(Stream.of(
+            this.getName(),
+            this.getType().getName()
+        ), this.getNotifications().stream().map(notification -> notification.getType().getName()))
+            .map(String::toUpperCase)
+            .collect(Collectors.toList());
     }
 }

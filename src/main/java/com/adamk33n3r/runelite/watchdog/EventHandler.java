@@ -6,7 +6,6 @@ import com.adamk33n3r.runelite.watchdog.alerts.ChatAlert;
 import com.adamk33n3r.runelite.watchdog.alerts.InventoryAlert;
 import com.adamk33n3r.runelite.watchdog.alerts.NotificationFiredAlert;
 import com.adamk33n3r.runelite.watchdog.alerts.RegexMatcher;
-import com.adamk33n3r.runelite.watchdog.alerts.SoundFiredAlert;
 import com.adamk33n3r.runelite.watchdog.alerts.SpawnedAlert;
 import com.adamk33n3r.runelite.watchdog.alerts.StatChangedAlert;
 import com.adamk33n3r.runelite.watchdog.alerts.XPDropAlert;
@@ -22,7 +21,6 @@ import net.runelite.api.ItemComposition;
 import net.runelite.api.ObjectComposition;
 import net.runelite.api.Skill;
 import net.runelite.api.TileObject;
-import net.runelite.api.events.AreaSoundEffectPlayed;
 import net.runelite.api.events.ChatMessage;
 import net.runelite.api.events.DecorativeObjectDespawned;
 import net.runelite.api.events.DecorativeObjectSpawned;
@@ -38,7 +36,6 @@ import net.runelite.api.events.NpcDespawned;
 import net.runelite.api.events.NpcSpawned;
 import net.runelite.api.events.PlayerDespawned;
 import net.runelite.api.events.PlayerSpawned;
-import net.runelite.api.events.SoundEffectPlayed;
 import net.runelite.api.events.StatChanged;
 import net.runelite.api.events.WallObjectDespawned;
 import net.runelite.api.events.WallObjectSpawned;
@@ -222,24 +219,6 @@ public class EventHandler {
                 return isSkill && gainedXP >= alert.getGainedAmount();
             })
             .forEach(alert -> this.fireAlert(alert, statChanged.getSkill().getName()));
-    }
-    //endregion
-
-    //region Sound Effects
-    @Subscribe
-    private void onSoundEffectPlayed(SoundEffectPlayed soundEffectPlayed) {
-        this.handleSoundEffectPlayed(soundEffectPlayed.getSoundId());
-    }
-
-    @Subscribe
-    private void onAreaSoundEffectPlayed(AreaSoundEffectPlayed areaSoundEffectPlayed) {
-        this.handleSoundEffectPlayed(areaSoundEffectPlayed.getSoundId());
-    }
-
-    private void handleSoundEffectPlayed(int soundID) {
-        this.alertManager.getAllEnabledAlertsOfType(SoundFiredAlert.class)
-            .filter(soundFiredAlert -> soundID == soundFiredAlert.getSoundID())
-            .forEach(alert -> this.fireAlert(alert, "" + soundID));
     }
     //endregion
 

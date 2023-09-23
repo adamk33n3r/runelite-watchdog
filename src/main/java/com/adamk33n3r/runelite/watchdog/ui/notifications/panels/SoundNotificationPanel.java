@@ -12,14 +12,20 @@ import javax.sound.sampled.AudioSystem;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import java.util.Arrays;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class SoundNotificationPanel extends NotificationPanel {
 
     public SoundNotificationPanel(Sound sound, NotificationsPanel parentPanel, Runnable onChangeListener, PanelUtils.OnRemove onRemove) {
         super(sound, parentPanel, onChangeListener, onRemove);
 
-        String[] supportedExtensions = Arrays.stream(AudioSystem.getAudioFileTypes()).map(AudioFileFormat.Type::getExtension).toArray(String[]::new);
-        this.settings.add(new JLabel("Supports " + String.join(", ", Arrays.stream(supportedExtensions).map(ext -> "."+ext).toArray(String[]::new))));
+        String[] supportedExtensions = Stream.concat(
+            Arrays.stream(AudioSystem.getAudioFileTypes())
+                .map(AudioFileFormat.Type::getExtension),
+            Stream.of("mp3")
+        ).toArray(String[]::new);
+        this.settings.add(new JLabel("Supports " + Arrays.stream(supportedExtensions).map(ext -> '.' + ext).collect(Collectors.joining(", "))));
         this.settings.add(PanelUtils.createFileChooser(null, "Path to the sound file", ev -> {
             JFileChooser fileChooser = (JFileChooser) ev.getSource();
             sound.setPath(fileChooser.getSelectedFile().getAbsolutePath());

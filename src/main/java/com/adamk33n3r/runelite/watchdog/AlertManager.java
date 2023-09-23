@@ -7,7 +7,6 @@ import com.adamk33n3r.runelite.watchdog.alerts.FlashMode;
 import com.adamk33n3r.runelite.watchdog.alerts.InventoryAlert;
 import com.adamk33n3r.runelite.watchdog.alerts.NotificationFiredAlert;
 import com.adamk33n3r.runelite.watchdog.alerts.RegexMatcher;
-import com.adamk33n3r.runelite.watchdog.alerts.SoundFiredAlert;
 import com.adamk33n3r.runelite.watchdog.alerts.SpawnedAlert;
 import com.adamk33n3r.runelite.watchdog.alerts.StatChangedAlert;
 import com.adamk33n3r.runelite.watchdog.alerts.StatDrainAlert;
@@ -81,12 +80,13 @@ public class AlertManager {
         final RuntimeTypeAdapterFactory<Alert> alertTypeFactory = RuntimeTypeAdapterFactory.of(Alert.class)
             .ignoreSubtype("IdleAlert")
             .ignoreSubtype("ResourceAlert")
+            .ignoreSubtype("SoundFiredAlert")
+            .ignoreSubtype("AlertGroup")
             .registerSubtype(ChatAlert.class)
             .registerSubtype(NotificationFiredAlert.class)
             .registerSubtype(StatDrainAlert.class)
             .registerSubtype(StatChangedAlert.class)
             .registerSubtype(XPDropAlert.class)
-            .registerSubtype(SoundFiredAlert.class)
             .registerSubtype(SpawnedAlert.class)
             .registerSubtype(InventoryAlert.class)
             .registerSubtype(AlertGroup.class);

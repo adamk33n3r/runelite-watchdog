@@ -40,6 +40,11 @@ public class WrappedTitleComponent implements LayoutableRenderableEntity {
     @Getter
     private Rectangle bounds = new Rectangle();
 
+    private final int LINE_GAP = 2;
+    private final int WIDTH_PADDING = 20;
+    private final int HEIGHT_PADDING = 8;
+    private final int TEXT_PADDING = 20;
+
     @Override
     public Dimension render(Graphics2D graphics) {
         final Font font = MoreObjects.firstNonNull(this.font, graphics.getFont());
@@ -57,7 +62,7 @@ public class WrappedTitleComponent implements LayoutableRenderableEntity {
             final String[] splitLines = lineBreakText(this.text, smallWidth, fontMetrics);
 
             for (final String text : splitLines) {
-                textComponent.setPosition(new Point(x + ((smallWidth - fontMetrics.stringWidth(text)) / 2), y));
+                textComponent.setPosition(new Point(x + ((smallWidth - fontMetrics.stringWidth(text) + TEXT_PADDING) / 2), y + LINE_GAP));
                 textComponent.setText(text);
                 textComponent.setColor(this.color);
                 textComponent.setFont(font);
@@ -66,14 +71,14 @@ public class WrappedTitleComponent implements LayoutableRenderableEntity {
                 y += fmHeight;
             }
 
-            final Dimension dimension = new Dimension(this.preferredSize.width, y - baseY);
+            final Dimension dimension = new Dimension(this.preferredSize.width + WIDTH_PADDING, y - baseY + HEIGHT_PADDING);
             this.bounds.setLocation(preferredLocation);
             this.bounds.setSize(dimension);
             return dimension;
         }
 
         if (!this.text.isEmpty()) {
-            textComponent.setPosition(new Point(x + ((smallWidth - fontMetrics.stringWidth(this.text)) / 2), y));
+            textComponent.setPosition(new Point(x + ((smallWidth - fontMetrics.stringWidth(this.text) + TEXT_PADDING) / 2), y + LINE_GAP));
             textComponent.setText(this.text);
             textComponent.setColor(this.color);
             textComponent.setFont(font);
@@ -82,7 +87,7 @@ public class WrappedTitleComponent implements LayoutableRenderableEntity {
 
         y += fmHeight;
 
-        final Dimension dimension = new Dimension(this.preferredSize.width, y - baseY);
+        final Dimension dimension = new Dimension(this.preferredSize.width + WIDTH_PADDING, y - baseY + HEIGHT_PADDING);
         this.bounds.setLocation(this.preferredLocation);
         this.bounds.setSize(dimension);
         return dimension;
