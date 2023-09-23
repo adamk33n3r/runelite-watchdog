@@ -15,7 +15,7 @@ public class AlertManifest {
 
     private final String displayName;
     private final String description;
-    private final String createdVersion;
+    private final String compatibleVersion;
     private final String author;
     private final AlertHubCategory category;
     private final List<String> tags;
