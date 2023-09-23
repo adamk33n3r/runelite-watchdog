@@ -269,12 +269,19 @@ public class WatchdogPanel extends PluginPanel {
 
     private PluginPanel createPluginPanel(Alert alert) {
         if (alert instanceof ChatAlert) {
-            ChatAlert chatAlert = (ChatAlert) alert;
+            ChatAlert gameMessageAlert = (ChatAlert) alert;
             return AlertPanel.create(this.muxer, alert)
                 .addAlertDefaults(alert)
-                .addRegexMatcher(chatAlert, "Enter the message to trigger on...", "The message to trigger on. Supports glob (*)")
+                .addRegexMatcher(gameMessageAlert, "Enter the message to trigger on...", "The message to trigger on. Supports glob (*)")
                 .addLabel("<html><i>Note: Will not trigger on<br>player chat messages</i></html>")
                 .build();
+        } else if (alert instanceof PlayerChatAlert) {
+            PlayerChatAlert gameMessageAlert = (PlayerChatAlert) alert;
+            return AlertPanel.create(this.muxer, alert)
+                    .addAlertDefaults(alert)
+                    .addRegexMatcher(gameMessageAlert, "Enter the message to trigger on...", "The message to trigger on. Supports glob (*)")
+                    .addLabel("<html><i>Note: Will only trigger on<br>player chat messages</i></html>")
+                    .build();
         } else if (alert instanceof NotificationFiredAlert) {
             NotificationFiredAlert notificationFiredAlert = (NotificationFiredAlert) alert;
             return AlertPanel.create(this.muxer, alert)

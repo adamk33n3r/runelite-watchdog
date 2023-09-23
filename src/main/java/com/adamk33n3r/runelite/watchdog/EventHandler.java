@@ -1,13 +1,6 @@
 package com.adamk33n3r.runelite.watchdog;
 
-import com.adamk33n3r.runelite.watchdog.alerts.Alert;
-import com.adamk33n3r.runelite.watchdog.alerts.ChatAlert;
-import com.adamk33n3r.runelite.watchdog.alerts.InventoryAlert;
-import com.adamk33n3r.runelite.watchdog.alerts.NotificationFiredAlert;
-import com.adamk33n3r.runelite.watchdog.alerts.RegexMatcher;
-import com.adamk33n3r.runelite.watchdog.alerts.SpawnedAlert;
-import com.adamk33n3r.runelite.watchdog.alerts.StatChangedAlert;
-import com.adamk33n3r.runelite.watchdog.alerts.XPDropAlert;
+import com.adamk33n3r.runelite.watchdog.alerts.*;
 import com.adamk33n3r.runelite.watchdog.ui.panels.HistoryPanel;
 
 import net.runelite.api.Actor;
@@ -111,8 +104,9 @@ public class EventHandler {
         }
 
 //        log.debug(chatMessage.getType().name() + ": " + chatMessage.getMessage());
+        String unformattedMessage = Text.removeFormattingTags(chatMessage.getMessage());
 
-        // Filter out player messages
+        // Send player messages to a different handler
         if (
             chatMessage.getType() == ChatMessageType.PUBLICCHAT
                 || chatMessage.getType() == ChatMessageType.AUTOTYPER
@@ -126,19 +120,27 @@ public class EventHandler {
                 || chatMessage.getType() == ChatMessageType.CLAN_GUEST_CHAT
                 || chatMessage.getType() == ChatMessageType.CLAN_GIM_CHAT
         ) {
+            this.alertManager.getAlerts().stream()
+                    .filter(alert -> alert instanceof PlayerChatAlert)
+                    .map(alert -> (PlayerChatAlert) alert)
+                    .forEach(chatAlert -> {
+                        String[] groups = this.matchPattern(chatAlert, unformattedMessage);
+                        if (groups == null) return;
+
+                        this.fireAlert(chatAlert, groups);
+                    });
             return;
         }
 
-        String unformattedMessage = Text.removeFormattingTags(chatMessage.getMessage());
         this.alertManager.getAlerts().stream()
             .filter(alert -> alert instanceof ChatAlert)
             .map(alert -> (ChatAlert) alert)
 //            .filter(chatAlert -> chatAlert.getChatMessageType() == chatMessage.getType())
-            .forEach(chatAlert -> {
-                String[] groups = this.matchPattern(chatAlert, unformattedMessage);
+            .forEach(gameAlert -> {
+                String[] groups = this.matchPattern(gameAlert, unformattedMessage);
                 if (groups == null) return;
 
-                this.fireAlert(chatAlert, groups);
+                this.fireAlert(gameAlert, groups);
             });
     }
     //endregion
