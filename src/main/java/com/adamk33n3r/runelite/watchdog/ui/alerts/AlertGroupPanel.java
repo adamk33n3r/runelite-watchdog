@@ -45,14 +45,6 @@ public class AlertGroupPanel extends AlertPanel<AlertGroup> {
         subGroupPanel.add(buttonPanel);
         this.addSubPanel(subGroupPanel);
 
-        DragAndDropReorderPane dragAndDropReorderPane = new DragAndDropReorderPane();
-        dragAndDropReorderPane.addDragListener((c) -> {
-            int pos = dragAndDropReorderPane.getPosition(c);
-            AlertListItemNew alertListItem = (AlertListItemNew) c;
-            this.alert.getAlerts().remove(alertListItem.getAlert());
-            this.alert.getAlerts().add(pos, alertListItem.getAlert());
-            alertManager.saveAlerts();
-        });
-        subGroupPanel.add(new AlertListPanel(this.alert.getAlerts(), dragAndDropReorderPane, this::rebuild));
+        subGroupPanel.add(new AlertListPanel(this.alert.getAlerts(), this::rebuild));
     }
 }

@@ -1,6 +1,7 @@
 package com.adamk33n3r.runelite.watchdog.alerts;
 
 import com.adamk33n3r.runelite.watchdog.TriggerType;
+import com.adamk33n3r.runelite.watchdog.notifications.MessageNotification;
 import com.adamk33n3r.runelite.watchdog.notifications.Notification;
 
 import lombok.AccessLevel;
@@ -94,11 +95,26 @@ public abstract class Alert {
     }
 
     public List<String> getKeywords() {
-        return Stream.concat(Stream.of(
+        Stream<String> selfKeywords = Stream.of(
             this.getName(),
             this.getType().getName()
-        ), this.getNotifications().stream().map(notification -> notification.getType().getName()))
-            .map(String::toUpperCase)
-            .collect(Collectors.toList());
+        );
+
+        if (this instanceof AlertGroup) {
+            return Stream.concat(selfKeywords, ((AlertGroup) this).getAlerts().stream().flatMap(alert -> alert.getKeywords().stream()))
+                .collect(Collectors.toList());
+        } else {
+            return Stream.concat(
+                selfKeywords,
+                this.getNotifications().stream()
+                    .flatMap(notification -> {
+                        if (notification instanceof MessageNotification) {
+                            return Stream.of(notification.getType().getName(), ((MessageNotification) notification).getMessage());
+                        }
+                        return Stream.of(notification.getType().getName());
+                    }))
+                .map(String::toUpperCase)
+                .collect(Collectors.toList());
+        }
     }
 }

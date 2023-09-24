@@ -24,6 +24,7 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.util.List;
 
+@Deprecated
 public class AlertListItem extends JPanel {
     public static final ImageIcon DELETE_ICON_HOVER;
     public static final ImageIcon CLONE_ICON = new ImageIcon(ImageUtil.loadImageResource(ConfigPlugin.class, "mdi_content-duplicate.png"));

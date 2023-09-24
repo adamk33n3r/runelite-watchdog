@@ -15,7 +15,7 @@ public class SearchBar extends IconTextField {
     public SearchBar(Consumer<String> onSearch) {
         super();
         this.setIcon(new ImageIcon(Objects.requireNonNull(IconTextField.class.getResource(Icon.SEARCH.getFile()))));
-        this.setPreferredSize(new Dimension(PluginPanel.PANEL_WIDTH - 20, 30));
+        this.setPreferredSize(new Dimension(PluginPanel.PANEL_WIDTH - PluginPanel.SCROLLBAR_WIDTH, 30));
         this.setBackground(ColorScheme.DARKER_GRAY_COLOR);
         this.setHoverBackgroundColor(ColorScheme.DARK_GRAY_HOVER_COLOR);
         this.getDocument().addDocumentListener(new DocumentListener() {

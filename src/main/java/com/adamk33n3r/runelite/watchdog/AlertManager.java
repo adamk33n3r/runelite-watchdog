@@ -39,8 +39,7 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 import javax.swing.SwingUtilities;
 import java.lang.reflect.Type;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -154,50 +153,21 @@ public class AlertManager {
         String json = this.gson.toJson(alert, ALERT_TYPE);
         Alert clonedAlert = this.gson.fromJson(json, ALERT_TYPE);
         clonedAlert.setName(clonedAlert.getName() + " Clone");
+        if (clonedAlert instanceof AlertGroup) {
+            Util.setParentsOnAlerts(Collections.singletonList(clonedAlert));
+        }
         return clonedAlert;
     }
 
     public void moveAlertTo(Alert alert, int pos) {
-        this.alerts.remove(alert);
-        this.alerts.add(pos, alert);
-        this.saveAlerts();
-    }
-
-    public void moveAlertToTop(Alert alert) {
-        this.alerts.remove(alert);
-        this.alerts.add(0, alert);
-        this.saveAlerts();
-    }
-
-    public void moveAlertToBottom(Alert alert) {
-        this.alerts.remove(alert);
-        this.alerts.add(alert);
-        this.saveAlerts();
-    }
-
-    public void moveAlertUp(Alert alert) {
-        int curIdx = this.alerts.indexOf(alert);
-        int newIdx = curIdx - 1;
-
-        if (newIdx < 0) {
-            return;
+        AlertGroup parent = alert.getParent();
+        if (parent != null) {
+            parent.getAlerts().remove(alert);
+            parent.getAlerts().add(pos, alert);
+        } else {
+            this.alerts.remove(alert);
+            this.alerts.add(pos, alert);
         }
-
-        this.alerts.remove(alert);
-        this.alerts.add(newIdx, alert);
-        this.saveAlerts();
-    }
-
-    public void moveAlertDown(Alert alert) {
-        int curIdx = this.alerts.indexOf(alert);
-        int newIdx = curIdx + 1;
-
-        if (newIdx >= this.alerts.size()) {
-            return;
-        }
-
-        this.alerts.remove(alert);
-        this.alerts.add(newIdx, alert);
         this.saveAlerts();
     }
 
