@@ -13,7 +13,6 @@ public class GameMessageAlertPanel extends AlertPanel<ChatAlert> {
     protected void build() {
         this.addAlertDefaults()
             .addRegexMatcher(this.alert, "Enter the message to trigger on...", "The message to trigger on. Supports glob (*)")
-            .addLabel("<html><i>Note: Will not trigger on<br>player chat messages</i></html>")
             .addNotifications();
     }
 }

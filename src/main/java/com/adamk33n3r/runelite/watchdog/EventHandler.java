@@ -5,6 +5,7 @@ import com.adamk33n3r.runelite.watchdog.alerts.AlertGroup;
 import com.adamk33n3r.runelite.watchdog.alerts.ChatAlert;
 import com.adamk33n3r.runelite.watchdog.alerts.InventoryAlert;
 import com.adamk33n3r.runelite.watchdog.alerts.NotificationFiredAlert;
+import com.adamk33n3r.runelite.watchdog.alerts.PlayerChatAlert;
 import com.adamk33n3r.runelite.watchdog.alerts.RegexMatcher;
 import com.adamk33n3r.runelite.watchdog.alerts.SpawnedAlert;
 import com.adamk33n3r.runelite.watchdog.alerts.StatChangedAlert;
@@ -115,8 +116,9 @@ public class EventHandler {
         }
 
 //        log.debug(chatMessage.getType().name() + ": " + chatMessage.getMessage());
+        String unformattedMessage = Text.removeFormattingTags(chatMessage.getMessage());
 
-        // Filter out player messages
+        // Send player messages to a different handler
         if (
             chatMessage.getType() == ChatMessageType.PUBLICCHAT
                 || chatMessage.getType() == ChatMessageType.AUTOTYPER
@@ -130,16 +132,22 @@ public class EventHandler {
                 || chatMessage.getType() == ChatMessageType.CLAN_GUEST_CHAT
                 || chatMessage.getType() == ChatMessageType.CLAN_GIM_CHAT
         ) {
+            this.alertManager.getAllEnabledAlertsOfType(PlayerChatAlert.class)
+                .forEach(chatAlert -> {
+                    String[] groups = this.matchPattern(chatAlert, unformattedMessage);
+                    if (groups == null) return;
+
+                    this.fireAlert(chatAlert, groups);
+                });
             return;
         }
 
-        String unformattedMessage = Text.removeFormattingTags(chatMessage.getMessage());
         this.alertManager.getAllEnabledAlertsOfType(ChatAlert.class)
-            .forEach(chatAlert -> {
-                String[] groups = this.matchPattern(chatAlert, unformattedMessage);
+            .forEach(gameAlert -> {
+                String[] groups = this.matchPattern(gameAlert, unformattedMessage);
                 if (groups == null) return;
 
-                this.fireAlert(chatAlert, groups);
+                this.fireAlert(gameAlert, groups);
             });
     }
     //endregion

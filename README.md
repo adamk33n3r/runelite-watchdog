@@ -7,7 +7,8 @@
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/T6T0JH18I)
 
 Create custom alerts triggered by
-- Chat/Game Messages (supports glob pattern or regex)
+- Game Messages (supports glob pattern or regex)
+- Player Chat Messages (supports glob pattern or regex)
 - Stat Drain/Change
 - Notifications (supports glob pattern or regex. allows you to hook into existing notifications, even if you have the alerts off in Runelite. For example low prayer, idle, tempoross, etc) 
 - Inventory Changes

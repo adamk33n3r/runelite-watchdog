@@ -6,6 +6,7 @@ import com.adamk33n3r.runelite.watchdog.alerts.ChatAlert;
 import com.adamk33n3r.runelite.watchdog.alerts.FlashMode;
 import com.adamk33n3r.runelite.watchdog.alerts.InventoryAlert;
 import com.adamk33n3r.runelite.watchdog.alerts.NotificationFiredAlert;
+import com.adamk33n3r.runelite.watchdog.alerts.PlayerChatAlert;
 import com.adamk33n3r.runelite.watchdog.alerts.RegexMatcher;
 import com.adamk33n3r.runelite.watchdog.alerts.SpawnedAlert;
 import com.adamk33n3r.runelite.watchdog.alerts.StatChangedAlert;
@@ -83,6 +84,7 @@ public class AlertManager {
             .ignoreSubtype("AlertGroup")
             .recognizeSubtypes()
             .registerSubtype(ChatAlert.class)
+            .registerSubtype(PlayerChatAlert.class)
             .registerSubtype(NotificationFiredAlert.class)
             .registerSubtype(StatDrainAlert.class)
             .registerSubtype(StatChangedAlert.class)
