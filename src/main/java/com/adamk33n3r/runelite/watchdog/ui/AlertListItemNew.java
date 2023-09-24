@@ -96,7 +96,7 @@ public class AlertListItemNew extends JPanel {
         });
         topWrapper.add(toggleButton, BorderLayout.WEST);
 
-        final JPanel nameWrapper = new JPanel(new DynamicGridLayout(1, 0, 2, 2));
+        final JPanel nameWrapper = new JPanel(new BorderLayout());
         nameWrapper.setBackground(ColorScheme.DARKER_GRAY_COLOR);
         topWrapper.add(nameWrapper, BorderLayout.CENTER);
 
@@ -111,7 +111,7 @@ public class AlertListItemNew extends JPanel {
                     this.revalidate();
                 }
             );
-            nameWrapper.add(collapseButton);
+            nameWrapper.add(collapseButton, BorderLayout.WEST);
         }
 
         final JLabel nameLabel = new JLabel(this.alert.getName());
