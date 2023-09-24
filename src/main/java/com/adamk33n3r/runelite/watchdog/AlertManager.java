@@ -62,6 +62,7 @@ public class AlertManager {
             .ignoreSubtype("SoundFiredAlert")
             .ignoreSubtype("AlertGroup")
             .registerSubtype(ChatAlert.class)
+            .registerSubtype(PlayerChatAlert.class)
             .registerSubtype(NotificationFiredAlert.class)
             .registerSubtype(StatDrainAlert.class)
             .registerSubtype(StatChangedAlert.class)
