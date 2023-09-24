@@ -71,6 +71,12 @@ public class AlertHubClient {
                         String json = CharStreams.toString(new InputStreamReader(zipInputStream, Charsets.UTF_8));
                         AlertManifest alertManifest = WatchdogPlugin.getInstance().getAlertManager().getGson().fromJson(json, AlertManifest.class);
                         alertManifest.setInternalName(alertName);
+                        HttpUrl repoPage = GITHUB.newBuilder()
+                            .addPathSegment("tree")
+                            .addPathSegment("alert-hub")
+                            .addPathSegment(alertName)
+                            .build();
+                        alertManifest.setRepo(repoPage.url());
                         alertDisplayInfo.manifest = alertManifest;
                     } else if (alertFile.equals("icon.png")) {
                         BufferedImage icon = ImageIO.read(zipInputStream);

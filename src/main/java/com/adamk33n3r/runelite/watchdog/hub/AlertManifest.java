@@ -15,7 +15,8 @@ import java.util.stream.Stream;
 public class AlertManifest {
     @Setter
     private String internalName;
-    private final String commit;
+    private URL repo;
+    private String commit;
 
     private final String displayName;
     private final String description;
@@ -23,7 +24,6 @@ public class AlertManifest {
     private final String author;
     private final AlertHubCategory category;
     private final List<String> tags;
-    private final URL repo;
     private final Alert alert;
     private final boolean hasIcon;
 

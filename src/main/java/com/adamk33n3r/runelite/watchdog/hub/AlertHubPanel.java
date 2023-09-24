@@ -3,6 +3,7 @@ package com.adamk33n3r.runelite.watchdog.hub;
 import com.adamk33n3r.runelite.watchdog.ui.SearchBar;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
 
+import com.adamk33n3r.runelite.watchdog.ui.panels.ScrollablePanel;
 import com.google.common.base.Splitter;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.DynamicGridLayout;
@@ -22,6 +23,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.adamk33n3r.runelite.watchdog.WatchdogPanel.HISTORY_ICON;
 import static com.adamk33n3r.runelite.watchdog.WatchdogPanel.HISTORY_ICON_HOVER;
@@ -38,6 +40,7 @@ public class AlertHubPanel extends PluginPanel {
     private final JPanel container;
     private static final Splitter SPLITTER = Splitter.on(" ").trimResults().omitEmptyStrings();
     private final JButton refresh;
+    private final JScrollPane scrollPane;
 
     @Inject
     public AlertHubPanel(Provider<MultiplexingPluginPanel> muxer, AlertHubClient alertHubClient) {
@@ -90,21 +93,23 @@ public class AlertHubPanel extends PluginPanel {
 
         GroupLayout layout = new GroupLayout(this);
         this.setLayout(layout);
-        this.setBackground(ColorScheme.PROGRESS_ERROR_COLOR);
+//        this.setBackground(ColorScheme.PROGRESS_ERROR_COLOR);
         this.searchBar = new SearchBar(this::updateFilter);
 
         this.container = new JPanel(new DynamicGridLayout(0, 1, 0, 5));
 //        this.container.setMaximumSize(new Dimension(PANEL_WIDTH, 9999));
-        this.container.setBackground(ColorScheme.GRAND_EXCHANGE_LIMIT);
+//        this.container.setBackground(ColorScheme.GRAND_EXCHANGE_LIMIT);
 //        this.container.setBorder(BorderFactory.createEmptyBorder(0, 7, 15, 7));
 //        this.container.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        JPanel wrapper = new JPanel(new BorderLayout());
+        ScrollablePanel wrapper = new ScrollablePanel(new BorderLayout());
         wrapper.add(this.container, BorderLayout.NORTH);
-        JScrollPane scrollPane = new JScrollPane(wrapper, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-        scrollPane.setBackground(ColorScheme.GRAND_EXCHANGE_ALCH);
-        scrollPane.setMaximumSize(new Dimension(PANEL_WIDTH + SCROLLBAR_WIDTH, 9999));
-        this.container.setMaximumSize(new Dimension(PANEL_WIDTH + SCROLLBAR_WIDTH, 9999));
+        wrapper.setScrollableWidth(ScrollablePanel.ScrollableSizeHint.FIT);
+        wrapper.setScrollableHeight(ScrollablePanel.ScrollableSizeHint.STRETCH);
+        this.scrollPane = new JScrollPane(wrapper, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+//        scrollPane.setBackground(ColorScheme.GRAND_EXCHANGE_ALCH);
+//        scrollPane.setMaximumSize(new Dimension(PANEL_WIDTH + SCROLLBAR_WIDTH, 9999));
+//        this.container.setMaximumSize(new Dimension(PANEL_WIDTH + SCROLLBAR_WIDTH, 9999));
 
         this.refresh = PanelUtils.createActionButton(HISTORY_ICON, HISTORY_ICON_HOVER, "Refresh", (btn, mod) -> {
             this.reloadList();
@@ -138,19 +143,24 @@ public class AlertHubPanel extends PluginPanel {
     }
 
     public void reloadList() {
-        this.container.removeAll();
+//        this.container.removeAll();
 
-        try {
-            List<AlertHubClient.AlertDisplayInfo> alerts = this.alertHubClient.downloadManifest();
-//            System.out.println(alertManifests.stream().map(AlertManifest::toString).collect(Collectors.joining(", ")));
-            this.reloadList(alerts);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        SwingUtilities.invokeLater(() -> {
+            try {
+                List<AlertHubClient.AlertDisplayInfo> alerts = this.alertHubClient.downloadManifest();
+    //            System.out.println(alertManifests.stream().map(AlertManifest::toString).collect(Collectors.joining(", ")));
+                this.reloadList(alerts);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        });
     }
 
     private void reloadList(List<AlertHubClient.AlertDisplayInfo> alerts) {
-        this.alertHubItems = alerts.stream().map(AlertHubItem::new).collect(Collectors.toList());
+        this.alertHubItems = alerts.stream()
+//            .flatMap(e -> Stream.of(e, e, e, e))
+            .map(AlertHubItem::new)
+            .collect(Collectors.toList());
         this.updateFilter(this.searchBar.getText());
     }
 
@@ -163,7 +173,6 @@ public class AlertHubPanel extends PluginPanel {
             return Text.matchesSearchTerms(SPLITTER.split(upperSearch), manifest.getKeywords());
         }).forEach(this.container::add);
         this.revalidate();
-        // Idk why I need to repaint sometimes and the PluginListPanel doesn't
-        this.repaint();
+        this.scrollPane.getVerticalScrollBar().setValue(0);
     }
 }

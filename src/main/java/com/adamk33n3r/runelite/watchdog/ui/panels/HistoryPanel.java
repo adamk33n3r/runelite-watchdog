@@ -33,7 +33,7 @@ import static com.adamk33n3r.runelite.watchdog.ui.panels.AlertPanel.BACK_ICON;
 import static com.adamk33n3r.runelite.watchdog.ui.panels.AlertPanel.BACK_ICON_HOVER;
 
 @Slf4j
-//@Singleton
+@Singleton
 public class HistoryPanel extends PluginPanel {
     private final Provider<MultiplexingPluginPanel> muxer;
     private final ScrollablePanel historyItems;
