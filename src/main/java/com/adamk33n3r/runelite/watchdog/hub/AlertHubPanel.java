@@ -23,6 +23,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.adamk33n3r.runelite.watchdog.WatchdogPanel.HISTORY_ICON;
+import static com.adamk33n3r.runelite.watchdog.WatchdogPanel.HISTORY_ICON_HOVER;
 import static com.adamk33n3r.runelite.watchdog.ui.panels.AlertPanel.BACK_ICON;
 import static com.adamk33n3r.runelite.watchdog.ui.panels.AlertPanel.BACK_ICON_HOVER;
 
@@ -35,6 +37,7 @@ public class AlertHubPanel extends PluginPanel {
     private final IconTextField searchBar;
     private final JPanel container;
     private static final Splitter SPLITTER = Splitter.on(" ").trimResults().omitEmptyStrings();
+    private final JButton refresh;
 
     @Inject
     public AlertHubPanel(Provider<MultiplexingPluginPanel> muxer, AlertHubClient alertHubClient) {
@@ -98,16 +101,21 @@ public class AlertHubPanel extends PluginPanel {
 
         JPanel wrapper = new JPanel(new BorderLayout());
         wrapper.add(this.container, BorderLayout.NORTH);
-        JScrollPane scrollPane = new JScrollPane(wrapper, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        JScrollPane scrollPane = new JScrollPane(wrapper, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         scrollPane.setBackground(ColorScheme.GRAND_EXCHANGE_ALCH);
         scrollPane.setMaximumSize(new Dimension(PANEL_WIDTH + SCROLLBAR_WIDTH, 9999));
         this.container.setMaximumSize(new Dimension(PANEL_WIDTH + SCROLLBAR_WIDTH, 9999));
+
+        this.refresh = PanelUtils.createActionButton(HISTORY_ICON, HISTORY_ICON_HOVER, "Refresh", (btn, mod) -> {
+            this.reloadList();
+        });
 
         layout.setVerticalGroup(layout.createSequentialGroup()
             .addGap(5)
             .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                 .addComponent(backButton, 24, 24, 24)
-                .addComponent(this.searchBar, 24, 24, 24))
+                .addComponent(this.searchBar, 24, 24, 24)
+                .addComponent(this.refresh, 24, 24, 24))
             .addGap(10)
             .addComponent(scrollPane)
         );
@@ -118,6 +126,8 @@ public class AlertHubPanel extends PluginPanel {
                 .addComponent(backButton)
                 .addGap(3)
                 .addComponent(this.searchBar)
+                .addGap(3)
+                .addComponent(this.refresh)
                 .addGap(7))
             .addComponent(scrollPane)
         );
@@ -131,16 +141,16 @@ public class AlertHubPanel extends PluginPanel {
         this.container.removeAll();
 
         try {
-            List<AlertManifest> alertManifests = this.alertHubClient.downloadManifest();
+            List<AlertHubClient.AlertDisplayInfo> alerts = this.alertHubClient.downloadManifest();
 //            System.out.println(alertManifests.stream().map(AlertManifest::toString).collect(Collectors.joining(", ")));
-            this.reloadList(alertManifests);
+            this.reloadList(alerts);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private void reloadList(List<AlertManifest> alertManifests) {
-        this.alertHubItems = alertManifests.stream().map(AlertHubItem::new).collect(Collectors.toList());
+    private void reloadList(List<AlertHubClient.AlertDisplayInfo> alerts) {
+        this.alertHubItems = alerts.stream().map(AlertHubItem::new).collect(Collectors.toList());
         this.updateFilter(this.searchBar.getText());
     }
 
@@ -149,7 +159,7 @@ public class AlertHubPanel extends PluginPanel {
         String upperSearch = search.toUpperCase();
         this.alertHubItems.stream().filter(alertHubItem -> {
 //            Alert alert = WatchdogPlugin.getInstance().getAlertManager().getGson().fromJson(alertHubItem.getManifest().getJson(), ALERT_LIST_TYPE);
-            AlertManifest manifest = alertHubItem.getManifest();
+            AlertManifest manifest = alertHubItem.getAlertDisplayInfo().getManifest();
             return Text.matchesSearchTerms(SPLITTER.split(upperSearch), manifest.getKeywords());
         }).forEach(this.container::add);
         this.revalidate();

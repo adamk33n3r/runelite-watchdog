@@ -1,16 +1,20 @@
 package com.adamk33n3r.runelite.watchdog.hub;
 
+import com.adamk33n3r.runelite.watchdog.alerts.Alert;
 import lombok.Data;
+import lombok.Setter;
 
 import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Data
 public class AlertManifest {
-    private final String internalName;
+    @Setter
+    private String internalName;
     private final String commit;
 
     private final String displayName;
@@ -20,7 +24,7 @@ public class AlertManifest {
     private final AlertHubCategory category;
     private final List<String> tags;
     private final URL repo;
-    private final String json;
+    private final Alert alert;
     private final boolean hasIcon;
 
     @Override
@@ -35,8 +39,9 @@ public class AlertManifest {
             this.getInternalName(),
             this.getAuthor()
 //            this.getCategory().getName()
-        );
+        ).filter(Objects::nonNull);
         if (this.getTags() != null) {
+            System.out.println(this.getTags());
             return Stream.concat(keywords, this.getTags().stream()).map(String::toUpperCase).collect(Collectors.toList());
         }
         return keywords.map(String::toUpperCase).collect(Collectors.toList());

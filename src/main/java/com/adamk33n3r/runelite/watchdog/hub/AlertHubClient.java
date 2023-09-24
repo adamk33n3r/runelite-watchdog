@@ -1,98 +1,142 @@
 package com.adamk33n3r.runelite.watchdog.hub;
 
-import com.google.gson.reflect.TypeToken;
+import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
+import com.google.common.base.Charsets;
+import com.google.common.io.CharStreams;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import net.runelite.client.ui.PluginPanel;
+import net.runelite.client.util.ImageUtil;
 import net.runelite.http.api.RuneLiteAPI;
-import okhttp3.HttpUrl;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
+import okhttp3.*;
 
 import javax.imageio.ImageIO;
 import javax.inject.Inject;
+import javax.swing.*;
 import java.awt.image.BufferedImage;
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.net.URI;
+import java.io.InputStreamReader;
 import java.net.URL;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 @Slf4j
 public class AlertHubClient {
     private final OkHttpClient cachingClient;
+    private static final HttpUrl GITHUB = Objects.requireNonNull(HttpUrl.parse("https://github.com/adamk33n3r/runelite-watchdog"));
 
     @Inject
     public AlertHubClient(OkHttpClient cachingClient) {
-        this.cachingClient = cachingClient;
+        this.cachingClient = cachingClient.newBuilder()
+            .addInterceptor(new CacheInterceptor(15))
+            .build();
     }
 
-    public List<AlertManifest> downloadManifest() throws IOException {
+    public List<AlertDisplayInfo> downloadManifest() throws IOException {
         HttpUrl manifest = Objects.requireNonNull(HttpUrl.parse("https://raw.githubusercontent.com/melkypie/resource-packs"))
             .newBuilder()
             .addPathSegment("github-actions")
             .addPathSegment("manifest.js")
             .build();
+        HttpUrl allAlerts = GITHUB.newBuilder()
+            .addPathSegment("archive")
+            .addPathSegment("alert-hub.zip")
+            .build();
 
-        return Arrays.asList(new AlertManifest(
-            "testAlert",
-            "284hfu43hhfiu24rf",
-            "Test Alert",
-            "This is a test alert on the hub",
-            "4",
-            "adamk33n3r",
-            AlertHubCategory.COMBAT,
-            Arrays.asList("afk", "combat"),
-            new URL("https://github.com/adamk33n3r/runelite-watchdog"),
-            "[]",
-            false
-        ), new AlertManifest(
-            "testAlert",
-            "284hfu43hhfiu24rf",
-            "Test Alert",
-            "This is a test alert on the hub",
-            "4",
-            "adamk33n3r",
-            AlertHubCategory.COMBAT,
-            Arrays.asList("afk", "combat"),
-            new URL("https://github.com/adamk33n3r/runelite-watchdog"),
-            "[]",
-            false
-        ), new AlertManifest(
-            "testAlert",
-            "284hfu43hhfiu24rf",
-            "Test Alert",
-            "This is a test alert on the hub",
-            "4",
-            "adamk33n3r",
-            AlertHubCategory.COMBAT,
-            Arrays.asList("afk", "combat"),
-            new URL("https://github.com/adamk33n3r/runelite-watchdog"),
-            "[]",
-            false
-        ), new AlertManifest(
-            "testAlert2",
-            "284hfu43hhfiu24rf",
-            "Test Alert 2",
-            "This is a test alert on the hub with an extra long description to test wrapping",
-            "4",
-            "adamk33n3r",
-            AlertHubCategory.SKILLING,
-            Arrays.asList("mining", "tts"),
-            new URL("https://github.com/adamk33n3r/runelite-watchdog"),
-            "[]",
-            false
-        ));
-//        try (Response res  = cachingClient.newCall(new Request.Builder().url(manifest).build()).execute()) {
-//            if (res.code() != 200) {
-//                throw new IOException("Non-OK response code: " + res.code());
-//            }
-//
+        HashMap<String, AlertDisplayInfo> alerts = new HashMap<>();
+        try (Response res  = this.cachingClient.newCall(new Request.Builder().url(allAlerts).build()).execute()) {
+            if (res.code() != 200) {
+                throw new IOException("Non-OK response code: " + res.code());
+            }
+
+            BufferedInputStream is = new BufferedInputStream(res.body().byteStream());
+            ZipInputStream zipInputStream = new ZipInputStream(is);
+            ZipEntry entry;
+            while ((entry = zipInputStream.getNextEntry()) != null) {
+                String filePath = entry.getName().replaceAll("runelite-watchdog-alert-hub/", "");
+                String[] splitPath = filePath.split("/", 2);
+                if (splitPath.length == 2) {
+                    String alertName = splitPath[0];
+                    if (!alerts.containsKey(alertName)) {
+                        alerts.put(alertName, new AlertDisplayInfo());
+                    }
+                    AlertDisplayInfo alertDisplayInfo = alerts.get(alertName);
+                    String alertFile = splitPath[1];
+                    if (alertFile.equals("alert.json")) {
+                        String json = CharStreams.toString(new InputStreamReader(zipInputStream, Charsets.UTF_8));
+                        AlertManifest alertManifest = WatchdogPlugin.getInstance().getAlertManager().getGson().fromJson(json, AlertManifest.class);
+                        alertManifest.setInternalName(alertName);
+                        alertDisplayInfo.manifest = alertManifest;
+                    } else if (alertFile.equals("icon.png")) {
+                        BufferedImage icon = ImageIO.read(zipInputStream);
+                        alertDisplayInfo.icon = ImageUtil.resizeImage(icon, PluginPanel.PANEL_WIDTH, 147, true);
+                    }
+                }
+                System.out.println(filePath);
+//                if (!entry.isDirectory()) {
+            }
 //            String data = Objects.requireNonNull(res.body()).string();
-//
+
 //            return RuneLiteAPI.GSON.fromJson(data, new TypeToken<List<AlertManifest>>() {}.getType());
-//        }
+            return alerts.values().stream().sorted(Comparator.comparing(alert -> alert.manifest.getDisplayName()))
+                .collect(Collectors.toList());
+        }
+
+
+//        return Arrays.asList(new AlertManifest(
+//            "testAlert",
+//            "284hfu43hhfiu24rf",
+//            "Test Alert",
+//            "This is a test alert on the hub",
+//            "4",
+//            "adamk33n3r",
+//            AlertHubCategory.COMBAT,
+//            Arrays.asList("afk", "combat"),
+//            new URL("https://github.com/adamk33n3r/runelite-watchdog"),
+//            null,
+//            false
+//        ), new AlertManifest(
+//            "testAlert",
+//            "284hfu43hhfiu24rf",
+//            "Test Alert",
+//            "This is a test alert on the hub",
+//            "4",
+//            "adamk33n3r",
+//            AlertHubCategory.COMBAT,
+//            Arrays.asList("afk", "combat"),
+//            new URL("https://github.com/adamk33n3r/runelite-watchdog"),
+//            null,
+//            false
+//        ), new AlertManifest(
+//            "testAlert",
+//            "284hfu43hhfiu24rf",
+//            "Test Alert",
+//            "This is a test alert on the hub",
+//            "4",
+//            "adamk33n3r",
+//            AlertHubCategory.COMBAT,
+//            Arrays.asList("afk", "combat"),
+//            new URL("https://github.com/adamk33n3r/runelite-watchdog"),
+//            null,
+//            false
+//        ), new AlertManifest(
+//            "testAlert2",
+//            "284hfu43hhfiu24rf",
+//            "Test Alert 2",
+//            "This is a test alert on the hub with an extra long description to test wrapping",
+//            "4",
+//            "adamk33n3r",
+//            AlertHubCategory.SKILLING,
+//            Arrays.asList("mining", "tts"),
+//            new URL("https://github.com/adamk33n3r/runelite-watchdog"),
+//            null,
+//            false
+//        ));
     }
 
     public BufferedImage downloadIcon(AlertManifest alertManifest) throws IOException {
@@ -117,5 +161,33 @@ public class AlertHubClient {
                 return ImageIO.read(new ByteArrayInputStream(bytes));
             }
         }
+    }
+
+    class CacheInterceptor implements Interceptor {
+        private int minutes;
+        public CacheInterceptor(int minutes) {
+            this.minutes = minutes;
+        }
+
+        @Override
+        public Response intercept(Chain chain) throws IOException {
+            Response response = chain.proceed(chain.request());
+
+            CacheControl cacheControl = new CacheControl.Builder()
+                .maxAge(this.minutes, TimeUnit.MINUTES)
+                .build();
+
+            return response.newBuilder()
+                .removeHeader("Pragma")
+                .removeHeader("Cache-Control")
+                .header("Cache-Control", cacheControl.toString())
+                .build();
+        }
+    }
+
+    @Getter
+    class AlertDisplayInfo {
+        private AlertManifest manifest;
+        private BufferedImage icon;
     }
 }

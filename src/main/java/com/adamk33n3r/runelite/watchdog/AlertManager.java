@@ -81,6 +81,7 @@ public class AlertManager {
             .ignoreSubtype("ResourceAlert")
             .ignoreSubtype("SoundFiredAlert")
             .ignoreSubtype("AlertGroup")
+            .recognizeSubtypes()
             .registerSubtype(ChatAlert.class)
             .registerSubtype(NotificationFiredAlert.class)
             .registerSubtype(StatDrainAlert.class)
