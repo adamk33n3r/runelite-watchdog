@@ -1,0 +1,10 @@
+{
+  "displayName": "Wintertodt",
+  "description": "Round start and interruptions",
+  "compatibleVersion": "3.0.0",
+  "author": "Ðom",
+  "category": "SKILLING",
+  "tags": [ "boss", "minigame" ],
+  "dependsOn": [ "Wintertodt" ],
+  "alert": {"type":"AlertGroup","alerts":[{"type":"NotificationFiredAlert","message":"Wintertodt round is about to start","regexEnabled":false,"enabled":true,"name":"Round Start","debounceTime":0,"notifications":[{"type":"TextToSpeech","gain":8,"rate":1,"voice":"MARK","source":"LEGACY","message":"Wintertodt  round is about to start","fireWhenFocused":true}]},{"type":"NotificationFiredAlert","message":"Wintertodt: {*} Interrupted! {*}","regexEnabled":false,"enabled":true,"name":"Interrupted","debounceTime":0,"notifications":[{"type":"TextToSpeech","gain":7,"rate":1,"voice":"GEORGE","source":"LEGACY","message":"$1 Interrupted: $2","fireWhenFocused":true}]}],"enabled":true,"name":"Wintertodt","debounceTime":0}
+}

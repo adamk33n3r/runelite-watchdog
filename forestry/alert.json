@@ -1,0 +1,10 @@
+{
+  "displayName": "Forestry Alerts",
+  "description": "Has alerts for different forestry events spawning.",
+  "compatibleVersion": "3.0.0",
+  "author": "SoggyBurrito",
+  "category": "SKILLING",
+  "tags": [ "event" ],
+  "dependsOn": [ "Woodcutting" ],
+  "alert": {"type":"AlertGroup","alerts":[{"type":"NotificationFiredAlert","message":"* Roots Forestry*","regexEnabled":false,"enabled":true,"name":"Rising Roots Event","debounceTime":0,"notifications":[{"type":"TextToSpeech","gain":10,"rate":1,"voice":"GEORGE","source":"ELEVEN_LABS","elevenLabsVoiceId":"EXAVITQu4vr4xnSDxMaL","message":"Rising Roots Spawned","fireWhenFocused":true}]},{"type":"NotificationFiredAlert","message":"* Tree Forestry*","regexEnabled":false,"enabled":true,"name":"Pollen Event","debounceTime":0,"notifications":[{"type":"TextToSpeech","gain":5,"rate":1,"voice":"GEORGE","source":"ELEVEN_LABS","elevenLabsVoiceId":"EXAVITQu4vr4xnSDxMaL","message":"Pollen Event Spawned","fireWhenFocused":true}]},{"type":"NotificationFiredAlert","message":"* Sapling Forestry*","regexEnabled":false,"enabled":true,"name":"Struggling Sapling","debounceTime":0,"notifications":[{"type":"TextToSpeech","gain":5,"rate":1,"voice":"GEORGE","source":"ELEVEN_LABS","elevenLabsVoiceId":"EXAVITQu4vr4xnSDxMaL","message":"Struggling Sapling Spawned","fireWhenFocused":true}]},{"type":"NotificationFiredAlert","message":"* Leprechaun event*","regexEnabled":false,"enabled":true,"name":"Lep Forestry","debounceTime":0,"notifications":[{"type":"TextToSpeech","gain":5,"rate":1,"voice":"GEORGE","source":"ELEVEN_LABS","elevenLabsVoiceId":"EXAVITQu4vr4xnSDxMaL","message":"Leprechaun Spawned","fireWhenFocused":true}]}],"enabled":true,"name":"Forestry","debounceTime":0}
+}
