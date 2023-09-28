@@ -37,24 +37,23 @@ public class AlertHubClient {
             .build();
     }
 
-    public List<AlertDisplayInfo> downloadManifest() throws IOException {
-        HttpUrl manifest = Objects.requireNonNull(HttpUrl.parse("https://raw.githubusercontent.com/melkypie/resource-packs"))
-            .newBuilder()
-            .addPathSegment("github-actions")
-            .addPathSegment("manifest.js")
-            .build();
+    public List<AlertDisplayInfo> downloadManifest(boolean forceDownload) throws IOException {
         HttpUrl allAlerts = GITHUB.newBuilder()
             .addPathSegment("archive")
             .addPathSegment("alert-hub.zip")
             .build();
 
         HashMap<String, AlertDisplayInfo> alerts = new HashMap<>();
-        try (Response res  = this.cachingClient.newCall(new Request.Builder().url(allAlerts).build()).execute()) {
+        Request.Builder reqBuilder = new Request.Builder().url(allAlerts);
+        if (forceDownload) {
+            reqBuilder.cacheControl(CacheControl.FORCE_NETWORK);
+        }
+        try (Response res  = this.cachingClient.newCall(reqBuilder.build()).execute()) {
             if (res.code() != 200) {
                 throw new IOException("Non-OK response code: " + res.code());
             }
 
-            BufferedInputStream is = new BufferedInputStream(res.body().byteStream());
+            BufferedInputStream is = new BufferedInputStream(Objects.requireNonNull(res.body()).byteStream());
             ZipInputStream zipInputStream = new ZipInputStream(is);
             ZipEntry entry;
             while ((entry = zipInputStream.getNextEntry()) != null) {

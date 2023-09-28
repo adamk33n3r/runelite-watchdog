@@ -50,9 +50,12 @@ public class AlertHubItem extends JPanel {
 
         WrappingLabel alertDescLabel = new WrappingLabel(manifest.getDescription());
 
-        JLabel icon = new JLabel(new ImageIcon(this.alertDisplayInfo.getIcon()));
+//        JLabel icon = new JLabel();
 //        JLabel icon = new JLabel(new ImageIcon(ImageUtil.loadImageResource(WatchdogPlugin.class, "detail-test.png")));
-        icon.setHorizontalAlignment(JLabel.CENTER);
+//        icon.setHorizontalAlignment(JLabel.CENTER);
+//        if (this.alertDisplayInfo.getIcon() != null) {
+//            icon.setIcon(new ImageIcon(this.alertDisplayInfo.getIcon()));
+//        }
 
         JButton moreInfoButton = PanelUtils.createActionButton(WatchdogPanel.HELP_ICON, WatchdogPanel.HELP_ICON_HOVER, "More info", (btn, mod) -> {
             LinkBrowser.browse(manifest.getRepo().toString());
