@@ -20,6 +20,7 @@ import net.runelite.client.util.ImageUtil;
 import javax.swing.*;
 import javax.swing.text.AbstractDocument;
 import java.awt.Font;
+import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.image.BufferedImage;
@@ -100,14 +101,27 @@ public class TextToSpeechNotificationPanel extends NotificationPanel {
                     //Not serialized
                     notification.setElevenLabsVoice(voice);
                 });
+
+                // Kinda hacky, but it'd also be hacky to modify the createSelect method so...shrug
+                ActionListener actionListener = voiceSelect.getActionListeners()[0];
+                voiceSelect.removeActionListener(actionListener);
+
                 ElevenLabs.getVoices(WatchdogPlugin.getInstance().getHttpClient(), (voices) -> {
                     SwingUtilities.invokeLater(() -> {
                         voices.getVoices().forEach((voice) -> {
                             voiceSelect.addItem(voice);
-                            if (voice.getName().equals(WatchdogPlugin.getInstance().getConfig().defaultElevenLabsVoice())) {
-                                voiceSelect.setSelectedItem(voice);
+                            if (notification.getElevenLabsVoiceId() == null) {
+                                if (voice.getName().equals(WatchdogPlugin.getInstance().getConfig().defaultElevenLabsVoice())) {
+                                    voiceSelect.setSelectedItem(voice);
+                                }
+                            } else {
+                                if (voice.getVoiceId().equals(notification.getElevenLabsVoiceId())) {
+                                    voiceSelect.setSelectedItem(voice);
+                                }
                             }
                         });
+
+                        voiceSelect.addActionListener(actionListener);
                     });
                 });
                 this.settings.add(voiceSelect);

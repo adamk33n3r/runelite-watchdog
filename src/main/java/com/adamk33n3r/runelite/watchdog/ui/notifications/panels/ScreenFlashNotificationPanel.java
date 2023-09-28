@@ -34,6 +34,13 @@ public class ScreenFlashNotificationPanel extends NotificationPanel {
 
         JComboBox<FlashMode> flashModeSelect = new JComboBox<>(FlashMode.values());
         flashModeSelect.setToolTipText("The screen flash mode");
+        // TODO: Would be nice to move this somewhere else on import or something
+        if (screenFlash.getFlashMode() == null) {
+            screenFlash.setFlashMode(FlashMode.FLASH);
+            if (screenFlash.getFlashDuration() == 0) {
+                screenFlash.setFlashDuration(2);
+            }
+        }
         flashModeSelect.setSelectedItem(screenFlash.getFlashMode());
         flashModeSelect.setRenderer((list, value, index, isSelected, cellHasFocus) -> {
             list.setToolTipText(value.getTooltip());
