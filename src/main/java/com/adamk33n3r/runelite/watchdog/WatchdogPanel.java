@@ -75,6 +75,8 @@ public class WatchdogPanel extends PluginPanel {
     @Inject
     private OkHttpClient httpClient;
 
+    private JScrollPane scroll;
+
     public static final ImageIcon ADD_ICON;
     public static final ImageIcon HELP_ICON;
     public static final ImageIcon HELP_ICON_HOVER;
@@ -184,8 +186,8 @@ public class WatchdogPanel extends PluginPanel {
         scrollablePanel.setScrollableHeight(ScrollablePanel.ScrollableSizeHint.STRETCH);
         scrollablePanel.setScrollableBlockIncrement(ScrollablePanel.VERTICAL, ScrollablePanel.IncrementType.PERCENT, 10);
         scrollablePanel.add(alertPanel);
-        JScrollPane scroll = new JScrollPane(scrollablePanel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-        this.add(scroll, BorderLayout.CENTER);
+        this.scroll = new JScrollPane(scrollablePanel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        this.add(this.scroll, BorderLayout.CENTER);
 
         JPanel importExportGroup = new JPanel(new GridLayout(1, 2, 5, 0));
         JButton importButton = new JButton("Import", IMPORT_ICON);
@@ -218,7 +220,6 @@ public class WatchdogPanel extends PluginPanel {
         bottomPanel.add(hubButton);
         this.add(bottomPanel, BorderLayout.SOUTH);
 
-        // Need this for rebuild for some reason
         this.revalidate();
     }
 
@@ -254,5 +255,10 @@ public class WatchdogPanel extends PluginPanel {
     @Override
     public void onActivate() {
         this.rebuild();
+    }
+
+    public void scrollToBottom() {
+        JScrollBar scrollBar = this.scroll.getVerticalScrollBar();
+        scrollBar.setValue(scrollBar.getMaximum());
     }
 }

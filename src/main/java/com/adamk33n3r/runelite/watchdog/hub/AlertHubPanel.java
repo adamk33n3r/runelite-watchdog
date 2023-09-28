@@ -60,56 +60,21 @@ public class AlertHubPanel extends PluginPanel {
         );
         backButton.setPreferredSize(new Dimension(22, 16));
         backButton.setBorder(new EmptyBorder(0, 0, 0, 5));
-//        topPanel.add(backButton, BorderLayout.WEST);
-//        PlaceholderTextField filterTextField = new PlaceholderTextField();
-//        filterTextField.setPlaceholder("Filter");
-//        filterTextField.getDocument().addDocumentListener(new DocumentListener() {
-//            @Override
-//            public void insertUpdate(DocumentEvent e) {
-//                updateFilter(filterTextField.getText());
-//            }
-//
-//            @Override
-//            public void removeUpdate(DocumentEvent e) {
-//                updateFilter(filterTextField.getText());
-//            }
-//
-//            @Override
-//            public void changedUpdate(DocumentEvent e) {
-//                updateFilter(filterTextField.getText());
-//            }
-//        });
-//        topPanel.add(filterTextField);
-//        this.add(topPanel, BorderLayout.NORTH);
-//
-//        this.filteredAlerts = new ScrollablePanel(new StretchedStackedLayout(3, 3));
-//        this.filteredAlerts.setBorder(new EmptyBorder(0, 10, 0, 10));
-//        this.filteredAlerts.setScrollableWidth(ScrollablePanel.ScrollableSizeHint.FIT);
-//        this.filteredAlerts.setScrollableHeight(ScrollablePanel.ScrollableSizeHint.STRETCH);
-//        this.filteredAlerts.setScrollableBlockIncrement(ScrollablePanel.VERTICAL, ScrollablePanel.IncrementType.PERCENT, 10);
-//        JScrollPane scroll = new JScrollPane(this.filteredAlerts, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-//
-//        this.add(scroll, BorderLayout.CENTER);
 
         GroupLayout layout = new GroupLayout(this);
         this.setLayout(layout);
-//        this.setBackground(ColorScheme.PROGRESS_ERROR_COLOR);
         this.searchBar = new SearchBar(this::updateFilter);
 
         this.container = new JPanel(new DynamicGridLayout(0, 1, 0, 5));
-//        this.container.setMaximumSize(new Dimension(PANEL_WIDTH, 9999));
-//        this.container.setBackground(ColorScheme.GRAND_EXCHANGE_LIMIT);
-//        this.container.setBorder(BorderFactory.createEmptyBorder(0, 7, 15, 7));
-//        this.container.setAlignmentX(Component.LEFT_ALIGNMENT);
+//        this.container.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
 
         ScrollablePanel wrapper = new ScrollablePanel(new BorderLayout());
         wrapper.add(this.container, BorderLayout.NORTH);
         wrapper.setScrollableWidth(ScrollablePanel.ScrollableSizeHint.FIT);
         wrapper.setScrollableHeight(ScrollablePanel.ScrollableSizeHint.STRETCH);
+        wrapper.setScrollableBlockIncrement(SwingConstants.VERTICAL, ScrollablePanel.IncrementType.PERCENT, 10);
+        wrapper.setScrollableUnitIncrement(SwingConstants.VERTICAL, ScrollablePanel.IncrementType.PERCENT, 10);
         this.scrollPane = new JScrollPane(wrapper, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-//        scrollPane.setBackground(ColorScheme.GRAND_EXCHANGE_ALCH);
-//        scrollPane.setMaximumSize(new Dimension(PANEL_WIDTH + SCROLLBAR_WIDTH, 9999));
-//        this.container.setMaximumSize(new Dimension(PANEL_WIDTH + SCROLLBAR_WIDTH, 9999));
 
         this.refresh = PanelUtils.createActionButton(HISTORY_ICON, HISTORY_ICON_HOVER, "Refresh", (btn, mod) -> {
             this.reloadList();
@@ -168,11 +133,10 @@ public class AlertHubPanel extends PluginPanel {
         this.container.removeAll();
         String upperSearch = search.toUpperCase();
         this.alertHubItems.stream().filter(alertHubItem -> {
-//            Alert alert = WatchdogPlugin.getInstance().getAlertManager().getGson().fromJson(alertHubItem.getManifest().getJson(), ALERT_LIST_TYPE);
             AlertManifest manifest = alertHubItem.getAlertDisplayInfo().getManifest();
             return Text.matchesSearchTerms(SPLITTER.split(upperSearch), manifest.getKeywords());
         }).forEach(this.container::add);
-        this.revalidate();
+        this.container.revalidate();
         this.scrollPane.getVerticalScrollBar().setValue(0);
     }
 }

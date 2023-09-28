@@ -80,7 +80,7 @@ public class AlertHubClient {
                         alertDisplayInfo.manifest = alertManifest;
                     } else if (alertFile.equals("icon.png")) {
                         BufferedImage icon = ImageIO.read(zipInputStream);
-                        alertDisplayInfo.icon = ImageUtil.resizeImage(icon, PluginPanel.PANEL_WIDTH, 147, true);
+                        alertDisplayInfo.icon = ImageUtil.resizeImage(icon, 242, 182, true);
                     }
                 }
                 System.out.println(filePath);

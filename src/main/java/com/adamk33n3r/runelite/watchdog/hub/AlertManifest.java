@@ -5,7 +5,6 @@ import lombok.Data;
 import lombok.Setter;
 
 import java.net.URL;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -37,8 +36,8 @@ public class AlertManifest {
         Stream<String> keywords = Stream.of(
             this.getDisplayName(),
             this.getInternalName(),
-            this.getAuthor()
-//            this.getCategory().getName()
+            this.getAuthor(),
+            this.getCategory().getName()
         ).filter(Objects::nonNull);
         if (this.getTags() != null) {
             System.out.println(this.getTags());

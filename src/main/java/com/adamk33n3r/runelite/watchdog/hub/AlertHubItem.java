@@ -8,6 +8,7 @@ import com.adamk33n3r.runelite.watchdog.ui.WrappingLabel;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
 import com.google.gson.Gson;
 import lombok.Getter;
+import net.runelite.client.plugins.config.ConfigPlugin;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.FontManager;
 import net.runelite.client.ui.PluginPanel;
@@ -28,39 +29,35 @@ public class AlertHubItem extends JPanel {
     public AlertHubItem(AlertHubClient.AlertDisplayInfo alertDisplayInfo) {
         this.alertDisplayInfo = alertDisplayInfo;
         this.setBackground(ColorScheme.DARKER_GRAY_COLOR);
-//        this.setMaximumSize(new Dimension(PluginPanel.PANEL_WIDTH + PluginPanel.SCROLLBAR_WIDTH, Short.MAX_VALUE));
 
         GroupLayout layout = new GroupLayout(this);
         this.setLayout(layout);
 
-        JLabel alertName = new JLabel(this.alertDisplayInfo.getManifest().getDisplayName());
+        AlertManifest manifest = this.alertDisplayInfo.getManifest();
+        JLabel alertName = new JLabel(manifest.getDisplayName());
         alertName.setFont(FontManager.getRunescapeBoldFont());
-        alertName.setToolTipText(this.alertDisplayInfo.getManifest().getDisplayName());
-        JLabel alertAuthor = new JLabel(this.alertDisplayInfo.getManifest().getAuthor());
+        alertName.setToolTipText(manifest.getDisplayName());
+        JLabel alertAuthor = new JLabel(manifest.getAuthor());
         alertAuthor.setFont(FontManager.getRunescapeSmallFont());
-        alertAuthor.setToolTipText(this.alertDisplayInfo.getManifest().getAuthor());
-//        alertAuthor.setText("te9");
+        alertAuthor.setToolTipText(manifest.getAuthor());
 
-        JLabel compatVersion = new JLabel(this.alertDisplayInfo.getManifest().getCompatibleVersion());
+        alertName.setIcon(new ImageIcon(ImageUtil.loadImageResource(WatchdogPlugin.class, manifest.getCategory().getIcon())));
+
+        JLabel compatVersion = new JLabel(manifest.getCompatibleVersion());
+        compatVersion.setHorizontalAlignment(JLabel.RIGHT);
         compatVersion.setFont(FontManager.getRunescapeSmallFont());
-        compatVersion.setToolTipText("Compatible with Watchdog v" + this.alertDisplayInfo.getManifest().getCompatibleVersion());
+        compatVersion.setToolTipText("Compatible with Watchdog v" + manifest.getCompatibleVersion());
 
-
-//        JPanel titlePanel = new JPanel(new BorderLayout());
-//        titlePanel.add(alertName, BorderLayout.WEST);
-//        titlePanel.add(alertAuthor, BorderLayout.EAST);
-//        titlePanel.setBackground(ColorScheme.DARKER_GRAY_COLOR);
-
-        WrappingLabel alertDescLabel = new WrappingLabel(this.alertDisplayInfo.getManifest().getDescription());
-        alertDescLabel.setForeground(Color.CYAN);
+        WrappingLabel alertDescLabel = new WrappingLabel(manifest.getDescription());
 
         JLabel icon = new JLabel(new ImageIcon(this.alertDisplayInfo.getIcon()));
+//        JLabel icon = new JLabel(new ImageIcon(ImageUtil.loadImageResource(WatchdogPlugin.class, "detail-test.png")));
         icon.setHorizontalAlignment(JLabel.CENTER);
 
         JButton moreInfoButton = PanelUtils.createActionButton(WatchdogPanel.HELP_ICON, WatchdogPanel.HELP_ICON_HOVER, "More info", (btn, mod) -> {
-            LinkBrowser.browse(this.alertDisplayInfo.getManifest().getRepo().toString());
+            LinkBrowser.browse(manifest.getRepo().toString());
         });
-        if (this.alertDisplayInfo.getManifest().getRepo() == null) {
+        if (manifest.getRepo() == null) {
             moreInfoButton.setVisible(false);
         }
 
@@ -73,42 +70,54 @@ public class AlertHubItem extends JPanel {
         addButton.setBorder(new LineBorder(addButton.getBackground().darker()));
         addButton.setFocusPainted(false);
         addButton.addActionListener((ev) -> {
-            WatchdogPlugin.getInstance().getAlertManager().addAlert(this.alertDisplayInfo.getManifest().getAlert());
-            JOptionPane.showMessageDialog(this, "Added " + this.alertDisplayInfo.getManifest().getDisplayName() + "to your alerts", "Successfully Added", JOptionPane.INFORMATION_MESSAGE);
+            WatchdogPlugin.getInstance().getAlertManager().addAlert(manifest.getAlert());
+            JOptionPane.showMessageDialog(this, "Added " + manifest.getDisplayName() + " to your alerts", "Successfully Added", JOptionPane.INFORMATION_MESSAGE);
         });
 
-        layout.setAutoCreateContainerGaps(true);
         layout.setVerticalGroup(layout.createSequentialGroup()
             .addGap(5)
-            .addGroup(layout.createParallelGroup()
-                .addComponent(alertName)
-                .addComponent(moreInfoButton, LINE_HEIGHT, LINE_HEIGHT, LINE_HEIGHT)
-                .addComponent(addButton, LINE_HEIGHT, LINE_HEIGHT, LINE_HEIGHT))
-            .addGap(5)
-            .addGroup(layout.createParallelGroup()
-                .addComponent(alertAuthor)
-                .addComponent(compatVersion)
+            .addGroup(layout.createSequentialGroup()
+                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                    .addComponent(alertName, LINE_HEIGHT, LINE_HEIGHT, LINE_HEIGHT)
+                    .addComponent(moreInfoButton, LINE_HEIGHT, LINE_HEIGHT, LINE_HEIGHT)
+                    .addComponent(addButton, LINE_HEIGHT, LINE_HEIGHT, LINE_HEIGHT)
+                )
+                .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
+                    .addComponent(alertAuthor, LINE_HEIGHT, LINE_HEIGHT, LINE_HEIGHT)
+                    .addComponent(compatVersion, LINE_HEIGHT, LINE_HEIGHT, LINE_HEIGHT)
+                )
+                .addComponent(alertDescLabel, 0, GroupLayout.DEFAULT_SIZE, 96)
+                .addGap(5)
             )
-            .addComponent(alertDescLabel)
-            .addComponent(icon, 147, GroupLayout.DEFAULT_SIZE, 147)
+//            .addComponent(icon, 0, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE)
         );
 
-        layout.setHorizontalGroup(layout.createSequentialGroup()
-            .addGroup(layout.createParallelGroup(GroupLayout.Alignment.CENTER)
-                .addGroup(layout.createSequentialGroup()
-                    .addComponent(alertName, 0, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
-                    .addComponent(moreInfoButton, 0, 24, 24)
-                    .addComponent(addButton, 0, 50, GroupLayout.PREFERRED_SIZE)
+        layout.setHorizontalGroup(layout.createParallelGroup()
+            // Info group
+            .addGroup(layout.createSequentialGroup()
+                .addGap(5)
+                .addGroup(layout.createParallelGroup()
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(alertName, 0, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
+                        .addComponent(moreInfoButton, 24, 24, 24)
+                        .addComponent(addButton, 50, 50, GroupLayout.PREFERRED_SIZE)
+                    )
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(alertAuthor, 0, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, GroupLayout.PREFERRED_SIZE, 100)
+                        .addComponent(compatVersion, 0, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    )
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(alertDescLabel, 0, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    )
                 )
-                .addGroup(layout.createSequentialGroup()
-                    .addComponent(alertAuthor, 0, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, GroupLayout.PREFERRED_SIZE, Short.MAX_VALUE)
-                    .addComponent(compatVersion, 0, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                )
-                .addComponent(alertDescLabel)
-                .addComponent(icon, PluginPanel.PANEL_WIDTH, PluginPanel.PANEL_WIDTH, PluginPanel.PANEL_WIDTH)
+                .addGap(5)
             )
+//            .addGroup(layout.createSequentialGroup()
+//                .addComponent(icon, 0, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+//            )
         );
     }
 }

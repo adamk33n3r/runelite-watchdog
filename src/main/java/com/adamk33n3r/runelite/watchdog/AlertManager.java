@@ -12,6 +12,7 @@ import com.adamk33n3r.runelite.watchdog.alerts.SpawnedAlert;
 import com.adamk33n3r.runelite.watchdog.alerts.StatChangedAlert;
 import com.adamk33n3r.runelite.watchdog.alerts.StatDrainAlert;
 import com.adamk33n3r.runelite.watchdog.alerts.XPDropAlert;
+import com.adamk33n3r.runelite.watchdog.hub.AlertHubCategory;
 import com.adamk33n3r.runelite.watchdog.notifications.GameMessage;
 import com.adamk33n3r.runelite.watchdog.notifications.IAudioNotification;
 import com.adamk33n3r.runelite.watchdog.notifications.INotification;
@@ -107,6 +108,7 @@ public class AlertManager {
 //            .serializeNulls()
             .registerTypeAdapterFactory(alertTypeFactory)
             .registerTypeAdapterFactory(notificationTypeFactory)
+            .registerTypeAdapter(AlertHubCategory.class, new MixedCaseEnumAdapter())
             .create();
     }
 
@@ -222,7 +224,10 @@ public class AlertManager {
                 }
             });
 
-        SwingUtilities.invokeLater(this.watchdogPanel::rebuild);
+        SwingUtilities.invokeLater(() -> {
+            this.watchdogPanel.rebuild();
+            SwingUtilities.invokeLater(this.watchdogPanel::scrollToBottom);
+        });
         return true;
     }
 
