@@ -2,16 +2,12 @@ package com.adamk33n3r.runelite.watchdog.hub;
 
 import com.adamk33n3r.runelite.watchdog.WatchdogPanel;
 import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
-import com.adamk33n3r.runelite.watchdog.alerts.Alert;
-import com.adamk33n3r.runelite.watchdog.alerts.AlertGroup;
 import com.adamk33n3r.runelite.watchdog.ui.WrappingLabel;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
-import com.google.gson.Gson;
 import lombok.Getter;
-import net.runelite.client.plugins.config.ConfigPlugin;
+import net.runelite.client.RuneLite;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.FontManager;
-import net.runelite.client.ui.PluginPanel;
 import net.runelite.client.util.ImageUtil;
 import net.runelite.client.util.LinkBrowser;
 
@@ -41,7 +37,7 @@ public class AlertHubItem extends JPanel {
         alertAuthor.setFont(FontManager.getRunescapeSmallFont());
         alertAuthor.setToolTipText(manifest.getAuthor());
 
-        alertName.setIcon(new ImageIcon(ImageUtil.loadImageResource(WatchdogPlugin.class, manifest.getCategory().getIcon())));
+        alertName.setIcon(new ImageIcon(ImageUtil.loadImageResource(RuneLite.class, manifest.getCategory().getIcon())));
 
         JLabel compatVersion = new JLabel(manifest.getCompatibleVersion());
         compatVersion.setHorizontalAlignment(JLabel.RIGHT);
