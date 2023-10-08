@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.adamk33n3r.runelite.watchdog.WatchdogPanel.HISTORY_ICON;
 import static com.adamk33n3r.runelite.watchdog.WatchdogPanel.HISTORY_ICON_HOVER;
@@ -87,20 +88,20 @@ public class AlertHubPanel extends PluginPanel {
                 .addComponent(backButton, 24, 24, 24)
                 .addComponent(this.searchBar, 24, 24, 24)
                 .addComponent(refresh, 24, 24, 24))
-            .addGap(10)
-            .addComponent(scrollPane)
+            .addGap(5)
+            .addComponent(this.scrollPane)
         );
 
         layout.setHorizontalGroup(layout.createParallelGroup()
             .addGroup(layout.createSequentialGroup()
-                .addGap(7)
                 .addComponent(backButton)
-                .addGap(3)
                 .addComponent(this.searchBar)
-                .addGap(3)
-                .addComponent(refresh)
-                .addGap(7))
-            .addComponent(scrollPane)
+                .addComponent(refresh))
+            .addGroup(layout.createSequentialGroup()
+                .addGap(5)
+                .addComponent(this.scrollPane)
+                .addGap(5)
+            )
         );
 
         this.reloadList(false);
@@ -127,7 +128,6 @@ public class AlertHubPanel extends PluginPanel {
         SwingUtilities.invokeLater(() -> {
             this.loading.setVisible(false);
             this.alertHubItems = alerts.stream()
-//                .flatMap(e -> Stream.of(e, e, e, e))
                 .map(AlertHubItem::new)
                 .collect(Collectors.toList());
             this.updateFilter(this.searchBar.getText());

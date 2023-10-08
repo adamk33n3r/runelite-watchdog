@@ -316,6 +316,7 @@ public class PanelUtils {
                 popupMenu.add(c);
             });
         JButton addDropDownButton = DropDownButtonFactory.createDropDownButton(ADD_ICON, popupMenu);
+        addDropDownButton.setPreferredSize(new Dimension(40, addDropDownButton.getPreferredSize().height));
         addDropDownButton.setToolTipText("Create New Alert");
         return addDropDownButton;
     }

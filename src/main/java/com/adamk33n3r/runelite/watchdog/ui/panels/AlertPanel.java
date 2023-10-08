@@ -24,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.text.WordUtils;
 
 import javax.swing.*;
+import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.FocusEvent;
@@ -41,12 +42,11 @@ import static com.adamk33n3r.runelite.watchdog.ui.notifications.panels.Notificat
 
 @Slf4j
 public abstract class AlertPanel<T extends Alert> extends PluginPanel {
-    private final ScrollablePanel container;
+    private final JPanel controlContainer;
+    private final JPanel centerContainer;
     protected final WatchdogPanel watchdogPanel;
     protected final MultiplexingPluginPanel muxer;
     protected final T alert;
-    private final JPanel wrapper;
-    private final JScrollPane scroll;
 
     private final AlertManager alertManager;
 
@@ -85,17 +85,11 @@ public abstract class AlertPanel<T extends Alert> extends PluginPanel {
 
         this.setLayout(new BorderLayout());
 
-        this.wrapper = new JPanel(new BorderLayout());
-        this.container = new ScrollablePanel(new StretchedStackedLayout(3, 3));
-        this.container.setBorder(new EmptyBorder(0, 10, 0, 10));
-        this.container.setScrollableWidth(ScrollablePanel.ScrollableSizeHint.FIT);
-        this.container.setScrollableHeight(ScrollablePanel.ScrollableSizeHint.STRETCH);
-        this.container.setScrollableBlockIncrement(ScrollablePanel.VERTICAL, ScrollablePanel.IncrementType.PERCENT, 10);
-        this.scroll = new JScrollPane(this.container, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        this.wrapper.add(scroll, BorderLayout.CENTER);
+        JPanel northPanel = new JPanel(new StretchedStackedLayout(3, 3));
+        this.add(northPanel, BorderLayout.NORTH);
 
         JPanel nameGroup = new JPanel(new BorderLayout());
-        nameGroup.setBorder(new EmptyBorder(10, 10, 10, 10));
+        nameGroup.setBorder(new EmptyBorder(10, 5, 10, 5));
 
         TriggerType triggerType = this.alert.getType();
         JLabel nameLabel = new JLabel(triggerType.getName());
@@ -174,14 +168,19 @@ public abstract class AlertPanel<T extends Alert> extends PluginPanel {
         backButton.setBorder(new EmptyBorder(0, 0, 0, 5));
         nameGroup.add(backButton, BorderLayout.WEST);
 
-        this.wrapper.add(nameGroup, BorderLayout.NORTH);
+        northPanel.add(nameGroup, BorderLayout.NORTH);
 
-        this.add(wrapper, BorderLayout.CENTER);
+        this.controlContainer = new JPanel(new StretchedStackedLayout(3, 3));
+        this.controlContainer.setBorder(new EmptyBorder(0, 5, 0, 5));
+        northPanel.add(this.controlContainer, BorderLayout.NORTH);
+
+        this.centerContainer = new JPanel(new BorderLayout());
+        this.add(this.centerContainer, BorderLayout.CENTER);
     }
 
     public AlertPanel<T> addLabel(String label) {
         JLabel labelComp = new JLabel(label);
-        this.container.add(labelComp);
+        this.controlContainer.add(labelComp);
         return this;
     }
 
@@ -190,7 +189,7 @@ public abstract class AlertPanel<T extends Alert> extends PluginPanel {
         richTextPane.setContentType("text/html");
         richTextPane.setText(text);
         richTextPane.setForeground(Color.WHITE);
-        this.container.add(richTextPane);
+        this.controlContainer.add(richTextPane);
         return this;
     }
 
@@ -210,7 +209,7 @@ public abstract class AlertPanel<T extends Alert> extends PluginPanel {
                 alertManager.saveAlerts();
             }
         });
-        this.container.add(textField);
+        this.controlContainer.add(textField);
         return this;
     }
 
@@ -219,7 +218,7 @@ public abstract class AlertPanel<T extends Alert> extends PluginPanel {
             saveAction.accept(val);
             this.alertManager.saveAlerts();
         });
-        this.container.add(textArea);
+        this.controlContainer.add(textArea);
         return this;
     }
 
@@ -232,7 +231,7 @@ public abstract class AlertPanel<T extends Alert> extends PluginPanel {
             saveAction.accept(val);
             this.alertManager.saveAlerts();
         });
-        this.container.add(PanelUtils.createLabeledComponent(name, tooltip, spinner));
+        this.controlContainer.add(PanelUtils.createLabeledComponent(name, tooltip, spinner));
         return this;
     }
 
@@ -252,7 +251,7 @@ public abstract class AlertPanel<T extends Alert> extends PluginPanel {
             saveAction.accept(select.getItemAt(select.getSelectedIndex()));
             this.alertManager.saveAlerts();
         });
-        this.container.add(PanelUtils.createLabeledComponent(name, tooltip, select));
+        this.controlContainer.add(PanelUtils.createLabeledComponent(name, tooltip, select));
         return this;
     }
 
@@ -261,7 +260,7 @@ public abstract class AlertPanel<T extends Alert> extends PluginPanel {
             saveAction.accept(val);
             this.alertManager.saveAlerts();
         });
-        this.container.add(checkbox);
+        this.controlContainer.add(checkbox);
         return this;
     }
 
@@ -273,7 +272,7 @@ public abstract class AlertPanel<T extends Alert> extends PluginPanel {
         InputGroup textFieldGroup = new InputGroup(mainComponent)
             .addPrefixes(prefixes)
             .addSuffixes(suffixes);
-        this.container.add(textFieldGroup);
+        this.controlContainer.add(textFieldGroup);
         return this;
     }
 
@@ -324,21 +323,22 @@ public abstract class AlertPanel<T extends Alert> extends PluginPanel {
     public AlertPanel<T> addNotifications() {
         NotificationsPanel notificationPanel = new NotificationsPanel(this.alert);
         WatchdogPlugin.getInstance().getInjector().injectMembers(notificationPanel);
-        notificationPanel.setBorder(new HorizontalRuleBorder(10));
-        this.container.add(notificationPanel);
+        notificationPanel.setBorder(new CompoundBorder(new EmptyBorder(0, 5, 0, 5), new HorizontalRuleBorder(10)));
+        this.centerContainer.add(notificationPanel);
 
         return this;
     }
 
     public AlertPanel<T> addSubPanel(JPanel sub) {
-        this.container.add(sub);
+        this.centerContainer.add(sub);
 
         return this;
     }
 
     protected abstract void build();
     protected void rebuild() {
-        this.container.removeAll();
+        this.controlContainer.removeAll();
+        this.centerContainer.removeAll();
         this.build();
         this.revalidate();
         this.repaint();

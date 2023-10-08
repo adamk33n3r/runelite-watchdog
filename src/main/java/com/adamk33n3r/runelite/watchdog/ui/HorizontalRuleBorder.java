@@ -24,7 +24,7 @@ public class HorizontalRuleBorder extends EtchedBorder {
      */
     public Insets getBorderInsets(Component c, Insets insets) {
         Insets outerInsets = this.outsideBorder.getBorderInsets(c);
-        insets.set(this.size + outerInsets.top, 2, this.size + outerInsets.bottom, 2);
+        insets.set(this.size + outerInsets.top, 0, 0, 0);
         return insets;
     }
 

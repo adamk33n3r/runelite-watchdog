@@ -38,6 +38,7 @@ public class HistoryPanel extends PluginPanel {
     private final Provider<MultiplexingPluginPanel> muxer;
     private final ScrollablePanel historyItems;
     private final List<HistoryEntryPanel> previousAlerts = new ArrayList<>();
+    private final JLabel noHistory;
 
     private static final int MAX_HISTORY_ITEMS = 100;
     private static final Splitter SPLITTER = Splitter.on(" ").trimResults().omitEmptyStrings();
@@ -49,7 +50,7 @@ public class HistoryPanel extends PluginPanel {
 
         this.setLayout(new BorderLayout());
 
-        JPanel topPanel = new JPanel(new BorderLayout());
+        JPanel topPanel = new JPanel(new BorderLayout(0, 5));
         topPanel.setBorder(new EmptyBorder(0, 0, 5, 0));
         JButton backButton = PanelUtils.createActionButton(
             BACK_ICON,
@@ -61,6 +62,9 @@ public class HistoryPanel extends PluginPanel {
         backButton.setBorder(new EmptyBorder(0, 0, 0, 5));
         topPanel.add(backButton, BorderLayout.WEST);
         topPanel.add(new SearchBar(this::updateFilter));
+        this.noHistory = new JLabel("No history items");
+        this.noHistory.setHorizontalAlignment(SwingConstants.CENTER);
+        topPanel.add(this.noHistory, BorderLayout.SOUTH);
         this.add(topPanel, BorderLayout.NORTH);
 
         this.historyItems = new ScrollablePanel(new StretchedStackedLayout(3, 3));
@@ -74,6 +78,7 @@ public class HistoryPanel extends PluginPanel {
     }
 
     public void addEntry(Alert alert, String[] triggerValues) {
+        this.noHistory.setVisible(false);
         HistoryEntryPanel historyEntryPanel = new HistoryEntryPanel(alert, triggerValues);
         this.previousAlerts.add(0, historyEntryPanel);
         this.historyItems.add(historyEntryPanel, 0);

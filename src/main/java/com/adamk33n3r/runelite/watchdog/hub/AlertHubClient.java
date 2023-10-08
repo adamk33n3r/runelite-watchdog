@@ -5,20 +5,17 @@ import com.google.common.base.Charsets;
 import com.google.common.io.CharStreams;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import net.runelite.client.ui.PluginPanel;
 import net.runelite.client.util.ImageUtil;
-import net.runelite.http.api.RuneLiteAPI;
 import okhttp3.*;
 
+import javax.annotation.Nonnull;
 import javax.imageio.ImageIO;
 import javax.inject.Inject;
-import javax.swing.*;
 import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.URL;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -156,7 +153,7 @@ public class AlertHubClient {
             .addPathSegment("icon.png")
             .build();
 
-        try (Response res  = cachingClient.newCall(new Request.Builder().url(url).build()).execute()) {
+        try (Response res  = this.cachingClient.newCall(new Request.Builder().url(url).build()).execute()) {
             if (res.code() != 200) {
                 throw new IOException("Non-OK response code: " + res.code());
             }
@@ -168,13 +165,14 @@ public class AlertHubClient {
         }
     }
 
-    class CacheInterceptor implements Interceptor {
-        private int minutes;
+    static class CacheInterceptor implements Interceptor {
+        private final int minutes;
         public CacheInterceptor(int minutes) {
             this.minutes = minutes;
         }
 
         @Override
+        @Nonnull
         public Response intercept(Chain chain) throws IOException {
             Response response = chain.proceed(chain.request());
 
@@ -191,7 +189,7 @@ public class AlertHubClient {
     }
 
     @Getter
-    class AlertDisplayInfo {
+    static class AlertDisplayInfo {
         private AlertManifest manifest;
         private BufferedImage icon;
     }

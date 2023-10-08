@@ -23,13 +23,14 @@ public class AlertManifest {
     private final String author;
     private final AlertHubCategory category;
     private final List<String> tags;
+    private final List<String> dependsOn;
     private final Alert alert;
     private final boolean hasIcon;
 
     @Override
     public String toString()
     {
-        return displayName;
+        return this.displayName;
     }
 
     public List<String> getKeywords() {
@@ -40,8 +41,10 @@ public class AlertManifest {
             this.getCategory().getName()
         ).filter(Objects::nonNull);
         if (this.getTags() != null) {
-            System.out.println(this.getTags());
-            return Stream.concat(keywords, this.getTags().stream()).map(String::toUpperCase).collect(Collectors.toList());
+            keywords = Stream.concat(keywords, this.getTags().stream());
+        }
+        if (this.getDependsOn() != null) {
+            keywords = Stream.concat(keywords, this.getDependsOn().stream());
         }
         return keywords.map(String::toUpperCase).collect(Collectors.toList());
     }

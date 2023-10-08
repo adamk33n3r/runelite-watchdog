@@ -75,7 +75,7 @@ public class WatchdogPanel extends PluginPanel {
     @Inject
     private OkHttpClient httpClient;
 
-    private JScrollPane scroll;
+    private AlertListPanel alertListPanel;
 
     public static final ImageIcon ADD_ICON;
     public static final ImageIcon HELP_ICON;
@@ -123,11 +123,12 @@ public class WatchdogPanel extends PluginPanel {
     public void rebuild() {
         this.removeAll();
         this.setLayout(new BorderLayout(0, 3));
+        this.setBorder(new EmptyBorder(0, 5, 0, 5));
         this.setBackground(ColorScheme.DARK_GRAY_COLOR);
 
         JPanel topPanel = new JPanel(new BorderLayout());
-        JPanel titlePanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        titlePanel.setBorder(new EmptyBorder(5, 0, 0, 0));
+        topPanel.setBorder(new EmptyBorder(5, 0, 0, 0));
+        JPanel titlePanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 3));
         JLabel title = new JLabel(WatchdogPlugin.getInstance().getName());
         title.setFont(title.getFont().deriveFont(Font.BOLD));
         title.setHorizontalAlignment(JLabel.LEFT);
@@ -142,7 +143,7 @@ public class WatchdogPanel extends PluginPanel {
         titlePanel.add(version);
         topPanel.add(titlePanel);
 
-        JPanel actionButtons = new JPanel();
+        JPanel actionButtons = new JPanel(new FlowLayout(FlowLayout.RIGHT, 0, 0));
 
         JButton discordButton = PanelUtils.createActionButton(DISCORD_ICON, DISCORD_ICON_HOVER, "Discord", (btn, modifiers) -> {
             LinkBrowser.browse(DISCORD_URL);
@@ -180,14 +181,8 @@ public class WatchdogPanel extends PluginPanel {
 
         this.add(topPanel, BorderLayout.NORTH);
 
-        AlertListPanel alertPanel = new AlertListPanel(this.alertManager.getAlerts(), this::rebuild);
-        ScrollablePanel scrollablePanel = new ScrollablePanel(new StretchedStackedLayout(3, 3));
-        scrollablePanel.setScrollableWidth(ScrollablePanel.ScrollableSizeHint.FIT);
-        scrollablePanel.setScrollableHeight(ScrollablePanel.ScrollableSizeHint.STRETCH);
-        scrollablePanel.setScrollableBlockIncrement(ScrollablePanel.VERTICAL, ScrollablePanel.IncrementType.PERCENT, 10);
-        scrollablePanel.add(alertPanel);
-        this.scroll = new JScrollPane(scrollablePanel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-        this.add(this.scroll, BorderLayout.CENTER);
+        this.alertListPanel = new AlertListPanel(this.alertManager.getAlerts(), this::rebuild);
+        this.add(this.alertListPanel, BorderLayout.CENTER);
 
         JPanel importExportGroup = new JPanel(new GridLayout(1, 2, 5, 0));
         JButton importButton = new JButton("Import", IMPORT_ICON);
@@ -258,7 +253,7 @@ public class WatchdogPanel extends PluginPanel {
     }
 
     public void scrollToBottom() {
-        JScrollBar scrollBar = this.scroll.getVerticalScrollBar();
+        JScrollBar scrollBar = this.alertListPanel.getScrollPane().getVerticalScrollBar();
         scrollBar.setValue(scrollBar.getMaximum());
     }
 }

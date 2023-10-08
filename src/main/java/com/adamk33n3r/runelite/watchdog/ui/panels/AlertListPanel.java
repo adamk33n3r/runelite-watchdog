@@ -7,7 +7,11 @@ import com.adamk33n3r.runelite.watchdog.alerts.Alert;
 import com.adamk33n3r.runelite.watchdog.ui.AlertListItemNew;
 
 import com.adamk33n3r.runelite.watchdog.ui.SearchBar;
+import com.adamk33n3r.runelite.watchdog.ui.StretchedStackedLayout;
+
 import com.google.common.base.Splitter;
+import lombok.Getter;
+
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.components.DragAndDropReorderPane;
 import net.runelite.client.util.Text;
@@ -18,12 +22,15 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
 
 public class AlertListPanel extends JPanel {
     private String filterText = "";
     private static final Splitter SPLITTER = Splitter.on(" ").trimResults().omitEmptyStrings();
     private final List<AlertListItemNew> alertListItems = new ArrayList<>();
     private final DragAndDropReorderPane dragAndDropReorderPane = new DragAndDropReorderPane();
+    @Getter
+    private final JScrollPane scrollPane;
 
     public AlertListPanel(List<Alert> alerts, Runnable onChange) {
         AlertManager alertManager = WatchdogPlugin.getInstance().getAlertManager();
@@ -38,16 +45,22 @@ public class AlertListPanel extends JPanel {
 
         SearchBar searchBar = new SearchBar(this::filter);
         Arrays.stream(TriggerType.values()).map(TriggerType::getName).forEach(searchBar.getSuggestionListModel()::addElement);
-        JPanel searchWrapper = new JPanel(new BorderLayout(0, 6));
+        JPanel searchWrapper = new JPanel(new BorderLayout());
         searchWrapper.add(searchBar);
-        searchWrapper.setBorder(new EmptyBorder(0, 5, 0, 5));
-        this.add(searchBar, BorderLayout.NORTH);
-        // TODO: move the scroll pane in here so that the search bar doesn't scroll
+        searchWrapper.setBorder(new EmptyBorder(0, 0, 2, 0));
+        this.add(searchWrapper, BorderLayout.NORTH);
 
-        this.add(dragAndDropReorderPane, BorderLayout.CENTER);
+        ScrollablePanel scrollablePanel = new ScrollablePanel(new StretchedStackedLayout(3, 3));
+        scrollablePanel.setScrollableWidth(ScrollablePanel.ScrollableSizeHint.FIT);
+        scrollablePanel.setScrollableHeight(ScrollablePanel.ScrollableSizeHint.STRETCH);
+        scrollablePanel.setScrollableBlockIncrement(ScrollablePanel.VERTICAL, ScrollablePanel.IncrementType.PERCENT, 10);
+        scrollablePanel.add(this.dragAndDropReorderPane);
+        this.scrollPane = new JScrollPane(scrollablePanel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+
+        this.add(this.scrollPane, BorderLayout.CENTER);
 
         alerts.stream()
-            .map(alert -> new AlertListItemNew(WatchdogPlugin.getInstance().getPanel(), alertManager, alert, dragAndDropReorderPane, onChange))
+            .map(alert -> new AlertListItemNew(WatchdogPlugin.getInstance().getPanel(), alertManager, alert, this.dragAndDropReorderPane, onChange))
             .forEach(alertListItem -> {
                 this.alertListItems.add(alertListItem);
                 this.dragAndDropReorderPane.add(alertListItem);

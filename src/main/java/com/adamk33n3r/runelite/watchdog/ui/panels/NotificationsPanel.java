@@ -14,6 +14,7 @@ import com.adamk33n3r.runelite.watchdog.notifications.Sound;
 import com.adamk33n3r.runelite.watchdog.notifications.SoundEffect;
 import com.adamk33n3r.runelite.watchdog.notifications.TextToSpeech;
 import com.adamk33n3r.runelite.watchdog.notifications.TrayNotification;
+import com.adamk33n3r.runelite.watchdog.ui.StretchedStackedLayout;
 import com.adamk33n3r.runelite.watchdog.ui.dropdownbutton.DropDownButtonFactory;
 import com.adamk33n3r.runelite.watchdog.ui.notifications.panels.MessageNotificationPanel;
 import com.adamk33n3r.runelite.watchdog.ui.notifications.panels.NotificationPanel;
@@ -33,12 +34,8 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.inject.Inject;
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JMenuItem;
-import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import java.awt.BorderLayout;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionListener;
 import java.util.Arrays;
 
@@ -59,7 +56,7 @@ public class NotificationsPanel extends JPanel {
 
     public NotificationsPanel(Alert alert) {
         this.alert = alert;
-        this.setLayout(new DynamicGridLayout(0, 1, 3, 3));
+        this.setLayout(new BorderLayout(0, 5));
         this.notificationContainer = new DragAndDropReorderPane();
         this.notificationContainer.addDragListener((c) -> {
             int pos = this.notificationContainer.getPosition(c);
@@ -86,13 +83,21 @@ public class NotificationsPanel extends JPanel {
             popupMenu.add(c);
         });
         JButton addDropDownButton = DropDownButtonFactory.createDropDownButton(ADD_ICON, popupMenu);
+        addDropDownButton.setPreferredSize(new Dimension(40, addDropDownButton.getPreferredSize().height));
         addDropDownButton.setToolTipText("Create New Notification");
         JPanel buttonPanel = new JPanel(new BorderLayout());
         buttonPanel.add(new JLabel("Notifications"), BorderLayout.WEST);
         buttonPanel.add(addDropDownButton, BorderLayout.EAST);
 
-        this.add(buttonPanel);
-        this.add(this.notificationContainer);
+        this.add(buttonPanel, BorderLayout.NORTH);
+
+        ScrollablePanel scrollablePanel = new ScrollablePanel(new StretchedStackedLayout(3, 3));
+        scrollablePanel.setScrollableWidth(ScrollablePanel.ScrollableSizeHint.FIT);
+        scrollablePanel.setScrollableHeight(ScrollablePanel.ScrollableSizeHint.STRETCH);
+        scrollablePanel.setScrollableBlockIncrement(ScrollablePanel.VERTICAL, ScrollablePanel.IncrementType.PERCENT, 10);
+        scrollablePanel.add(this.notificationContainer);
+        JScrollPane scrollPane = new JScrollPane(scrollablePanel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        this.add(scrollPane, BorderLayout.CENTER);
     }
 
     // After inject, build

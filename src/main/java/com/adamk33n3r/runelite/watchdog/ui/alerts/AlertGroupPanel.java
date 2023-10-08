@@ -18,7 +18,9 @@ import net.runelite.client.ui.components.DragAndDropReorderPane;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import java.awt.BorderLayout;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.EmptyBorder;
+import java.awt.*;
 
 public class AlertGroupPanel extends AlertPanel<AlertGroup> {
     public AlertGroupPanel(WatchdogPanel watchdogPanel, AlertGroup alert) {
@@ -40,11 +42,14 @@ public class AlertGroupPanel extends AlertPanel<AlertGroup> {
         });
 
         buttonPanel.add(alertDropDownButton, BorderLayout.EAST);
-        JPanel subGroupPanel = new JPanel(new StretchedStackedLayout(3, 3));
-        subGroupPanel.setBorder(new HorizontalRuleBorder(10));
-        subGroupPanel.add(buttonPanel);
-        this.addSubPanel(subGroupPanel);
+        buttonPanel.setBorder(new EmptyBorder(0, 0, 8, 0));
+        JPanel subGroupPanel = new JPanel(new BorderLayout());
+        subGroupPanel.setBorder(new CompoundBorder(new EmptyBorder(0, 5, 0, 5), new HorizontalRuleBorder(10)));
+        subGroupPanel.add(buttonPanel, BorderLayout.NORTH);
 
-        subGroupPanel.add(new AlertListPanel(this.alert.getAlerts(), this::rebuild));
+        AlertListPanel alertListPanel = new AlertListPanel(this.alert.getAlerts(), this::rebuild);
+
+        subGroupPanel.add(alertListPanel);
+        this.addSubPanel(subGroupPanel);
     }
 }

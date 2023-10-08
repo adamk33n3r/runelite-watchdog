@@ -73,6 +73,12 @@ public class AlertHubItem extends JPanel {
             JOptionPane.showMessageDialog(this, "Added " + manifest.getDisplayName() + " to your alerts", "Successfully Added", JOptionPane.INFORMATION_MESSAGE);
         });
 
+        JLabel dependsOn = new JLabel();
+        dependsOn.setFont(FontManager.getRunescapeSmallFont());
+        if (manifest.getDependsOn() != null) {
+            dependsOn.setText("Depends On: " + String.join(", ", manifest.getDependsOn()));
+        }
+
         layout.setVerticalGroup(layout.createSequentialGroup()
             .addGap(5)
             .addGroup(layout.createSequentialGroup()
@@ -87,6 +93,7 @@ public class AlertHubItem extends JPanel {
                     .addComponent(compatVersion, LINE_HEIGHT, LINE_HEIGHT, LINE_HEIGHT)
                 )
                 .addComponent(alertDescLabel, 0, GroupLayout.DEFAULT_SIZE, 96)
+                .addComponent(dependsOn, 0, GroupLayout.DEFAULT_SIZE, LINE_HEIGHT)
                 .addGap(5)
             )
 //            .addComponent(icon, 0, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE)
@@ -111,6 +118,7 @@ public class AlertHubItem extends JPanel {
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(alertDescLabel, 0, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     )
+                    .addComponent(dependsOn)
                 )
                 .addGap(5)
             )
