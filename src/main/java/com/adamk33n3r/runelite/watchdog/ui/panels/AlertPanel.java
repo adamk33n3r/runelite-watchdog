@@ -35,8 +35,8 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import static com.adamk33n3r.runelite.watchdog.WatchdogPanel.IMPORT_ICON;
 import static com.adamk33n3r.runelite.watchdog.WatchdogPanel.EXPORT_ICON;
+import static com.adamk33n3r.runelite.watchdog.WatchdogPanel.IMPORT_ICON;
 import static com.adamk33n3r.runelite.watchdog.ui.notifications.panels.NotificationPanel.TEST_ICON;
 import static com.adamk33n3r.runelite.watchdog.ui.notifications.panels.NotificationPanel.TEST_ICON_HOVER;
 

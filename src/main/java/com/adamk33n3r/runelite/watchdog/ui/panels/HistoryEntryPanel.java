@@ -8,9 +8,7 @@ import net.runelite.client.ui.DynamicGridLayout;
 
 import lombok.Getter;
 
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTextArea;
+import javax.swing.*;
 import javax.swing.border.EtchedBorder;
 import java.time.Instant;
 import java.time.ZoneId;

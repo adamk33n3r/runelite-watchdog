@@ -4,12 +4,14 @@ import com.adamk33n3r.runelite.watchdog.WatchdogPanel;
 import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
 import com.adamk33n3r.runelite.watchdog.ui.WrappingLabel;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
-import lombok.Getter;
+
 import net.runelite.client.RuneLite;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.FontManager;
 import net.runelite.client.util.ImageUtil;
 import net.runelite.client.util.LinkBrowser;
+
+import lombok.Getter;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;

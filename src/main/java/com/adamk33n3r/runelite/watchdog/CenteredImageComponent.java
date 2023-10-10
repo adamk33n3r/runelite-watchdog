@@ -1,9 +1,10 @@
 package com.adamk33n3r.runelite.watchdog;
 
+import net.runelite.client.ui.overlay.components.LayoutableRenderableEntity;
+
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import net.runelite.client.ui.overlay.components.LayoutableRenderableEntity;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;

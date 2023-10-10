@@ -1,9 +1,7 @@
 package com.adamk33n3r.runelite.watchdog.ui.panels;
 
-import javax.swing.JComponent;
-import javax.swing.JPanel;
-import java.awt.BorderLayout;
-import java.awt.GridLayout;
+import javax.swing.*;
+import java.awt.*;
 import java.util.List;
 
 class InputGroup extends JPanel {

@@ -4,20 +4,12 @@ import com.adamk33n3r.runelite.watchdog.AlertManager;
 import com.adamk33n3r.runelite.watchdog.WatchdogPanel;
 import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
 import com.adamk33n3r.runelite.watchdog.alerts.AlertGroup;
-import com.adamk33n3r.runelite.watchdog.ui.AlertListItem;
-import com.adamk33n3r.runelite.watchdog.ui.AlertListItemNew;
 import com.adamk33n3r.runelite.watchdog.ui.HorizontalRuleBorder;
-import com.adamk33n3r.runelite.watchdog.ui.StretchedStackedLayout;
 import com.adamk33n3r.runelite.watchdog.ui.panels.AlertListPanel;
 import com.adamk33n3r.runelite.watchdog.ui.panels.AlertPanel;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
 
-import net.runelite.client.ui.DynamicGridLayout;
-import net.runelite.client.ui.components.DragAndDropReorderPane;
-
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
+import javax.swing.*;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;

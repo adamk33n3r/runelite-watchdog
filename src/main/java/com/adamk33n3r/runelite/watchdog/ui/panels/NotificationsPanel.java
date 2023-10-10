@@ -25,7 +25,6 @@ import com.adamk33n3r.runelite.watchdog.ui.notifications.panels.SoundEffectNotif
 import com.adamk33n3r.runelite.watchdog.ui.notifications.panels.SoundNotificationPanel;
 import com.adamk33n3r.runelite.watchdog.ui.notifications.panels.TextToSpeechNotificationPanel;
 
-import net.runelite.client.ui.DynamicGridLayout;
 import net.runelite.client.ui.components.DragAndDropReorderPane;
 import net.runelite.client.ui.components.colorpicker.ColorPickerManager;
 

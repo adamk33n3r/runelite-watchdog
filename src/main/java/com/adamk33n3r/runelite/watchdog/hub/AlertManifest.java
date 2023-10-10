@@ -1,6 +1,7 @@
 package com.adamk33n3r.runelite.watchdog.hub;
 
 import com.adamk33n3r.runelite.watchdog.alerts.Alert;
+
 import lombok.Data;
 import lombok.Setter;
 

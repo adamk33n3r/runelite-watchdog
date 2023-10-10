@@ -1,12 +1,19 @@
 package com.adamk33n3r.runelite.watchdog.hub;
 
 import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
+
+import net.runelite.client.util.ImageUtil;
+
 import com.google.common.base.Charsets;
 import com.google.common.io.CharStreams;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import net.runelite.client.util.ImageUtil;
-import okhttp3.*;
+import okhttp3.CacheControl;
+import okhttp3.HttpUrl;
+import okhttp3.Interceptor;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 import javax.annotation.Nonnull;
 import javax.imageio.ImageIO;
@@ -16,7 +23,10 @@ import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.*;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
@@ -79,12 +89,8 @@ public class AlertHubClient {
                         alertDisplayInfo.icon = ImageUtil.resizeImage(icon, 242, 182, true);
                     }
                 }
-                System.out.println(filePath);
-//                if (!entry.isDirectory()) {
             }
-//            String data = Objects.requireNonNull(res.body()).string();
 
-//            return RuneLiteAPI.GSON.fromJson(data, new TypeToken<List<AlertManifest>>() {}.getType());
             return alerts.values().stream().sorted(Comparator.comparing(alert -> alert.manifest.getDisplayName()))
                 .collect(Collectors.toList());
         }

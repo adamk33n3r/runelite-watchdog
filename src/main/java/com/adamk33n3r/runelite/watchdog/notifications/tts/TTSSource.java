@@ -1,6 +1,7 @@
 package com.adamk33n3r.runelite.watchdog.notifications.tts;
 
 import com.adamk33n3r.runelite.watchdog.Displayable;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

@@ -9,8 +9,7 @@ import net.runelite.client.ui.ColorScheme;
 
 import javax.sound.sampled.AudioFileFormat;
 import javax.sound.sampled.AudioSystem;
-import javax.swing.JFileChooser;
-import javax.swing.JLabel;
+import javax.swing.*;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;

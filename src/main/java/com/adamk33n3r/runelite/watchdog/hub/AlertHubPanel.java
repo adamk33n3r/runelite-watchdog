@@ -2,16 +2,16 @@ package com.adamk33n3r.runelite.watchdog.hub;
 
 import com.adamk33n3r.runelite.watchdog.ui.SearchBar;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
-
 import com.adamk33n3r.runelite.watchdog.ui.panels.ScrollablePanel;
-import com.google.common.base.Splitter;
+
 import net.runelite.client.ui.DynamicGridLayout;
 import net.runelite.client.ui.MultiplexingPluginPanel;
 import net.runelite.client.ui.PluginPanel;
-
-import lombok.extern.slf4j.Slf4j;
 import net.runelite.client.ui.components.IconTextField;
 import net.runelite.client.util.Text;
+
+import com.google.common.base.Splitter;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static com.adamk33n3r.runelite.watchdog.WatchdogPanel.HISTORY_ICON;
 import static com.adamk33n3r.runelite.watchdog.WatchdogPanel.HISTORY_ICON_HOVER;

@@ -18,14 +18,8 @@
  */
 package com.adamk33n3r.runelite.watchdog.ui.panels;
 
-import javax.swing.JPanel;
-import javax.swing.JViewport;
-import javax.swing.Scrollable;
-import javax.swing.SwingConstants;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.LayoutManager;
-import java.awt.Rectangle;
+import javax.swing.*;
+import java.awt.*;
 
 public class ScrollablePanel extends JPanel
     implements Scrollable, SwingConstants

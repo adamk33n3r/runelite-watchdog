@@ -3,9 +3,7 @@ package com.adamk33n3r.runelite.watchdog.ui;
 import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
-import java.awt.Component;
-import java.awt.Graphics;
-import java.awt.Insets;
+import java.awt.*;
 
 public class HorizontalRuleBorder extends EtchedBorder {
     private final int size;
