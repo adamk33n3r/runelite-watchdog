@@ -44,9 +44,6 @@ public interface WatchdogConfig extends Config {
     String DEFAULT_SCREEN_FLASH_MODE = "defaultScreenFlashMode";
     String DEFAULT_SCREEN_FLASH_DURATION = "defaultScreenFlashDuration";
 
-    // AFK Notification
-    String DEFAULT_AFK_SECONDS = "defaultAFKSeconds";
-
     // Sound
     String PUT_SOUNDS_INTO_QUEUE = "putSoundsIntoQueue";
     String DEFAULT_SOUND_VOLUME = "defaultSoundVolume";
@@ -254,29 +251,11 @@ public interface WatchdogConfig extends Config {
     default int defaultScreenFlashDuration() { return 2; }
     //endregion
 
-    //region AFK Notification
-    @ConfigSection(
-            name = "AFK Notification",
-            description = "The options that control the afk alert filter settings",
-            position = 3
-    )
-    String afkNotificationSection = "afkNotificationSection";
-
-    @ConfigItem(
-            keyName = DEFAULT_AFK_SECONDS,
-            name = "Default AFK Seconds",
-            description = "The default AFK seconds value",
-            section = afkNotificationSection
-    )
-    @Units(Units.SECONDS)
-    default int defaultAFKSeconds() { return 5; }
-    //endregion
-
     //region Sound
     @ConfigSection(
         name = "Custom Sound",
         description = "The options that control the custom sound notifications",
-        position = 4
+        position = 3
     )
     String soundSection = "soundSection";
 
@@ -302,7 +281,7 @@ public interface WatchdogConfig extends Config {
     @ConfigSection(
         name = "Sound Effect",
         description = "The options that control the custom sound notifications",
-        position = 5
+        position = 4
     )
     String soundEffectSection = "soundEffectSection";
 
@@ -328,7 +307,7 @@ public interface WatchdogConfig extends Config {
     @ConfigSection(
         name = "Text to Speech",
         description = "The options that control the text to speech notifications",
-        position = 6
+        position = 5
     )
     String ttsSection = "ttsSection";
 

@@ -1,8 +1,6 @@
 package com.adamk33n3r.runelite.watchdog.ui.notifications.panels;
 
 import com.adamk33n3r.runelite.watchdog.NotificationType;
-import com.adamk33n3r.runelite.watchdog.WatchdogConfig;
-import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
 import com.adamk33n3r.runelite.watchdog.notifications.Notification;
 import com.adamk33n3r.runelite.watchdog.ui.Icons;
 import com.adamk33n3r.runelite.watchdog.ui.StretchedStackedLayout;
@@ -14,13 +12,15 @@ import net.runelite.client.ui.components.MouseDragEventForwarder;
 
 import lombok.Getter;
 
-import javax.swing.*;
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
-import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
 
 public abstract class NotificationPanel extends JPanel {
     // worldhopper - arrow down
@@ -34,42 +34,6 @@ public abstract class NotificationPanel extends JPanel {
     // info - import cloud
     // info - github
     // config - edit/back
-
-    private static final ImageIcon FOREGROUND_ICON;
-    private static final ImageIcon FOREGROUND_ICON_HOVER;
-    private static final ImageIcon BACKGROUND_ICON;
-    private static final ImageIcon BACKGROUND_ICON_HOVER;
-    private static final ImageIcon AFK_ICON;
-    private static final ImageIcon AFK_ICON_HOVER;
-    private static final ImageIcon NON_AFK_ICON;
-    private static final ImageIcon NON_AFK_ICON_HOVER;
-    public static final ImageIcon TEST_ICON;
-    public static final ImageIcon TEST_ICON_HOVER;
-    protected static final ImageIcon VOLUME_ICON;
-    protected static final ImageIcon CLOCK_ICON;
-
-    static {
-        final BufferedImage foregroundImg = ImageUtil.loadImageResource(NotificationPanel.class, "foreground_icon.png");
-        final BufferedImage backgroundImg = ImageUtil.loadImageResource(NotificationPanel.class, "background_icon.png");
-        final BufferedImage afkIcon = ImageUtil.loadImageResource(NotificationPanel.class, "afk_icon.png");
-        final BufferedImage nonAFKIcon = ImageUtil.loadImageResource(NotificationPanel.class, "non_afk_icon.png");
-        final BufferedImage testImg = ImageUtil.loadImageResource(NotificationPanel.class, "test_icon.png");
-        final BufferedImage volumeImg = ImageUtil.loadImageResource(NotificationPanel.class, "volume_icon.png");
-        final BufferedImage clockIcon = ImageUtil.loadImageResource(NotificationPanel.class, "clock_icon.png");
-
-        FOREGROUND_ICON = new ImageIcon(foregroundImg);
-        FOREGROUND_ICON_HOVER = new ImageIcon(ImageUtil.luminanceOffset(foregroundImg, -80));
-        BACKGROUND_ICON = new ImageIcon(backgroundImg);
-        BACKGROUND_ICON_HOVER = new ImageIcon(ImageUtil.luminanceOffset(backgroundImg, -80));
-        AFK_ICON = new ImageIcon(afkIcon);
-        AFK_ICON_HOVER = new ImageIcon(ImageUtil.luminanceOffset(afkIcon, -80));
-        NON_AFK_ICON = new ImageIcon(nonAFKIcon);
-        NON_AFK_ICON_HOVER = new ImageIcon(ImageUtil.luminanceOffset(nonAFKIcon, -80));
-        TEST_ICON = new ImageIcon(testImg);
-        TEST_ICON_HOVER = new ImageIcon(ImageUtil.luminanceOffset(testImg, -80));
-        VOLUME_ICON = new ImageIcon(ImageUtil.luminanceOffset(volumeImg, -80));
-        CLOCK_ICON = new ImageIcon(ImageUtil.luminanceOffset(clockIcon, -80));
-    }
 
     @Getter
     protected Notification notification;
@@ -85,8 +49,6 @@ public abstract class NotificationPanel extends JPanel {
         this.notification = notification;
         this.onChangeListener = onChangeListener;
         this.onRemove = onRemove;
-
-        WatchdogConfig config = WatchdogPlugin.getInstance().getConfig();
 
         this.setLayout(new BorderLayout());
         this.setBorder(new EmptyBorder(3, 0, 0, 0));
@@ -118,50 +80,6 @@ public abstract class NotificationPanel extends JPanel {
         rightActions.setBackground(ColorScheme.DARKER_GRAY_COLOR);
         nameWrapper.add(rightActions, BorderLayout.EAST);
 
-        JPanel afkTimerConfigRow = new JPanel(new GridLayout(1, 2));
-        afkTimerConfigRow.setBorder(new EmptyBorder(4, 10, 0, 5));
-        afkTimerConfigRow.setBackground(ColorScheme.DARKER_GRAY_COLOR);
-        JLabel afkTimerLabel = new JLabel("AFK Seconds:");
-        afkTimerLabel.setToolTipText("Number of seconds for which the client doesn't get any mouse or keyboard inputs.");
-        AtomicInteger previousAFKSeconds = new AtomicInteger(notification.getFireWhenAFKForSeconds() > 0 ? notification.getFireWhenAFKForSeconds() : config.defaultAFKSeconds());
-
-        JSpinner afkTimerSpinner = PanelUtils.createSpinner(Math.max(notification.getFireWhenAFKForSeconds(), 1),
-            1,
-            25 * 60,
-            1,
-            (val) -> {
-                notification.setFireWhenAFKForSeconds(val);
-                previousAFKSeconds.set(val);
-                onChangeListener.run();
-            });
-        if (notification.getFireWhenAFKForSeconds() != 0) {
-            afkTimerConfigRow.add(afkTimerLabel);
-            afkTimerConfigRow.add(afkTimerSpinner);
-        }
-
-        JButton afkButton = PanelUtils.createToggleActionButton(
-            AFK_ICON,
-            AFK_ICON_HOVER,
-            NON_AFK_ICON,
-            NON_AFK_ICON_HOVER,
-            "Enable notification even when you are active",
-            "Switch to only fire notification when you have been AFK for a certain amount of time",
-            notification.getFireWhenAFKForSeconds() != 0,
-            (btn, modifiers) -> {
-                notification.setFireWhenAFKForSeconds(btn.isSelected() ? previousAFKSeconds.get() : 0);
-                if (notification.getFireWhenAFKForSeconds() != 0) {
-                    afkTimerSpinner.setValue(notification.getFireWhenAFKForSeconds());
-                    afkTimerConfigRow.add(afkTimerLabel);
-                    afkTimerConfigRow.add(afkTimerSpinner);
-                } else {
-                    afkTimerConfigRow.removeAll();
-                }
-                afkTimerConfigRow.revalidate();
-                afkTimerConfigRow.repaint();
-                onChangeListener.run();
-            });
-        rightActions.add(afkButton, BorderLayout.EAST);
-
         JButton focusBtn = PanelUtils.createToggleActionButton(
             Icons.FOREGROUND,
             Icons.FOREGROUND_HOVER,
@@ -189,8 +107,6 @@ public abstract class NotificationPanel extends JPanel {
             "Remove this notification",
             (btn, modifiers) -> onRemove.elementRemoved(this));
         rightActions.add(deleteBtn);
-
-        container.add(afkTimerConfigRow);
 
         this.settings.setBorder(new EmptyBorder(5, 10, 5, 10));
         this.settings.setBackground(ColorScheme.DARKER_GRAY_COLOR);
