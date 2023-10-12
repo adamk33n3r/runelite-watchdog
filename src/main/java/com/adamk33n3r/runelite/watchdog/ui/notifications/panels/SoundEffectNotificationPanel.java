@@ -2,6 +2,7 @@ package com.adamk33n3r.runelite.watchdog.ui.notifications.panels;
 
 import com.adamk33n3r.runelite.watchdog.WatchdogProperties;
 import com.adamk33n3r.runelite.watchdog.notifications.SoundEffect;
+import com.adamk33n3r.runelite.watchdog.ui.Icons;
 import com.adamk33n3r.runelite.watchdog.ui.notifications.VolumeSlider;
 import com.adamk33n3r.runelite.watchdog.ui.panels.NotificationsPanel;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
@@ -29,6 +30,6 @@ public class SoundEffectNotificationPanel extends NotificationPanel {
         VolumeSlider volumeSlider = new VolumeSlider(soundEffect);
         volumeSlider.setBackground(ColorScheme.MEDIUM_GRAY_COLOR);
         volumeSlider.addChangeListener(e -> onChangeListener.run());
-        this.settings.add(PanelUtils.createIconComponent(VOLUME_ICON, "The volume to playback sound effect", volumeSlider));
+        this.settings.add(PanelUtils.createIconComponent(Icons.VOLUME, "The volume to playback sound effect", volumeSlider));
     }
 }

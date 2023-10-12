@@ -1,6 +1,7 @@
 package com.adamk33n3r.runelite.watchdog.ui.notifications.panels;
 
 import com.adamk33n3r.runelite.watchdog.notifications.Overhead;
+import com.adamk33n3r.runelite.watchdog.ui.Icons;
 import com.adamk33n3r.runelite.watchdog.ui.panels.NotificationsPanel;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
 
@@ -14,6 +15,6 @@ public class OverheadNotificationPanel extends MessageNotificationPanel {
             notification.setDisplayTime(val);
             onChangeListener.run();
         });
-        this.settings.add(PanelUtils.createIconComponent(CLOCK_ICON, "Time to display overhead in seconds", displayTime));
+        this.settings.add(PanelUtils.createIconComponent(Icons.CLOCK, "Time to display overhead in seconds", displayTime));
     }
 }

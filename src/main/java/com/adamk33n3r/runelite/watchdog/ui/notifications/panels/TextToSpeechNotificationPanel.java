@@ -2,40 +2,28 @@ package com.adamk33n3r.runelite.watchdog.ui.notifications.panels;
 
 import com.adamk33n3r.runelite.watchdog.LengthLimitFilter;
 import com.adamk33n3r.runelite.watchdog.SimpleDocumentListener;
-import com.adamk33n3r.runelite.watchdog.WatchdogPanel;
 import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
 import com.adamk33n3r.runelite.watchdog.elevenlabs.ElevenLabs;
 import com.adamk33n3r.runelite.watchdog.elevenlabs.Voice;
 import com.adamk33n3r.runelite.watchdog.notifications.TextToSpeech;
 import com.adamk33n3r.runelite.watchdog.notifications.tts.TTSSource;
 import com.adamk33n3r.runelite.watchdog.ui.FlatTextArea;
+import com.adamk33n3r.runelite.watchdog.ui.Icons;
 import com.adamk33n3r.runelite.watchdog.ui.notifications.VoiceChooser;
 import com.adamk33n3r.runelite.watchdog.ui.notifications.VolumeSlider;
 import com.adamk33n3r.runelite.watchdog.ui.panels.NotificationsPanel;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
 
 import net.runelite.client.ui.ColorScheme;
-import net.runelite.client.util.ImageUtil;
 
 import javax.swing.*;
 import javax.swing.text.AbstractDocument;
 import java.awt.Font;
+import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
-import java.awt.image.BufferedImage;
 
 public class TextToSpeechNotificationPanel extends NotificationPanel {
-    private static final ImageIcon SPEECH_ICON;
-    private static final ImageIcon SPEED_ICON;
-
-    static {
-        final BufferedImage speechImg = ImageUtil.loadImageResource(NotificationPanel.class, "speech_icon.png");
-        final BufferedImage speedImg = ImageUtil.loadImageResource(NotificationPanel.class, "speed_icon.png");
-
-        SPEECH_ICON = new ImageIcon(ImageUtil.luminanceOffset(speechImg, -80));
-        SPEED_ICON = new ImageIcon(ImageUtil.luminanceOffset(speedImg, -80));
-    }
-
     public TextToSpeechNotificationPanel(TextToSpeech notification, NotificationsPanel parentPanel, Runnable onChangeListener, PanelUtils.OnRemove onRemove) {
         super(notification, parentPanel, onChangeListener, onRemove);
 
@@ -100,14 +88,27 @@ public class TextToSpeechNotificationPanel extends NotificationPanel {
                     //Not serialized
                     notification.setElevenLabsVoice(voice);
                 });
+
+                // Kinda hacky, but it'd also be hacky to modify the createSelect method so...shrug
+                ActionListener actionListener = voiceSelect.getActionListeners()[0];
+                voiceSelect.removeActionListener(actionListener);
+
                 ElevenLabs.getVoices(WatchdogPlugin.getInstance().getHttpClient(), (voices) -> {
                     SwingUtilities.invokeLater(() -> {
                         voices.getVoices().forEach((voice) -> {
                             voiceSelect.addItem(voice);
-                            if (voice.getName().equals(WatchdogPlugin.getInstance().getConfig().defaultElevenLabsVoice())) {
-                                voiceSelect.setSelectedItem(voice);
+                            if (notification.getElevenLabsVoiceId() == null) {
+                                if (voice.getName().equals(WatchdogPlugin.getInstance().getConfig().defaultElevenLabsVoice())) {
+                                    voiceSelect.setSelectedItem(voice);
+                                }
+                            } else {
+                                if (voice.getVoiceId().equals(notification.getElevenLabsVoiceId())) {
+                                    voiceSelect.setSelectedItem(voice);
+                                }
                             }
                         });
+
+                        voiceSelect.addActionListener(actionListener);
                     });
                 });
                 this.settings.add(voiceSelect);
@@ -119,17 +120,17 @@ public class TextToSpeechNotificationPanel extends NotificationPanel {
                     notification.setRate(rateSlider.getValue());
                     onChangeListener.run();
                 });
-                this.settings.add(PanelUtils.createIconComponent(SPEED_ICON, "The speed of the generated speech", rateSlider));
+                this.settings.add(PanelUtils.createIconComponent(Icons.SPEED, "The speed of the generated speech", rateSlider));
 
                 VoiceChooser voiceChooser = new VoiceChooser(notification);
                 voiceChooser.addActionListener(e -> onChangeListener.run());
-                this.settings.add(PanelUtils.createIconComponent(SPEECH_ICON, "The voice to generate speech with", voiceChooser));
+                this.settings.add(PanelUtils.createIconComponent(Icons.SPEECH, "The voice to generate speech with", voiceChooser));
                 break;
         }
 
         VolumeSlider volumeSlider = new VolumeSlider(notification);
         volumeSlider.setBackground(ColorScheme.MEDIUM_GRAY_COLOR);
         volumeSlider.addChangeListener(e -> onChangeListener.run());
-        this.settings.add(PanelUtils.createIconComponent(VOLUME_ICON, "The volume to playback speech", volumeSlider));
+        this.settings.add(PanelUtils.createIconComponent(Icons.VOLUME, "The volume to playback speech", volumeSlider));
     }
 }

@@ -2,6 +2,7 @@ package com.adamk33n3r.runelite.watchdog.ui.panels;
 
 import com.adamk33n3r.runelite.watchdog.Displayable;
 import com.adamk33n3r.runelite.watchdog.Util;
+import com.adamk33n3r.runelite.watchdog.ui.Icons;
 import com.adamk33n3r.runelite.watchdog.ui.PlaceholderTextArea;
 
 import net.runelite.client.ui.DynamicGridLayout;
@@ -17,19 +18,8 @@ import org.apache.commons.text.WordUtils;
 import javax.annotation.Nullable;
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.GridLayout;
-import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.*;
+import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.Arrays;
@@ -40,11 +30,11 @@ import java.util.regex.PatternSyntaxException;
 import java.util.stream.Collectors;
 
 public class PanelUtils {
-    private static final ImageIcon FOLDER_ICON;
+    private static final ImageIcon FOLDER;
     static {
-        final BufferedImage folderImg = ImageUtil.loadImageResource(PanelUtils.class, "folder_icon.png");
+        final BufferedImage folderImg = ImageUtil.loadImageResource(Icons.class, "mdi_folder-open.png");
 
-        FOLDER_ICON = new ImageIcon(folderImg);
+        FOLDER = new ImageIcon(folderImg);
     }
 
     private PanelUtils () {}
@@ -119,7 +109,7 @@ public class PanelUtils {
                 return filterLabel + Arrays.stream(filters).map(ft -> "*." + ft).collect(Collectors.joining(", ", " (", ")"));
             }
         });
-        JButton fileChooserButton = new JButton(null, FOLDER_ICON);
+        JButton fileChooserButton = new JButton(null, FOLDER);
         fileChooserButton.setToolTipText(tooltip);
         fileChooserButton.addActionListener(e -> {
             int result = fileChooser.showOpenDialog(panel);

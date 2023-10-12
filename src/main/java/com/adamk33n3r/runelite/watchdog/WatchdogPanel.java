@@ -2,6 +2,7 @@ package com.adamk33n3r.runelite.watchdog;
 
 import com.adamk33n3r.runelite.watchdog.alerts.*;
 import com.adamk33n3r.runelite.watchdog.ui.AlertListItem;
+import com.adamk33n3r.runelite.watchdog.ui.Icons;
 import com.adamk33n3r.runelite.watchdog.ui.ImportExportDialog;
 import com.adamk33n3r.runelite.watchdog.ui.SearchBar;
 import com.adamk33n3r.runelite.watchdog.ui.dropdownbutton.DropDownButtonFactory;
@@ -9,46 +10,27 @@ import com.adamk33n3r.runelite.watchdog.ui.panels.AlertPanel;
 import com.adamk33n3r.runelite.watchdog.ui.panels.HistoryPanel;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
 
-import com.google.common.base.Splitter;
 import net.runelite.api.Skill;
-import net.runelite.client.plugins.config.ConfigPlugin;
-import net.runelite.client.plugins.info.InfoPanel;
-import net.runelite.client.plugins.timetracking.TimeTrackingPlugin;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.MultiplexingPluginPanel;
 import net.runelite.client.ui.PluginPanel;
 import net.runelite.client.ui.components.DragAndDropReorderPane;
-import net.runelite.client.util.ImageUtil;
 import net.runelite.client.util.LinkBrowser;
-
-import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
 import net.runelite.client.util.Text;
 
+import com.google.common.base.Splitter;
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
 import org.apache.commons.text.WordUtils;
 
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Provider;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JMenuItem;
-import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.JScrollPane;
-import javax.swing.SwingConstants;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.Font;
-import java.awt.GridLayout;
+import java.awt.*;
 import java.awt.event.ActionListener;
-import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -83,50 +65,10 @@ public class WatchdogPanel extends PluginPanel {
 
     private String filterText = "";
     private static final Splitter SPLITTER = Splitter.on(" ").trimResults().omitEmptyStrings();
-//    private IconTextField searchBar;
     DragAndDropReorderPane dragAndDropReorderPane = new DragAndDropReorderPane();
     private final List<AlertListItem> alertListItems = new ArrayList<>();
     @Inject
     private OkHttpClient httpClient;
-
-    public static final ImageIcon ADD_ICON;
-    public static final ImageIcon HELP_ICON;
-    public static final ImageIcon HELP_ICON_HOVER;
-    public static final ImageIcon HISTORY_ICON;
-    public static final ImageIcon HISTORY_ICON_HOVER;
-    public static final ImageIcon DISCORD_ICON;
-    public static final ImageIcon DISCORD_ICON_HOVER;
-    public static final ImageIcon KOFI_ICON;
-    public static final ImageIcon KOFI_ICON_HOVER;
-    public static final ImageIcon CONFIG_ICON;
-    public static final ImageIcon CONFIG_ICON_HOVER;
-    public static final ImageIcon EXPORT_ICON = new ImageIcon(ImageUtil.loadImageResource(ConfigPlugin.class, "mdi_export.png"));
-    public static final ImageIcon IMPORT_ICON = new ImageIcon(ImageUtil.loadImageResource(WatchdogPanel.class, "mdi_import.png"));
-
-    static {
-        final BufferedImage addIcon = ImageUtil.loadImageResource(TimeTrackingPlugin.class, "add_icon.png");
-        ADD_ICON = new ImageIcon(addIcon);
-
-        final BufferedImage helpIcon = ImageUtil.loadImageResource(WatchdogPanel.class, "help_icon.png");
-        HELP_ICON = new ImageIcon(helpIcon);
-        HELP_ICON_HOVER = new ImageIcon(ImageUtil.luminanceOffset(helpIcon, -100));
-
-        final BufferedImage historyIcon = ImageUtil.loadImageResource(WatchdogPanel.class, "history_icon.png");
-        HISTORY_ICON = new ImageIcon(ImageUtil.luminanceOffset(historyIcon, -40));
-        HISTORY_ICON_HOVER = new ImageIcon(ImageUtil.luminanceOffset(historyIcon, -160));
-
-        final BufferedImage discordIcon = ImageUtil.loadImageResource(InfoPanel.class, "discord_icon.png");
-        DISCORD_ICON = new ImageIcon(discordIcon);
-        DISCORD_ICON_HOVER = new ImageIcon(ImageUtil.luminanceOffset(discordIcon, -100));
-
-        final BufferedImage kofiIcon = ImageUtil.loadImageResource(WatchdogPanel.class, "kofi_icon.png");
-        KOFI_ICON = new ImageIcon(kofiIcon);
-        KOFI_ICON_HOVER = new ImageIcon(ImageUtil.luminanceOffset(kofiIcon, -100));
-
-        final BufferedImage configIcon = ImageUtil.loadImageResource(ConfigPlugin.class, "config_edit_icon.png");
-        CONFIG_ICON = new ImageIcon(configIcon);
-        CONFIG_ICON_HOVER = new ImageIcon(ImageUtil.luminanceOffset(configIcon, -100));
-    }
 
     public WatchdogPanel() {
         super(false);
@@ -159,28 +101,28 @@ public class WatchdogPanel extends PluginPanel {
 
         JPanel actionButtons = new JPanel();
 
-        JButton discordButton = PanelUtils.createActionButton(DISCORD_ICON, DISCORD_ICON_HOVER, "Discord", (btn, modifiers) -> {
+        JButton discordButton = PanelUtils.createActionButton(Icons.DISCORD, Icons.DISCORD_HOVER, "Discord", (btn, modifiers) -> {
             LinkBrowser.browse(DISCORD_URL);
         });
         actionButtons.add(discordButton);
 
-        JButton kofiButton = PanelUtils.createActionButton(KOFI_ICON, KOFI_ICON_HOVER, "Buy me a coffee :)", (btn, modifiers) -> {
+        JButton kofiButton = PanelUtils.createActionButton(Icons.KOFI, Icons.KOFI_HOVER, "Buy me a coffee :)", (btn, modifiers) -> {
             LinkBrowser.browse(KOFI_URL);
         });
         kofiButton.setPreferredSize(new Dimension(17, 17));
         actionButtons.add(kofiButton);
 
-        JButton helpButton = PanelUtils.createActionButton(HELP_ICON, HELP_ICON_HOVER, "Wiki", (btn, modifiers) -> {
+        JButton helpButton = PanelUtils.createActionButton(Icons.HELP, Icons.HELP_HOVER, "Wiki", (btn, modifiers) -> {
             LinkBrowser.browse(HELP_URL);
         });
         actionButtons.add(helpButton);
 
-        JButton configButton = PanelUtils.createActionButton(CONFIG_ICON, CONFIG_ICON_HOVER, "Config", (btn, modifiers) -> {
+        JButton configButton = PanelUtils.createActionButton(Icons.CONFIG, Icons.CONFIG_HOVER, "Config", (btn, modifiers) -> {
             WatchdogPlugin.getInstance().openConfiguration();
         });
         actionButtons.add(configButton);
 
-        JButton historyButton = PanelUtils.createActionButton(HISTORY_ICON, HISTORY_ICON_HOVER, "History", (btn, modifiers) -> {
+        JButton historyButton = PanelUtils.createActionButton(Icons.HISTORY, Icons.HISTORY_HOVER, "History", (btn, modifiers) -> {
             this.muxer.pushState(this.historyPanelProvider.get());
         });
         actionButtons.add(historyButton);
@@ -200,7 +142,7 @@ public class WatchdogPanel extends PluginPanel {
                 c.addActionListener(actionListener);
                 popupMenu.add(c);
             });
-        JButton addDropDownButton = DropDownButtonFactory.createDropDownButton(ADD_ICON, popupMenu);
+        JButton addDropDownButton = DropDownButtonFactory.createDropDownButton(Icons.ADD, popupMenu);
         addDropDownButton.setToolTipText("Create New Alert");
         actionButtons.add(addDropDownButton);
 
@@ -232,14 +174,14 @@ public class WatchdogPanel extends PluginPanel {
         this.add(new JScrollPane(alertPanel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER), BorderLayout.CENTER);
 
         JPanel importExportGroup = new JPanel(new GridLayout(1, 2, 5, 0));
-        JButton importButton = new JButton("Import", IMPORT_ICON);
+        JButton importButton = new JButton("Import", Icons.IMPORT);
         importButton.setHorizontalTextPosition(SwingConstants.LEFT);
         importButton.addActionListener(ev -> {
             ImportExportDialog importExportDialog = new ImportExportDialog(SwingUtilities.getWindowAncestor(this));
             importExportDialog.setVisible(true);
         });
         importExportGroup.add(importButton);
-        JButton exportButton = new JButton("Export", EXPORT_ICON);
+        JButton exportButton = new JButton("Export", Icons.EXPORT);
         exportButton.setHorizontalTextPosition(SwingConstants.LEFT);
         exportButton.addActionListener(ev -> {
             ImportExportDialog importExportDialog = new ImportExportDialog(SwingUtilities.getWindowAncestor(this), WatchdogPlugin.getInstance().getConfig().alerts());

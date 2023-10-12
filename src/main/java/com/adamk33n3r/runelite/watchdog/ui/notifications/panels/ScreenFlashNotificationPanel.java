@@ -2,17 +2,16 @@ package com.adamk33n3r.runelite.watchdog.ui.notifications.panels;
 
 import com.adamk33n3r.runelite.watchdog.alerts.FlashMode;
 import com.adamk33n3r.runelite.watchdog.notifications.ScreenFlash;
+import com.adamk33n3r.runelite.watchdog.ui.Icons;
 import com.adamk33n3r.runelite.watchdog.ui.panels.NotificationsPanel;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
 
-import net.runelite.client.config.FlashNotification;
 import net.runelite.client.ui.components.ColorJButton;
 import net.runelite.client.ui.components.colorpicker.ColorPickerManager;
 
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JComboBox;
 import javax.swing.JSpinner;
-import java.util.Arrays;
 
 public class ScreenFlashNotificationPanel extends NotificationPanel {
     public ScreenFlashNotificationPanel(ScreenFlash screenFlash, NotificationsPanel parentPanel, ColorPickerManager colorPickerManager, Runnable onChangeListener, PanelUtils.OnRemove onRemove) {
@@ -34,6 +33,13 @@ public class ScreenFlashNotificationPanel extends NotificationPanel {
 
         JComboBox<FlashMode> flashModeSelect = new JComboBox<>(FlashMode.values());
         flashModeSelect.setToolTipText("The screen flash mode");
+        // TODO: Would be nice to move this somewhere else on import or something
+        if (screenFlash.getFlashMode() == null) {
+            screenFlash.setFlashMode(FlashMode.FLASH);
+            if (screenFlash.getFlashDuration() == 0) {
+                screenFlash.setFlashDuration(2);
+            }
+        }
         flashModeSelect.setSelectedItem(screenFlash.getFlashMode());
         flashModeSelect.setRenderer((list, value, index, isSelected, cellHasFocus) -> {
             list.setToolTipText(value.getTooltip());
@@ -49,6 +55,6 @@ public class ScreenFlashNotificationPanel extends NotificationPanel {
             screenFlash.setFlashDuration(val);
             onChangeListener.run();
         });
-        this.settings.add(PanelUtils.createIconComponent(CLOCK_ICON, "Duration of flash, use 0 to flash until cancelled", flashDuration));
+        this.settings.add(PanelUtils.createIconComponent(Icons.CLOCK, "Duration of flash, use 0 to flash until cancelled", flashDuration));
     }
 }

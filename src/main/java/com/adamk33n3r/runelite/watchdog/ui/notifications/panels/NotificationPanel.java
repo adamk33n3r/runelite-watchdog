@@ -4,14 +4,13 @@ import com.adamk33n3r.runelite.watchdog.NotificationType;
 import com.adamk33n3r.runelite.watchdog.WatchdogConfig;
 import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
 import com.adamk33n3r.runelite.watchdog.notifications.Notification;
-import com.adamk33n3r.runelite.watchdog.ui.AlertListItem;
+import com.adamk33n3r.runelite.watchdog.ui.Icons;
 import com.adamk33n3r.runelite.watchdog.ui.StretchedStackedLayout;
 import com.adamk33n3r.runelite.watchdog.ui.panels.NotificationsPanel;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
 
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.components.MouseDragEventForwarder;
-import net.runelite.client.util.ImageUtil;
 
 import lombok.Getter;
 
@@ -164,10 +163,10 @@ public abstract class NotificationPanel extends JPanel {
         rightActions.add(afkButton, BorderLayout.EAST);
 
         JButton focusBtn = PanelUtils.createToggleActionButton(
-            FOREGROUND_ICON,
-            FOREGROUND_ICON_HOVER,
-            BACKGROUND_ICON,
-            BACKGROUND_ICON_HOVER,
+            Icons.FOREGROUND,
+            Icons.FOREGROUND_HOVER,
+            Icons.BACKGROUND,
+            Icons.BACKGROUND_HOVER,
             "Switch to only fire notification while the game is in the background",
             "Enable notification while the game is in the foreground",
             notification.isFireWhenFocused(),
@@ -178,15 +177,15 @@ public abstract class NotificationPanel extends JPanel {
         rightActions.add(focusBtn, BorderLayout.EAST);
 
         JButton testBtn = PanelUtils.createActionButton(
-            TEST_ICON,
-            TEST_ICON_HOVER,
+            Icons.TEST,
+            Icons.TEST_HOVER,
             "Test the notification",
             (btn, modifiers) -> notification.fireForced(new String[]{ "1", "2", "3", "4", "5" }));
         rightActions.add(testBtn);
 
         JButton deleteBtn = PanelUtils.createActionButton(
-            AlertListItem.DELETE_ICON,
-            AlertListItem.DELETE_ICON_HOVER,
+            Icons.DELETE,
+            Icons.DELETE_HOVER,
             "Remove this notification",
             (btn, modifiers) -> onRemove.elementRemoved(this));
         rightActions.add(deleteBtn);
