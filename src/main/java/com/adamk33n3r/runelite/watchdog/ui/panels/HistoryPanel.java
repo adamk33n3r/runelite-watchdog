@@ -2,6 +2,7 @@ package com.adamk33n3r.runelite.watchdog.ui.panels;
 
 import com.adamk33n3r.runelite.watchdog.alerts.Alert;
 import com.adamk33n3r.runelite.watchdog.notifications.IMessageNotification;
+import com.adamk33n3r.runelite.watchdog.ui.Icons;
 import com.adamk33n3r.runelite.watchdog.ui.SearchBar;
 import com.adamk33n3r.runelite.watchdog.ui.StretchedStackedLayout;
 
@@ -17,14 +18,12 @@ import javax.inject.Provider;
 import javax.inject.Singleton;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static com.adamk33n3r.runelite.watchdog.ui.panels.AlertPanel.BACK_ICON;
-import static com.adamk33n3r.runelite.watchdog.ui.panels.AlertPanel.BACK_ICON_HOVER;
 
 @Slf4j
 @Singleton
@@ -47,8 +46,8 @@ public class HistoryPanel extends PluginPanel {
         JPanel topPanel = new JPanel(new BorderLayout(0, 5));
         topPanel.setBorder(new EmptyBorder(0, 0, 5, 0));
         JButton backButton = PanelUtils.createActionButton(
-            BACK_ICON,
-            BACK_ICON_HOVER,
+            Icons.BACK,
+            Icons.BACK_HOVER,
             "Back",
             (btn, modifiers) -> this.muxer.get().popState()
         );

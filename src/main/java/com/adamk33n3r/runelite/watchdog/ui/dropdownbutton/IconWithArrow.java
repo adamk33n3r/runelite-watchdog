@@ -19,8 +19,12 @@
 
 package com.adamk33n3r.runelite.watchdog.ui.dropdownbutton;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.Icon;
+import javax.swing.UIManager;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.geom.Path2D;
 
 /**

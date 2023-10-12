@@ -4,26 +4,11 @@ import com.adamk33n3r.runelite.watchdog.AlertManager;
 import com.adamk33n3r.runelite.watchdog.NotificationType;
 import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
 import com.adamk33n3r.runelite.watchdog.alerts.Alert;
-import com.adamk33n3r.runelite.watchdog.notifications.GameMessage;
-import com.adamk33n3r.runelite.watchdog.notifications.Notification;
-import com.adamk33n3r.runelite.watchdog.notifications.NotificationEvent;
-import com.adamk33n3r.runelite.watchdog.notifications.Overhead;
-import com.adamk33n3r.runelite.watchdog.notifications.Overlay;
-import com.adamk33n3r.runelite.watchdog.notifications.ScreenFlash;
-import com.adamk33n3r.runelite.watchdog.notifications.Sound;
-import com.adamk33n3r.runelite.watchdog.notifications.SoundEffect;
-import com.adamk33n3r.runelite.watchdog.notifications.TextToSpeech;
-import com.adamk33n3r.runelite.watchdog.notifications.TrayNotification;
+import com.adamk33n3r.runelite.watchdog.notifications.*;
+import com.adamk33n3r.runelite.watchdog.ui.Icons;
 import com.adamk33n3r.runelite.watchdog.ui.StretchedStackedLayout;
 import com.adamk33n3r.runelite.watchdog.ui.dropdownbutton.DropDownButtonFactory;
-import com.adamk33n3r.runelite.watchdog.ui.notifications.panels.MessageNotificationPanel;
-import com.adamk33n3r.runelite.watchdog.ui.notifications.panels.NotificationPanel;
-import com.adamk33n3r.runelite.watchdog.ui.notifications.panels.OverheadNotificationPanel;
-import com.adamk33n3r.runelite.watchdog.ui.notifications.panels.OverlayNotificationPanel;
-import com.adamk33n3r.runelite.watchdog.ui.notifications.panels.ScreenFlashNotificationPanel;
-import com.adamk33n3r.runelite.watchdog.ui.notifications.panels.SoundEffectNotificationPanel;
-import com.adamk33n3r.runelite.watchdog.ui.notifications.panels.SoundNotificationPanel;
-import com.adamk33n3r.runelite.watchdog.ui.notifications.panels.TextToSpeechNotificationPanel;
+import com.adamk33n3r.runelite.watchdog.ui.notifications.panels.*;
 
 import net.runelite.client.ui.components.DragAndDropReorderPane;
 import net.runelite.client.ui.components.colorpicker.ColorPickerManager;
@@ -34,11 +19,10 @@ import lombok.extern.slf4j.Slf4j;
 
 import javax.inject.Inject;
 import javax.swing.*;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.event.ActionListener;
 import java.util.Arrays;
-
-import static com.adamk33n3r.runelite.watchdog.WatchdogPanel.ADD_ICON;
 
 @Slf4j
 public class NotificationsPanel extends JPanel {
@@ -81,7 +65,7 @@ public class NotificationsPanel extends JPanel {
             c.addActionListener(actionListener);
             popupMenu.add(c);
         });
-        JButton addDropDownButton = DropDownButtonFactory.createDropDownButton(ADD_ICON, popupMenu);
+        JButton addDropDownButton = DropDownButtonFactory.createDropDownButton(Icons.ADD, popupMenu);
         addDropDownButton.setPreferredSize(new Dimension(40, addDropDownButton.getPreferredSize().height));
         addDropDownButton.setToolTipText("Create New Notification");
         JPanel buttonPanel = new JPanel(new BorderLayout());

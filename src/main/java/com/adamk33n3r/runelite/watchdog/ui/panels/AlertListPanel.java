@@ -15,9 +15,10 @@ import net.runelite.client.util.Text;
 import com.google.common.base.Splitter;
 import lombok.Getter;
 
-import javax.swing.*;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.border.EmptyBorder;
-import java.awt.*;
+import java.awt.BorderLayout;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;

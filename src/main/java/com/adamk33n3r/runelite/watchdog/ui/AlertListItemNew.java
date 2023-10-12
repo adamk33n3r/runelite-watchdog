@@ -1,7 +1,6 @@
 package com.adamk33n3r.runelite.watchdog.ui;
 
 import com.adamk33n3r.runelite.watchdog.AlertManager;
-import com.adamk33n3r.runelite.watchdog.Icons;
 import com.adamk33n3r.runelite.watchdog.WatchdogPanel;
 import com.adamk33n3r.runelite.watchdog.alerts.Alert;
 import com.adamk33n3r.runelite.watchdog.alerts.AlertGroup;
@@ -17,7 +16,8 @@ import lombok.Getter;
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
@@ -140,11 +140,11 @@ public class AlertListItemNew extends JPanel {
         rightActions.setBackground(ColorScheme.DARKER_GRAY_COLOR);
         topWrapper.add(rightActions, BorderLayout.EAST);
 
-        rightActions.add(PanelUtils.createActionButton(Icons.EDIT_ICON, Icons.EDIT_ICON, "Edit Alert", (btn, modifiers) -> {
+        rightActions.add(PanelUtils.createActionButton(Icons.EDIT, Icons.EDIT, "Edit Alert", (btn, modifiers) -> {
             this.panel.openAlert(this.alert);
         }));
 
-        rightActions.add(PanelUtils.createActionButton(Icons.CLONE_ICON, Icons.CLONE_ICON, "Clone Alert", (btn, modifiers) -> {
+        rightActions.add(PanelUtils.createActionButton(Icons.CLONE, Icons.CLONE, "Clone Alert", (btn, modifiers) -> {
             Alert cloned = this.alertManager.cloneAlert(this.alert);
             AlertGroup parent = this.alert.getParent();
             if (parent != null) {
@@ -157,7 +157,7 @@ public class AlertListItemNew extends JPanel {
             this.onChange.run();
         }));
 
-        final JButton deleteButton = PanelUtils.createActionButton(Icons.DELETE_ICON, Icons.DELETE_ICON, "Delete Alert", (btn, modifiers) -> {
+        final JButton deleteButton = PanelUtils.createActionButton(Icons.DELETE, Icons.DELETE, "Delete Alert", (btn, modifiers) -> {
             int result = JOptionPane.showConfirmDialog(this, "Are you sure you want to delete the " + this.alert.getName() + " alert?", "Delete?", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE);
             if (result == JOptionPane.YES_OPTION) {
                 this.alertManager.removeAlert(this.alert);

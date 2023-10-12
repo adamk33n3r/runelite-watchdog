@@ -19,7 +19,9 @@
 
 package com.adamk33n3r.runelite.watchdog.ui.dropdownbutton;
 
-import javax.swing.*;
+import javax.swing.Icon;
+import javax.swing.JButton;
+import javax.swing.JPopupMenu;
 
 /**
  * Factory creating buttons with a small arrow icon that shows a popup menu when clicked.

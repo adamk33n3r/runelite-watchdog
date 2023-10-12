@@ -18,7 +18,7 @@
  */
 package com.adamk33n3r.runelite.watchdog.ui.dropdownbutton;
 
-import javax.swing.*;
+import javax.swing.Icon;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.io.Serializable;

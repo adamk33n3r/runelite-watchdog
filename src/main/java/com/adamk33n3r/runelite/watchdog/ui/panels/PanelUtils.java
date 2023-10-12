@@ -5,6 +5,7 @@ import com.adamk33n3r.runelite.watchdog.TriggerType;
 import com.adamk33n3r.runelite.watchdog.Util;
 import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
 import com.adamk33n3r.runelite.watchdog.alerts.Alert;
+import com.adamk33n3r.runelite.watchdog.ui.Icons;
 import com.adamk33n3r.runelite.watchdog.ui.PlaceholderTextArea;
 import com.adamk33n3r.runelite.watchdog.ui.dropdownbutton.DropDownButtonFactory;
 
@@ -22,12 +23,7 @@ import javax.annotation.Nullable;
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.Arrays;
@@ -37,14 +33,12 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 import java.util.stream.Collectors;
 
-import static com.adamk33n3r.runelite.watchdog.WatchdogPanel.ADD_ICON;
-
 public class PanelUtils {
-    private static final ImageIcon FOLDER_ICON;
+    private static final ImageIcon FOLDER;
     static {
-        final BufferedImage folderImg = ImageUtil.loadImageResource(PanelUtils.class, "folder_icon.png");
+        final BufferedImage folderImg = ImageUtil.loadImageResource(Icons.class, "mdi_folder-open.png");
 
-        FOLDER_ICON = new ImageIcon(folderImg);
+        FOLDER = new ImageIcon(folderImg);
     }
 
     private PanelUtils () {}
@@ -119,7 +113,7 @@ public class PanelUtils {
                 return filterLabel + Arrays.stream(filters).map(ft -> "*." + ft).collect(Collectors.joining(", ", " (", ")"));
             }
         });
-        JButton fileChooserButton = new JButton(null, FOLDER_ICON);
+        JButton fileChooserButton = new JButton(null, FOLDER);
         fileChooserButton.setToolTipText(tooltip);
         fileChooserButton.addActionListener(e -> {
             int result = fileChooser.showOpenDialog(panel);
@@ -315,7 +309,7 @@ public class PanelUtils {
                 c.addActionListener(actionListener);
                 popupMenu.add(c);
             });
-        JButton addDropDownButton = DropDownButtonFactory.createDropDownButton(ADD_ICON, popupMenu);
+        JButton addDropDownButton = DropDownButtonFactory.createDropDownButton(Icons.ADD, popupMenu);
         addDropDownButton.setPreferredSize(new Dimension(40, addDropDownButton.getPreferredSize().height));
         addDropDownButton.setToolTipText("Create New Alert");
         return addDropDownButton;

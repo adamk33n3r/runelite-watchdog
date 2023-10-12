@@ -1,5 +1,6 @@
 package com.adamk33n3r.runelite.watchdog.hub;
 
+import com.adamk33n3r.runelite.watchdog.ui.Icons;
 import com.adamk33n3r.runelite.watchdog.ui.SearchBar;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
 import com.adamk33n3r.runelite.watchdog.ui.panels.ScrollablePanel;
@@ -17,17 +18,13 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.stream.Collectors;
-
-import static com.adamk33n3r.runelite.watchdog.WatchdogPanel.HISTORY_ICON;
-import static com.adamk33n3r.runelite.watchdog.WatchdogPanel.HISTORY_ICON_HOVER;
-import static com.adamk33n3r.runelite.watchdog.ui.panels.AlertPanel.BACK_ICON;
-import static com.adamk33n3r.runelite.watchdog.ui.panels.AlertPanel.BACK_ICON_HOVER;
 
 @Slf4j
 public class AlertHubPanel extends PluginPanel {
@@ -50,8 +47,8 @@ public class AlertHubPanel extends PluginPanel {
         this.executor = executor;
 
         JButton backButton = PanelUtils.createActionButton(
-            BACK_ICON,
-            BACK_ICON_HOVER,
+            Icons.BACK,
+            Icons.BACK_HOVER,
             "Back",
             (btn, modifiers) -> this.muxer.get().popState()
         );
@@ -77,7 +74,7 @@ public class AlertHubPanel extends PluginPanel {
         wrapper.setScrollableUnitIncrement(SwingConstants.VERTICAL, ScrollablePanel.IncrementType.PERCENT, 10);
         this.scrollPane = new JScrollPane(wrapper, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 
-        JButton refresh = PanelUtils.createActionButton(HISTORY_ICON, HISTORY_ICON_HOVER, "Refresh", (btn, mod) -> {
+        JButton refresh = PanelUtils.createActionButton(Icons.HISTORY, Icons.HISTORY_HOVER, "Refresh", (btn, mod) -> {
             this.reloadList(true);
         });
 

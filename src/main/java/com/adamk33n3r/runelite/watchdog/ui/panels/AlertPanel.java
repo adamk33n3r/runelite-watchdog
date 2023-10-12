@@ -1,24 +1,14 @@
 package com.adamk33n3r.runelite.watchdog.ui.panels;
 
-import com.adamk33n3r.runelite.watchdog.AlertManager;
-import com.adamk33n3r.runelite.watchdog.Displayable;
-import com.adamk33n3r.runelite.watchdog.TriggerType;
-import com.adamk33n3r.runelite.watchdog.WatchdogPanel;
-import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
+import com.adamk33n3r.runelite.watchdog.*;
 import com.adamk33n3r.runelite.watchdog.alerts.Alert;
 import com.adamk33n3r.runelite.watchdog.alerts.AlertGroup;
 import com.adamk33n3r.runelite.watchdog.alerts.RegexMatcher;
-import com.adamk33n3r.runelite.watchdog.ui.HorizontalRuleBorder;
-import com.adamk33n3r.runelite.watchdog.ui.ImportExportDialog;
-import com.adamk33n3r.runelite.watchdog.ui.PlaceholderTextField;
-import com.adamk33n3r.runelite.watchdog.ui.StretchedStackedLayout;
-import com.adamk33n3r.runelite.watchdog.ui.ToggleButton;
+import com.adamk33n3r.runelite.watchdog.ui.*;
 
-import net.runelite.client.plugins.config.ConfigPlugin;
 import net.runelite.client.plugins.info.JRichTextPane;
 import net.runelite.client.ui.MultiplexingPluginPanel;
 import net.runelite.client.ui.PluginPanel;
-import net.runelite.client.util.ImageUtil;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.text.WordUtils;
@@ -26,19 +16,16 @@ import org.apache.commons.text.WordUtils;
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.GridLayout;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
-import java.awt.image.BufferedImage;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-
-import static com.adamk33n3r.runelite.watchdog.WatchdogPanel.EXPORT_ICON;
-import static com.adamk33n3r.runelite.watchdog.WatchdogPanel.IMPORT_ICON;
-import static com.adamk33n3r.runelite.watchdog.ui.notifications.panels.NotificationPanel.TEST_ICON;
-import static com.adamk33n3r.runelite.watchdog.ui.notifications.panels.NotificationPanel.TEST_ICON_HOVER;
 
 @Slf4j
 public abstract class AlertPanel<T extends Alert> extends PluginPanel {
@@ -49,31 +36,6 @@ public abstract class AlertPanel<T extends Alert> extends PluginPanel {
     protected final T alert;
 
     private final AlertManager alertManager;
-
-    public static final ImageIcon BACK_ICON;
-    public static final ImageIcon BACK_ICON_HOVER;
-    public static final ImageIcon IMPORT_ICON_HOVER;
-    public static final ImageIcon EXPORT_ICON_HOVER;
-    public static final ImageIcon REGEX_ICON;
-    public static final ImageIcon REGEX_ICON_HOVER;
-    public static final ImageIcon REGEX_SELECTED_ICON;
-    public static final ImageIcon REGEX_SELECTED_ICON_HOVER;
-
-    static {
-        final BufferedImage backIcon = ImageUtil.loadImageResource(ConfigPlugin.class, "config_back_icon.png");
-        BACK_ICON = new ImageIcon(backIcon);
-        BACK_ICON_HOVER = new ImageIcon(ImageUtil.alphaOffset(backIcon, -120));
-
-        IMPORT_ICON_HOVER = new ImageIcon(ImageUtil.alphaOffset(IMPORT_ICON.getImage(), -120));
-        EXPORT_ICON_HOVER = new ImageIcon(ImageUtil.alphaOffset(EXPORT_ICON.getImage(), -120));
-
-        final BufferedImage regexIcon = ImageUtil.loadImageResource(AlertPanel.class, "regex_icon.png");
-        final BufferedImage regexIconSelected = ImageUtil.loadImageResource(AlertPanel.class, "regex_icon_selected.png");
-        REGEX_ICON = new ImageIcon(ImageUtil.luminanceOffset(regexIcon, -80));
-        REGEX_ICON_HOVER = new ImageIcon(ImageUtil.luminanceOffset(regexIcon, -120));
-        REGEX_SELECTED_ICON = new ImageIcon(regexIconSelected);
-        REGEX_SELECTED_ICON_HOVER = new ImageIcon(ImageUtil.luminanceOffset(regexIconSelected, -80));
-    }
 
     public AlertPanel(WatchdogPanel watchdogPanel, T alert) {
         super(false);
@@ -101,8 +63,8 @@ public abstract class AlertPanel<T extends Alert> extends PluginPanel {
 
         if (alert instanceof AlertGroup) {
             JButton importAlertBtn = PanelUtils.createActionButton(
-                IMPORT_ICON,
-                IMPORT_ICON_HOVER,
+                Icons.IMPORT,
+                Icons.IMPORT_HOVER,
                 "Import alert into this group",
                 (btn, modifiers) -> {
                     ImportExportDialog importExportDialog = new ImportExportDialog(
@@ -119,8 +81,8 @@ public abstract class AlertPanel<T extends Alert> extends PluginPanel {
             rightButtons.add(importAlertBtn);
         } else {
             JButton testAlert = PanelUtils.createActionButton(
-                TEST_ICON,
-                TEST_ICON_HOVER,
+                Icons.TEST,
+                Icons.TEST_HOVER,
                 "Test the whole alert",
                 (btn, modifiers) -> {
                     String[] triggerValues = {"1", "2", "3", "4", "5"};
@@ -132,8 +94,8 @@ public abstract class AlertPanel<T extends Alert> extends PluginPanel {
         }
 
         JButton exportAlertBtn = PanelUtils.createActionButton(
-            EXPORT_ICON,
-            EXPORT_ICON_HOVER,
+            Icons.EXPORT,
+            Icons.EXPORT_HOVER,
             "Export this alert",
             (btn, modifiers) -> {
                 ImportExportDialog importExportDialog = new ImportExportDialog(
@@ -156,8 +118,8 @@ public abstract class AlertPanel<T extends Alert> extends PluginPanel {
         nameGroup.add(rightButtons, BorderLayout.EAST);
 
         JButton backButton = PanelUtils.createActionButton(
-            BACK_ICON,
-            BACK_ICON_HOVER,
+            Icons.BACK,
+            Icons.BACK_HOVER,
             "Back",
             (btn, modifiers) -> {
                 this.alertManager.saveAlerts();
@@ -305,10 +267,10 @@ public abstract class AlertPanel<T extends Alert> extends PluginPanel {
                 this.alertManager.saveAlerts();
             }),
             PanelUtils.createToggleActionButton(
-                REGEX_SELECTED_ICON,
-                REGEX_SELECTED_ICON_HOVER,
-                REGEX_ICON,
-                REGEX_ICON_HOVER,
+                Icons.REGEX_SELECTED,
+                Icons.REGEX_SELECTED_HOVER,
+                Icons.REGEX,
+                Icons.REGEX_HOVER,
                 "Disable regex",
                 "Enable regex",
                 regexMatcher.isRegexEnabled(),

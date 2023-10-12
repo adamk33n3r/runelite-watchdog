@@ -8,12 +8,7 @@ import com.google.common.base.Charsets;
 import com.google.common.io.CharStreams;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import okhttp3.CacheControl;
-import okhttp3.HttpUrl;
-import okhttp3.Interceptor;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
+import okhttp3.*;
 
 import javax.annotation.Nonnull;
 import javax.imageio.ImageIO;

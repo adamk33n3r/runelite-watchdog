@@ -1,7 +1,7 @@
 package com.adamk33n3r.runelite.watchdog.hub;
 
-import com.adamk33n3r.runelite.watchdog.WatchdogPanel;
 import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
+import com.adamk33n3r.runelite.watchdog.ui.Icons;
 import com.adamk33n3r.runelite.watchdog.ui.WrappingLabel;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
 
@@ -15,7 +15,7 @@ import lombok.Getter;
 
 import javax.swing.*;
 import javax.swing.border.LineBorder;
-import java.awt.*;
+import java.awt.Color;
 import java.awt.image.BufferedImage;
 
 @Getter
@@ -55,7 +55,7 @@ public class AlertHubItem extends JPanel {
 //            icon.setIcon(new ImageIcon(this.alertDisplayInfo.getIcon()));
 //        }
 
-        JButton moreInfoButton = PanelUtils.createActionButton(WatchdogPanel.HELP_ICON, WatchdogPanel.HELP_ICON_HOVER, "More info", (btn, mod) -> {
+        JButton moreInfoButton = PanelUtils.createActionButton(Icons.HELP, Icons.HELP_HOVER, "More info", (btn, mod) -> {
             LinkBrowser.browse(manifest.getRepo().toString());
         });
         if (manifest.getRepo() == null) {
@@ -64,7 +64,7 @@ public class AlertHubItem extends JPanel {
 
         JButton addButton = new JButton();
         addButton.setText("Add");
-        BufferedImage addIcon = ImageUtil.recolorImage(WatchdogPanel.ADD_ICON.getImage(), Color.white);
+        BufferedImage addIcon = ImageUtil.recolorImage(Icons.ADD.getImage(), Color.WHITE);
         addButton.setIcon(new ImageIcon(addIcon));
         addButton.setHorizontalTextPosition(SwingConstants.LEFT);
         addButton.setBackground(new Color(0x28BE28));

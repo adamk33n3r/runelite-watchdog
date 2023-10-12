@@ -6,12 +6,10 @@ import lombok.Getter;
 
 import javax.swing.*;
 import javax.swing.text.Document;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Insets;
+import java.awt.event.*;
 
 /**
  * This component is a JTextArea with a flat design look.

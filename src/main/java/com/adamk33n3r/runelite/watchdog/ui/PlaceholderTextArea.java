@@ -3,9 +3,12 @@ package com.adamk33n3r.runelite.watchdog.ui;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.swing.*;
+import javax.swing.JTextArea;
 import javax.swing.text.Document;
-import java.awt.*;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
+import java.awt.Toolkit;
 import java.util.Map;
 
 public class PlaceholderTextArea extends JTextArea {

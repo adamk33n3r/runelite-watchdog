@@ -1,30 +1,8 @@
 package com.adamk33n3r.runelite.watchdog;
 
-import com.adamk33n3r.runelite.watchdog.alerts.Alert;
-import com.adamk33n3r.runelite.watchdog.alerts.AlertGroup;
-import com.adamk33n3r.runelite.watchdog.alerts.ChatAlert;
-import com.adamk33n3r.runelite.watchdog.alerts.FlashMode;
-import com.adamk33n3r.runelite.watchdog.alerts.InventoryAlert;
-import com.adamk33n3r.runelite.watchdog.alerts.NotificationFiredAlert;
-import com.adamk33n3r.runelite.watchdog.alerts.PlayerChatAlert;
-import com.adamk33n3r.runelite.watchdog.alerts.RegexMatcher;
-import com.adamk33n3r.runelite.watchdog.alerts.SpawnedAlert;
-import com.adamk33n3r.runelite.watchdog.alerts.StatChangedAlert;
-import com.adamk33n3r.runelite.watchdog.alerts.StatDrainAlert;
-import com.adamk33n3r.runelite.watchdog.alerts.XPDropAlert;
+import com.adamk33n3r.runelite.watchdog.alerts.*;
 import com.adamk33n3r.runelite.watchdog.hub.AlertHubCategory;
-import com.adamk33n3r.runelite.watchdog.notifications.GameMessage;
-import com.adamk33n3r.runelite.watchdog.notifications.IAudioNotification;
-import com.adamk33n3r.runelite.watchdog.notifications.INotification;
-import com.adamk33n3r.runelite.watchdog.notifications.Notification;
-import com.adamk33n3r.runelite.watchdog.notifications.NotificationEvent;
-import com.adamk33n3r.runelite.watchdog.notifications.Overhead;
-import com.adamk33n3r.runelite.watchdog.notifications.Overlay;
-import com.adamk33n3r.runelite.watchdog.notifications.ScreenFlash;
-import com.adamk33n3r.runelite.watchdog.notifications.Sound;
-import com.adamk33n3r.runelite.watchdog.notifications.SoundEffect;
-import com.adamk33n3r.runelite.watchdog.notifications.TextToSpeech;
-import com.adamk33n3r.runelite.watchdog.notifications.TrayNotification;
+import com.adamk33n3r.runelite.watchdog.notifications.*;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
 
 import net.runelite.client.config.ConfigManager;
@@ -131,7 +109,7 @@ public class AlertManager {
     public Stream<Alert> getAllAlertsFrom(Stream<Alert> alerts) {
         return alerts.flatMap(alert -> {
             if (alert instanceof AlertGroup) {
-                return getAllAlertsFrom(((AlertGroup) alert).getAlerts().stream());
+                return this.getAllAlertsFrom(((AlertGroup) alert).getAlerts().stream());
             }
             return Stream.of(alert);
         });

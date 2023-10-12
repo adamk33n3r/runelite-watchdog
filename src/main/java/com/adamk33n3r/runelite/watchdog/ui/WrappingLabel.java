@@ -1,6 +1,6 @@
 package com.adamk33n3r.runelite.watchdog.ui;
 
-import javax.swing.*;
+import javax.swing.JTextArea;
 import javax.swing.text.DefaultCaret;
 
 public class WrappingLabel extends JTextArea {
