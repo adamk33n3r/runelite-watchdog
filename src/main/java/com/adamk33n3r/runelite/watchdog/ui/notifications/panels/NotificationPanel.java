@@ -1,6 +1,8 @@
 package com.adamk33n3r.runelite.watchdog.ui.notifications.panels;
 
 import com.adamk33n3r.runelite.watchdog.NotificationType;
+import com.adamk33n3r.runelite.watchdog.WatchdogConfig;
+import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
 import com.adamk33n3r.runelite.watchdog.notifications.Notification;
 import com.adamk33n3r.runelite.watchdog.ui.AlertListItem;
 import com.adamk33n3r.runelite.watchdog.ui.StretchedStackedLayout;
@@ -19,6 +21,7 @@ import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public abstract class NotificationPanel extends JPanel {
     // worldhopper - arrow down
@@ -84,6 +87,8 @@ public abstract class NotificationPanel extends JPanel {
         this.onChangeListener = onChangeListener;
         this.onRemove = onRemove;
 
+        WatchdogConfig config = WatchdogPlugin.getInstance().getConfig();
+
         this.setLayout(new BorderLayout());
         this.setBorder(new EmptyBorder(3, 0, 0, 0));
         JPanel container = new JPanel(new StretchedStackedLayout(3, 3));
@@ -119,6 +124,7 @@ public abstract class NotificationPanel extends JPanel {
         afkTimerConfigRow.setBackground(ColorScheme.DARKER_GRAY_COLOR);
         JLabel afkTimerLabel = new JLabel("AFK Seconds:");
         afkTimerLabel.setToolTipText("Number of seconds for which the client doesn't get any mouse or keyboard inputs.");
+        AtomicInteger previousAFKSeconds = new AtomicInteger(notification.getFireWhenAFKForSeconds() > 0 ? notification.getFireWhenAFKForSeconds() : config.defaultAFKSeconds());
 
         JSpinner afkTimerSpinner = PanelUtils.createSpinner(Math.max(notification.getFireWhenAFKForSeconds(), 1),
             1,
@@ -126,6 +132,7 @@ public abstract class NotificationPanel extends JPanel {
             1,
             (val) -> {
                 notification.setFireWhenAFKForSeconds(val);
+                previousAFKSeconds.set(val);
                 onChangeListener.run();
             });
         if (notification.getFireWhenAFKForSeconds() != 0) {
@@ -138,11 +145,11 @@ public abstract class NotificationPanel extends JPanel {
             AFK_ICON_HOVER,
             NON_AFK_ICON,
             NON_AFK_ICON_HOVER,
-            "Switch to only fire notification when you have been AFK for a certain amount of time",
             "Enable notification even when you are active",
+            "Switch to only fire notification when you have been AFK for a certain amount of time",
             notification.getFireWhenAFKForSeconds() != 0,
             (btn, modifiers) -> {
-                notification.setFireWhenAFKForSeconds(btn.isSelected() ? 5 : 0);
+                notification.setFireWhenAFKForSeconds(btn.isSelected() ? previousAFKSeconds.get() : 0);
                 if (notification.getFireWhenAFKForSeconds() != 0) {
                     afkTimerSpinner.setValue(notification.getFireWhenAFKForSeconds());
                     afkTimerConfigRow.add(afkTimerLabel);
