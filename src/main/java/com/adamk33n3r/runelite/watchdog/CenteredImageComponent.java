@@ -1,11 +1,15 @@
 package com.adamk33n3r.runelite.watchdog;
 
+import net.runelite.client.ui.overlay.components.LayoutableRenderableEntity;
+
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import net.runelite.client.ui.overlay.components.LayoutableRenderableEntity;
 
-import java.awt.*;
+import java.awt.Dimension;
+import java.awt.Graphics2D;
+import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 
 
