@@ -47,6 +47,6 @@ public class AlertManifest {
         if (this.getDependsOn() != null) {
             keywords = Stream.concat(keywords, this.getDependsOn().stream());
         }
-        return keywords.map(String::toUpperCase).collect(Collectors.toList());
+        return keywords.collect(Collectors.toList());
     }
 }

@@ -1,5 +1,6 @@
 package com.adamk33n3r.runelite.watchdog.ui.panels;
 
+import com.adamk33n3r.runelite.watchdog.Util;
 import com.adamk33n3r.runelite.watchdog.alerts.Alert;
 import com.adamk33n3r.runelite.watchdog.notifications.IMessageNotification;
 import com.adamk33n3r.runelite.watchdog.ui.Icons;
@@ -86,7 +87,6 @@ public class HistoryPanel extends PluginPanel {
     // TODO: Abstract this out into a filterpanel type thing
     private void updateFilter(String search) {
         this.historyItems.removeAll();
-        String upperSearch = search.toUpperCase();
         this.previousAlerts.stream().filter(historyEntryPanel -> {
             Alert alert = historyEntryPanel.getAlert();
             Stream<String> keywords = Stream.concat(Stream.of(
@@ -98,8 +98,8 @@ public class HistoryPanel extends PluginPanel {
                     return Stream.concat(notificationType, Stream.of(((IMessageNotification) notification).getMessage()));
                 }
                 return notificationType;
-            })).map(String::toUpperCase);
-            return Text.matchesSearchTerms(SPLITTER.split(upperSearch), keywords.collect(Collectors.toList()));
+            }));
+            return Util.searchText(search, keywords.collect(Collectors.toList()));
         }).forEach(this.historyItems::add);
         this.revalidate();
         // Idk why I need to repaint sometimes and the PluginListPanel doesn't

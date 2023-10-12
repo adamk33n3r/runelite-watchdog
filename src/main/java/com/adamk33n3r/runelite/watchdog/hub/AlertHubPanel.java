@@ -1,5 +1,6 @@
 package com.adamk33n3r.runelite.watchdog.hub;
 
+import com.adamk33n3r.runelite.watchdog.Util;
 import com.adamk33n3r.runelite.watchdog.ui.Icons;
 import com.adamk33n3r.runelite.watchdog.ui.SearchBar;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
@@ -9,9 +10,7 @@ import net.runelite.client.ui.DynamicGridLayout;
 import net.runelite.client.ui.MultiplexingPluginPanel;
 import net.runelite.client.ui.PluginPanel;
 import net.runelite.client.ui.components.IconTextField;
-import net.runelite.client.util.Text;
 
-import com.google.common.base.Splitter;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.inject.Inject;
@@ -22,6 +21,7 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.stream.Collectors;
@@ -36,7 +36,6 @@ public class AlertHubPanel extends PluginPanel {
     private final IconTextField searchBar;
     private final JPanel container;
     private final JLabel loading;
-    private static final Splitter SPLITTER = Splitter.on(" ").trimResults().omitEmptyStrings();
     private final JScrollPane scrollPane;
 
     @Inject
@@ -58,6 +57,7 @@ public class AlertHubPanel extends PluginPanel {
         GroupLayout layout = new GroupLayout(this);
         this.setLayout(layout);
         this.searchBar = new SearchBar(this::updateFilter);
+        Arrays.stream(AlertHubCategory.values()).map(AlertHubCategory::getName).forEach(this.searchBar.getSuggestionListModel()::addElement);
 
         this.container = new JPanel(new DynamicGridLayout(0, 1, 0, 5));
 //        this.container.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
@@ -74,7 +74,7 @@ public class AlertHubPanel extends PluginPanel {
         wrapper.setScrollableUnitIncrement(SwingConstants.VERTICAL, ScrollablePanel.IncrementType.PERCENT, 10);
         this.scrollPane = new JScrollPane(wrapper, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 
-        JButton refresh = PanelUtils.createActionButton(Icons.HISTORY, Icons.HISTORY_HOVER, "Refresh", (btn, mod) -> {
+        JButton refresh = PanelUtils.createActionButton(Icons.REFRESH, Icons.REFRESH_HOVER, "Refresh", (btn, mod) -> {
             this.reloadList(true);
         });
 
@@ -132,10 +132,9 @@ public class AlertHubPanel extends PluginPanel {
 
     private void updateFilter(String search) {
         this.container.removeAll();
-        String upperSearch = search.toUpperCase();
         this.alertHubItems.stream().filter(alertHubItem -> {
             AlertManifest manifest = alertHubItem.getAlertDisplayInfo().getManifest();
-            return Text.matchesSearchTerms(SPLITTER.split(upperSearch), manifest.getKeywords());
+            return Util.searchText(search, manifest.getKeywords());
         }).forEach(this.container::add);
         this.container.revalidate();
         this.scrollPane.getVerticalScrollBar().setValue(0);

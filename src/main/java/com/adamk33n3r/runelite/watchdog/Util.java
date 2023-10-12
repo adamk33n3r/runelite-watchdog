@@ -3,7 +3,13 @@ package com.adamk33n3r.runelite.watchdog;
 import com.adamk33n3r.runelite.watchdog.alerts.Alert;
 import com.adamk33n3r.runelite.watchdog.alerts.AlertGroup;
 
+import net.runelite.client.util.Text;
+
+import com.google.common.base.Splitter;
+
+import java.text.Normalizer;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Util {
     public static void setParentsOnAlerts(List<Alert> alerts) {
@@ -160,5 +166,13 @@ public class Util {
      */
     public static int scale(int val, float srcMin, float srcMax, float destMin, float destMax) {
         return Math.round(((val - srcMin) / (srcMax - srcMin)) * (destMax - destMin) + destMin);
+    }
+
+    private static final Splitter SPLITTER = Splitter.on(" ").trimResults().omitEmptyStrings();
+    public static boolean searchText(String search, List<String> keywords) {
+        String normalizedSearch = Normalizer.normalize(search, Normalizer.Form.NFD).replaceAll("\\p{InCombiningDiacriticalMarks}+", "").toLowerCase();
+        return Text.matchesSearchTerms(
+            SPLITTER.split(normalizedSearch),
+            keywords.stream().map(term -> Normalizer.normalize(term, Normalizer.Form.NFD).replaceAll("\\p{InCombiningDiacriticalMarks}+", "").toLowerCase()).collect(Collectors.toList()));
     }
 }

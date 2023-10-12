@@ -113,7 +113,6 @@ public abstract class Alert {
                         }
                         return Stream.of(notification.getType().getName());
                     }))
-                .map(String::toUpperCase)
                 .collect(Collectors.toList());
         }
     }

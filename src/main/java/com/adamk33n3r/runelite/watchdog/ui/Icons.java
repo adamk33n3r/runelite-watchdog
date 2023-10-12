@@ -37,6 +37,9 @@ public abstract class Icons {
     public static final ImageIcon EDIT = new ImageIcon(ImageUtil.loadImageResource(Icons.class, "mdi_pencil.png"));
     public static final ImageIcon DRAG_VERT = new ImageIcon(ImageUtil.loadImageResource(Icons.class, "mdi_drag-vertical.png"));
 
+    public static final ImageIcon REFRESH = new ImageIcon(ImageUtil.loadImageResource(Icons.class, "mdi_refresh.png"));
+    public static final ImageIcon REFRESH_HOVER = new ImageIcon(ImageUtil.luminanceOffset(REFRESH.getImage(), -80));
+
     /*
      * Alerts
      */
