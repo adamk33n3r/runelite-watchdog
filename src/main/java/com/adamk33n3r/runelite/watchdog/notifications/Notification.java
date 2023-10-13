@@ -3,6 +3,8 @@ package com.adamk33n3r.runelite.watchdog.notifications;
 import com.adamk33n3r.runelite.watchdog.NotificationType;
 import com.adamk33n3r.runelite.watchdog.alerts.Alert;
 
+import net.runelite.api.Client;
+import net.runelite.api.Constants;
 import net.runelite.client.ui.ClientUI;
 
 import lombok.Getter;
@@ -15,13 +17,23 @@ public abstract class Notification implements INotification {
     @Inject
     protected transient ClientUI clientUI;
 
+    @Inject
+    protected transient Client client;
+
     @Getter @Setter
     private boolean fireWhenFocused = true;
+
+    @Getter @Setter
+    private int fireWhenAFKForSeconds = 0;
 
     @Getter @Setter
     protected transient Alert alert;
 
     protected boolean shouldFire() {
+        int afkTime = (int)Math.floor(Math.min(client.getKeyboardIdleTicks(), client.getMouseIdleTicks()) * Constants.CLIENT_TICK_LENGTH / 1000f);
+        if (afkTime < this.fireWhenAFKForSeconds) {
+            return false;
+        }
         return !this.clientUI.isFocused() || this.fireWhenFocused;
     }
 
