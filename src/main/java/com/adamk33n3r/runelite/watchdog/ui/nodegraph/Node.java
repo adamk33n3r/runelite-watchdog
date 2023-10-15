@@ -19,10 +19,12 @@ import java.util.List;
 public class Node extends JPanel {
     public static final int PANEL_WIDTH = 300;
     public static final int PANEL_HEIGHT = 200;
-    private List<Connection> connections = new ArrayList<>();
+    private List<NodeConnection> connections = new ArrayList<>();
     private Color color;
+    private Graph graph;
 
     public Node(Graph graph, int x, int y, String name, Color color) {
+        this.graph = graph;
         this.color = color;
         this.setName(name);
         this.setBounds(x, y, PANEL_WIDTH, PANEL_HEIGHT);
@@ -63,15 +65,21 @@ public class Node extends JPanel {
             point.translate(-start.x, -start.y);
 //            setLocation(point.x - start.x, point.y - start.y);
             point.setLocation(Math.min(Math.max(point.x, 0), graph.getWidth() - PANEL_WIDTH), Math.min(Math.max(point.y, 0), graph.getHeight() - PANEL_HEIGHT));
-            setLocation(point);
+            this.setLocation(point);
             graph.onNodeMoved(this);
         });
         this.addMouseListener(draggingMouseAdapter);
         this.addMouseMotionListener(draggingMouseAdapter);
         this.addMouseListener(onTopAdapter);
+
+
+        ConnectionPoint connectionPoint = new ConnectionPoint(this);
+        System.out.println(this.getWidth());
+//        connectionPoint.setLocation(this.getWidth(), this.getHeight() / 2);
+        this.add(connectionPoint, BorderLayout.EAST);
     }
 
-    public void addConnection(Connection connection) {
+    public void addConnection(NodeConnection connection) {
         this.connections.add(connection);
     }
 }

@@ -11,9 +11,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.util.*;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class Graph extends JPanel {
     private static final int ZOOM_FACTOR = 10; // Adjust this value for zoom sensitivity
@@ -32,6 +29,13 @@ public class Graph extends JPanel {
         this.setLayout(null);
         this.setOpaque(false);
         this.setPreferredSize(new Dimension(6000, 4000));
+        this.setName("Graph");
+        this.nodes.setName("Nodes");
+        this.connections.setName("Connections");
+        SwingUtilities.invokeLater(() -> {
+            this.nodes.setBounds(0, 0, this.getWidth(), this.getHeight());
+            this.connections.setBounds(0, 0, this.getWidth(), this.getHeight());
+        });
 
         this.nodes.setOpaque(false);
         this.nodes.setLayout(null);
@@ -52,6 +56,9 @@ public class Graph extends JPanel {
         this.connect(node1, node2);
         this.connect(node1, node3);
         this.connect(node4, node3);
+
+//        Connection testCon = new Connection(new Point(0, 0), new Point(500, 500));
+//        this.connections.add(testCon);
 
 
 //        List<String> options = Stream.concat(Stream.concat(Stream.concat(
@@ -118,7 +125,11 @@ public class Graph extends JPanel {
     }
 
     public void connect(Node node1, Node node2) {
-        Connection conn = new Connection(node1, node2);
+        if (node1.getConnections().stream().anyMatch(c -> c.getEndNode().equals(node2))) {
+            System.out.println("already connected");
+            return;
+        }
+        Connection conn = new NodeConnection(node1, node2);
 //        this.setComponentZOrder(conn, 0);
         this.connections.add(conn);
     }
@@ -142,8 +153,8 @@ public class Graph extends JPanel {
         ((Graphics2D)g).scale(this.zoomLevel, this.zoomLevel);
         int width = this.getWidth();
         int height = this.getHeight();
-        this.nodes.setBounds(0, 0, this.getWidth(), this.getHeight());
-        this.connections.setBounds(0, 0, this.getWidth(), this.getHeight());
+//        this.nodes.setBounds(0, 0, this.getWidth(), this.getHeight());
+//        this.connections.setBounds(0, 0, this.getWidth(), this.getHeight());
         for (int x = 0; x < width; x += BACKGROUND_IMG.getWidth()) {
             for (int y = 0; y < height; y += BACKGROUND_IMG.getHeight()) {
                 g.drawImage(BACKGROUND_IMG, x, y, this);

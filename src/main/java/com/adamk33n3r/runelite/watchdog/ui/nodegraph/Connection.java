@@ -1,21 +1,20 @@
 package com.adamk33n3r.runelite.watchdog.ui.nodegraph;
 
-import javax.swing.*;
+
+import javax.swing.JComponent;
 import java.awt.*;
 import java.awt.geom.CubicCurve2D;
 
 public class Connection extends JComponent {
-    private final Node start;
-    private final Node end;
+    protected static final int END_SIZE = 10;
+    protected static final int BOUNDS_OFFSET = 40;
 
-    private static final int END_SIZE = 10;
-    private static final int BOUNDS_OFFSET = 20;
+    protected Point start;
+    protected Point end;
 
-    public Connection(Node start, Node end) {
+    public Connection(Point start, Point end) {
         this.start = start;
         this.end = end;
-        this.start.addConnection(this);
-        this.end.addConnection(this);
         this.recalculateBounds();
     }
 
@@ -23,40 +22,48 @@ public class Connection extends JComponent {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        int startX = start.getWidth() + Math.max(start.getX() - end.getX(), 0);
-        int startY = Math.max(start.getY() - end.getY(), 0) + start.getHeight() / 2;
-        int endX = Math.max(end.getX() - start.getX(), 0);
-        int endY = Math.max(end.getY() - start.getY(), 0) + end.getHeight() / 2;
+        double startX = Math.abs(this.start.getX() - this.end.getX());
+        startX = this.start.x;
+        double startY = Math.abs(this.start.getY() - this.end.getY());
+        startY = this.start.y;
+        double endX = Math.max(this.end.getX() - this.start.getX(), 0);
+        endX = this.end.x;
+        double endY = Math.max(this.end.getY() - this.start.getY(), 0);
+        endY = this.end.y;
 
         Graphics2D g2 = (Graphics2D) g;
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
         g.translate(BOUNDS_OFFSET, BOUNDS_OFFSET);
-        g2.setStroke(new BasicStroke(4));
 
-        CubicCurve2D.Float curve = new CubicCurve2D.Float(
+        CubicCurve2D.Double curve = new CubicCurve2D.Double(
             startX, startY,
             startX + 100, startY,
             endX - 100, endY,
             endX, endY);
         g2.setColor(Color.WHITE);
+        g2.setStroke(new BasicStroke(4));
         g2.draw(curve);
 
-        g.setColor(end.getColor());
-        g.fillRect(startX, startY - END_SIZE / 2, END_SIZE, END_SIZE);
-        g.setColor(start.getColor());
-        g.fillRect(endX - END_SIZE, endY - END_SIZE / 2, END_SIZE, END_SIZE);
+        g.setColor(Color.GREEN);
+        g.fillRect((int) startX - END_SIZE/2, (int) (startY - END_SIZE / 2), END_SIZE, END_SIZE);
+        g.setColor(Color.RED);
+        g.fillRect((int) (endX - END_SIZE/2), (int) (endY - END_SIZE / 2), END_SIZE, END_SIZE);
 
-//        g.setColor(Color.cyan);
-//        g.drawRect(3, 3, this.getWidth()-6, this.getHeight()-6);
+
+//        g.setColor(Color.red);
+//        g.drawRect(0, 0, this.getWidth() - BOUNDS_OFFSET*2, this.getHeight() - BOUNDS_OFFSET*2);
+
+        g.translate(-BOUNDS_OFFSET, -BOUNDS_OFFSET);
     }
 
     public void recalculateBounds() {
         this.setBounds(
-            Math.min(start.getX(), end.getX()) - BOUNDS_OFFSET,
-            Math.min(start.getY(), end.getY()) - BOUNDS_OFFSET,
-            Math.abs(start.getX() - end.getX())+ Node.PANEL_WIDTH + BOUNDS_OFFSET*2,
-            Math.abs(start.getY() - end.getY()) + Node.PANEL_HEIGHT + BOUNDS_OFFSET*2
+            Math.min(this.start.x, this.end.x) - BOUNDS_OFFSET,
+            Math.min(this.start.y, this.end.y) - BOUNDS_OFFSET,
+            Math.abs(this.start.x - this.end.x) + BOUNDS_OFFSET * 2,
+            Math.abs(this.start.y - this.end.y) + BOUNDS_OFFSET * 2
         );
+        System.out.println(this.getBounds());
     }
 }
