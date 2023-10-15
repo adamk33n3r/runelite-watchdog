@@ -1,0 +1,9 @@
+{
+  "displayName": "Guardians of the Rift Portal Spawn",
+  "description": "Notifies when a portal spawns with its location in Guardians of the Rift minigame.",
+  "compatibleVersion": "3.0.0",
+  "author": "Dom",
+  "category": "SKILLING",
+  "tags": [ "minigame" ],
+  "alert": {"type":"ChatAlert","message":"A portal to the huge guardian fragment mine has opened to the {*}","regexEnabled":false,"enabled":true,"name":"[GOTR] Portal Spawn","debounceTime":0,"notifications":[{"type":"TextToSpeech","gain":9,"rate":1,"voice":"GEORGE","source":"LEGACY","message":"Portal spawned to the $1","fireWhenFocused":true}]}
+}
