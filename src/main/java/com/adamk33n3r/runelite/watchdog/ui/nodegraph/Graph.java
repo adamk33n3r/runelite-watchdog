@@ -44,39 +44,28 @@ public class Graph extends JPanel {
         this.connections.setLayout(null);
         this.add(this.connections);
 
-        Node node1 = new Node(this, 150, 150, "Game Message", Color.red);
+        Node node1 = new AlertNode(this, 150, 150, "Game Message", Color.red);
         this.nodes.add(node1);
-        Node node2 = new Node(this, 700, 150, "Screen Flash", Color.green);
+        Node node2 = new NotificationNode(this, 700, 150, "Screen Flash", Color.green);
         this.nodes.add(node2);
-        Node node3 = new Node(this, 700, 500, "Text to Speech", Color.green);
+        Node node3 = new NotificationNode(this, 700, 500, "Text to Speech", Color.green);
         this.nodes.add(node3);
-        Node node4 = new Node(this, 150, 500, "Notification Fired", Color.red);
+        Node node4 = new AlertNode(this, 150, 500, "Notification Fired", Color.red);
         this.nodes.add(node4);
 
-        this.connect(node1, node2);
-        this.connect(node1, node3);
-        this.connect(node4, node3);
-
-//        Connection testCon = new Connection(new Point(0, 0), new Point(500, 500));
-//        this.connections.add(testCon);
-
-
-//        List<String> options = Stream.concat(Stream.concat(Stream.concat(
-//            Stream.of("c:Alerts"),
-//            Arrays.stream(TriggerType.values()).map(TriggerType::getName)),
-//            Stream.of("c:Notifications")),
-//            Arrays.stream(NotificationType.values()).map(NotificationType::getName)
-//        ).collect(Collectors.toList());
+//        this.connect(node1, node2);
+//        this.connect(node1, node3);
+//        this.connect(node4, node3);
 
         this.createNodePopup = new NewNodePopup((selected) -> {
             System.out.println(selected);
             if (selected instanceof TriggerType) {
                 System.out.println("create alert node");
-                Node node = new Node(this, this.popupLocation.x, this.popupLocation.y, ((TriggerType) selected).getName(), Color.CYAN);
+                Node node = new AlertNode(this, this.popupLocation.x, this.popupLocation.y, ((TriggerType) selected).getName(), Color.CYAN);
                 this.nodes.add(node, 0);
             } else if (selected instanceof NotificationType) {
                 System.out.println("create notification node");
-                Node node = new Node(this, this.popupLocation.x, this.popupLocation.y, ((NotificationType) selected).getName(), Color.ORANGE);
+                Node node = new NotificationNode(this, this.popupLocation.x, this.popupLocation.y, ((NotificationType) selected).getName(), Color.ORANGE);
                 this.nodes.add(node, 0);
             }
             Graph.this.revalidate();

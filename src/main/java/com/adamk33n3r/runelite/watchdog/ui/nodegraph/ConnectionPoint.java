@@ -36,7 +36,7 @@ public class ConnectionPoint extends JComponent {
 
                 Point point = SwingUtilities.convertPoint(ConnectionPoint.this, e.getPoint(), node.getGraph());
                 Component deepestComponentAt = SwingUtilities.getDeepestComponentAt(node.getGraph(), point.x, point.y);
-                Node droppedNode = (Node) SwingUtilities.getAncestorOfClass(Node.class, deepestComponentAt);
+                NotificationNode droppedNode = (NotificationNode) SwingUtilities.getAncestorOfClass(NotificationNode.class, deepestComponentAt);
                 if (droppedNode == null || droppedNode.equals(node)) {
                     return;
                 }

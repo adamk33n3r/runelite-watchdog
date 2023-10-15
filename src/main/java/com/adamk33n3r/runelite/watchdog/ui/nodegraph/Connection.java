@@ -22,14 +22,10 @@ public class Connection extends JComponent {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        double startX = Math.abs(this.start.getX() - this.end.getX());
-        startX = this.start.x;
-        double startY = Math.abs(this.start.getY() - this.end.getY());
-        startY = this.start.y;
-        double endX = Math.max(this.end.getX() - this.start.getX(), 0);
-        endX = this.end.x;
-        double endY = Math.max(this.end.getY() - this.start.getY(), 0);
-        endY = this.end.y;
+        double startX = this.start.x;
+        double startY = this.start.y;
+        double endX = this.end.x;
+        double endY = this.end.y;
 
         Graphics2D g2 = (Graphics2D) g;
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -49,7 +45,6 @@ public class Connection extends JComponent {
         g.fillRect((int) startX - END_SIZE/2, (int) (startY - END_SIZE / 2), END_SIZE, END_SIZE);
         g.setColor(Color.RED);
         g.fillRect((int) (endX - END_SIZE/2), (int) (endY - END_SIZE / 2), END_SIZE, END_SIZE);
-
 
 //        g.setColor(Color.red);
 //        g.drawRect(0, 0, this.getWidth() - BOUNDS_OFFSET*2, this.getHeight() - BOUNDS_OFFSET*2);

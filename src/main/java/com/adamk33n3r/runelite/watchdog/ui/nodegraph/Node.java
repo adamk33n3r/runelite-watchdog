@@ -73,10 +73,6 @@ public class Node extends JPanel {
         this.addMouseListener(onTopAdapter);
 
 
-        ConnectionPoint connectionPoint = new ConnectionPoint(this);
-        System.out.println(this.getWidth());
-//        connectionPoint.setLocation(this.getWidth(), this.getHeight() / 2);
-        this.add(connectionPoint, BorderLayout.EAST);
     }
 
     public void addConnection(NodeConnection connection) {

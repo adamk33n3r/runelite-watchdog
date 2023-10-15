@@ -14,29 +14,24 @@ public class DragConnection extends Connection {
     }
 
     public void setEndOffset(Point endOffset) {
-        this.end.x = /*this.startNode.getX() +*/ endOffset.x;// - BOUNDS_OFFSET;
-        this.end.y = /*this.startNode.getY() +*/ endOffset.y;// - BOUNDS_OFFSET;
+        this.end.x = endOffset.x;
+        this.end.y = endOffset.y;
         this.recalculateBounds();
     }
 
     @Override
     protected void paintComponent(Graphics g) {
-        this.start.x = Math.max(this.startNode.getX() + Node.PANEL_WIDTH - this.end.x, 0);
-        this.start.x = this.startNode.getX() + this.startNode.getWidth() - BOUNDS_OFFSET;
         this.start.x = this.end.x > 0 ? 0 : -this.end.x;
-        this.start.y = 0;// = this.startNode.getY() - this.getY() - BOUNDS_OFFSET + this.startNode.getHeight() / 2;
-//        this.start.y = this.startNode.getHeight() / 2 + this.start.y;
         this.start.y = this.startNode.getY() - this.getY() - BOUNDS_OFFSET + Node.PANEL_HEIGHT / 2;
+
+        // I think this doesn't break things because we are setting the bounds every time
         this.end.x = Math.max(0, this.end.x);
         this.end.y = Math.max(0, this.end.y);
-//        System.out.println(this.end);
-//        this.end.x = ;
-//        this.end.y = Math.max(this.endNode.getY() - this.startNode.getY(), 0) + this.endNode.getHeight() / 2;
 
         super.paintComponent(g);
 
-        g.setColor(Color.CYAN);
-        g.drawRect(0, 0, this.getWidth()-1, this.getHeight()-1);
+//        g.setColor(Color.CYAN);
+//        g.drawRect(0, 0, this.getWidth()-1, this.getHeight()-1);
     }
 
     @Override
