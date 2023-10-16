@@ -3,7 +3,7 @@
   "description": "This is an example alert for the alert hub.",
   "compatibleVersion": "3.0.0",
   "author": "adamk33n3r",
-  "category": "COMBAT",
+  "category": "SKILLING",
   "tags": [ "example", "simple" ],
-  "alert": {"type":"AlertGroup","alerts":[{"type":"ChatAlert","message":"Coins","regexEnabled":false,"enabled":true,"name":"Money","debounceTime":0,"notifications":[{"type":"TextToSpeech","gain":5,"rate":1,"voice":"GEORGE","message":"Coin drop","fireWhenFocused":true}]},{"type":"ChatAlert","message":".*Valuable drop: ([^\\(\\d]+(?:\\(dark|light\\))?(?:.2h.)?(?:\\(\\d+\\))?(?:\\(e\\))?(?:[^\\(\\d])*).\\((?:[1-9]\\d,\\d{3,3}) coins\\)","regexEnabled":true,"enabled":true,"name":"10k-100k (Singular)","debounceTime":0,"notifications":[{"type":"Overhead","displayTime":3,"message":"get yer robes","fireWhenFocused":true}]},{"type":"ChatAlert","message":".*Valuable drop: (\\d{1,3}(?:,\\d{3})*|\\d+) x ([^\\(\\d]+(?:\\(dark|light\\))?(?:.2h.)?(?:\\(\\d+\\))?(?:\\(e\\))?(?:[^\\(\\d])*) \\((?:[1-9]\\d,\\d{3,3}) coins\\)","regexEnabled":true,"enabled":true,"name":"10k-100k (Multiples)","debounceTime":0,"notifications":[{"type":"ScreenFlash","color":"#46FF0000","flashMode":"FLASH","flashDuration":2,"fireWhenFocused":true}]}],"enabled":true,"name":"Example Alert Group","debounceTime":0}
+  "alert": {"type":"ChatAlert","message":"*is ready to harvest*","regexEnabled":false,"enabled":true,"name":"Ready to Harvest","debounceTime":500,"notifications":[{"type":"TrayNotification","message":"Time to harvest your crops!","fireWhenFocused":true},{"type":"Sound","path":"airplane_seatbelt.mp3","gain":8,"fireWhenFocused":true}]}
 }

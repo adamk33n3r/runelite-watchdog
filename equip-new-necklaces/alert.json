@@ -1,0 +1,9 @@
+{
+  "displayName": "Equip New Necklaces",
+  "description": "When your binding necklace disintegrates or your dodgy necklace crumbles to dust.",
+  "compatibleVersion": "3.0.0",
+  "author": "Murphy",
+  "category": "MISC",
+  "tags": [ "dodgy", "binding", "disintegrate", "crumble", "rune", "runecraft", "thieve", "thieving", "pickpocket" ],
+  "alert": {"type":"AlertGroup","alerts":[{"type":"ChatAlert","message":"Your dodgy necklace protects you. It then crumbles to dust.","regexEnabled":false,"enabled":true,"name":"Dodgy Necklace","debounceTime":0,"notifications":[{"type":"Overhead","displayTime":4,"message":"Equip dodgy necklace","fireWhenFocused":true},{"type":"ScreenFlash","color":"#37FF26B9","flashMode":"FLASH","flashDuration":3,"fireWhenFocused":true}]},{"type":"ChatAlert","message":"Your Binding necklace has disintegrated.","regexEnabled":false,"enabled":true,"name":"Binding Necklace","debounceTime":0,"notifications":[{"type":"Overhead","displayTime":7,"message":"Equip binding necklace","fireWhenFocused":true},{"type":"ScreenFlash","color":"#23FF0000","flashMode":"SOLID","flashDuration":0,"fireWhenFocused":true}]}],"enabled":true,"name":"Equip New Necklaces","debounceTime":0}
+}
