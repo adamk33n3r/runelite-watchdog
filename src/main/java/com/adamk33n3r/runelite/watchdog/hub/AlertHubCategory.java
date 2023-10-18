@@ -6,11 +6,11 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum AlertHubCategory {
-    COMBAT("Combat", "Combat", "/skill_icons_small/attack.png"),
+    COMBAT("Combat", "Combat", "/skill_icons_small/combat.png"),
     SKILLING("Skilling", "Skilling", "/skill_icons_small/mining.png"),
     BOSSES("Bosses", "Bosses", "/skill_icons_small/slayer.png"),
-    DROPS("Drops", "Drops", "/skill_icons_small/clue_scroll_all.png"),
-    AFK("AFK", "AFK", "/skill_icons_small/cooking.png"),
+    AFK("AFK", "AFK", "/skill_icons_small/fishing.png"),
+    MISC("Misc", "Misc", "/skill_icons_small/clue_scroll_all.png")
     ;
 
     private final String name;

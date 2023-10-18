@@ -9,6 +9,7 @@ import net.runelite.client.config.ConfigManager;
 import net.runelite.client.config.FlashNotification;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import joptsimple.internal.Strings;
 import lombok.Getter;
@@ -162,7 +163,7 @@ public class AlertManager {
         this.handleUpgrades();
     }
 
-    public boolean importAlerts(String json, List<Alert> alerts, boolean append, boolean checkRegex) {
+    public boolean importAlerts(String json, List<Alert> alerts, boolean append, boolean checkRegex) throws JsonSyntaxException {
         if (Strings.isNullOrEmpty(json)) {
             return false;
         }
@@ -171,8 +172,7 @@ public class AlertManager {
             alerts.clear();
         }
 
-        List<Alert> importedAlerts = this.gson.fromJson(json, ALERT_LIST_TYPE);
-        Supplier<Stream<Alert>> alertStream = () -> importedAlerts.stream().filter(Objects::nonNull);
+        Supplier<Stream<Alert>> alertStream = this.tryImport(json);
 
         // Validate regex properties
         if (checkRegex && !alertStream.get().allMatch(alert -> {
@@ -218,6 +218,19 @@ public class AlertManager {
 
     public String toJSON() {
         return this.gson.toJson(this.alerts, ALERT_LIST_TYPE);
+    }
+
+    private Supplier<Stream<Alert>> tryImport(String json) throws JsonSyntaxException {
+        // Single
+        try {
+            Alert importedAlert = this.gson.fromJson(json, ALERT_TYPE);
+            return () -> Stream.of(importedAlert).filter(Objects::nonNull);
+        } catch (JsonSyntaxException ignored) {
+        }
+
+        // Multiple
+        List<Alert> importedAlerts = this.gson.fromJson(json, ALERT_LIST_TYPE);
+        return () -> importedAlerts.stream().filter(Objects::nonNull);
     }
 
     private void handleUpgrades() {

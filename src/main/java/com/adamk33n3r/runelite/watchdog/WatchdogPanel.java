@@ -151,7 +151,7 @@ public class WatchdogPanel extends PluginPanel {
         JButton exportButton = new JButton("Export", Icons.EXPORT);
         exportButton.setHorizontalTextPosition(SwingConstants.LEFT);
         exportButton.addActionListener(ev -> {
-            ImportExportDialog importExportDialog = new ImportExportDialog(SwingUtilities.getWindowAncestor(this), WatchdogPlugin.getInstance().getConfig().alerts());
+            ImportExportDialog importExportDialog = new ImportExportDialog(SwingUtilities.getWindowAncestor(this), this.alertManager.getAlerts());
             importExportDialog.setVisible(true);
         });
         importExportGroup.add(exportButton);
@@ -162,7 +162,6 @@ public class WatchdogPanel extends PluginPanel {
         hubButton.setHorizontalTextPosition(SwingConstants.LEFT);
         hubButton.addActionListener(ev -> {
             AlertHubPanel alertHubPanel = this.alertHubPanelProvider.get();
-//            alertHubPanel.reloadList();
             this.muxer.pushState(alertHubPanel);
         });
         bottomPanel.add(hubButton);
