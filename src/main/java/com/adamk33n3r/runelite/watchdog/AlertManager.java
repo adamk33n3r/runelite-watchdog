@@ -104,13 +104,29 @@ public class AlertManager {
     }
 
     public Stream<Alert> getAllAlerts() {
-        return this.getAllAlertsFrom(this.alerts.stream());
+        return this.getAllAlertsFrom(this.alerts.stream(), false);
     }
 
-    public Stream<Alert> getAllAlertsFrom(Stream<Alert> alerts) {
+    public <T extends Alert> Stream<T> getAllAlertsOfType(Class<T> type) {
+        return this.getAllAlerts()
+            .filter(type::isInstance)
+            .map(type::cast);
+    }
+
+    public Stream<AlertGroup> getAllAlertGroups() {
+        return this.getAllAlertsFrom(this.alerts.stream(), true)
+            .filter(AlertGroup.class::isInstance)
+            .map(AlertGroup.class::cast);
+    }
+
+    public Stream<Alert> getAllAlertsFrom(Stream<Alert> alerts, boolean includeGroups) {
         return alerts.flatMap(alert -> {
             if (alert instanceof AlertGroup) {
-                return this.getAllAlertsFrom(((AlertGroup) alert).getAlerts().stream());
+                Stream<Alert> children = this.getAllAlertsFrom(((AlertGroup) alert).getAlerts().stream(), includeGroups);
+                if (includeGroups) {
+                    return Stream.concat(Stream.of(alert), children);
+                }
+                return children;
             }
             return Stream.of(alert);
         });
@@ -139,9 +155,6 @@ public class AlertManager {
         String json = this.gson.toJson(alert, ALERT_TYPE);
         Alert clonedAlert = this.gson.fromJson(json, ALERT_TYPE);
         clonedAlert.setName(clonedAlert.getName() + " Clone");
-        if (clonedAlert instanceof AlertGroup) {
-            Util.setParentsOnAlerts(Collections.singletonList(clonedAlert));
-        }
         return clonedAlert;
     }
 
@@ -191,10 +204,8 @@ public class AlertManager {
         // Save immediately to save new properties
         this.saveAlerts();
 
-        Util.setParentsOnAlerts(this.getAlerts());
-
         // Inject dependencies
-        this.getAllAlertsFrom(alertStream.get())
+        this.getAllAlertsFrom(alertStream.get(), false)
             .filter(alert -> !(alert instanceof AlertGroup))
             .forEach(alert -> {
                 WatchdogPlugin.getInstance().getInjector().injectMembers(alert);
