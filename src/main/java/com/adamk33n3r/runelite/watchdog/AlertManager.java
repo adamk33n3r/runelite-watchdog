@@ -191,7 +191,7 @@ public class AlertManager {
         // Save immediately to save new properties
         this.saveAlerts();
 
-        Util.setParentsOnAlerts(alerts);
+        Util.setParentsOnAlerts(this.getAlerts());
 
         // Inject dependencies
         this.getAllAlertsFrom(alertStream.get())
