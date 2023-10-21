@@ -134,6 +134,7 @@ public class AlertManager {
 
     public void addAlert(Alert alert) {
         this.alerts.add(alert);
+        this.setUpAlert(alert);
         this.saveAlerts();
 
         SwingUtilities.invokeLater(this.watchdogPanel::rebuild);
@@ -206,13 +207,7 @@ public class AlertManager {
 
         // Inject dependencies
         this.getAllAlertsFrom(alertStream.get(), false)
-            .forEach(alert -> {
-                WatchdogPlugin.getInstance().getInjector().injectMembers(alert);
-                for (INotification notification : alert.getNotifications()) {
-                    WatchdogPlugin.getInstance().getInjector().injectMembers(notification);
-                    notification.setAlert(alert);
-                }
-            });
+            .forEach(this::setUpAlert);
 
         SwingUtilities.invokeLater(() -> {
             this.watchdogPanel.rebuild();
@@ -241,6 +236,18 @@ public class AlertManager {
         // Multiple
         List<Alert> importedAlerts = this.gson.fromJson(json, ALERT_LIST_TYPE);
         return () -> importedAlerts.stream().filter(Objects::nonNull);
+    }
+
+    private void setUpAlert(Alert alert) {
+        WatchdogPlugin.getInstance().getInjector().injectMembers(alert);
+        if (alert instanceof AlertGroup) {
+            ((AlertGroup) alert).getAlerts().forEach(this::setUpAlert);
+        } else {
+            for (INotification notification : alert.getNotifications()) {
+                WatchdogPlugin.getInstance().getInjector().injectMembers(notification);
+                notification.setAlert(alert);
+            }
+        }
     }
 
     private void handleUpgrades() {
