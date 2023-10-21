@@ -20,7 +20,6 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 import javax.swing.SwingUtilities;
 import java.lang.reflect.Type;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -40,6 +39,7 @@ public class AlertManager {
     @Getter
     private final List<Alert> alerts = new CopyOnWriteArrayList<>();
 
+    // TODO: Kinda weird this is in here...
     @Getter
     @Inject
     private WatchdogPanel watchdogPanel;
@@ -280,6 +280,7 @@ public class AlertManager {
             }
 
             if (configVersion.compareTo(new Version("2.8.0")) < 0) {
+                log.debug("Need to convert flash notifications to new properties");
                 this.alerts.stream()
                     .flatMap(alert -> alert.getNotifications().stream())
                     .filter(notification -> notification instanceof ScreenFlash)
@@ -293,6 +294,7 @@ public class AlertManager {
             }
 
             if (configVersion.compareTo(new Version("2.13.0")) < 0) {
+                log.debug("Need to set default overlay notification text color");
                 this.alerts.stream()
                     .flatMap(alert -> alert.getNotifications().stream())
                     .filter(notification -> notification instanceof Overlay)
