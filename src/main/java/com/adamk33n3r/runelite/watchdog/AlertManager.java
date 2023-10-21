@@ -206,7 +206,6 @@ public class AlertManager {
 
         // Inject dependencies
         this.getAllAlertsFrom(alertStream.get(), false)
-            .filter(alert -> !(alert instanceof AlertGroup))
             .forEach(alert -> {
                 WatchdogPlugin.getInstance().getInjector().injectMembers(alert);
                 for (INotification notification : alert.getNotifications()) {

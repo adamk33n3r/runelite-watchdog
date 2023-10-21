@@ -89,26 +89,22 @@ public class TextToSpeechNotificationPanel extends NotificationPanel {
                     notification.setElevenLabsVoice(voice);
                 });
 
-                // Kinda hacky, but it'd also be hacky to modify the createSelect method so...shrug
-                ActionListener actionListener = voiceSelect.getActionListeners()[0];
-                voiceSelect.removeActionListener(actionListener);
-
                 ElevenLabs.getVoices(WatchdogPlugin.getInstance().getHttpClient(), (voices) -> {
                     SwingUtilities.invokeLater(() -> {
+                        // Store the voice id prior to adding to the list because adding the first item will select it
+                        String elevenLabsVoiceId = notification.getElevenLabsVoiceId();
                         voices.getVoices().forEach((voice) -> {
                             voiceSelect.addItem(voice);
-                            if (notification.getElevenLabsVoiceId() == null) {
+                            if (elevenLabsVoiceId == null) {
                                 if (voice.getName().equals(WatchdogPlugin.getInstance().getConfig().defaultElevenLabsVoice())) {
                                     voiceSelect.setSelectedItem(voice);
                                 }
                             } else {
-                                if (voice.getVoiceId().equals(notification.getElevenLabsVoiceId())) {
+                                if (voice.getVoiceId().equals(elevenLabsVoiceId)) {
                                     voiceSelect.setSelectedItem(voice);
                                 }
                             }
                         });
-
-                        voiceSelect.addActionListener(actionListener);
                     });
                 });
                 this.settings.add(voiceSelect);

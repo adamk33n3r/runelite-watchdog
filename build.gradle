@@ -74,6 +74,8 @@ tasks.register("shadowJar", Jar) {
 	from sourceSets.test.output
 	from({
 		configurations.testRuntimeClasspath.collect {
+			// Ignore test framework stuff, especially bytebuddy because it's like 4MB
+			if (it.path.contains("mockito") || it.path.contains("guice-testlib") || it.path.contains("junit") || it.path.contains("bytebuddy")) return null
 			it.isDirectory() ? it : zipTree(it)
 		}
 	})
