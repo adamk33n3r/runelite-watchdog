@@ -19,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import javax.inject.Inject;
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionListener;
@@ -71,6 +72,7 @@ public class NotificationsPanel extends JPanel {
         JPanel buttonPanel = new JPanel(new BorderLayout());
         buttonPanel.add(new JLabel("Notifications"), BorderLayout.WEST);
         buttonPanel.add(addDropDownButton, BorderLayout.EAST);
+        buttonPanel.setBorder(new EmptyBorder(0, 5, 0, 0));
 
         this.add(buttonPanel, BorderLayout.NORTH);
 

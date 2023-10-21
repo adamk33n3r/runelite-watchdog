@@ -128,7 +128,10 @@ public class WatchdogPanel extends PluginPanel {
             this.alertManager.addAlert(createdAlert);
             this.openAlert(createdAlert);
         });
-        actionButtons.add(alertDropDownButton);
+        JPanel addAlertWrapper = new JPanel(new BorderLayout());
+        addAlertWrapper.setBorder(new EmptyBorder(0, 5, 0, 0));
+        addAlertWrapper.add(alertDropDownButton);
+        actionButtons.add(addAlertWrapper);
 
         topPanel.add(actionButtons, BorderLayout.EAST);
 

@@ -27,6 +27,7 @@ public class AlertGroupPanel extends AlertPanel<AlertGroup> {
         this.addAlertDefaults();
         JPanel buttonPanel = new JPanel(new BorderLayout());
         buttonPanel.add(new JLabel("Alerts"), BorderLayout.WEST);
+        buttonPanel.setBorder(new EmptyBorder(0, 5, 8, 0));
 
         JButton alertDropDownButton = PanelUtils.createAlertDropDownButton(createdAlert -> {
             this.alert.getAlerts().add(createdAlert);
@@ -36,7 +37,6 @@ public class AlertGroupPanel extends AlertPanel<AlertGroup> {
         });
 
         buttonPanel.add(alertDropDownButton, BorderLayout.EAST);
-        buttonPanel.setBorder(new EmptyBorder(0, 0, 8, 0));
         JPanel subGroupPanel = new JPanel(new BorderLayout());
         subGroupPanel.setBorder(new CompoundBorder(new EmptyBorder(0, 5, 0, 5), new HorizontalRuleBorder(10)));
         subGroupPanel.add(buttonPanel, BorderLayout.NORTH);

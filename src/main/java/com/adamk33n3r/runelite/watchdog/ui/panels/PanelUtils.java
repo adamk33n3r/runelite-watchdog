@@ -21,6 +21,7 @@ import org.apache.commons.text.WordUtils;
 
 import javax.annotation.Nullable;
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileFilter;
 import java.awt.*;
 import java.awt.event.*;
@@ -52,6 +53,7 @@ public class PanelUtils {
         if (twoLines) {
             panel.setLayout(new DynamicGridLayout(2, 0, 5, 5));
         } else {
+            panel.setBorder(new EmptyBorder(0, 5, 0, 0));
             panel.setLayout(new BorderLayout(5, 0));
         }
         JLabel jLabel = new JLabel(label);
