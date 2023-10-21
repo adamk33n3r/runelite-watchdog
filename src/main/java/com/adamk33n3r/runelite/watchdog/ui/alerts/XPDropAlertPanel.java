@@ -15,7 +15,7 @@ public class XPDropAlertPanel extends AlertPanel<XPDropAlert> {
     protected void build() {
         this.addAlertDefaults()
             .addSelect("Skill", "The skill to track", Skill.class, this.alert.getSkill(), this.alert::setSkill)
-            .addSpinner("Gained Amount", "How much xp needed to trigger this alert", this.alert.getGainedAmount(), this.alert::setGainedAmount)
+            .addSpinner("Gained Amount", "How much xp needed to trigger this alert", this.alert.getGainedAmount(), this.alert::setGainedAmount, 0, Integer.MAX_VALUE, 1)
             .addNotifications();
     }
 }
