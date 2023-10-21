@@ -57,6 +57,10 @@ public abstract class Icons {
     public static final ImageIcon FOREGROUND_HOVER = new ImageIcon(ImageUtil.luminanceOffset(FOREGROUND.getImage(), -80));
     public static final ImageIcon BACKGROUND = new ImageIcon(ImageUtil.loadImageResource(Icons.class, "mdi_flip-to-back.png"));
     public static final ImageIcon BACKGROUND_HOVER = new ImageIcon(ImageUtil.luminanceOffset(BACKGROUND.getImage(), -80));
+    public static final ImageIcon AFK = new ImageIcon(ImageUtil.loadImageResource(Icons.class, "afk_icon.png"));
+    public static final ImageIcon AFK_HOVER = new ImageIcon(ImageUtil.luminanceOffset(AFK.getImage(), -80));
+    public static final ImageIcon NON_AFK = new ImageIcon(ImageUtil.loadImageResource(Icons.class, "non_afk_icon.png"));
+    public static final ImageIcon NON_AFK_HOVER = new ImageIcon(ImageUtil.luminanceOffset(NON_AFK.getImage(), -80));
     public static final ImageIcon TEST = new ImageIcon(ImageUtil.loadImageResource(Icons.class, "mdi_flask.png"));
     public static final ImageIcon TEST_HOVER = new ImageIcon(ImageUtil.luminanceOffset(TEST.getImage(), -80));
     public static final ImageIcon VOLUME = new ImageIcon(ImageUtil.luminanceOffset(ImageUtil.loadImageResource(Icons.class, "mdi_volume-high.png"), -80));
