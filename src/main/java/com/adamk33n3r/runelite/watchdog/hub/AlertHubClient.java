@@ -190,7 +190,7 @@ public class AlertHubClient {
     }
 
     @Getter
-    static class AlertDisplayInfo {
+    public static class AlertDisplayInfo {
         private AlertManifest manifest;
         private BufferedImage icon;
     }

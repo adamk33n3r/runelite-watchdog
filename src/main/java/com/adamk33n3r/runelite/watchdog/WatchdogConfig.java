@@ -23,6 +23,7 @@ public interface WatchdogConfig extends Config {
 
     // Core
     String ENABLE_TTS = "enableTTS";
+    String OVERRIDE_IMPORTS_WITH_DEFAULTS = "overrideImportsWithDefaults";
 
     // Overhead
     String DEFAULT_OVERHEAD_DISPLAY_TIME = "defaultOverheadDisplayTime";
@@ -89,6 +90,13 @@ public interface WatchdogConfig extends Config {
         warning = "Using TTS will submit your IP address to a 3rd party website not controlled or verified by the RuneLite Developers."
     )
     default boolean ttsEnabled() { return false; }
+
+    @ConfigItem(
+        keyName = OVERRIDE_IMPORTS_WITH_DEFAULTS,
+        name = "Override Imports with Defaults",
+        description = "Will override imported alerts with your defaults set here"
+    )
+    default boolean overrideImportsWithDefaults() { return false; }
 
     @ConfigItem(
         keyName = PUT_SOUNDS_INTO_QUEUE,
@@ -269,6 +277,7 @@ public interface WatchdogConfig extends Config {
             section = afkNotificationSection
     )
     @Units(Units.SECONDS)
+    @Range(min = 1)
     default int defaultAFKSeconds() { return 5; }
     //endregion
 

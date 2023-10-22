@@ -1,6 +1,7 @@
 package com.adamk33n3r.runelite.watchdog.hub;
 
 import com.adamk33n3r.runelite.watchdog.Util;
+import com.adamk33n3r.runelite.watchdog.WatchdogConfig;
 import com.adamk33n3r.runelite.watchdog.ui.Icons;
 import com.adamk33n3r.runelite.watchdog.ui.SearchBar;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
@@ -31,6 +32,7 @@ public class AlertHubPanel extends PluginPanel {
     private final Provider<MultiplexingPluginPanel> muxer;
     private final AlertHubClient alertHubClient;
     private final ScheduledExecutorService executor;
+    private final WatchdogConfig watchdogConfig;
 
     private List<AlertHubItem> alertHubItems = new ArrayList<>();
     private final IconTextField searchBar;
@@ -39,11 +41,12 @@ public class AlertHubPanel extends PluginPanel {
     private final JScrollPane scrollPane;
 
     @Inject
-    public AlertHubPanel(Provider<MultiplexingPluginPanel> muxer, AlertHubClient alertHubClient, ScheduledExecutorService executor) {
+    public AlertHubPanel(Provider<MultiplexingPluginPanel> muxer, AlertHubClient alertHubClient, ScheduledExecutorService executor, WatchdogConfig watchdogConfig) {
         super(false);
         this.muxer = muxer;
         this.alertHubClient = alertHubClient;
         this.executor = executor;
+        this.watchdogConfig = watchdogConfig;
 
         JButton backButton = PanelUtils.createActionButton(
             Icons.BACK,
@@ -124,7 +127,7 @@ public class AlertHubPanel extends PluginPanel {
         SwingUtilities.invokeLater(() -> {
             this.loading.setVisible(false);
             this.alertHubItems = alerts.stream()
-                .map(AlertHubItem::new)
+                .map(alertDisplayInfo -> new AlertHubItem(alertDisplayInfo, this.watchdogConfig))
                 .collect(Collectors.toList());
             this.updateFilter(this.searchBar.getText());
         });

@@ -137,12 +137,12 @@ public class WatchdogPlugin extends Plugin {
             TrayNotification harvestNotification = this.injector.getInstance(TrayNotification.class);
             harvestNotification.setMessage("Time to harvest your crops!");
             readyToHarvest.getNotifications().add(harvestNotification);
-            this.alertManager.addAlert(readyToHarvest);
+            this.alertManager.addAlert(readyToHarvest, false);
 
             NotificationFiredAlert outOfCombat = new NotificationFiredAlert("Out of Combat");
             outOfCombat.setMessage("You are now out of combat!");
             outOfCombat.getNotifications().add(this.injector.getInstance(ScreenFlash.class));
-            this.alertManager.addAlert(outOfCombat);
+            this.alertManager.addAlert(outOfCombat, false);
         }
 
         this.panel = this.alertManager.getWatchdogPanel();

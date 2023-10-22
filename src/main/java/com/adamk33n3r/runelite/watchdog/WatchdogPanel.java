@@ -65,6 +65,9 @@ public class WatchdogPanel extends PluginPanel {
     private AlertManager alertManager;
 
     @Inject
+    private WatchdogConfig watchdogConfig;
+
+    @Inject
     private OkHttpClient httpClient;
 
     private AlertListPanel alertListPanel;
@@ -125,7 +128,7 @@ public class WatchdogPanel extends PluginPanel {
         actionButtons.add(historyButton);
 
         JButton alertDropDownButton = PanelUtils.createAlertDropDownButton(createdAlert -> {
-            this.alertManager.addAlert(createdAlert);
+            this.alertManager.addAlert(createdAlert, false);
             this.openAlert(createdAlert);
         });
         JPanel addAlertWrapper = new JPanel(new BorderLayout());
@@ -146,7 +149,7 @@ public class WatchdogPanel extends PluginPanel {
         importButton.addActionListener(ev -> {
             ImportExportDialog importExportDialog = new ImportExportDialog(
                 SwingUtilities.getWindowAncestor(this),
-                (json, append) -> WatchdogPlugin.getInstance().getAlertManager().importAlerts(json, this.alertManager.getAlerts(), append, true)
+                (json, append) -> this.alertManager.importAlerts(json, this.alertManager.getAlerts(), append, true, this.watchdogConfig.overrideImportsWithDefaults())
             );
             importExportDialog.setVisible(true);
         });

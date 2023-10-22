@@ -43,4 +43,10 @@ public class Overhead extends MessageNotification {
             }
         }, this.displayTime, TimeUnit.SECONDS);
     }
+
+    @Override
+    public void setDefaults() {
+        super.setDefaults();
+        this.setDisplayTime(this.watchdogConfig.defaultOverHeadDisplayTime());
+    }
 }

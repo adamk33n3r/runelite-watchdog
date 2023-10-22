@@ -6,4 +6,5 @@ public interface INotification {
     Alert getAlert();
     void setAlert(Alert alert);
     void fire(String[] triggerValues);
+    void setDefaults();
 }

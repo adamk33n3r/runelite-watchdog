@@ -70,7 +70,7 @@ public abstract class AlertPanel<T extends Alert> extends PluginPanel {
                     ImportExportDialog importExportDialog = new ImportExportDialog(
                         SwingUtilities.getWindowAncestor(this),
                         (json, append) -> {
-                            boolean result = WatchdogPlugin.getInstance().getAlertManager().importAlerts(json, ((AlertGroup) alert).getAlerts(), append, true);
+                            boolean result = this.alertManager.importAlerts(json, ((AlertGroup) alert).getAlerts(), append, true, WatchdogPlugin.getInstance().getConfig().overrideImportsWithDefaults());
                             this.rebuild();
                             return result;
                         }

@@ -36,6 +36,9 @@ public class AlertManager {
     @Getter
     private Gson gson;
 
+    @Inject
+    private WatchdogConfig watchdogConfig;
+
     @Getter
     private final List<Alert> alerts = new CopyOnWriteArrayList<>();
 
@@ -132,9 +135,9 @@ public class AlertManager {
         });
     }
 
-    public void addAlert(Alert alert) {
+    public void addAlert(Alert alert, boolean overrideWithDefaults) {
         this.alerts.add(alert);
-        this.setUpAlert(alert);
+        this.setUpAlert(alert, overrideWithDefaults);
         this.saveAlerts();
 
         SwingUtilities.invokeLater(this.watchdogPanel::rebuild);
@@ -173,11 +176,11 @@ public class AlertManager {
 
     public void loadAlerts() {
         final String json = this.configManager.getConfiguration(WatchdogConfig.CONFIG_GROUP_NAME, WatchdogConfig.ALERTS);
-        this.importAlerts(json, this.alerts, false, false);
+        this.importAlerts(json, this.alerts, false, false, false);
         this.handleUpgrades();
     }
 
-    public boolean importAlerts(String json, List<Alert> alerts, boolean append, boolean checkRegex) throws JsonSyntaxException {
+    public boolean importAlerts(String json, List<Alert> alerts, boolean append, boolean checkRegex, boolean overrideWithDefaults) throws JsonSyntaxException {
         if (Strings.isNullOrEmpty(json)) {
             return false;
         }
@@ -207,7 +210,7 @@ public class AlertManager {
 
         // Inject dependencies
         this.getAllAlertsFrom(alertStream.get(), false)
-            .forEach(this::setUpAlert);
+            .forEach(alert -> this.setUpAlert(alert, overrideWithDefaults));
 
         SwingUtilities.invokeLater(() -> {
             this.watchdogPanel.rebuild();
@@ -238,13 +241,16 @@ public class AlertManager {
         return () -> importedAlerts.stream().filter(Objects::nonNull);
     }
 
-    private void setUpAlert(Alert alert) {
+    private void setUpAlert(Alert alert, boolean overrideWithDefaults) {
         WatchdogPlugin.getInstance().getInjector().injectMembers(alert);
         if (alert instanceof AlertGroup) {
-            ((AlertGroup) alert).getAlerts().forEach(this::setUpAlert);
+            ((AlertGroup) alert).getAlerts().forEach(subAlert -> this.setUpAlert(subAlert, overrideWithDefaults));
         } else {
             for (INotification notification : alert.getNotifications()) {
                 WatchdogPlugin.getInstance().getInjector().injectMembers(notification);
+                if (overrideWithDefaults) {
+                    notification.setDefaults();
+                }
                 notification.setAlert(alert);
             }
         }

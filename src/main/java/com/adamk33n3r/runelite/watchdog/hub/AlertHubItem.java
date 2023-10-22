@@ -1,6 +1,9 @@
 package com.adamk33n3r.runelite.watchdog.hub;
 
+import com.adamk33n3r.runelite.watchdog.WatchdogConfig;
 import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
+import com.adamk33n3r.runelite.watchdog.alerts.AlertGroup;
+import com.adamk33n3r.runelite.watchdog.notifications.TextToSpeech;
 import com.adamk33n3r.runelite.watchdog.ui.Icons;
 import com.adamk33n3r.runelite.watchdog.ui.WrappingLabel;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
@@ -13,6 +16,7 @@ import net.runelite.client.util.LinkBrowser;
 
 import lombok.Getter;
 
+import javax.inject.Inject;
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import java.awt.Color;
@@ -24,7 +28,7 @@ public class AlertHubItem extends JPanel {
 
     private final AlertHubClient.AlertDisplayInfo alertDisplayInfo;
 
-    public AlertHubItem(AlertHubClient.AlertDisplayInfo alertDisplayInfo) {
+    public AlertHubItem(AlertHubClient.AlertDisplayInfo alertDisplayInfo, WatchdogConfig watchdogConfig) {
         this.alertDisplayInfo = alertDisplayInfo;
         this.setBackground(ColorScheme.DARKER_GRAY_COLOR);
 
@@ -48,13 +52,6 @@ public class AlertHubItem extends JPanel {
 
         WrappingLabel alertDescLabel = new WrappingLabel(manifest.getDescription());
 
-//        JLabel icon = new JLabel();
-//        JLabel icon = new JLabel(new ImageIcon(ImageUtil.loadImageResource(WatchdogPlugin.class, "detail-test.png")));
-//        icon.setHorizontalAlignment(JLabel.CENTER);
-//        if (this.alertDisplayInfo.getIcon() != null) {
-//            icon.setIcon(new ImageIcon(this.alertDisplayInfo.getIcon()));
-//        }
-
         JButton moreInfoButton = PanelUtils.createActionButton(Icons.HELP, Icons.HELP_HOVER, "More info", (btn, mod) -> {
             LinkBrowser.browse(manifest.getRepo().toString());
         });
@@ -71,7 +68,7 @@ public class AlertHubItem extends JPanel {
         addButton.setBorder(new LineBorder(addButton.getBackground().darker()));
         addButton.setFocusPainted(false);
         addButton.addActionListener((ev) -> {
-            WatchdogPlugin.getInstance().getAlertManager().addAlert(manifest.getAlert());
+            WatchdogPlugin.getInstance().getAlertManager().addAlert(manifest.getAlert(), watchdogConfig.overrideImportsWithDefaults());
             JOptionPane.showMessageDialog(this, "Added " + manifest.getDisplayName() + " to your alerts", "Successfully Added", JOptionPane.INFORMATION_MESSAGE);
         });
 
@@ -98,7 +95,6 @@ public class AlertHubItem extends JPanel {
                 .addComponent(dependsOn, 0, GroupLayout.DEFAULT_SIZE, LINE_HEIGHT)
                 .addGap(5)
             )
-//            .addComponent(icon, 0, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE)
         );
 
         layout.setHorizontalGroup(layout.createParallelGroup()
@@ -124,9 +120,6 @@ public class AlertHubItem extends JPanel {
                 )
                 .addGap(5)
             )
-//            .addGroup(layout.createSequentialGroup()
-//                .addComponent(icon, 0, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-//            )
         );
     }
 }

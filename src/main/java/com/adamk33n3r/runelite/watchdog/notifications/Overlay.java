@@ -33,4 +33,14 @@ public class Overlay extends MessageNotification {
         WatchdogPlugin.getInstance().getNotificationOverlay()
             .add(this, Util.processTriggerValues(this.message, triggerValues));
     }
+
+    @Override
+    public void setDefaults() {
+        super.setDefaults();
+        this.setColor(this.watchdogConfig.defaultOverlayColor());
+        this.setTextColor(this.watchdogConfig.defaultOverlayTextColor());
+        this.setSticky(this.watchdogConfig.defaultOverlaySticky());
+        this.setTimeToLive(this.watchdogConfig.defaultOverlayTTL());
+        this.setImagePath(this.watchdogConfig.defaultOverlayImagePath());
+    }
 }

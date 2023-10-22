@@ -105,7 +105,18 @@ public class TextToSpeech extends MessageNotification implements IAudioNotificat
             }
             WatchdogPlugin.getInstance().getSoundPlayer().play(soundFile, this.gain);
         } catch (Exception ex) {
-            ex.printStackTrace();
+            log.error("Exception occurred while playing text to speech", ex);
         }
+    }
+
+    @Override
+    public void setDefaults() {
+        super.setDefaults();
+        this.setSource(this.watchdogConfig.defaultTTSSource());
+        this.setLegacyVoice(this.watchdogConfig.defaultTTSVoice());
+        // This will cause the tts panel to set the default
+        this.setElevenLabsVoiceId(null);
+        this.setGain(this.watchdogConfig.defaultTTSVolume());
+        this.setRate(this.watchdogConfig.defaultTTSRate());
     }
 }

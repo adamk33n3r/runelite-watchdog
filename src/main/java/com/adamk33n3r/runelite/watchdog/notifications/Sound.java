@@ -28,4 +28,10 @@ public class Sound extends AudioNotification {
         String processedPath = Util.processTriggerValues(this.path, triggerValues);
         WatchdogPlugin.getInstance().getSoundPlayer().play(new File(processedPath), this.gain);
     }
+
+    @Override
+    public void setDefaults() {
+        super.setDefaults();
+        this.setGain(this.watchdogConfig.defaultSoundVolume());
+    }
 }
