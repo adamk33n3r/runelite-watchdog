@@ -28,11 +28,17 @@ public abstract class Icons {
     public static final ImageIcon EXPORT = new ImageIcon(ImageUtil.loadImageResource(Icons.class, "mdi_export-variant.png"));
     public static final ImageIcon EXPORT_HOVER = new ImageIcon(ImageUtil.alphaOffset(EXPORT.getImage(), -120));
     public static final ImageIcon IMPORT = new ImageIcon(ImageUtil.loadImageResource(Icons.class, "mdi_import.png"));
+    public static final ImageIcon IMPORT_HOVER = new ImageIcon(ImageUtil.alphaOffset(IMPORT.getImage(), -120));
     public static final ImageIcon DELETE = new ImageIcon(ImageUtil.loadImageResource(Icons.class, "mdi_delete.png"));
     public static final ImageIcon DELETE_HOVER = new ImageIcon(ImageUtil.luminanceOffset(DELETE.getImage(), -80));
+    public static final ImageIcon DOWNLOAD = new ImageIcon(ImageUtil.loadImageResource(Icons.class, "mdi_download.png"));
 
     public static final ImageIcon CLONE = new ImageIcon(ImageUtil.loadImageResource(Icons.class, "mdi_content-duplicate.png"));
+    public static final ImageIcon EDIT = new ImageIcon(ImageUtil.loadImageResource(Icons.class, "mdi_pencil.png"));
     public static final ImageIcon DRAG_VERT = new ImageIcon(ImageUtil.loadImageResource(Icons.class, "mdi_drag-vertical.png"));
+
+    public static final ImageIcon REFRESH = new ImageIcon(ImageUtil.loadImageResource(Icons.class, "mdi_refresh.png"));
+    public static final ImageIcon REFRESH_HOVER = new ImageIcon(ImageUtil.luminanceOffset(REFRESH.getImage(), -80));
 
     /*
      * Alerts

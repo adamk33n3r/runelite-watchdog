@@ -1,6 +1,8 @@
 package com.adamk33n3r.runelite.watchdog.notifications;
 
+import com.adamk33n3r.runelite.watchdog.AlertManager;
 import com.adamk33n3r.runelite.watchdog.NotificationType;
+import com.adamk33n3r.runelite.watchdog.WatchdogConfig;
 import com.adamk33n3r.runelite.watchdog.alerts.Alert;
 
 import net.runelite.api.Client;
@@ -20,14 +22,36 @@ public abstract class Notification implements INotification {
     @Inject
     protected transient Client client;
 
+    @Inject
+    protected transient AlertManager alertManager;
+
+    @Inject
+    protected transient WatchdogConfig watchdogConfig;
+
     @Getter @Setter
     private boolean fireWhenFocused = true;
 
     @Getter @Setter
+    private boolean fireWhenAFK = false;
+    @Getter @Setter
     private int fireWhenAFKForSeconds = 0;
 
     @Getter @Setter
-    protected transient Alert alert;
+    private transient Alert alert;
+    public Alert getAlert() {
+        if (this.alert == null) {
+            this.alert = this.alertManager.getAllAlerts()
+                .filter(a -> a.getNotifications().contains(this)).findFirst().orElse(null);
+        }
+
+        return this.alert;
+    }
+
+    @Inject
+    public Notification(WatchdogConfig config) {
+        this.fireWhenAFK = config.defaultAFKMode();
+        this.fireWhenAFKForSeconds = config.defaultAFKSeconds();
+    }
 
     protected boolean shouldFire() {
         int afkTime = (int)Math.floor(Math.min(client.getKeyboardIdleTicks(), client.getMouseIdleTicks()) * Constants.CLIENT_TICK_LENGTH / 1000f);
@@ -55,5 +79,10 @@ public abstract class Notification implements INotification {
             .filter(nType -> nType.getImplClass() == this.getClass())
             .findFirst()
             .orElse(null);
+    }
+
+    public void setDefaults() {
+        this.setFireWhenAFK(this.watchdogConfig.defaultAFKMode());
+        this.setFireWhenAFKForSeconds(this.watchdogConfig.defaultAFKSeconds());
     }
 }

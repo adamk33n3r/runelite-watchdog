@@ -2,12 +2,18 @@ package com.adamk33n3r.runelite.watchdog.notifications;
 
 import com.adamk33n3r.runelite.watchdog.EventHandler;
 import com.adamk33n3r.runelite.watchdog.Util;
+import com.adamk33n3r.runelite.watchdog.WatchdogConfig;
 
 import javax.inject.Inject;
 
 public class NotificationEvent extends MessageNotification {
     @Inject
     private transient EventHandler eventHandler;
+
+    @Inject
+    public NotificationEvent(WatchdogConfig config) {
+        super(config);
+    }
 
     @Override
     protected void fireImpl(String[] triggerValues) {

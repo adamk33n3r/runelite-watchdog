@@ -1,10 +1,8 @@
 package com.adamk33n3r.runelite.watchdog.ui.panels;
 
-import com.adamk33n3r.runelite.watchdog.AlertManager;
-import com.adamk33n3r.runelite.watchdog.Displayable;
-import com.adamk33n3r.runelite.watchdog.TriggerType;
-import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
+import com.adamk33n3r.runelite.watchdog.*;
 import com.adamk33n3r.runelite.watchdog.alerts.Alert;
+import com.adamk33n3r.runelite.watchdog.alerts.AlertGroup;
 import com.adamk33n3r.runelite.watchdog.alerts.RegexMatcher;
 import com.adamk33n3r.runelite.watchdog.ui.*;
 
@@ -16,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.text.WordUtils;
 
 import javax.swing.*;
+import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -29,35 +28,30 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 @Slf4j
-public class AlertPanel extends PluginPanel {
-    private final ScrollablePanel container;
-    private final MultiplexingPluginPanel muxer;
-    private final Alert alert;
-    private final JPanel wrapper;
-    private final JScrollPane scroll;
+public abstract class AlertPanel<T extends Alert> extends PluginPanel {
+    private final JPanel controlContainer;
+    private final JPanel centerContainer;
+    protected final WatchdogPanel watchdogPanel;
+    protected final MultiplexingPluginPanel muxer;
+    protected final T alert;
 
     private final AlertManager alertManager;
 
-    private AlertPanel(MultiplexingPluginPanel muxer, Alert alert) {
+    public AlertPanel(WatchdogPanel watchdogPanel, T alert) {
         super(false);
 
-        this.muxer = muxer;
+        this.watchdogPanel = watchdogPanel;
+        this.muxer = watchdogPanel.getMuxer();
         this.alert = alert;
         this.alertManager = WatchdogPlugin.getInstance().getAlertManager();
 
         this.setLayout(new BorderLayout());
 
-        this.wrapper = new JPanel(new BorderLayout());
-        this.container = new ScrollablePanel(new StretchedStackedLayout(3, 3));
-        this.container.setBorder(new EmptyBorder(0, 10, 0, 10));
-        this.container.setScrollableWidth(ScrollablePanel.ScrollableSizeHint.FIT);
-        this.container.setScrollableHeight(ScrollablePanel.ScrollableSizeHint.STRETCH);
-        this.container.setScrollableBlockIncrement(ScrollablePanel.VERTICAL, ScrollablePanel.IncrementType.PERCENT, 10);
-        this.scroll = new JScrollPane(this.container, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        this.wrapper.add(scroll, BorderLayout.CENTER);
+        JPanel northPanel = new JPanel(new StretchedStackedLayout(3, 3));
+        this.add(northPanel, BorderLayout.NORTH);
 
         JPanel nameGroup = new JPanel(new BorderLayout());
-        nameGroup.setBorder(new EmptyBorder(10, 10, 10, 10));
+        nameGroup.setBorder(new EmptyBorder(10, 5, 10, 5));
 
         TriggerType triggerType = this.alert.getType();
         JLabel nameLabel = new JLabel(triggerType.getName());
@@ -67,6 +61,38 @@ public class AlertPanel extends PluginPanel {
 
         JPanel rightButtons = new JPanel(new GridLayout(1, 0));
 
+        if (alert instanceof AlertGroup) {
+            JButton importAlertBtn = PanelUtils.createActionButton(
+                Icons.IMPORT,
+                Icons.IMPORT_HOVER,
+                "Import alert into this group",
+                (btn, modifiers) -> {
+                    ImportExportDialog importExportDialog = new ImportExportDialog(
+                        SwingUtilities.getWindowAncestor(this),
+                        (json, append) -> {
+                            boolean result = this.alertManager.importAlerts(json, ((AlertGroup) alert).getAlerts(), append, true, WatchdogPlugin.getInstance().getConfig().overrideImportsWithDefaults());
+                            this.rebuild();
+                            return result;
+                        }
+                    );
+                    importExportDialog.setVisible(true);
+                }
+            );
+            rightButtons.add(importAlertBtn);
+        } else {
+            JButton testAlert = PanelUtils.createActionButton(
+                Icons.TEST,
+                Icons.TEST_HOVER,
+                "Test the whole alert",
+                (btn, modifiers) -> {
+                    String[] triggerValues = {"1", "2", "3", "4", "5"};
+                    WatchdogPlugin.getInstance().getPanel().getHistoryPanelProvider().get().addEntry(alert, triggerValues);
+                    alert.getNotifications().forEach(notification -> notification.fireForced(triggerValues));
+                }
+            );
+            rightButtons.add(testAlert);
+        }
+
         JButton exportAlertBtn = PanelUtils.createActionButton(
             Icons.EXPORT,
             Icons.EXPORT_HOVER,
@@ -74,24 +100,12 @@ public class AlertPanel extends PluginPanel {
             (btn, modifiers) -> {
                 ImportExportDialog importExportDialog = new ImportExportDialog(
                     SwingUtilities.getWindowAncestor(this),
-                    this.alertManager.getGson().toJson(new Alert[] { alert })
+                    alert
                 );
                 importExportDialog.setVisible(true);
             }
         );
         rightButtons.add(exportAlertBtn);
-
-        JButton testAlert = PanelUtils.createActionButton(
-            Icons.TEST,
-            Icons.TEST_HOVER,
-            "Test the whole alert",
-            (btn, modifiers) -> {
-                String[] triggerValues = {"1", "2", "3", "4", "5"};
-                WatchdogPlugin.getInstance().getPanel().getHistoryPanelProvider().get().addEntry(alert, triggerValues);
-                alert.getNotifications().forEach(notification -> notification.fireForced(triggerValues));
-            }
-        );
-        rightButtons.add(testAlert);
 
         ToggleButton toggleButton = new ToggleButton();
         toggleButton.setSelected(alert.isEnabled());
@@ -116,31 +130,32 @@ public class AlertPanel extends PluginPanel {
         backButton.setBorder(new EmptyBorder(0, 0, 0, 5));
         nameGroup.add(backButton, BorderLayout.WEST);
 
-        this.wrapper.add(nameGroup, BorderLayout.NORTH);
+        northPanel.add(nameGroup, BorderLayout.NORTH);
 
-        this.add(wrapper, BorderLayout.CENTER);
+        this.controlContainer = new JPanel(new StretchedStackedLayout(3, 3));
+        this.controlContainer.setBorder(new EmptyBorder(0, 5, 0, 5));
+        northPanel.add(this.controlContainer, BorderLayout.NORTH);
+
+        this.centerContainer = new JPanel(new BorderLayout());
+        this.add(this.centerContainer, BorderLayout.CENTER);
     }
 
-    public static AlertPanel create(MultiplexingPluginPanel muxer, Alert alert) {
-        return new AlertPanel(muxer, alert);
-    }
-
-    public AlertPanel addLabel(String label) {
+    public AlertPanel<T> addLabel(String label) {
         JLabel labelComp = new JLabel(label);
-        this.container.add(labelComp);
+        this.controlContainer.add(labelComp);
         return this;
     }
 
-    public AlertPanel addRichTextPane(String text) {
+    public AlertPanel<T> addRichTextPane(String text) {
         JRichTextPane richTextPane = new JRichTextPane();
         richTextPane.setContentType("text/html");
         richTextPane.setText(text);
         richTextPane.setForeground(Color.WHITE);
-        this.container.add(richTextPane);
+        this.controlContainer.add(richTextPane);
         return this;
     }
 
-    public AlertPanel addTextField(String placeholder, String tooltip, String initialValue, Consumer<String> saveAction) {
+    public AlertPanel<T> addTextField(String placeholder, String tooltip, String initialValue, Consumer<String> saveAction) {
         PlaceholderTextField textField = new PlaceholderTextField(initialValue);
         textField.setPlaceholder(placeholder);
         textField.setToolTipText(tooltip);
@@ -156,34 +171,34 @@ public class AlertPanel extends PluginPanel {
                 alertManager.saveAlerts();
             }
         });
-        this.container.add(textField);
+        this.controlContainer.add(textField);
         return this;
     }
 
-    public AlertPanel addTextArea(String placeholder, String tooltip, String initialValue, Consumer<String> saveAction) {
+    public AlertPanel<T> addTextArea(String placeholder, String tooltip, String initialValue, Consumer<String> saveAction) {
         JTextArea textArea = PanelUtils.createTextArea(placeholder, tooltip, initialValue, val -> {
             saveAction.accept(val);
             this.alertManager.saveAlerts();
         });
-        this.container.add(textArea);
+        this.controlContainer.add(textArea);
         return this;
     }
 
-    public AlertPanel addSpinner(String name, String tooltip, int initialValue, Consumer<Integer> saveAction) {
+    public AlertPanel<T> addSpinner(String name, String tooltip, int initialValue, Consumer<Integer> saveAction) {
         return this.addSpinner(name, tooltip, initialValue, saveAction, -99, 99, 1);
     }
 
-    public AlertPanel addSpinner(String name, String tooltip, int initialValue, Consumer<Integer> saveAction, int min, int max, int step) {
+    public AlertPanel<T> addSpinner(String name, String tooltip, int initialValue, Consumer<Integer> saveAction, int min, int max, int step) {
         JSpinner spinner = PanelUtils.createSpinner(initialValue, min, max, step, val -> {
             saveAction.accept(val);
             this.alertManager.saveAlerts();
         });
-        this.container.add(PanelUtils.createLabeledComponent(name, tooltip, spinner));
+        this.controlContainer.add(PanelUtils.createLabeledComponent(name, tooltip, spinner));
         return this;
     }
 
-    public <T extends Enum<T>> AlertPanel addSelect(String name, String tooltip, Class<T> enumType, T initialValue, Consumer<T> saveAction) {
-        JComboBox<T> select = new JComboBox<>(enumType.getEnumConstants());
+    public <E extends Enum<E>> AlertPanel<T> addSelect(String name, String tooltip, Class<E> enumType, E initialValue, Consumer<E> saveAction) {
+        JComboBox<E> select = new JComboBox<>(enumType.getEnumConstants());
         select.setSelectedItem(initialValue);
         select.setRenderer((list, value, index, isSelected, cellHasFocus) -> {
             if (value instanceof Displayable) {
@@ -198,65 +213,52 @@ public class AlertPanel extends PluginPanel {
             saveAction.accept(select.getItemAt(select.getSelectedIndex()));
             this.alertManager.saveAlerts();
         });
-        this.container.add(PanelUtils.createLabeledComponent(name, tooltip, select));
+        this.controlContainer.add(PanelUtils.createLabeledComponent(name, tooltip, select));
         return this;
     }
 
-    public AlertPanel addCheckbox(String name, String tooltip, boolean initialValue, Consumer<Boolean> saveAction) {
+    public AlertPanel<T> addCheckbox(String name, String tooltip, boolean initialValue, Consumer<Boolean> saveAction) {
         JCheckBox checkbox = PanelUtils.createCheckbox(name, tooltip, initialValue, val -> {
             saveAction.accept(val);
             this.alertManager.saveAlerts();
         });
-        this.container.add(checkbox);
+        this.controlContainer.add(checkbox);
         return this;
     }
 
-    public AlertPanel addInputGroupWithSuffix(JComponent mainComponent, JComponent suffix) {
+    public AlertPanel<T> addInputGroupWithSuffix(JComponent mainComponent, JComponent suffix) {
         return this.addInputGroup(mainComponent, null, Collections.singletonList(suffix));
     }
 
-    public AlertPanel addInputGroup(JComponent mainComponent, List<JComponent> prefixes, List<JComponent> suffixes) {
+    public AlertPanel<T> addInputGroup(JComponent mainComponent, List<JComponent> prefixes, List<JComponent> suffixes) {
         InputGroup textFieldGroup = new InputGroup(mainComponent)
             .addPrefixes(prefixes)
             .addSuffixes(suffixes);
-        this.container.add(textFieldGroup);
+        this.controlContainer.add(textFieldGroup);
         return this;
     }
 
-    public PluginPanel build() {
-        NotificationsPanel notificationPanel = new NotificationsPanel(this.alert);
-        WatchdogPlugin.getInstance().getInjector().injectMembers(notificationPanel);
-        notificationPanel.setBorder(new HorizontalRuleBorder(10));
-        this.container.add(notificationPanel);
-        // I don't know why but sometimes the scroll pane is starting scrolled down 1 element, and we have to wait a tick to reset it
-//        SwingUtilities.invokeLater(() -> {
-//            this.scroll.getVerticalScrollBar();//.setValue(0);
-//        });
-
-        return this;
-    }
-
-    public AlertPanel addAlertDefaults(Alert alert) {
-        return this.addTextField("Enter the alert name...", "Name of Alert", alert.getName(), alert::setName)
+    public AlertPanel<T> addAlertDefaults() {
+        return this.addTextField("Enter the alert name...", "Name of Alert", this.alert.getName(), this.alert::setName)
             .addSpinner(
                 "Debounce Time (ms)",
                 "How long to wait before allowing this alert to trigger again in milliseconds",
-                alert.getDebounceTime(),
-                alert::setDebounceTime,
+                this.alert.getDebounceTime(),
+                this.alert::setDebounceTime,
                 0,
                 8640000, // 6 hours - max time a player can be logged in
                 100
             );
     }
 
-    public AlertPanel addIf(Consumer<AlertPanel> panel, Supplier<Boolean> ifFunc) {
+    public AlertPanel<T> addIf(Consumer<AlertPanel<T>> panel, Supplier<Boolean> ifFunc) {
         if (ifFunc.get()) {
             panel.accept(this);
         }
         return this;
     }
 
-    public AlertPanel addRegexMatcher(RegexMatcher regexMatcher, String placeholder, String tooltip) {
+    public AlertPanel<T> addRegexMatcher(RegexMatcher regexMatcher, String placeholder, String tooltip) {
         return this.addInputGroupWithSuffix(
             PanelUtils.createTextArea(placeholder, tooltip, regexMatcher.getPattern(), msg -> {
                 if (!PanelUtils.isPatternValid(this, msg, regexMatcher.isRegexEnabled()))
@@ -278,5 +280,34 @@ public class AlertPanel extends PluginPanel {
                 }
             )
         );
+    }
+
+    public AlertPanel<T> addNotifications() {
+        NotificationsPanel notificationPanel = new NotificationsPanel(this.alert);
+        WatchdogPlugin.getInstance().getInjector().injectMembers(notificationPanel);
+        notificationPanel.setBorder(new CompoundBorder(new EmptyBorder(0, 5, 0, 5), new HorizontalRuleBorder(10)));
+        this.centerContainer.add(notificationPanel);
+
+        return this;
+    }
+
+    public AlertPanel<T> addSubPanel(JPanel sub) {
+        this.centerContainer.add(sub);
+
+        return this;
+    }
+
+    protected abstract void build();
+    protected void rebuild() {
+        this.controlContainer.removeAll();
+        this.centerContainer.removeAll();
+        this.build();
+        this.revalidate();
+        this.repaint();
+    }
+
+    @Override
+    public void onActivate() {
+        this.rebuild();
     }
 }

@@ -25,6 +25,7 @@ public class SoundEffect extends AudioNotification {
 
     @Inject
     public SoundEffect(WatchdogConfig config) {
+        super(config);
         this.gain = config.defaultSoundEffectVolume();
         this.soundID = config.defaultSoundEffectID();
     }
@@ -34,5 +35,12 @@ public class SoundEffect extends AudioNotification {
         this.clientThread.invokeLater(() -> {
             this.client.playSoundEffect(this.soundID, Util.scale(this.gain, 0, 10, SoundEffectVolume.MUTED, SoundEffectVolume.HIGH));
         });
+    }
+
+    @Override
+    public void setDefaults() {
+        super.setDefaults();
+        this.setSoundID(this.watchdogConfig.defaultSoundEffectID());
+        this.setGain(this.watchdogConfig.defaultSoundEffectVolume());
     }
 }

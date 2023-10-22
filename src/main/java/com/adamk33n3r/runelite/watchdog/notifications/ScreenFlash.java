@@ -24,6 +24,7 @@ public class ScreenFlash extends Notification {
 
     @Inject
     public ScreenFlash(WatchdogConfig config) {
+        super(config);
         this.color = config.defaultScreenFlashColor();
         this.flashMode = config.defaultScreenFlashMode();
         this.flashDuration = config.defaultScreenFlashDuration();
@@ -32,5 +33,13 @@ public class ScreenFlash extends Notification {
     @Override
     protected void fireImpl(String[] triggerValues) {
         WatchdogPlugin.getInstance().getFlashOverlay().flash(this);
+    }
+
+    @Override
+    public void setDefaults() {
+        super.setDefaults();
+        this.setFlashDuration(this.watchdogConfig.defaultScreenFlashDuration());
+        this.setFlashMode(this.watchdogConfig.defaultScreenFlashMode());
+        this.setColor(this.watchdogConfig.defaultScreenFlashColor());
     }
 }

@@ -4,6 +4,7 @@ import com.adamk33n3r.runelite.watchdog.Util;
 import com.adamk33n3r.runelite.watchdog.WatchdogConfig;
 
 import net.runelite.api.Client;
+import net.runelite.api.Player;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -25,17 +26,28 @@ public class Overhead extends MessageNotification {
 
     @Inject
     public Overhead(WatchdogConfig config) {
+        super(config);
         this.displayTime = config.defaultOverHeadDisplayTime();
     }
 
     @Override
     protected void fireImpl(String[] triggerValues) {
         String message = Util.processTriggerValues(this.message, triggerValues);
-        this.client.getLocalPlayer().setOverheadText(message);
+        Player localPlayer = this.client.getLocalPlayer();
+        if (localPlayer == null) {
+            return;
+        }
+        localPlayer.setOverheadText(message);
         this.executor.schedule(() -> {
-            if (this.client.getLocalPlayer().getOverheadText().equals(message)) {
-                this.client.getLocalPlayer().setOverheadText("");
+            if (localPlayer.getOverheadText().equals(message)) {
+                localPlayer.setOverheadText("");
             }
         }, this.displayTime, TimeUnit.SECONDS);
+    }
+
+    @Override
+    public void setDefaults() {
+        super.setDefaults();
+        this.setDisplayTime(this.watchdogConfig.defaultOverHeadDisplayTime());
     }
 }

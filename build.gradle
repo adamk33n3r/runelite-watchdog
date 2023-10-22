@@ -1,15 +1,6 @@
 plugins {
 	id 'java'
-//	id 'com.github.johnrengelman.shadow' version '6.1.0'
 }
-
-//shadowJar {
-//	from sourceSets.test.output
-//	configurations = [project.configurations.testRuntimeClasspath]
-//	manifest {
-//		attributes 'Main-Class': 'com.adamk33n3r.runelite.watchdog.WatchdogPluginLauncher'
-//	}
-//}
 
 repositories {
 	mavenLocal()
@@ -28,7 +19,9 @@ dependencies {
 	compileOnly 'org.projectlombok:lombok:1.18.20'
 	annotationProcessor 'org.projectlombok:lombok:1.18.20'
 
-	testImplementation 'junit:junit:4.12'
+	testImplementation 'junit:junit:4.13.2'
+	testImplementation 'org.mockito:mockito-core:3.4.0'
+	testImplementation 'com.google.inject.extensions:guice-testlib:4.1.0'
 	testImplementation group: 'net.runelite', name:'client', version: runeLiteVersion
 	testImplementation group: 'net.runelite', name:'jshell', version: runeLiteVersion
 }
@@ -40,28 +33,60 @@ def versionPropsFile = file("src/main/resources/${group.replace('.', '/')}/versi
 if (versionPropsFile.exists())
 	versionProps.load(versionPropsFile.newReader())
 
-def updateBuildNumber = 1
-if (tasks.findByName('shadowJar')) {
-	updateBuildNumber = 0
-}
-
 def major = (versionProps['VERSION_MAJOR'] as String ?: '0').toInteger()
 def minor = (versionProps['VERSION_MINOR'] as String ?: '0').toInteger()
 def patch = (versionProps['VERSION_PATCH'] as String ?: '0').toInteger()
-def build = (versionProps['VERSION_BUILD'] as String ?: '0').toInteger() + updateBuildNumber
+def build = (versionProps['VERSION_BUILD'] as String ?: '0').toInteger()
 def phase = (versionProps['VERSION_PHASE'] as String ?: '')
-versionProps['VERSION_MAJOR'] = major.toString()
-versionProps['VERSION_MINOR'] = minor.toString()
-versionProps['VERSION_PATCH'] = patch.toString()
-versionProps['VERSION_BUILD'] = build.toString()
-versionProps['VERSION_PHASE'] = phase
-versionProps.store(versionPropsFile.newWriter(), null)
 
-version = major+'.'+minor+'.'+patch+'.'+build
+version = major+'.'+minor+'.'+patch
 if (!phase.empty)
 	version = version+'-'+phase
+version = version+'+'+build
+
 sourceCompatibility = '1.8'
+targetCompatibility = '1.8'
+
+compileJava.doFirst {
+	def runTasks = gradle.startParameter.taskNames
+	if ("shadowJar" in runTasks) return
+	build += 1
+	versionProps['VERSION_BUILD'] = build.toString()
+	versionProps.store(versionPropsFile.newWriter(), null)
+	version = major+'.'+minor+'.'+patch
+	if (!phase.empty)
+		version = version+'-'+phase
+	version = version+'+'+build
+}
 
 tasks.withType(JavaCompile) {
 	options.encoding = 'UTF-8'
+}
+
+tasks.register("shadowJar", Jar) {
+	dependsOn configurations.testRuntimeClasspath
+	manifest {
+		attributes 'Main-Class': 'com.adamk33n3r.runelite.watchdog.WatchdogPluginLauncher'
+	}
+
+	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+	from sourceSets.main.output
+	from sourceSets.test.output
+	from({
+		configurations.testRuntimeClasspath.collect {
+			// Ignore test framework stuff, especially bytebuddy because it's like 4MB
+			if (it.path.contains("mockito") || it.path.contains("guice-testlib") || it.path.contains("junit") || it.path.contains("bytebuddy")) return null
+			it.isDirectory() ? it : zipTree(it)
+		}
+	})
+	exclude("META-INF/INDEX.LIST")
+	exclude("META-INF/*.SF")
+	exclude("META-INF/*.DSA")
+	exclude("META-INF/*.RSA")
+	exclude "**/module-info.class"
+
+	group = BasePlugin.BUILD_GROUP
+	archiveClassifier = "shadow"
+	archiveFileName = rootProject.name + "-" + project.version + "-all.jar"
+	destinationDirectory = file('jars')
 }

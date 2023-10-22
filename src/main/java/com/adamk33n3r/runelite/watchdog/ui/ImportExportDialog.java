@@ -1,7 +1,10 @@
 package com.adamk33n3r.runelite.watchdog.ui;
 
 import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
+import com.adamk33n3r.runelite.watchdog.alerts.Alert;
+import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
 
+import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.swing.*;
@@ -13,12 +16,14 @@ import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionListener;
+import java.util.List;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 @Slf4j
 public class ImportExportDialog extends JDialog {
     // Import
-    public ImportExportDialog(Component parent) {
+    public ImportExportDialog(Component parent, BiFunction<String, Boolean, Boolean> onImport) {
         this.setTitle("Import");
         this.setSize(500, 250);
         this.setLocationRelativeTo(parent);
@@ -42,7 +47,7 @@ public class ImportExportDialog extends JDialog {
             }
             String json = textArea.getText();
             try {
-                if (WatchdogPlugin.getInstance().getAlertManager().importAlerts(json, append, true)) {
+                if (onImport.apply(json, append)) {
                     this.setVisible(false);
                 }
             } catch (Exception ex) {
@@ -65,21 +70,48 @@ public class ImportExportDialog extends JDialog {
     }
 
     // Export
-    public ImportExportDialog(Component parent, String exportString) {
+    public ImportExportDialog(Component parent, Alert alert) {
+        Gson gson = WatchdogPlugin.getInstance().getAlertManager().getGson();
+        String json = gson.toJson(alert);
+        String pretty = gson.newBuilder().setPrettyPrinting().create().toJson(alert);
+        this.show(parent, json, pretty);
+    }
+
+    public ImportExportDialog(Component parent, List<Alert> alerts) {
+        Gson gson = WatchdogPlugin.getInstance().getAlertManager().getGson();
+        String json = gson.toJson(alerts);
+        String pretty = gson.newBuilder().setPrettyPrinting().create().toJson(alerts);
+        this.show(parent, json, pretty);
+    }
+
+    public void show(Component parent, String exportString, String prettyExportString) {
         this.setTitle("Export");
         this.setSize(500, 250);
         this.setLocationRelativeTo(parent);
         this.setModal(true);
         this.setUndecorated(true);
 
+        JTextArea textArea = new JTextArea(exportString);
+        textArea.setLineWrap(true);
+        textArea.setEditable(false);
+        SwingUtilities.invokeLater(textArea::requestFocusInWindow);
+
         JPanel wrapper = this.createWrapper();
         this.add(wrapper);
-        wrapper.add(new JLabel("Exported Alert JSON"), BorderLayout.NORTH);
+        JPanel top = new JPanel(new BorderLayout());
+        top.add(new JLabel("Exported Alert JSON"), BorderLayout.WEST);
+        JCheckBox prettyPrint = PanelUtils.createCheckbox("Pretty Print", "Pretty Print", false, (selected) -> {
+            textArea.setText(selected ? prettyExportString : exportString);
+            textArea.setCaretPosition(0);
+            textArea.requestFocusInWindow();
+        });
+        top.add(prettyPrint, BorderLayout.EAST);
+        wrapper.add(top, BorderLayout.NORTH);
         JPanel btnGroup = new JPanel(new GridLayout(1, 2, 25, 0));
         JButton copyBtn = new JButton("Copy to Clipboard");
         copyBtn.addActionListener(ev -> {
             Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-            clipboard.setContents(new StringSelection(exportString), null);
+            clipboard.setContents(new StringSelection(prettyPrint.isSelected() ? prettyExportString : exportString), null);
             this.setVisible(false);
         });
         btnGroup.add(copyBtn);
@@ -90,9 +122,6 @@ public class ImportExportDialog extends JDialog {
         });
         wrapper.add(btnGroup, BorderLayout.SOUTH);
 
-        JTextArea textArea = new JTextArea(exportString);
-        textArea.setLineWrap(true);
-        textArea.setEditable(false);
         JScrollPane scrollPane = new JScrollPane(textArea);
         wrapper.add(scrollPane, BorderLayout.CENTER);
     }

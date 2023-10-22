@@ -19,6 +19,7 @@ public class Sound extends AudioNotification {
 
     @Inject
     public Sound(WatchdogConfig config) {
+        super(config);
         this.gain = config.defaultSoundVolume();
         this.path = config.defaultSoundPath();
     }
@@ -27,5 +28,11 @@ public class Sound extends AudioNotification {
     protected void fireImpl(String[] triggerValues) {
         String processedPath = Util.processTriggerValues(this.path, triggerValues);
         WatchdogPlugin.getInstance().getSoundPlayer().play(new File(processedPath), this.gain);
+    }
+
+    @Override
+    public void setDefaults() {
+        super.setDefaults();
+        this.setGain(this.watchdogConfig.defaultSoundVolume());
     }
 }

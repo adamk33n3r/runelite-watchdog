@@ -19,7 +19,9 @@ import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.util.List;
 
+@Deprecated
 public class AlertListItem extends JPanel {
 
     private static final int ROW_HEIGHT = 30;
@@ -28,20 +30,20 @@ public class AlertListItem extends JPanel {
     @Getter
     private final Alert alert;
 
-    public AlertListItem(WatchdogPanel panel, AlertManager alertManager, Alert alert, JComponent parent) {
+    public AlertListItem(WatchdogPanel panel, AlertManager alertManager, Alert alert, List<Alert> parentList, JComponent parent, Runnable onChange) {
         this.alert = alert;
-
         this.setLayout(new BorderLayout(5, 0));
+
+        MouseDragEventForwarder mouseDragEventForwarder = new MouseDragEventForwarder(parent);
+
         this.setBorder(new EmptyBorder(PADDING, 0, PADDING, 0));
         this.setPreferredSize(new Dimension(PluginPanel.PANEL_WIDTH, ROW_HEIGHT + PADDING * 2));
-
 
         JPanel frontGroup = new JPanel(new DynamicGridLayout(1, 0, 3, 0));
 
         JButton dragHandle = new JButton(Icons.DRAG_VERT);
         SwingUtil.removeButtonDecorations(dragHandle);
         dragHandle.setPreferredSize(new Dimension(8, 16));
-        MouseDragEventForwarder mouseDragEventForwarder = new MouseDragEventForwarder(parent);
         dragHandle.addMouseListener(mouseDragEventForwarder);
         dragHandle.addMouseMotionListener(mouseDragEventForwarder);
         frontGroup.add(dragHandle);
@@ -68,13 +70,18 @@ public class AlertListItem extends JPanel {
         this.add(actionButtons, BorderLayout.LINE_END);
 
         actionButtons.add(PanelUtils.createActionButton(Icons.CLONE, Icons.CLONE, "Clone Alert", (btn, modifiers) -> {
-            alertManager.cloneAlert(alert);
+            Alert cloned = alertManager.cloneAlert(alert);
+            parentList.add(cloned);
+            alertManager.saveAlerts();
+            onChange.run();
         }));
 
         final JButton deleteButton = PanelUtils.createActionButton(Icons.DELETE, Icons.DELETE, "Delete Alert", (btn, modifiers) -> {
             int result = JOptionPane.showConfirmDialog(this, "Are you sure you want to delete the " + alert.getName() + " alert?", "Delete?", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE);
             if (result == JOptionPane.YES_OPTION) {
-                alertManager.removeAlert(alert);
+                parentList.remove(alert);
+                alertManager.saveAlerts();
+                onChange.run();
             }
         });
         actionButtons.add(deleteButton);

@@ -22,6 +22,7 @@ import java.time.Instant;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 import static com.adamk33n3r.runelite.watchdog.alerts.SpawnedAlert.SpawnedDespawned.DESPAWNED;
 import static com.adamk33n3r.runelite.watchdog.alerts.SpawnedAlert.SpawnedDespawned.SPAWNED;
@@ -84,22 +85,17 @@ public class EventHandler {
                 || chatMessage.getType() == ChatMessageType.CLAN_GUEST_CHAT
                 || chatMessage.getType() == ChatMessageType.CLAN_GIM_CHAT
         ) {
-            this.alertManager.getAlerts().stream()
-                    .filter(alert -> alert instanceof PlayerChatAlert)
-                    .map(alert -> (PlayerChatAlert) alert)
-                    .forEach(chatAlert -> {
-                        String[] groups = this.matchPattern(chatAlert, unformattedMessage);
-                        if (groups == null) return;
+            this.alertManager.getAllEnabledAlertsOfType(PlayerChatAlert.class)
+                .forEach(chatAlert -> {
+                    String[] groups = this.matchPattern(chatAlert, unformattedMessage);
+                    if (groups == null) return;
 
-                        this.fireAlert(chatAlert, groups);
-                    });
+                    this.fireAlert(chatAlert, groups);
+                });
             return;
         }
 
-        this.alertManager.getAlerts().stream()
-            .filter(alert -> alert instanceof ChatAlert)
-            .map(alert -> (ChatAlert) alert)
-//            .filter(chatAlert -> chatAlert.getChatMessageType() == chatMessage.getType())
+        this.alertManager.getAllEnabledAlertsOfType(ChatAlert.class)
             .forEach(gameAlert -> {
                 String[] groups = this.matchPattern(gameAlert, unformattedMessage);
                 if (groups == null) return;
@@ -117,9 +113,7 @@ public class EventHandler {
             return;
         }
 
-        this.alertManager.getAlerts().stream()
-            .filter(alert -> alert instanceof NotificationFiredAlert)
-            .map(alert -> (NotificationFiredAlert) alert)
+        this.alertManager.getAllEnabledAlertsOfType(NotificationFiredAlert.class)
             .forEach(notificationFiredAlert -> {
                 String[] groups = this.matchPattern(notificationFiredAlert, notificationFired.getMessage());
                 if (groups == null) return;
@@ -153,9 +147,7 @@ public class EventHandler {
             return;
         }
 
-        this.alertManager.getAlerts().stream()
-            .filter(alert -> alert instanceof StatChangedAlert)
-            .map(alert -> (StatChangedAlert) alert)
+        this.alertManager.getAllEnabledAlertsOfType(StatChangedAlert.class)
             .filter(alert -> {
                 boolean isSkill = alert.getSkill() == statChanged.getSkill();
                 if (!isSkill) {
@@ -181,9 +173,7 @@ public class EventHandler {
             return;
         }
 
-        this.alertManager.getAlerts().stream()
-            .filter(alert -> alert instanceof XPDropAlert)
-            .map(alert -> (XPDropAlert) alert)
+        this.alertManager.getAllEnabledAlertsOfType(XPDropAlert.class)
             .filter(alert -> {
                 boolean isSkill = alert.getSkill() == statChanged.getSkill();
                 int gainedXP = statChanged.getXp() - previousXP;
@@ -199,9 +189,7 @@ public class EventHandler {
         // Ignore everything but inventory
         if (itemContainerChanged.getItemContainer().getId() != InventoryID.INVENTORY.getId())
             return;
-        this.alertManager.getAlerts().stream()
-            .filter(alert -> alert instanceof InventoryAlert)
-            .map(alert -> (InventoryAlert) alert)
+        this.alertManager.getAllEnabledAlertsOfType(InventoryAlert.class)
             .forEach(inventoryAlert -> {
                 Item[] items = itemContainerChanged.getItemContainer().getItems();
                 long itemCount = Arrays.stream(items).filter(item -> item.getId() > -1).count();
@@ -305,9 +293,7 @@ public class EventHandler {
 
     private void onSpawned(String name, SpawnedAlert.SpawnedDespawned mode, SpawnedAlert.SpawnedType type) {
         String unformattedName = Text.removeFormattingTags(name);
-        this.alertManager.getAlerts().stream()
-            .filter(alert -> alert instanceof SpawnedAlert)
-            .map(alert -> (SpawnedAlert) alert)
+        this.alertManager.getAllEnabledAlertsOfType(SpawnedAlert.class)
             .filter(spawnedAlert -> spawnedAlert.getSpawnedDespawned() == mode)
             .filter(spawnedAlert -> spawnedAlert.getSpawnedType() == type)
             .forEach(spawnedAlert -> {
@@ -339,12 +325,23 @@ public class EventHandler {
         // Don't fire if it is disabled
         if (!alert.isEnabled()) return;
 
+        List<AlertGroup> ancestors = alert.getAncestors();
+        // Don't fire if any of the ancestors are disabled
+        if (ancestors != null && !ancestors.stream().allMatch(Alert::isEnabled)) {
+            return;
+        }
+
+        Alert alertToDebounceWith = ancestors == null ? alert : Stream.concat(ancestors.stream(), Stream.of(alert))
+            .filter(ancestor -> ancestor.getDebounceTime() > 0)
+            .max(Comparator.comparingInt(Alert::getDebounceTime))
+            .orElse(alert);
+
         // If the alert hasn't been fired yet, or has been enough time, set the last trigger time to now and fire.
-        if (!this.lastTriggered.containsKey(alert) || Instant.now().compareTo(this.lastTriggered.get(alert).plusMillis(alert.getDebounceTime())) >= 0) {
+        if (!this.lastTriggered.containsKey(alertToDebounceWith) || Instant.now().compareTo(this.lastTriggered.get(alertToDebounceWith).plusMillis(alertToDebounceWith.getDebounceTime())) >= 0) {
             SwingUtilities.invokeLater(() -> {
                 this.historyPanelProvider.get().addEntry(alert, triggerValues);
             });
-            this.lastTriggered.put(alert, Instant.now());
+            this.lastTriggered.put(alertToDebounceWith, Instant.now());
             alert.getNotifications().forEach(notification -> notification.fire(triggerValues));
         }
     }

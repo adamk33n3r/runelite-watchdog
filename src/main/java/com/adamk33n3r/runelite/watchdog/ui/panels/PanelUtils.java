@@ -1,9 +1,13 @@
 package com.adamk33n3r.runelite.watchdog.ui.panels;
 
 import com.adamk33n3r.runelite.watchdog.Displayable;
+import com.adamk33n3r.runelite.watchdog.TriggerType;
 import com.adamk33n3r.runelite.watchdog.Util;
+import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
+import com.adamk33n3r.runelite.watchdog.alerts.Alert;
 import com.adamk33n3r.runelite.watchdog.ui.Icons;
 import com.adamk33n3r.runelite.watchdog.ui.PlaceholderTextArea;
+import com.adamk33n3r.runelite.watchdog.ui.dropdownbutton.DropDownButtonFactory;
 
 import net.runelite.client.ui.DynamicGridLayout;
 import net.runelite.client.ui.components.ColorJButton;
@@ -17,6 +21,7 @@ import org.apache.commons.text.WordUtils;
 
 import javax.annotation.Nullable;
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileFilter;
 import java.awt.*;
 import java.awt.event.*;
@@ -48,6 +53,7 @@ public class PanelUtils {
         if (twoLines) {
             panel.setLayout(new DynamicGridLayout(2, 0, 5, 5));
         } else {
+            panel.setBorder(new EmptyBorder(0, 5, 0, 0));
             panel.setLayout(new BorderLayout(5, 0));
         }
         JLabel jLabel = new JLabel(label);
@@ -279,5 +285,35 @@ public class PanelUtils {
             JOptionPane.showMessageDialog(parent, errorLabel, "Error in regex/pattern", JOptionPane.ERROR_MESSAGE);
             return false;
         }
+    }
+
+    public static JButton createAlertDropDownButton(Consumer<Alert> onCreate) {
+        ActionListener actionListener = e -> {
+            JMenuItem menuItem = (JMenuItem) e.getSource();
+            TriggerType tType = (TriggerType) menuItem.getClientProperty(TriggerType.class);
+            Alert createdAlert = WatchdogPlugin.getInstance().getInjector().getInstance(tType.getImplClass());
+            onCreate.accept(createdAlert);
+        };
+
+        JPopupMenu popupMenu = new JPopupMenu();
+        JMenuItem alertGroupMenuItem = new JMenuItem(TriggerType.ALERT_GROUP.getName());
+        alertGroupMenuItem.setToolTipText(TriggerType.ALERT_GROUP.getTooltip());
+        alertGroupMenuItem.putClientProperty(TriggerType.class, TriggerType.ALERT_GROUP);
+        alertGroupMenuItem.addActionListener(actionListener);
+        popupMenu.add(alertGroupMenuItem);
+        popupMenu.addSeparator();
+        Arrays.stream(TriggerType.values())
+            .filter(tType -> tType != TriggerType.ALERT_GROUP)
+            .forEach(tType -> {
+                JMenuItem c = new JMenuItem(tType.getName());
+                c.setToolTipText(tType.getTooltip());
+                c.putClientProperty(TriggerType.class, tType);
+                c.addActionListener(actionListener);
+                popupMenu.add(c);
+            });
+        JButton addDropDownButton = DropDownButtonFactory.createDropDownButton(Icons.ADD, popupMenu);
+        addDropDownButton.setPreferredSize(new Dimension(40, addDropDownButton.getPreferredSize().height));
+        addDropDownButton.setToolTipText("Create New Alert");
+        return addDropDownButton;
     }
 }

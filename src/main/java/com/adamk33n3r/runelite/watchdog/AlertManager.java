@@ -1,6 +1,7 @@
 package com.adamk33n3r.runelite.watchdog;
 
 import com.adamk33n3r.runelite.watchdog.alerts.*;
+import com.adamk33n3r.runelite.watchdog.hub.AlertHubCategory;
 import com.adamk33n3r.runelite.watchdog.notifications.*;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
 
@@ -8,6 +9,7 @@ import net.runelite.client.config.ConfigManager;
 import net.runelite.client.config.FlashNotification;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import joptsimple.internal.Strings;
 import lombok.Getter;
@@ -34,9 +36,13 @@ public class AlertManager {
     @Getter
     private Gson gson;
 
+    @Inject
+    private WatchdogConfig watchdogConfig;
+
     @Getter
     private final List<Alert> alerts = new CopyOnWriteArrayList<>();
 
+    // TODO: Kinda weird this is in here...
     @Getter
     @Inject
     private WatchdogPanel watchdogPanel;
@@ -61,6 +67,7 @@ public class AlertManager {
             .ignoreSubtype("ResourceAlert")
             .ignoreSubtype("SoundFiredAlert")
             .ignoreSubtype("AlertGroup")
+            .recognizeSubtypes()
             .registerSubtype(ChatAlert.class)
             .registerSubtype(PlayerChatAlert.class)
             .registerSubtype(NotificationFiredAlert.class)
@@ -68,7 +75,8 @@ public class AlertManager {
             .registerSubtype(StatChangedAlert.class)
             .registerSubtype(XPDropAlert.class)
             .registerSubtype(SpawnedAlert.class)
-            .registerSubtype(InventoryAlert.class);
+            .registerSubtype(InventoryAlert.class)
+            .registerSubtype(AlertGroup.class);
         // Add new notification types here
         final RuntimeTypeAdapterFactory<Notification> notificationTypeFactory = RuntimeTypeAdapterFactory.of(Notification.class)
             .registerSubtype(TrayNotification.class)
@@ -84,116 +92,130 @@ public class AlertManager {
 //            .serializeNulls()
             .registerTypeAdapterFactory(alertTypeFactory)
             .registerTypeAdapterFactory(notificationTypeFactory)
+            .registerTypeAdapter(AlertHubCategory.class, new MixedCaseEnumAdapter())
             .create();
     }
 
-    public void addAlert(Alert alert) {
+    public Stream<Alert> getAllEnabledAlerts() {
+        return this.getAllAlerts().filter(Alert::isEnabled);
+    }
+
+    public <T extends Alert> Stream<T> getAllEnabledAlertsOfType(Class<T> type) {
+        return this.getAllEnabledAlerts()
+            .filter(type::isInstance)
+            .map(type::cast);
+    }
+
+    public Stream<Alert> getAllAlerts() {
+        return this.getAllAlertsFrom(this.alerts.stream(), false);
+    }
+
+    public <T extends Alert> Stream<T> getAllAlertsOfType(Class<T> type) {
+        return this.getAllAlerts()
+            .filter(type::isInstance)
+            .map(type::cast);
+    }
+
+    public Stream<AlertGroup> getAllAlertGroups() {
+        return this.getAllAlertsFrom(this.alerts.stream(), true)
+            .filter(AlertGroup.class::isInstance)
+            .map(AlertGroup.class::cast);
+    }
+
+    public Stream<Alert> getAllAlertsFrom(Stream<Alert> alerts, boolean includeGroups) {
+        return alerts.flatMap(alert -> {
+            if (alert instanceof AlertGroup) {
+                Stream<Alert> children = this.getAllAlertsFrom(((AlertGroup) alert).getAlerts().stream(), includeGroups);
+                if (includeGroups) {
+                    return Stream.concat(Stream.of(alert), children);
+                }
+                return children;
+            }
+            return Stream.of(alert);
+        });
+    }
+
+    public void addAlert(Alert alert, boolean overrideWithDefaults) {
         this.alerts.add(alert);
+        this.setUpAlert(alert, overrideWithDefaults);
         this.saveAlerts();
 
         SwingUtilities.invokeLater(this.watchdogPanel::rebuild);
     }
 
     public void removeAlert(Alert alert) {
-        this.alerts.remove(alert);
+        AlertGroup parent = alert.getParent();
+        if (parent != null) {
+            parent.getAlerts().remove(alert);
+        } else {
+            this.alerts.remove(alert);
+        }
         this.saveAlerts();
 
         SwingUtilities.invokeLater(this.watchdogPanel::rebuild);
     }
 
-    public void cloneAlert(Alert alert) {
+    public Alert cloneAlert(Alert alert) {
         String json = this.gson.toJson(alert, ALERT_TYPE);
         Alert clonedAlert = this.gson.fromJson(json, ALERT_TYPE);
         clonedAlert.setName(clonedAlert.getName() + " Clone");
-        this.addAlert(clonedAlert);
+        return clonedAlert;
     }
 
     public void moveAlertTo(Alert alert, int pos) {
-        this.alerts.remove(alert);
-        this.alerts.add(pos, alert);
-        this.saveAlerts();
-    }
-
-    public void moveAlertToTop(Alert alert) {
-        this.alerts.remove(alert);
-        this.alerts.add(0, alert);
-        this.saveAlerts();
-    }
-
-    public void moveAlertToBottom(Alert alert) {
-        this.alerts.remove(alert);
-        this.alerts.add(alert);
-        this.saveAlerts();
-    }
-
-    public void moveAlertUp(Alert alert) {
-        int curIdx = this.alerts.indexOf(alert);
-        int newIdx = curIdx - 1;
-
-        if (newIdx < 0) {
-            return;
+        AlertGroup parent = alert.getParent();
+        if (parent != null) {
+            parent.getAlerts().remove(alert);
+            parent.getAlerts().add(pos, alert);
+        } else {
+            this.alerts.remove(alert);
+            this.alerts.add(pos, alert);
         }
-
-        this.alerts.remove(alert);
-        this.alerts.add(newIdx, alert);
-        this.saveAlerts();
-    }
-
-    public void moveAlertDown(Alert alert) {
-        int curIdx = this.alerts.indexOf(alert);
-        int newIdx = curIdx + 1;
-
-        if (newIdx >= this.alerts.size()) {
-            return;
-        }
-
-        this.alerts.remove(alert);
-        this.alerts.add(newIdx, alert);
         this.saveAlerts();
     }
 
     public void loadAlerts() {
         final String json = this.configManager.getConfiguration(WatchdogConfig.CONFIG_GROUP_NAME, WatchdogConfig.ALERTS);
-        this.importAlerts(json, false, false);
+        this.importAlerts(json, this.alerts, false, false, false);
         this.handleUpgrades();
     }
 
-    public boolean importAlerts(String json, boolean append, boolean checkRegex) {
-        if (!Strings.isNullOrEmpty(json)) {
-            if (!append) {
-                this.alerts.clear();
-            }
-            List<Alert> importedAlerts = this.gson.fromJson(json, ALERT_LIST_TYPE);
-            Supplier<Stream<Alert>> alertStream = () -> importedAlerts.stream().filter(Objects::nonNull);
-
-            // Validate regex properties
-            if (checkRegex && !alertStream.get().allMatch(alert -> {
-                if (alert instanceof RegexMatcher) {
-                    RegexMatcher matcher = (RegexMatcher) alert;
-                    return PanelUtils.isPatternValid(this.watchdogPanel, matcher.getPattern(), matcher.isRegexEnabled());
-                }
-
-                return true;
-            })) {
-                return false;
-            }
-
-            alertStream.get().forEach(this.alerts::add);
-
-            // Save immediately to save new properties
-            this.saveAlerts();
+    public boolean importAlerts(String json, List<Alert> alerts, boolean append, boolean checkRegex, boolean overrideWithDefaults) throws JsonSyntaxException {
+        if (Strings.isNullOrEmpty(json)) {
+            return false;
         }
+
+        if (!append) {
+            alerts.clear();
+        }
+
+        Supplier<Stream<Alert>> alertStream = this.tryImport(json);
+
+        // Validate regex properties
+        if (checkRegex && !alertStream.get().allMatch(alert -> {
+            if (alert instanceof RegexMatcher) {
+                RegexMatcher matcher = (RegexMatcher) alert;
+                return PanelUtils.isPatternValid(this.watchdogPanel, matcher.getPattern(), matcher.isRegexEnabled());
+            }
+
+            return true;
+        })) {
+            return false;
+        }
+
+        alertStream.get().forEach(alerts::add);
+
+        // Save immediately to save new properties
+        this.saveAlerts();
 
         // Inject dependencies
-        for (Alert alert : this.alerts) {
-            WatchdogPlugin.getInstance().getInjector().injectMembers(alert);
-            for (INotification notification : alert.getNotifications()) {
-                WatchdogPlugin.getInstance().getInjector().injectMembers(notification);
-                notification.setAlert(alert);
-            }
-        }
+        this.getAllAlertsFrom(alertStream.get(), false)
+            .forEach(alert -> this.setUpAlert(alert, overrideWithDefaults));
 
-        SwingUtilities.invokeLater(this.watchdogPanel::rebuild);
+        SwingUtilities.invokeLater(() -> {
+            this.watchdogPanel.rebuild();
+            SwingUtilities.invokeLater(this.watchdogPanel::scrollToBottom);
+        });
         return true;
     }
 
@@ -204,6 +226,34 @@ public class AlertManager {
 
     public String toJSON() {
         return this.gson.toJson(this.alerts, ALERT_LIST_TYPE);
+    }
+
+    private Supplier<Stream<Alert>> tryImport(String json) throws JsonSyntaxException {
+        // Single
+        try {
+            Alert importedAlert = this.gson.fromJson(json, ALERT_TYPE);
+            return () -> Stream.of(importedAlert).filter(Objects::nonNull);
+        } catch (JsonSyntaxException ignored) {
+        }
+
+        // Multiple
+        List<Alert> importedAlerts = this.gson.fromJson(json, ALERT_LIST_TYPE);
+        return () -> importedAlerts.stream().filter(Objects::nonNull);
+    }
+
+    private void setUpAlert(Alert alert, boolean overrideWithDefaults) {
+        WatchdogPlugin.getInstance().getInjector().injectMembers(alert);
+        if (alert instanceof AlertGroup) {
+            ((AlertGroup) alert).getAlerts().forEach(subAlert -> this.setUpAlert(subAlert, overrideWithDefaults));
+        } else {
+            for (INotification notification : alert.getNotifications()) {
+                WatchdogPlugin.getInstance().getInjector().injectMembers(notification);
+                if (overrideWithDefaults) {
+                    notification.setDefaults();
+                }
+                notification.setAlert(alert);
+            }
+        }
     }
 
     private void handleUpgrades() {
@@ -242,6 +292,7 @@ public class AlertManager {
             }
 
             if (configVersion.compareTo(new Version("2.8.0")) < 0) {
+                log.debug("Need to convert flash notifications to new properties");
                 this.alerts.stream()
                     .flatMap(alert -> alert.getNotifications().stream())
                     .filter(notification -> notification instanceof ScreenFlash)
@@ -255,6 +306,7 @@ public class AlertManager {
             }
 
             if (configVersion.compareTo(new Version("2.13.0")) < 0) {
+                log.debug("Need to set default overlay notification text color");
                 this.alerts.stream()
                     .flatMap(alert -> alert.getNotifications().stream())
                     .filter(notification -> notification instanceof Overlay)

@@ -7,7 +7,7 @@ public class Version implements Comparable<Version> {
     private final String version;
 
     public Version(String version) {
-        if (version != null && !version.matches("[0-9]+(\\.[0-9]+)*")) {
+        if (version != null && !version.matches("[0-9]+(\\.[0-9]+)*(-\\w+)?")) {
             throw new IllegalArgumentException("Invalid version format");
         }
         this.version = version;
@@ -23,8 +23,10 @@ public class Version implements Comparable<Version> {
             return -1;
         }
 
-        String[] thisParts = this.version.split("\\.");
-        String[] thatParts = o.version.split("\\.");
+        String thisVer = this.version.lastIndexOf('-') < 0 ? this.version : this.version.substring(0, this.version.lastIndexOf("-"));
+        String thatVer = o.version.lastIndexOf('-') < 0 ? o.version : o.version.substring(0, o.version.lastIndexOf("-"));
+        String[] thisParts = thisVer.split("\\.");
+        String[] thatParts = thatVer.split("\\.");
         int length = Math.max(thisParts.length, thatParts.length);
         for (int i = 0; i < length; i++) {
             int thisPart = i < thisParts.length ? Integer.parseInt(thisParts[i]) : 0;

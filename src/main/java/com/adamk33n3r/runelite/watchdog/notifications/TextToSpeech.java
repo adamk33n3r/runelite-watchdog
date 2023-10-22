@@ -9,7 +9,6 @@ import com.adamk33n3r.runelite.watchdog.notifications.tts.Voice;
 
 import com.google.gson.annotations.SerializedName;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -26,24 +25,19 @@ import java.nio.file.Files;
 import static net.runelite.client.RuneLite.CACHE_DIR;
 
 @Slf4j
-@NoArgsConstructor
+@Getter @Setter
 public class TextToSpeech extends MessageNotification implements IAudioNotification {
-    @Getter @Setter
     private int gain;
-    @Getter @Setter
     private int rate;
-    @Getter @Setter
     @SerializedName("voice")
     private Voice legacyVoice;
-    @Getter @Setter
     private TTSSource source = TTSSource.LEGACY;
-    @Getter @Setter
     private String elevenLabsVoiceId;
-    @Getter @Setter
     private transient com.adamk33n3r.runelite.watchdog.elevenlabs.Voice elevenLabsVoice;
 
     @Inject
     public TextToSpeech(WatchdogConfig config) {
+        super(config);
         this.gain = config.defaultTTSVolume();
         this.rate = config.defaultTTSRate();
         this.legacyVoice = config.defaultTTSVoice();
@@ -105,7 +99,18 @@ public class TextToSpeech extends MessageNotification implements IAudioNotificat
             }
             WatchdogPlugin.getInstance().getSoundPlayer().play(soundFile, this.gain);
         } catch (Exception ex) {
-            ex.printStackTrace();
+            log.error("Exception occurred while playing text to speech", ex);
         }
+    }
+
+    @Override
+    public void setDefaults() {
+        super.setDefaults();
+        this.setSource(this.watchdogConfig.defaultTTSSource());
+        this.setLegacyVoice(this.watchdogConfig.defaultTTSVoice());
+        // This will cause the tts panel to set the default
+        this.setElevenLabsVoiceId(null);
+        this.setGain(this.watchdogConfig.defaultTTSVolume());
+        this.setRate(this.watchdogConfig.defaultTTSRate());
     }
 }
