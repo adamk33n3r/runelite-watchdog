@@ -19,6 +19,7 @@ public class Sound extends AudioNotification {
 
     @Inject
     public Sound(WatchdogConfig config) {
+        super(config);
         this.gain = config.defaultSoundVolume();
         this.path = config.defaultSoundPath();
     }

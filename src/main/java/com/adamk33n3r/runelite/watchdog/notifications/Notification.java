@@ -14,7 +14,6 @@ import lombok.Setter;
 
 import javax.inject.Inject;
 import java.util.Arrays;
-import java.util.Optional;
 
 public abstract class Notification implements INotification {
     @Inject
@@ -33,10 +32,11 @@ public abstract class Notification implements INotification {
     private boolean fireWhenFocused = true;
 
     @Getter @Setter
+    private boolean fireWhenAFK = false;
+    @Getter @Setter
     private int fireWhenAFKForSeconds = 0;
 
-    @Getter
-    @Setter
+    @Getter @Setter
     private transient Alert alert;
     public Alert getAlert() {
         if (this.alert == null) {
@@ -45,6 +45,12 @@ public abstract class Notification implements INotification {
         }
 
         return this.alert;
+    }
+
+    @Inject
+    public Notification(WatchdogConfig config) {
+        this.fireWhenAFK = config.defaultAFKMode();
+        this.fireWhenAFKForSeconds = config.defaultAFKSeconds();
     }
 
     protected boolean shouldFire() {
@@ -76,6 +82,7 @@ public abstract class Notification implements INotification {
     }
 
     public void setDefaults() {
+        this.setFireWhenAFK(this.watchdogConfig.defaultAFKMode());
         this.setFireWhenAFKForSeconds(this.watchdogConfig.defaultAFKSeconds());
     }
 }

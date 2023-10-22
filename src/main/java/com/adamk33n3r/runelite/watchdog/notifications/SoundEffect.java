@@ -25,6 +25,7 @@ public class SoundEffect extends AudioNotification {
 
     @Inject
     public SoundEffect(WatchdogConfig config) {
+        super(config);
         this.gain = config.defaultSoundEffectVolume();
         this.soundID = config.defaultSoundEffectID();
     }

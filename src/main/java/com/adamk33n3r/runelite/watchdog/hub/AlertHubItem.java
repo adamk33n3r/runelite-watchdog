@@ -2,8 +2,6 @@ package com.adamk33n3r.runelite.watchdog.hub;
 
 import com.adamk33n3r.runelite.watchdog.WatchdogConfig;
 import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
-import com.adamk33n3r.runelite.watchdog.alerts.AlertGroup;
-import com.adamk33n3r.runelite.watchdog.notifications.TextToSpeech;
 import com.adamk33n3r.runelite.watchdog.ui.Icons;
 import com.adamk33n3r.runelite.watchdog.ui.WrappingLabel;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
@@ -16,7 +14,6 @@ import net.runelite.client.util.LinkBrowser;
 
 import lombok.Getter;
 
-import javax.inject.Inject;
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import java.awt.Color;

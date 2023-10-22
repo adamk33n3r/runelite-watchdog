@@ -1,6 +1,7 @@
 package com.adamk33n3r.runelite.watchdog.notifications;
 
 import com.adamk33n3r.runelite.watchdog.Util;
+import com.adamk33n3r.runelite.watchdog.WatchdogConfig;
 import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
 
 import net.runelite.api.ChatMessageType;
@@ -17,6 +18,11 @@ import javax.inject.Inject;
 public class GameMessage extends MessageNotification {
     @Inject
     private transient ChatMessageManager chatMessageManager;
+
+    @Inject
+    public GameMessage(WatchdogConfig config) {
+        super(config);
+    }
 
     @Override
     protected void fireImpl(String[] triggerValues) {

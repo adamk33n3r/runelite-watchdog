@@ -21,6 +21,7 @@ public class Overlay extends MessageNotification {
 
     @Inject
     public Overlay(WatchdogConfig config) {
+        super(config);
         this.color = config.defaultOverlayColor();
         this.textColor = config.defaultOverlayTextColor();
         this.sticky = config.defaultOverlaySticky();

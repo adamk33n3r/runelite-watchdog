@@ -9,7 +9,6 @@ import com.adamk33n3r.runelite.watchdog.ui.StretchedStackedLayout;
 
 import net.runelite.client.ui.MultiplexingPluginPanel;
 import net.runelite.client.ui.PluginPanel;
-import net.runelite.client.util.Text;
 
 import com.google.common.base.Splitter;
 import lombok.extern.slf4j.Slf4j;

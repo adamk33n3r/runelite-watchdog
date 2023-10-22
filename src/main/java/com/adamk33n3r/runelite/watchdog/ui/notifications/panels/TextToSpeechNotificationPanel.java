@@ -19,7 +19,6 @@ import net.runelite.client.ui.ColorScheme;
 import javax.swing.*;
 import javax.swing.text.AbstractDocument;
 import java.awt.Font;
-import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 

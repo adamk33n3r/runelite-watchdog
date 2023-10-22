@@ -11,7 +11,6 @@ import com.adamk33n3r.runelite.watchdog.ui.StretchedStackedLayout;
 
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.components.DragAndDropReorderPane;
-import net.runelite.client.util.Text;
 
 import com.google.common.base.Splitter;
 import lombok.Getter;
