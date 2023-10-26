@@ -36,7 +36,7 @@ public abstract class Notification implements INotification {
     @Getter @Setter
     private int fireWhenAFKForSeconds = 0;
 
-    @Getter @Setter
+    @Setter
     private transient Alert alert;
     public Alert getAlert() {
         if (this.alert == null) {
