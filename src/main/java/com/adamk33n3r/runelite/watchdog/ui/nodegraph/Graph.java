@@ -11,6 +11,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.util.*;
+import java.util.function.Consumer;
 
 public class Graph extends JPanel {
     private static final int ZOOM_FACTOR = 10; // Adjust this value for zoom sensitivity
@@ -21,7 +22,6 @@ public class Graph extends JPanel {
     private final JPanel connections = new JPanel();
     private final double zoomLevel = 1;
     private final Map<Component, Dimension> originalSizes = new HashMap<>();
-    private final JPopupMenu createNodePopup;
     private Point popupLocation;
 
     public Graph() {
@@ -57,21 +57,6 @@ public class Graph extends JPanel {
 //        this.connect(node1, node3);
 //        this.connect(node4, node3);
 
-        this.createNodePopup = new NewNodePopup((selected) -> {
-            System.out.println(selected);
-            if (selected instanceof TriggerType) {
-                System.out.println("create alert node");
-                Node node = new AlertNode(this, this.popupLocation.x, this.popupLocation.y, ((TriggerType) selected).getName(), Color.CYAN);
-                this.nodes.add(node, 0);
-            } else if (selected instanceof NotificationType) {
-                System.out.println("create notification node");
-                Node node = new NotificationNode(this, this.popupLocation.x, this.popupLocation.y, ((NotificationType) selected).getName(), Color.ORANGE);
-                this.nodes.add(node, 0);
-            }
-            Graph.this.revalidate();
-            Graph.this.repaint();
-        });
-
         this.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -81,8 +66,7 @@ public class Graph extends JPanel {
             @Override
             public void mouseReleased(MouseEvent e) {
                 if (SwingUtilities.isRightMouseButton(e)) {
-                    Graph.this.popupLocation = e.getPoint();
-                    Graph.this.createNodePopup.show(e.getComponent(), e.getX(), e.getY());
+                    Graph.this.createNode(e.getComponent(), e.getX(), e.getY(), null, (s) -> {});
                 }
             }
         });
@@ -121,6 +105,41 @@ public class Graph extends JPanel {
         Connection conn = new NodeConnection(node1, node2);
 //        this.setComponentZOrder(conn, 0);
         this.connections.add(conn);
+    }
+
+    public void createNode(Component parent, int x, int y, Class<? extends Enum<?>>[] filter, Consumer<Node> onSelect) {
+        this.popupLocation = SwingUtilities.convertPoint(parent, new Point(x, y), this);
+
+        new NewNodePopup(filter).show(parent, x, y, (selected) -> {
+            System.out.println(selected);
+            if (selected instanceof TriggerType) {
+                System.out.println("create alert node");
+                Node node = new AlertNode(Graph.this, Graph.this.popupLocation.x, Graph.this.popupLocation.y, ((TriggerType) selected).getName(), Color.CYAN);
+                Graph.this.nodes.add(node, 0);
+                onSelect.accept(node);
+            } else if (selected instanceof NotificationType) {
+                System.out.println("create notification node");
+                Node node = new NotificationNode(Graph.this, Graph.this.popupLocation.x, Graph.this.popupLocation.y, ((NotificationType) selected).getName(), Color.ORANGE);
+                Graph.this.nodes.add(node, 0);
+                onSelect.accept(node);
+            } else if (selected instanceof LogicNodeType) {
+                LogicNodeType logicNodeType = (LogicNodeType) selected;
+                switch (logicNodeType) {
+                    case AND:
+                    case OR:
+                    case GREATER_THAN:
+                    case LESS_THAN:
+                    case EQUALS:
+                    case NOT_EQUALS:
+                        Node node = new IfNode(Graph.this, Graph.this.popupLocation.x, Graph.this.popupLocation.y, logicNodeType.getName(), Color.MAGENTA);
+                        Graph.this.nodes.add(node, 0);
+                        onSelect.accept(node);
+                        break;
+                }
+            }
+            Graph.this.revalidate();
+            Graph.this.repaint();
+        });
     }
 
     public void onNodeMoved(Node node) {

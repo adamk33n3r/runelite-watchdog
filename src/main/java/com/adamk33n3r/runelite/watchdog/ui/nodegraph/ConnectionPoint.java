@@ -1,5 +1,7 @@
 package com.adamk33n3r.runelite.watchdog.ui.nodegraph;
 
+import com.adamk33n3r.runelite.watchdog.NotificationType;
+
 import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
 import java.awt.*;
@@ -36,7 +38,17 @@ public class ConnectionPoint extends JComponent {
 
                 Point point = SwingUtilities.convertPoint(ConnectionPoint.this, e.getPoint(), node.getGraph());
                 Component deepestComponentAt = SwingUtilities.getDeepestComponentAt(node.getGraph(), point.x, point.y);
-                NotificationNode droppedNode = (NotificationNode) SwingUtilities.getAncestorOfClass(NotificationNode.class, deepestComponentAt);
+                System.out.print("deepest component");
+                System.out.println(deepestComponentAt);
+                if (deepestComponentAt.getParent().equals(node.getGraph())) {
+                    System.out.println("dropped on graph");
+                    node.getGraph().createNode(e.getComponent(), e.getX(), e.getY(), new Class[]{NotificationType.class, LogicNodeType.class},(newNode) -> {
+                        node.getGraph().connect(node, newNode);
+                    });
+                    return;
+                }
+
+                AcceptsConnectionNode droppedNode = (AcceptsConnectionNode) SwingUtilities.getAncestorOfClass(AcceptsConnectionNode.class, deepestComponentAt);
                 if (droppedNode == null || droppedNode.equals(node)) {
                     return;
                 }

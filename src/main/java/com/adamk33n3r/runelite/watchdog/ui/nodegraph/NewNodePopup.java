@@ -9,6 +9,8 @@ import com.google.common.base.Splitter;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.event.ListSelectionListener;
+import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.util.Arrays;
 import java.util.Collections;
@@ -17,16 +19,34 @@ import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 public class NewNodePopup extends JPopupMenu {
+    public static final List<Class<? extends Enum<?>>> DEFAULT_ITEMS = Arrays.asList(TriggerType.class, NotificationType.class, LogicNodeType.class);
     private final JList<Object> itemList;
     private final static Splitter SPLITTER = Splitter.on(' ').trimResults().omitEmptyStrings();
     private final JTextField search;
-    private final CustomList.Items<?>[] items;
+    private final CustomList.Items[] items;
+    private ListSelectionListener currentListener;
 
-    public NewNodePopup(Consumer<Object> onSelect) {
-        this.items = new CustomList.Items[]{
-            new CustomList.Items<>("Alert", TriggerType.values(), System.out::println),
-            new CustomList.Items<>("Notification", NotificationType.values(), System.out::println),
+    public void show(Component invoker, int x, int y, Consumer<Object> onSelect) {
+        this.itemList.removeListSelectionListener(this.currentListener);
+        this.currentListener = (ls) -> {
+            if (this.itemList.getSelectedValue() == null || this.itemList.getSelectedValue().toString().startsWith("c:")) {
+                return;
+            }
+            onSelect.accept(this.itemList.getSelectedValue());
+            this.setVisible(false);
+            this.itemList.clearSelection();
+            // Simulate mouse leave so that it isn't highlighting an entry when it's opened again
+            this.itemList.dispatchEvent(new MouseEvent(this.itemList, MouseEvent.MOUSE_EXITED, System.currentTimeMillis(), 0, 0, 0, 0, false));
         };
+        this.itemList.addListSelectionListener(this.currentListener);
+
+        super.show(invoker, x, y);
+    }
+
+    @SafeVarargs
+    public NewNodePopup(Class<? extends Enum<?>>... items) {
+        this.items = (items == null ? DEFAULT_ITEMS.stream() : Arrays.stream(items))
+            .map(CustomList.Items::new).toArray(CustomList.Items[]::new);
         this.itemList = new CustomList(this.items);
 
         this.search = new JTextField();
@@ -47,16 +67,6 @@ public class NewNodePopup extends JPopupMenu {
             }
         });
         this.add(this.search);
-        this.itemList.addListSelectionListener((ls) -> {
-            if (this.itemList.getSelectedValue() == null || this.itemList.getSelectedValue().toString().startsWith("c:")) {
-                return;
-            }
-            onSelect.accept(this.itemList.getSelectedValue());
-            this.setVisible(false);
-            this.itemList.clearSelection();
-            // Simulate mouse leave so that it isn't highlighting an entry when it's opened again
-            this.itemList.dispatchEvent(new MouseEvent(this.itemList, MouseEvent.MOUSE_EXITED, System.currentTimeMillis(), 0, 0, 0, 0, false));
-        });
 
         JScrollPane jScrollPane = new JScrollPane(this.itemList);
         jScrollPane.getVerticalScrollBar().setBlockIncrement(1);
