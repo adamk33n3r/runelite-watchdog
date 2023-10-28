@@ -19,6 +19,7 @@ import java.util.List;
 public class Node extends JPanel {
     public static final int PANEL_WIDTH = 300;
     public static final int PANEL_HEIGHT = 200;
+    protected JPanel items;
     private List<NodeConnection> connections = new ArrayList<>();
     private Color color;
     private Graph graph;
@@ -29,8 +30,8 @@ public class Node extends JPanel {
         this.setName(name);
         this.setBounds(x, y, PANEL_WIDTH, PANEL_HEIGHT);
         this.setBackground(color);
-        this.setBorder(BorderFactory.createLineBorder(ColorScheme.DARK_GRAY_COLOR, 4));
-        this.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
+//        this.setBorder(BorderFactory.createLineBorder(ColorScheme.DARK_GRAY_COLOR, 4));
+//        this.setBorder(BorderFactory.createSoftBevelBorder(BevelBorder.RAISED));
         this.setLayout(new BorderLayout());
         JLabel nameLabel = new JLabel(name);
         nameLabel.setPreferredSize(new Dimension(0, 20));
@@ -45,20 +46,20 @@ public class Node extends JPanel {
         };
 
         JPanel itemsWrapper = new JPanel(new BorderLayout());
-        JPanel items = new JPanel();
-        itemsWrapper.add(items, BorderLayout.NORTH);
+        this.items = new JPanel();
+        itemsWrapper.add(this.items, BorderLayout.NORTH);
 //        items.setLayout(new BoxLayout(items, BoxLayout.Y_AXIS));
-        items.setLayout(new DynamicGridLayout(0, 1, 5, 5));
+        this.items.setLayout(new DynamicGridLayout(0, 1, 5, 5));
         this.add(itemsWrapper);
 
-        items.add(new TextInput("Message", "asdf")).addMouseListener(onTopAdapter);
+//        this.items.add(new TextInput("Message", "asdf")).addMouseListener(onTopAdapter);
 //        items.add(Box.createVerticalStrut(10));
 //        items.add(Box.createVerticalGlue());
-        items.add(new NumberInput("X", 8)).addMouseListener(onTopAdapter);
+//        this.items.add(new NumberInput("X", 8)).addMouseListener(onTopAdapter);
 //        Box.Filler verticalGlue = (Box.Filler) Box.createVerticalGlue();
 //        verticalGlue.changeShape(verticalGlue.getMinimumSize(), new Dimension(0, Short.MAX_VALUE), verticalGlue.getMaximumSize());
 //        items.add(verticalGlue);
-        items.add(new NumberInput("Y", 9)).addMouseListener(onTopAdapter);
+//        this.items.add(new NumberInput("Y", 9)).addMouseListener(onTopAdapter);
 
         DraggingMouseAdapter draggingMouseAdapter = new DraggingMouseAdapter((start, point) -> {
             point = SwingUtilities.convertPoint(Node.this, point, graph);

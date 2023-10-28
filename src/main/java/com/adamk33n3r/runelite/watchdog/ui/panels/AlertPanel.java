@@ -209,19 +209,8 @@ public abstract class AlertPanel<T extends Alert> extends PluginPanel {
     }
 
     public <E extends Enum<E>> AlertPanel<T> addSelect(String name, String tooltip, Class<E> enumType, E initialValue, Consumer<E> saveAction) {
-        JComboBox<E> select = new JComboBox<>(enumType.getEnumConstants());
-        select.setSelectedItem(initialValue);
-        select.setRenderer((list, value, index, isSelected, cellHasFocus) -> {
-            if (value instanceof Displayable) {
-                list.setToolTipText(((Displayable) value).getTooltip());
-                return new DefaultListCellRenderer().getListCellRendererComponent(list, ((Displayable) value).getName(), index, isSelected, cellHasFocus);
-            }
-            String titleized = WordUtils.capitalizeFully(value.name());
-            list.setToolTipText(titleized);
-            return new DefaultListCellRenderer().getListCellRendererComponent(list, titleized, index, isSelected, cellHasFocus);
-        });
-        select.addActionListener(e -> {
-            saveAction.accept(select.getItemAt(select.getSelectedIndex()));
+        JComboBox<E> select = PanelUtils.createSelect(enumType.getEnumConstants(), initialValue, val -> {
+            saveAction.accept(val);
             this.alertManager.saveAlerts();
         });
         this.controlContainer.add(PanelUtils.createLabeledComponent(name, tooltip, select));

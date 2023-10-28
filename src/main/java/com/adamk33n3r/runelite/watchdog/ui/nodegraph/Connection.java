@@ -33,7 +33,8 @@ public class Connection extends JComponent {
         g.translate(BOUNDS_OFFSET, BOUNDS_OFFSET);
 
         CubicCurve2D.Double curve = new CubicCurve2D.Double(
-            startX, startY,
+            // +2 to offset to be on the edge
+            startX+2, startY,
             startX + 100, startY,
             endX - 100, endY,
             endX, endY);
@@ -41,10 +42,15 @@ public class Connection extends JComponent {
         g2.setStroke(new BasicStroke(4));
         g2.draw(curve);
 
-        g.setColor(Color.GREEN);
-        g.fillRect((int) startX - END_SIZE/2, (int) (startY - END_SIZE / 2), END_SIZE, END_SIZE);
-        g.setColor(Color.RED);
-        g.fillRect((int) (endX - END_SIZE/2), (int) (endY - END_SIZE / 2), END_SIZE, END_SIZE);
+//        g.setColor(Color.GREEN);
+//        g.fillRect((int) startX - END_SIZE/2, (int) (startY - END_SIZE / 2), END_SIZE, END_SIZE);
+//        g.setColor(Color.RED);
+//        g.fillRect((int) (endX - END_SIZE/2), (int) (endY - END_SIZE / 2), END_SIZE, END_SIZE);
+        g2.setColor(Color.WHITE);
+        g2.setStroke(new BasicStroke(5));
+        g2.fillArc(this.start.x-10, this.start.y-10, 20, 20, 90, -180);
+        g2.drawLine(this.end.x-10, this.end.y-7, this.end.x-2, this.end.y);
+        g2.drawLine(this.end.x-10, this.end.y+7, this.end.x-2, this.end.y);
 
 //        g.setColor(Color.red);
 //        g.drawRect(0, 0, this.getWidth() - BOUNDS_OFFSET*2, this.getHeight() - BOUNDS_OFFSET*2);

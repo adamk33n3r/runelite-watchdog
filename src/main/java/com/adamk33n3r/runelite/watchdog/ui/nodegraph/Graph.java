@@ -2,6 +2,10 @@ package com.adamk33n3r.runelite.watchdog.ui.nodegraph;
 
 import com.adamk33n3r.runelite.watchdog.NotificationType;
 import com.adamk33n3r.runelite.watchdog.TriggerType;
+import com.adamk33n3r.runelite.watchdog.alerts.Alert;
+import com.adamk33n3r.runelite.watchdog.alerts.ChatAlert;
+import com.adamk33n3r.runelite.watchdog.alerts.SpawnedAlert;
+
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.util.ImageUtil;
 
@@ -44,18 +48,26 @@ public class Graph extends JPanel {
         this.connections.setLayout(null);
         this.add(this.connections);
 
-        Node node1 = new AlertNode(this, 150, 150, "Game Message", Color.red);
-        this.nodes.add(node1);
-        Node node2 = new NotificationNode(this, 700, 150, "Screen Flash", Color.green);
-        this.nodes.add(node2);
+        ChatAlert alert = new ChatAlert("Test Chat Alert");
+        alert.setMessage("This is a test message");
+        Node gameMessageNode = new AlertNode(this, 50, 50, alert.getType().getName(), Color.red, alert);
+        this.nodes.add(gameMessageNode);
+        Node screenFlashNode = new NotificationNode(this, 750, 350, "Screen Flash", Color.green);
+        this.nodes.add(screenFlashNode);
+        Node logicNode = new IfNode(this, 400, 200, "If Node", Color.CYAN);
+        this.nodes.add(logicNode);
         Node node3 = new NotificationNode(this, 700, 500, "Text to Speech", Color.green);
         this.nodes.add(node3);
-        Node node4 = new AlertNode(this, 150, 500, "Notification Fired", Color.red);
+
+        SpawnedAlert spawnedAlert = new SpawnedAlert("Spawned Alert");
+        spawnedAlert.setPattern("Henry");
+        spawnedAlert.setSpawnedDespawned(SpawnedAlert.SpawnedDespawned.SPAWNED);
+        spawnedAlert.setSpawnedType(SpawnedAlert.SpawnedType.NPC);
+        Node node4 = new AlertNode(this, 150, 500, spawnedAlert.getType().getName(), Color.red, spawnedAlert);
         this.nodes.add(node4);
 
-//        this.connect(node1, node2);
-//        this.connect(node1, node3);
-//        this.connect(node4, node3);
+        this.connect(gameMessageNode, logicNode);
+        this.connect(logicNode, screenFlashNode);
 
         this.addMouseListener(new MouseAdapter() {
             @Override
@@ -114,7 +126,7 @@ public class Graph extends JPanel {
             System.out.println(selected);
             if (selected instanceof TriggerType) {
                 System.out.println("create alert node");
-                Node node = new AlertNode(Graph.this, Graph.this.popupLocation.x, Graph.this.popupLocation.y, ((TriggerType) selected).getName(), Color.CYAN);
+                Node node = new AlertNode(Graph.this, Graph.this.popupLocation.x, Graph.this.popupLocation.y, ((TriggerType) selected).getName(), Color.CYAN, null);
                 Graph.this.nodes.add(node, 0);
                 onSelect.accept(node);
             } else if (selected instanceof NotificationType) {

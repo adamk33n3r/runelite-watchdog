@@ -34,7 +34,7 @@ public class PlaceholderTextArea extends JTextArea {
     protected void paintComponent(final Graphics pG) {
         super.paintComponent(pG);
 
-        if (this.placeholder == null || this.placeholder.length() == 0 || this.getText().length() > 0) {
+        if (this.placeholder == null || this.placeholder.isEmpty() || !this.getText().isEmpty()) {
             return;
         }
 
