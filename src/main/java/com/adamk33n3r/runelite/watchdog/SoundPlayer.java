@@ -2,7 +2,10 @@ package com.adamk33n3r.runelite.watchdog;
 
 import jaco.mp3.player.MP3Player;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.tuple.Pair;
+import net.runelite.api.Client;
+import net.runelite.api.Constants;
+import net.runelite.client.callback.ClientThread;
+import net.runelite.client.ui.ClientUI;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -14,37 +17,64 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.Queue;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Slf4j
 @Singleton
 public class SoundPlayer {
     @Inject
-    private ScheduledExecutorService executor;
+    private ClientUI clientUI;
+
+    @Inject
+    private Client client;
+
+    @Inject
+    private transient ClientThread clientThread;
+
+    @Inject
+    private WatchdogConfig config;
 
     private final MP3Player mp3Player;
 
-    private final Queue<Pair<File, Integer>> queue = new ConcurrentLinkedQueue<>();
+    private final Queue<SoundItem> queue = new ConcurrentLinkedQueue<>();
+
+    private final ScheduledExecutorService executor = Executors.newScheduledThreadPool(2);
+    private ScheduledFuture<?> soundPlayerFuture;
+    private ScheduledFuture<?> soundTimeoutFuture;
 
     private boolean mp3IsPlaying = false;
     private boolean clipIsPlaying = false;
+    private long mouseLastPressedMillis;
 
     public SoundPlayer() {
-        this.mp3Player = this.createMP3Player();
-        // So that we don't get errors since the mp3 player creates buttons
-//        SwingUtilities.invokeLater(() -> this.mp3Player = new MP3PlayerExt());
+        this.mp3Player = new MP3Player();
     }
 
-    public void clearQueue() {
+    public void startUp() {
+        this.soundPlayerFuture = this.executor.scheduleAtFixedRate(
+                this::processQueue,
+                0,
+                100,
+                TimeUnit.MILLISECONDS
+        );
+    }
+
+    public void shutDown() {
+        this.soundPlayerFuture.cancel(false);
+        this.soundTimeoutFuture.cancel(false);
         this.queue.clear();
     }
 
     public void processQueue() {
         // Handle mp3 being over
         if (!this.clipIsPlaying && this.mp3IsPlaying && this.mp3Player.isStopped()) {
-            this.mp3IsPlaying = false;
+            if (this.mp3Player.isRepeat()) {
+                this.mp3Player.play();
+                return;
+            } else {
+                this.mp3IsPlaying = false;
+            }
         }
         if (mp3IsPlaying || clipIsPlaying) {
             return;
@@ -54,51 +84,71 @@ public class SoundPlayer {
     }
 
     public void play(File soundFile, int volume) {
-        this.queue.add(Pair.of(soundFile, volume));
+        this.play(soundFile, volume, 0);
+    }
+
+    public void play(File soundFile, int volume, int repeatTime) {
+        this.queue.add(new SoundItem(soundFile, volume, repeatTime));
         if (!WatchdogPlugin.getInstance().getConfig().putSoundsIntoQueue()) {
-            SwingUtilities.invokeLater(() -> this.playNext(this.createMP3Player()));
+            SwingUtilities.invokeLater(() -> this.playNext(this.mp3Player));
         }
     }
 
     private void playNext(MP3Player mp3Player) {
-        Pair<File, Integer> nextSound = this.queue.poll();
+        SoundItem nextSound = this.queue.poll();
         if (nextSound == null) {
             return;
         }
 
-        if (!nextSound.getLeft().exists()) {
-            log.error(String.format("File not found: %s", nextSound.getLeft().getAbsolutePath()));
+        if (!nextSound.getFile().exists()) {
+            log.error(String.format("File not found: %s", nextSound.getFile().getAbsolutePath()));
             this.clipIsPlaying = true;
             Toolkit.getDefaultToolkit().beep();
             this.executor.schedule(() -> this.clipIsPlaying = false, 1, TimeUnit.SECONDS);
             return;
         }
 
-        log.debug(String.format("Now playing: %s", nextSound.getLeft().getAbsolutePath()));
+        mouseLastPressedMillis = client.getMouseLastPressedMillis();
 
-        if (nextSound.getLeft().getName().endsWith(".mp3")) {
+        log.debug(String.format("Now playing: %s", nextSound.getFile().getAbsolutePath()));
+
+        if (nextSound.getFile().getName().endsWith(".mp3")) {
             mp3Player.getPlayList().clear();
-            mp3Player.add(nextSound.getLeft());
-            mp3Player.setVolume(nextSound.getRight() * 10);
+            mp3Player.add(nextSound.getFile());
+            mp3Player.setVolume(nextSound.getGain() * 10);
             this.mp3IsPlaying = true;
             mp3Player.play();
-        } else  {
+            // jaco.mp3 repeat functionality is broken, but we are using it to signal to ourselves to repeat on loop
+            mp3Player.setRepeat(true);
+            setTimeout(() -> {
+                mp3Player.setRepeat(false);
+            }, nextSound.getRepeatSeconds());
+        } else {
             try {
                 Clip clip = AudioSystem.getClip();
-                try (InputStream fileStream = new BufferedInputStream(new FileInputStream(nextSound.getLeft()));
+                try (InputStream fileStream = new BufferedInputStream(new FileInputStream(nextSound.getFile()));
                      AudioInputStream sound = AudioSystem.getAudioInputStream(fileStream)) {
                     clip.open(sound);
                     FloatControl volumeFC = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
-                    int decibels = Util.scale(nextSound.getRight(), 0, 10, -25, 5);
+                    int decibels = Util.scale(nextSound.getGain(), 0, 10, -25, 5);
                     volumeFC.setValue(decibels);
                     this.clipIsPlaying = true;
                     clip.loop(0);
+                    AtomicBoolean isLooping = new AtomicBoolean(true);
                     clip.addLineListener(event -> {
                         if (event.getType() == LineEvent.Type.STOP) {
-                            this.clipIsPlaying = false;
-                            clip.close();
+                            if (isLooping.get()) {
+                                clip.setFramePosition(0);
+                                clip.loop(0);
+                            } else {
+                                this.clipIsPlaying = false;
+                                clip.close();
+                            }
                         }
                     });
+                    setTimeout(() -> {
+                        isLooping.set(false);
+                    }, nextSound.getRepeatSeconds());
                 } catch (Exception e) {
 //                } catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
                     log.warn("Unable to load sound", e);
@@ -110,9 +160,34 @@ public class SoundPlayer {
         }
     }
 
-    private MP3Player createMP3Player() {
-        MP3Player mp3Player = new MP3Player();
-        mp3Player.setRepeat(false);
-        return mp3Player;
+    /**
+     * Internally polls for user interaction if the delay is < 0
+     */
+    private void setTimeout(Runnable runnable, int delaySeconds) {
+        if (delaySeconds == 0) {
+            runnable.run();
+            return;
+        }
+        if (delaySeconds < 0) {
+            this.soundTimeoutFuture = this.executor.scheduleAtFixedRate(() -> {
+                if (hasUserInteraction()) {
+                    runnable.run();
+                }
+            }, 0, Constants.CLIENT_TICK_LENGTH, TimeUnit.MILLISECONDS);
+            return;
+        }
+        this.soundTimeoutFuture = this.executor.schedule(runnable, delaySeconds, TimeUnit.SECONDS);
+    }
+
+    private boolean hasUserInteraction() {
+        // We poll this every client tick, if there was any activity in the past second, that counts
+        int clientTicksSinceActivity = 1000 / Constants.CLIENT_TICK_LENGTH;
+        if (((client.getMouseIdleTicks() < clientTicksSinceActivity && this.config.mouseMovementCancels())
+                || client.getKeyboardIdleTicks() < clientTicksSinceActivity
+                || client.getMouseLastPressedMillis() > mouseLastPressedMillis) && clientUI.isFocused()
+        ) {
+            return true;
+        }
+        return false;
     }
 }

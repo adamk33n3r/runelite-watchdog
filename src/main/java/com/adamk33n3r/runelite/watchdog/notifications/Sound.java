@@ -16,6 +16,7 @@ import java.io.File;
 @Setter
 public class Sound extends AudioNotification {
     private String path;
+    private int repeatDuration = 0;
 
     @Inject
     public Sound(WatchdogConfig config) {
@@ -26,8 +27,8 @@ public class Sound extends AudioNotification {
 
     @Override
     protected void fireImpl(String[] triggerValues) {
-        String processedPath = Util.processTriggerValues(this.path, triggerValues);
-        WatchdogPlugin.getInstance().getSoundPlayer().play(new File(processedPath), this.gain);
+        String processedPath = Util.processTriggerValues(path, triggerValues);
+        WatchdogPlugin.getInstance().getSoundPlayer().play(new File(processedPath), gain, repeatDuration);
     }
 
     @Override

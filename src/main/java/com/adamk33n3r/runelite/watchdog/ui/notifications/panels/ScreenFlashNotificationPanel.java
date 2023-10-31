@@ -51,7 +51,7 @@ public class ScreenFlashNotificationPanel extends NotificationPanel {
         });
         this.settings.add(flashModeSelect);
 
-        JSpinner flashDuration = PanelUtils.createSpinner(screenFlash.getFlashDuration(), 0, 10, 1, val -> {
+        JSpinner flashDuration = PanelUtils.createSpinner(screenFlash.getFlashDuration(), 0, 120, 1, val -> {
             screenFlash.setFlashDuration(val);
             onChangeListener.run();
         });

@@ -105,10 +105,6 @@ public class WatchdogPlugin extends Plugin {
     @Getter
     private static WatchdogPlugin instance;
 
-    private ScheduledFuture<?> soundPlayerFuture;
-
-    private final ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
-
     public WatchdogPlugin() {
         instance = this;
     }
@@ -159,26 +155,7 @@ public class WatchdogPlugin extends Plugin {
             this.clientToolbar.removeNavigation(this.navButton);
             this.clientToolbar.addNavigation(this.navButton);
         });
-
-        this.startSoundPlayerTimer();
-    }
-
-    private void startSoundPlayerTimer() {
-        if (this.soundPlayerFuture != null && !this.soundPlayerFuture.isCancelled()) {
-            return;
-        }
-
-        // Don't start the timer if we're not queuing sounds
-        if (!this.config.putSoundsIntoQueue()) {
-            return;
-        }
-
-        this.soundPlayerFuture = this.executor.scheduleAtFixedRate(
-            () -> this.soundPlayer.processQueue(),
-            0,
-            100,
-            TimeUnit.MILLISECONDS
-        );
+        this.soundPlayer.startUp();
     }
 
     @Override
@@ -187,6 +164,7 @@ public class WatchdogPlugin extends Plugin {
         this.clientToolbar.removeNavigation(this.navButton);
         this.overlayManager.remove(this.flashOverlay);
         this.overlayManager.remove(this.notificationOverlay);
+        this.soundPlayer.shutDown();
     }
 
     public void openConfiguration() {
@@ -217,14 +195,6 @@ public class WatchdogPlugin extends Plugin {
                     this.panel.getMuxer().popState();
                 }
                 this.panel.rebuild();
-            } else if (configChanged.getKey().equals(WatchdogConfig.PUT_SOUNDS_INTO_QUEUE)) {
-                log.debug("sound queue config changed:"+this.config.putSoundsIntoQueue());
-                if (this.config.putSoundsIntoQueue()) {
-                    this.startSoundPlayerTimer();
-                } else {
-                    this.getSoundPlayer().clearQueue();
-                    this.soundPlayerFuture.cancel(false);
-                }
             }
         }
     }
