@@ -10,11 +10,13 @@ import net.runelite.api.Constants;
 import net.runelite.client.ui.ClientUI;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.inject.Inject;
 import java.util.Arrays;
 
+@NoArgsConstructor
 public abstract class Notification implements INotification {
     @Inject
     protected transient ClientUI clientUI;

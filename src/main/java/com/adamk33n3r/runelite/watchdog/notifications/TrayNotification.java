@@ -3,12 +3,14 @@ package com.adamk33n3r.runelite.watchdog.notifications;
 import com.adamk33n3r.runelite.watchdog.Util;
 import com.adamk33n3r.runelite.watchdog.WatchdogConfig;
 
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.inject.Inject;
 import java.awt.TrayIcon;
 
 @Slf4j
+@NoArgsConstructor
 public class TrayNotification extends MessageNotification {
     @Inject
     public TrayNotification(WatchdogConfig config) {

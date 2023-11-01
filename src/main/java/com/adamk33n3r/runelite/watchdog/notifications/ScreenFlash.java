@@ -7,17 +7,21 @@ import com.adamk33n3r.runelite.watchdog.alerts.FlashMode;
 import net.runelite.client.config.FlashNotification;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.inject.Inject;
 import java.awt.Color;
 
+import static com.adamk33n3r.runelite.watchdog.WatchdogConfig.DEFAULT_NOTIFICATION_COLOR;
+
 @Getter
 @Setter
+@NoArgsConstructor
 public class ScreenFlash extends Notification {
-    private Color color;
-    private FlashMode flashMode;
-    private int flashDuration;
+    private Color color = DEFAULT_NOTIFICATION_COLOR;
+    private FlashMode flashMode = FlashMode.FLASH;
+    private int flashDuration = 2;
 
     @Deprecated
     private FlashNotification flashNotification;
