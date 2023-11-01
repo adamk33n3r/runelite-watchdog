@@ -55,7 +55,7 @@ public abstract class Notification implements INotification {
 
     protected boolean shouldFire() {
         int afkTime = (int)Math.floor(Math.min(client.getKeyboardIdleTicks(), client.getMouseIdleTicks()) * Constants.CLIENT_TICK_LENGTH / 1000f);
-        if (afkTime < this.fireWhenAFKForSeconds) {
+        if (this.fireWhenAFK && afkTime < this.fireWhenAFKForSeconds) {
             return false;
         }
         return !this.clientUI.isFocused() || this.fireWhenFocused;
