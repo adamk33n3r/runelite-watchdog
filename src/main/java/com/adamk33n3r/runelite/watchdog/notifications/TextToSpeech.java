@@ -9,6 +9,7 @@ import com.adamk33n3r.runelite.watchdog.notifications.tts.Voice;
 
 import com.google.gson.annotations.SerializedName;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -26,11 +27,12 @@ import static net.runelite.client.RuneLite.CACHE_DIR;
 
 @Slf4j
 @Getter @Setter
+@NoArgsConstructor
 public class TextToSpeech extends MessageNotification implements IAudioNotification {
-    private int gain;
-    private int rate;
+    private int gain = 5;
+    private int rate = 1;
     @SerializedName("voice")
-    private Voice legacyVoice;
+    private Voice legacyVoice = Voice.GEORGE;
     private TTSSource source = TTSSource.LEGACY;
     private String elevenLabsVoiceId;
     private transient com.adamk33n3r.runelite.watchdog.elevenlabs.Voice elevenLabsVoice;

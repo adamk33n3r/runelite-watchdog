@@ -7,6 +7,7 @@ import net.runelite.api.Client;
 import net.runelite.api.Player;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
@@ -15,9 +16,10 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
+@NoArgsConstructor
 public class Overhead extends MessageNotification {
     @Getter @Setter
-    private int displayTime;
+    private int displayTime = 3;
 
     @Inject
     private transient Client client;

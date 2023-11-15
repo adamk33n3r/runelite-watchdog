@@ -56,8 +56,9 @@ public class GSONTest {
             .registerTypeAdapterFactory(alertTypeFactory)
             .registerTypeAdapterFactory(notificationTypeFactory)
             .create();
-        TextToSpeech tts = gson.fromJson("{\"type\":\"TextToSpeech\", \"message\":\"this is a test\",\"gain\":5,\"rate\":1,\"voice\":\"GEORGE\"}", TextToSpeech.class);
+        TextToSpeech tts = gson.fromJson("{\"type\":\"TextToSpeech\", \"message\":\"this is a test\",\"gain\":10,\"rate\":1,\"voice\":\"GEORGE\"}", TextToSpeech.class);
 
-        assertEquals(tts.getSource(), TTSSource.LEGACY);
+        assertEquals(TTSSource.LEGACY, tts.getSource());
+        assertEquals(10, tts.getGain());
     }
 }

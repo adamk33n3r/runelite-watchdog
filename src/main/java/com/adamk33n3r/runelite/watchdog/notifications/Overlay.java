@@ -5,16 +5,21 @@ import com.adamk33n3r.runelite.watchdog.WatchdogConfig;
 import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.inject.Inject;
 import java.awt.Color;
 
+import static com.adamk33n3r.runelite.watchdog.WatchdogConfig.DEFAULT_NOTIFICATION_COLOR;
+import static com.adamk33n3r.runelite.watchdog.WatchdogConfig.DEFAULT_NOTIFICATION_TEXT_COLOR;
+
 @Getter
 @Setter
+@NoArgsConstructor
 public class Overlay extends MessageNotification {
-    private Color color;
-    private Color textColor;
+    private Color color = DEFAULT_NOTIFICATION_COLOR;
+    private Color textColor = DEFAULT_NOTIFICATION_TEXT_COLOR;
     private boolean sticky = false;
     private int timeToLive = 5;
     private String imagePath;

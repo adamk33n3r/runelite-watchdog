@@ -23,6 +23,10 @@ public class SoundEffect extends AudioNotification {
     @Inject
     private transient ClientThread clientThread;
 
+    public SoundEffect() {
+        this.gain = 8;
+    }
+
     @Inject
     public SoundEffect(WatchdogConfig config) {
         super(config);

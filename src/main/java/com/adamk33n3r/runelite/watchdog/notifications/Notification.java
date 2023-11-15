@@ -10,11 +10,13 @@ import net.runelite.api.Constants;
 import net.runelite.client.ui.ClientUI;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.inject.Inject;
 import java.util.Arrays;
 
+@NoArgsConstructor
 public abstract class Notification implements INotification {
     @Inject
     protected transient ClientUI clientUI;
@@ -34,7 +36,7 @@ public abstract class Notification implements INotification {
     @Getter @Setter
     private boolean fireWhenAFK = false;
     @Getter @Setter
-    private int fireWhenAFKForSeconds = 0;
+    private int fireWhenAFKForSeconds = 1;
 
     @Setter
     private transient Alert alert;
@@ -55,7 +57,7 @@ public abstract class Notification implements INotification {
 
     protected boolean shouldFire() {
         int afkTime = (int)Math.floor(Math.min(client.getKeyboardIdleTicks(), client.getMouseIdleTicks()) * Constants.CLIENT_TICK_LENGTH / 1000f);
-        if (afkTime < this.fireWhenAFKForSeconds) {
+        if (this.fireWhenAFK && afkTime < this.fireWhenAFKForSeconds) {
             return false;
         }
         return !this.clientUI.isFocused() || this.fireWhenFocused;
