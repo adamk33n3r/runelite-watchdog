@@ -259,6 +259,32 @@ public abstract class AlertPanel<T extends Alert> extends PluginPanel {
     }
 
     public AlertPanel<T> addRegexMatcher(RegexMatcher regexMatcher, String placeholder, String tooltip) {
+        return this.addRegexMatcher(regexMatcher, placeholder, tooltip, false);
+    }
+
+    public AlertPanel<T> addRegexMatcher(RegexMatcher regexMatcher, String placeholder, String tooltip, boolean showChatPicker) {
+        JPanel btnGroup = new JPanel(new GridLayout(1, 0, 5, 5));
+        JButton regex = PanelUtils.createToggleActionButton(
+            Icons.REGEX_SELECTED,
+            Icons.REGEX_SELECTED_HOVER,
+            Icons.REGEX,
+            Icons.REGEX_HOVER,
+            "Disable regex",
+            "Enable regex",
+            regexMatcher.isRegexEnabled(),
+            (btn, modifiers) -> {
+                regexMatcher.setRegexEnabled(btn.isSelected());
+                this.alertManager.saveAlerts();
+            }
+        );
+        btnGroup.add(regex);
+        if (showChatPicker) {
+            JButton picker = PanelUtils.createActionButton(Icons.PICKER, Icons.PICKER_HOVER, "Pick a message from chat", (btn, mod) -> this.watchdogPanel.pickMessage(selected -> {
+                regexMatcher.setPattern(selected);
+                this.rebuild();
+            }));
+            btnGroup.add(picker);
+        }
         return this.addInputGroupWithSuffix(
             PanelUtils.createTextArea(placeholder, tooltip, regexMatcher.getPattern(), msg -> {
                 if (!PanelUtils.isPatternValid(this, msg, regexMatcher.isRegexEnabled()))
@@ -266,19 +292,7 @@ public abstract class AlertPanel<T extends Alert> extends PluginPanel {
                 regexMatcher.setPattern(msg);
                 this.alertManager.saveAlerts();
             }),
-            PanelUtils.createToggleActionButton(
-                Icons.REGEX_SELECTED,
-                Icons.REGEX_SELECTED_HOVER,
-                Icons.REGEX,
-                Icons.REGEX_HOVER,
-                "Disable regex",
-                "Enable regex",
-                regexMatcher.isRegexEnabled(),
-                (btn, modifiers) -> {
-                    regexMatcher.setRegexEnabled(btn.isSelected());
-                    this.alertManager.saveAlerts();
-                }
-            )
+            btnGroup
         );
     }
 

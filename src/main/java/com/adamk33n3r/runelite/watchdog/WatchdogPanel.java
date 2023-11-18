@@ -4,11 +4,13 @@ import com.adamk33n3r.runelite.watchdog.alerts.*;
 import com.adamk33n3r.runelite.watchdog.hub.AlertHubPanel;
 import com.adamk33n3r.runelite.watchdog.ui.Icons;
 import com.adamk33n3r.runelite.watchdog.ui.ImportExportDialog;
+import com.adamk33n3r.runelite.watchdog.ui.MessagePickerDialog;
 import com.adamk33n3r.runelite.watchdog.ui.alerts.*;
 import com.adamk33n3r.runelite.watchdog.ui.panels.AlertListPanel;
 import com.adamk33n3r.runelite.watchdog.ui.panels.HistoryPanel;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
 
+import net.runelite.api.Client;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.MultiplexingPluginPanel;
 import net.runelite.client.ui.PluginPanel;
@@ -24,6 +26,7 @@ import javax.inject.Provider;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.util.function.Consumer;
 
 @Slf4j
 public class WatchdogPanel extends PluginPanel {
@@ -69,6 +72,9 @@ public class WatchdogPanel extends PluginPanel {
 
     @Inject
     private OkHttpClient httpClient;
+
+    @Inject
+    private Client client;
 
     private AlertListPanel alertListPanel;
 
@@ -213,5 +219,10 @@ public class WatchdogPanel extends PluginPanel {
     public void scrollToBottom() {
         JScrollBar scrollBar = this.alertListPanel.getScrollPane().getVerticalScrollBar();
         scrollBar.setValue(scrollBar.getMaximum());
+    }
+
+    public void pickMessage(Consumer<String> callback) {
+        MessagePickerDialog messagePickerDialog = new MessagePickerDialog(SwingUtilities.getWindowAncestor(this), this.client, callback);
+        messagePickerDialog.setVisible(true);
     }
 }

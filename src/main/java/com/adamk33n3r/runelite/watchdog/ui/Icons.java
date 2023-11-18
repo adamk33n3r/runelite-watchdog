@@ -49,6 +49,8 @@ public abstract class Icons {
     public static final ImageIcon REGEX_HOVER = new ImageIcon(ImageUtil.luminanceOffset(REGEX.getImage(), -40));
     public static final ImageIcon REGEX_SELECTED = new ImageIcon(ImageUtil.loadImageResource(Icons.class, "mdi_regex-outline.png"));
     public static final ImageIcon REGEX_SELECTED_HOVER = new ImageIcon(ImageUtil.luminanceOffset(REGEX_SELECTED.getImage(), -80));
+    public static final ImageIcon PICKER = new ImageIcon(ImageUtil.loadImageResource(Icons.class, "mdi_eyedropper.png"));
+    public static final ImageIcon PICKER_HOVER = new ImageIcon(ImageUtil.luminanceOffset(PICKER.getImage(), -120));
 
     /*
      * Notifications

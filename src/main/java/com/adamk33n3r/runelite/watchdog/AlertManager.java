@@ -158,6 +158,7 @@ public class AlertManager {
     public Alert cloneAlert(Alert alert) {
         String json = this.gson.toJson(alert, ALERT_TYPE);
         Alert clonedAlert = this.gson.fromJson(json, ALERT_TYPE);
+        this.setUpAlert(clonedAlert, false);
         clonedAlert.setName(clonedAlert.getName() + " Clone");
         return clonedAlert;
     }
