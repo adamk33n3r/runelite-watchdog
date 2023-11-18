@@ -10,8 +10,7 @@ import net.runelite.client.ui.ColorScheme;
 
 import javax.sound.sampled.AudioFileFormat;
 import javax.sound.sampled.AudioSystem;
-import javax.swing.JFileChooser;
-import javax.swing.JLabel;
+import javax.swing.*;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -37,5 +36,11 @@ public class SoundNotificationPanel extends NotificationPanel {
         volumeSlider.setBackground(ColorScheme.MEDIUM_GRAY_COLOR);
         volumeSlider.addChangeListener(e -> onChangeListener.run());
         this.settings.add(PanelUtils.createIconComponent(Icons.VOLUME, "The volume to playback sound", volumeSlider));
+
+        JSpinner repeatDuration = PanelUtils.createSpinner(sound.getRepeatDuration(), -1, 120, 1, val -> {
+            sound.setRepeatDuration(val);
+            onChangeListener.run();
+        });
+        this.settings.add(PanelUtils.createIconComponent(Icons.CLOCK, "Duration to repeat sound, use -1 to repeat until cancelled", repeatDuration));
     }
 }

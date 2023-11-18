@@ -106,6 +106,13 @@ public interface WatchdogConfig extends Config {
     )
     default boolean putSoundsIntoQueue() { return true; }
 
+    @ConfigItem(
+            keyName = MOUSE_MOVEMENT_CANCELS_FLASH,
+            name = "Mouse Movement Cancels",
+            description = "Cancel the repeated sounds/flashes with mouse movement as well as click and keyboard"
+    )
+    default boolean mouseMovementCancels() { return true; }
+
     //region AFK Notification
     @ConfigSection(
         name = "AFK Notification",
@@ -244,15 +251,6 @@ public interface WatchdogConfig extends Config {
         closedByDefault = true
     )
     String screenFlashSection = "screenFlashSection";
-
-    @ConfigItem(
-        keyName = MOUSE_MOVEMENT_CANCELS_FLASH,
-        name = "Mouse Movement Cancels",
-        description = "Cancel the screen flash with mouse movement as well as click and keyboard",
-        section = screenFlashSection,
-        position = 0
-    )
-    default boolean mouseMovementCancels() { return true; }
 
     @ConfigItem(
         keyName = DEFAULT_SCREEN_FLASH_COLOR,
