@@ -102,6 +102,9 @@ public class WatchdogPlugin extends Plugin {
 
     private NavigationButton navButton;
 
+    @Inject
+    private final TrayNotifier trayNotifier = new TrayNotifier();
+
     @Getter
     private static WatchdogPlugin instance;
 
