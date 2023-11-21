@@ -9,6 +9,7 @@ import com.adamk33n3r.runelite.watchdog.notifications.TrayNotification;
 import net.runelite.api.Client;
 import net.runelite.api.ItemID;
 import net.runelite.api.MenuAction;
+import net.runelite.api.events.GameStateChanged;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
@@ -184,6 +185,11 @@ public class WatchdogPlugin extends Plugin {
         {
             this.notificationOverlay.clear();
         }
+    }
+
+    @Subscribe
+    private void onGameStateChanged(GameStateChanged gameStateChanged) {
+        this.soundPlayer.stop();
     }
 
     @Subscribe

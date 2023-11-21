@@ -8,6 +8,6 @@ import java.io.File;
 @RequiredArgsConstructor
 public class SoundItem {
     private final File file;
-    private final Integer gain;
-    private final Integer repeatSeconds;
+    private final int gain;
+    private final int repeatSeconds;
 }

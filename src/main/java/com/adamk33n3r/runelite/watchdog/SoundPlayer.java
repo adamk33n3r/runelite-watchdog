@@ -41,7 +41,7 @@ public class SoundPlayer {
 
     private final ScheduledExecutorService executor = Executors.newScheduledThreadPool(2);
     private ScheduledFuture<?> soundPlayerFuture;
-    private ScheduledFuture<?> soundTimeoutFuture;
+    private Timeout soundTimeout;
 
     private boolean mp3IsPlaying = false;
     private boolean clipIsPlaying = false;
@@ -62,8 +62,7 @@ public class SoundPlayer {
 
     public void shutDown() {
         this.soundPlayerFuture.cancel(false);
-        this.soundTimeoutFuture.cancel(false);
-        this.queue.clear();
+        this.stop();
     }
 
     public void processQueue() {
@@ -81,6 +80,14 @@ public class SoundPlayer {
         }
 
         this.playNext(this.mp3Player);
+    }
+
+    public void stop() {
+        if (this.soundTimeout != null) {
+            this.soundTimeout.stopAndRunNow();
+            this.soundTimeout = null;
+        }
+        this.queue.clear();
     }
 
     public void play(File soundFile, int volume) {
@@ -117,6 +124,10 @@ public class SoundPlayer {
             mp3Player.add(nextSound.getFile());
             mp3Player.setVolume(nextSound.getGain() * 10);
             this.mp3IsPlaying = true;
+            if (this.soundTimeout != null) {
+                this.soundTimeout.stopAndRunNow();
+                this.soundTimeout = null;
+            }
             mp3Player.play();
             // jaco.mp3 repeat functionality is broken, but we are using it to signal to ourselves to repeat on loop
             mp3Player.setRepeat(true);
@@ -146,6 +157,12 @@ public class SoundPlayer {
                             }
                         }
                     });
+
+                    if (this.soundTimeout != null) {
+                        this.soundTimeout.stopAndRunNow();
+                        this.soundTimeout = null;
+                    }
+
                     setTimeout(() -> {
                         isLooping.set(false);
                     }, nextSound.getRepeatSeconds());
@@ -161,6 +178,8 @@ public class SoundPlayer {
     }
 
     /**
+     * Runs a method after a delay
+     * <p>
      * Internally polls for user interaction if the delay is < 0
      */
     private void setTimeout(Runnable runnable, int delaySeconds) {
@@ -168,15 +187,16 @@ public class SoundPlayer {
             runnable.run();
             return;
         }
+
         if (delaySeconds < 0) {
-            this.soundTimeoutFuture = this.executor.scheduleAtFixedRate(() -> {
-                if (hasUserInteraction()) {
+            this.soundTimeout = new Interval(this.executor, () -> {
+                if (this.hasUserInteraction()) {
                     runnable.run();
                 }
-            }, 0, Constants.CLIENT_TICK_LENGTH, TimeUnit.MILLISECONDS);
+            }, Constants.CLIENT_TICK_LENGTH, TimeUnit.MILLISECONDS);
             return;
         }
-        this.soundTimeoutFuture = this.executor.schedule(runnable, delaySeconds, TimeUnit.SECONDS);
+        this.soundTimeout = new Timeout(this.executor, runnable, delaySeconds, TimeUnit.SECONDS);
     }
 
     private boolean hasUserInteraction() {
