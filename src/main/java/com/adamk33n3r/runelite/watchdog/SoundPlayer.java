@@ -210,4 +210,10 @@ public class SoundPlayer {
         }
         return false;
     }
+
+    private MP3Player createMP3Player() {
+        MP3Player mp3Player = new MP3Player();
+        mp3Player.setRepeat(false);
+        return mp3Player;
+    }
 }
