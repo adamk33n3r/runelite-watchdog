@@ -8,6 +8,7 @@ import net.runelite.api.Client;
 import net.runelite.client.RuneLite;
 import net.runelite.client.RuneLiteProperties;
 import net.runelite.client.config.ConfigManager;
+import net.runelite.client.config.RuneLiteConfig;
 import net.runelite.client.ui.ClientUI;
 import net.runelite.client.util.OSType;
 
@@ -45,7 +46,8 @@ public class TrayNotifier {
     @Inject
     protected transient ConfigManager configManager;
     private static final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(2);
-    private final transient FakeRuneLiteConfig runeLiteConfig;
+    @Inject
+    private transient RuneLiteConfig runeLiteConfig;
     private transient final String appName = "RuneLite";
     // Copied from RuneLite's Notifier class
     private final transient Path notifyIconPath = RuneLite.RUNELITE_DIR.toPath().resolve("icon.png");
@@ -56,8 +58,6 @@ public class TrayNotifier {
             .build();
 
     public TrayNotifier() {
-        this.runeLiteConfig = new FakeRuneLiteConfig(this);
-
         // Copied from RuneLite's Notifier class
         // Check if we are running in the launcher because terminal-notifier notifications don't work
         // if the group/sender are unknown to it.
@@ -237,23 +237,4 @@ public class TrayNotifier {
         }
     }
 
-    /**
-     * This "mocks" the RuneLite config
-     * While this isn't necessarily efficient, it means we don't have to make any modification to the copied code
-     */
-    private static class FakeRuneLiteConfig {
-        private final TrayNotifier parent;
-
-        public FakeRuneLiteConfig(TrayNotifier parent) {
-            this.parent = parent;
-        }
-
-        int notificationTimeout() {
-            Integer notificationTimeout = this.parent.configManager.getConfiguration("runelite", "notificationTimeout", Integer.class);
-            if (notificationTimeout == null) {
-                return 10000;
-            }
-            return notificationTimeout;
-        }
-    }
 }
