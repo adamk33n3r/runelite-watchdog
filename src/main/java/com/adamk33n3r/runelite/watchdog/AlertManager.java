@@ -1,6 +1,7 @@
 package com.adamk33n3r.runelite.watchdog;
 
 import com.adamk33n3r.runelite.watchdog.alerts.*;
+import com.adamk33n3r.runelite.watchdog.elevenlabs.ElevenLabs;
 import com.adamk33n3r.runelite.watchdog.hub.AlertHubCategory;
 import com.adamk33n3r.runelite.watchdog.notifications.*;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
@@ -248,6 +249,10 @@ public class AlertManager {
             ((AlertGroup) alert).getAlerts().forEach(subAlert -> this.setUpAlert(subAlert, overrideWithDefaults));
         } else {
             for (INotification notification : alert.getNotifications()) {
+                if (notification instanceof TextToSpeech) {
+                    TextToSpeech tts = (TextToSpeech) notification;
+                    ElevenLabs.getVoice(WatchdogPlugin.getInstance().getHttpClient(), tts.getElevenLabsVoiceId(), tts::setElevenLabsVoice);
+                }
                 WatchdogPlugin.getInstance().getInjector().injectMembers(notification);
                 if (overrideWithDefaults) {
                     notification.setDefaults();
