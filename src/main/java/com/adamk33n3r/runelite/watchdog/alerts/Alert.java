@@ -94,12 +94,12 @@ public abstract class Alert {
 
     @Nullable
     public List<AlertGroup> getAncestors() {
-        if (this.parent == null) {
+        if (this.getParent() == null) {
             return null;
         }
 
         ArrayList<AlertGroup> ancestors = new ArrayList<>();
-        AlertGroup alertGroup = this.parent;
+        AlertGroup alertGroup = this.getParent();
         do {
             ancestors.add(0, alertGroup);
         } while ((alertGroup = alertGroup.getParent()) != null);

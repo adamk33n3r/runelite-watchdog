@@ -73,9 +73,6 @@ public class WatchdogPanel extends PluginPanel {
     @Inject
     private OkHttpClient httpClient;
 
-    @Inject
-    private Client client;
-
     private AlertListPanel alertListPanel;
 
     public WatchdogPanel() {
@@ -222,7 +219,7 @@ public class WatchdogPanel extends PluginPanel {
     }
 
     public void pickMessage(Consumer<String> callback) {
-        MessagePickerDialog messagePickerDialog = new MessagePickerDialog(SwingUtilities.getWindowAncestor(this), this.client, callback);
+        MessagePickerDialog messagePickerDialog = new MessagePickerDialog(SwingUtilities.getWindowAncestor(this), callback);
         messagePickerDialog.setVisible(true);
     }
 }

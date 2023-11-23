@@ -9,6 +9,8 @@ import com.adamk33n3r.runelite.watchdog.notifications.TrayNotification;
 import net.runelite.api.Client;
 import net.runelite.api.ItemID;
 import net.runelite.api.MenuAction;
+import net.runelite.api.MessageNode;
+import net.runelite.api.events.ChatMessage;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.EventBus;
@@ -27,6 +29,7 @@ import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.ui.overlay.OverlayMenuEntry;
 import net.runelite.client.util.AsyncBufferedImage;
 
+import com.google.common.collect.EvictingQueue;
 import com.google.inject.Binder;
 import com.google.inject.Provides;
 import com.google.inject.name.Names;
@@ -38,6 +41,7 @@ import javax.inject.Inject;
 import javax.inject.Provider;
 import java.util.List;
 import java.util.Properties;
+import java.util.Queue;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -105,6 +109,9 @@ public class WatchdogPlugin extends Plugin {
 
     @Getter
     private static WatchdogPlugin instance;
+
+    @Getter
+    private final Queue<MessageNode> messageQueue = EvictingQueue.create(20);
 
     public WatchdogPlugin() {
         instance = this;
@@ -190,6 +197,11 @@ public class WatchdogPlugin extends Plugin {
     @Subscribe
     private void onGameStateChanged(GameStateChanged gameStateChanged) {
         this.soundPlayer.stop();
+    }
+
+    @Subscribe
+    private void onChatMessage(ChatMessage chatMessage) {
+        this.messageQueue.offer(chatMessage.getMessageNode());
     }
 
     @Subscribe
