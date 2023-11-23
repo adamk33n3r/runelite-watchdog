@@ -1,0 +1,35 @@
+package com.adamk33n3r.runelite.watchdog.notifications;
+
+import com.adamk33n3r.runelite.watchdog.WatchdogConfig;
+
+import net.runelite.client.ui.ClientUI;
+
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import javax.inject.Inject;
+
+@Getter
+@Setter
+@NoArgsConstructor
+public class RequestFocus extends Notification {
+    private boolean forceFocus = false;
+
+    @Inject
+    private transient ClientUI clientUI;
+
+    @Inject
+    public RequestFocus(WatchdogConfig config) {
+        super(config);
+    }
+
+    @Override
+    protected void fireImpl(String[] triggerValues) {
+        if (this.forceFocus) {
+            this.clientUI.forceFocus();
+        } else {
+            this.clientUI.requestFocus();
+        }
+    }
+}

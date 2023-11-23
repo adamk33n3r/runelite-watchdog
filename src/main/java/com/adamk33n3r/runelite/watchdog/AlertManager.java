@@ -88,6 +88,7 @@ public class AlertManager {
             .registerSubtype(GameMessage.class)
             .registerSubtype(Overhead.class)
             .registerSubtype(Overlay.class)
+            .registerSubtype(RequestFocus.class)
             .registerSubtype(NotificationEvent.class);
         this.gson = this.clientGson.newBuilder()
 //            .serializeNulls()

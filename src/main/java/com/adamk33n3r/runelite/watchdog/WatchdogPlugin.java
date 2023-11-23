@@ -42,10 +42,6 @@ import javax.inject.Provider;
 import java.util.List;
 import java.util.Properties;
 import java.util.Queue;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
 
 import static net.runelite.api.MenuAction.RUNELITE_OVERLAY_CONFIG;
 

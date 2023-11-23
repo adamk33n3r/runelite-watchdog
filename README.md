@@ -24,6 +24,7 @@ with any amount of unique notification types like
 - Tray Notification
 - Overhead Text
 - Overlay
+- Request Focus
 - RuneLite Notification (to trigger things like RL Tray Notifications)
 
 _You can set defaults for the notifications in the plugin config_

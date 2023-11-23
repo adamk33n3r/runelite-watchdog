@@ -30,6 +30,10 @@ public class SoundEffectNotificationPanel extends NotificationPanel {
         VolumeSlider volumeSlider = new VolumeSlider(soundEffect);
         volumeSlider.setBackground(ColorScheme.MEDIUM_GRAY_COLOR);
         volumeSlider.addChangeListener(e -> onChangeListener.run());
-        this.settings.add(PanelUtils.createIconComponent(Icons.VOLUME, "The volume to playback sound effect", volumeSlider));
+        this.settings.add(PanelUtils.createIconComponent(
+            Icons.VOLUME,
+            "The volume to playback sound effect (if muted in game, otherwise will use game setting)",
+            volumeSlider
+        ));
     }
 }

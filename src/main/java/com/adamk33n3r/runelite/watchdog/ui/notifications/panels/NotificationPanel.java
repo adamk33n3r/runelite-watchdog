@@ -49,8 +49,6 @@ public abstract class NotificationPanel extends JPanel {
         this.onChangeListener = onChangeListener;
         this.onRemove = onRemove;
 
-        WatchdogConfig config = WatchdogPlugin.getInstance().getConfig();
-
         this.setLayout(new BorderLayout());
         this.setBorder(new EmptyBorder(3, 0, 0, 0));
         JPanel container = new JPanel(new StretchedStackedLayout(3, 3));
@@ -129,7 +127,7 @@ public abstract class NotificationPanel extends JPanel {
             Icons.BACKGROUND,
             Icons.BACKGROUND_HOVER,
             "Switch to only fire notification while the game is in the background",
-            "Enable notification while the game is in the foreground",
+            "Switch to fire notifications while the game is in the background and foreground",
             notification.isFireWhenFocused(),
             (btn, modifiers) -> {
                 notification.setFireWhenFocused(btn.isSelected());
