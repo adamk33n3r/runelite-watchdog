@@ -22,6 +22,7 @@ public class RequestFocus extends Notification {
     @Inject
     public RequestFocus(WatchdogConfig config) {
         super(config);
+        this.forceFocus = config.defaultRequestFocusForce();
     }
 
     @Override

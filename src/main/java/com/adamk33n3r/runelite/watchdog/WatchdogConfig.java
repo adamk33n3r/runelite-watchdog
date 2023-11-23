@@ -66,6 +66,9 @@ public interface WatchdogConfig extends Config {
     String ELEVEN_LABS_API_KEY = "elevenLabsAPIKey";
     String DEFAULT_ELEVEN_LABS_VOICE = "defaultElevenLabsVoice";
 
+    // Request Focus
+    String DEFAULT_FORCE_FOCUS = "defaultForceFocus";
+
     //region Hidden
     @ConfigItem(
         keyName = ALERTS,
@@ -107,9 +110,9 @@ public interface WatchdogConfig extends Config {
     default boolean putSoundsIntoQueue() { return true; }
 
     @ConfigItem(
-            keyName = MOUSE_MOVEMENT_CANCELS_FLASH,
-            name = "Mouse Movement Cancels",
-            description = "Cancel the repeated sounds/flashes with mouse movement as well as click and keyboard"
+        keyName = MOUSE_MOVEMENT_CANCELS_FLASH,
+        name = "Mouse Movement Cancels",
+        description = "Cancel the repeated sounds/flashes with mouse movement as well as click and keyboard"
     )
     default boolean mouseMovementCancels() { return true; }
 
@@ -403,5 +406,22 @@ public interface WatchdogConfig extends Config {
         section = ttsSection
     )
     default String defaultElevenLabsVoice() { return null; }
+    //endregion
+
+    //region Request Focus
+    @ConfigSection(
+        name = "Request Focus",
+        description = "The options that control the request focus notifications",
+        position = 7,
+        closedByDefault = true
+    )
+    String requestFocusSection = "requestFocusSection";
+
+    @ConfigItem(
+        keyName = DEFAULT_FORCE_FOCUS,
+        name = "Force Focus",
+        description = "Sets the default focus mode to force"
+    )
+    default boolean defaultRequestFocusForce() { return false; }
     //endregion
 }
