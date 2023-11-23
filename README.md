@@ -29,6 +29,11 @@ with any amount of unique notification types like
 
 _You can set defaults for the notifications in the plugin config_
 
+## Recommended RuneLite Notification Settings
+![image](https://github.com/adamk33n3r/runelite-watchdog/assets/1350444/18eb10dd-9ddb-4248-9d5f-ddc335acc103)
+
+Request Focus should be set to `Off` otherwise you will get some wrong behaviors with your background notifications.
+
 ## Examples
 ![Attack Drained Example](https://user-images.githubusercontent.com/1350444/221425644-0211c4d7-2838-4e63-986a-8ab313052ad5.png)
 ![Harvest Example](https://user-images.githubusercontent.com/1350444/221425625-4e246cb6-eff0-4f8f-855f-80fd7b36bc9d.png)
