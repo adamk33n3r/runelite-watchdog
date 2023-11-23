@@ -4,15 +4,16 @@ import com.google.common.base.Strings;
 import com.google.common.escape.Escaper;
 import com.google.common.escape.Escapers;
 import lombok.extern.slf4j.Slf4j;
-import net.runelite.api.Client;
 import net.runelite.client.RuneLite;
 import net.runelite.client.RuneLiteProperties;
-import net.runelite.client.config.ConfigManager;
+import net.runelite.client.chat.ChatMessageManager;
 import net.runelite.client.config.RuneLiteConfig;
+import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.ui.ClientUI;
 import net.runelite.client.util.OSType;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Singleton;
 import java.awt.*;
 import java.io.IOException;
@@ -30,35 +31,33 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @Singleton
 public class TrayNotifier {
-    @Inject
-    protected transient ClientUI clientUI;
-
-    @Inject
-    protected transient Client client;
-
-    @Inject
-    protected transient AlertManager alertManager;
-
-    @Inject
-    protected transient WatchdogConfig watchdogConfig;
-
-    @Inject
-    protected transient ConfigManager configManager;
-    @Inject
-    private transient ScheduledExecutorService executorService;
-    @Inject
-    private transient RuneLiteConfig runeLiteConfig;
-    private transient final String appName = "RuneLite";
     // Copied from RuneLite's Notifier class
-    private final transient Path notifyIconPath = RuneLite.RUNELITE_DIR.toPath().resolve("icon.png");
+    private final RuneLiteConfig runeLiteConfig;
+    private final ClientUI clientUI;
+    private final ScheduledExecutorService executorService;
+    private final String appName;
+    private final Path notifyIconPath;
     private transient boolean terminalNotifierAvailable;
     private static final String DOUBLE_QUOTE = "\"";
     private static final Escaper SHELL_ESCAPE = Escapers.builder()
             .addEscape('"', "'")
             .build();
 
-    public TrayNotifier() {
-        // Copied from RuneLite's Notifier class
+    @Inject
+    public TrayNotifier(
+        final ClientUI clientUI,
+        final RuneLiteConfig runeliteConfig,
+        final ScheduledExecutorService executorService,
+        final ChatMessageManager chatMessageManager,
+        final EventBus eventBus,
+        @Named("runelite.title") final String appName
+    ) {
+        this.clientUI = clientUI;
+        this.runeLiteConfig = runeliteConfig;
+        this.executorService = executorService;
+        this.appName = appName;
+        this.notifyIconPath = RuneLite.RUNELITE_DIR.toPath().resolve("icon.png");
+
         // Check if we are running in the launcher because terminal-notifier notifications don't work
         // if the group/sender are unknown to it.
         if (!Strings.isNullOrEmpty(RuneLiteProperties.getLauncherVersion()) && OSType.getOSType() == OSType.MacOS)
