@@ -42,7 +42,7 @@ public class ImportExportDialog extends JDialog {
 
         JPanel btnGroup = new JPanel(new GridLayout(1, 0, 25, 0));
         Function<Boolean, ActionListener> importAlertFn = append -> ev -> {
-            if (!append && JOptionPane.showConfirmDialog(this, "Are you sure you wish to overwrite your alerts?", "Confirm Overwrite?", JOptionPane.YES_NO_OPTION) == JOptionPane.NO_OPTION) {
+            if (!append && JOptionPane.showConfirmDialog(this, "Are you sure you wish to overwrite your alerts?", "Confirm Overwrite?", JOptionPane.YES_NO_OPTION) != JOptionPane.YES_OPTION) {
                 return;
             }
             String json = textArea.getText();

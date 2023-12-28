@@ -86,6 +86,7 @@ public class EventHandler {
                 || chatMessage.getType() == ChatMessageType.CLAN_GIM_CHAT
         ) {
             this.alertManager.getAllEnabledAlertsOfType(PlayerChatAlert.class)
+                .filter(chatAlert -> chatAlert.getPlayerChatType() == PlayerChatType.ANY || chatAlert.getPlayerChatType().isOfType(chatMessage.getType()))
                 .forEach(chatAlert -> {
                     String[] groups = this.matchPattern(chatAlert, unformattedMessage);
                     if (groups == null) return;

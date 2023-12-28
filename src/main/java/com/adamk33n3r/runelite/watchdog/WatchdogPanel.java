@@ -189,7 +189,9 @@ public class WatchdogPanel extends PluginPanel {
     }
 
     private PluginPanel createPluginPanel(Alert alert) {
-        if (alert instanceof ChatAlert) {
+        if (alert instanceof PlayerChatAlert) {
+            return new PlayerChatAlertPanel(this, (PlayerChatAlert) alert);
+        } else if (alert instanceof ChatAlert) {
             return new GameMessageAlertPanel(this, (ChatAlert) alert);
         } else if (alert instanceof NotificationFiredAlert) {
             return new NotificationFiredAlertPanel(this, (NotificationFiredAlert) alert);
