@@ -39,22 +39,28 @@ Request Focus should be set to `Off` otherwise you will get some wrong behaviors
 ![Harvest Example](https://user-images.githubusercontent.com/1350444/221425625-4e246cb6-eff0-4f8f-855f-80fd7b36bc9d.png)
 
 ## Alert Hub
-Add alerts other users have shared directly from the panel!
+Add alerts other users have shared directly from the panel! You can check out the [alert hub branch](https://github.com/adamk33n3r/runelite-watchdog/tree/alert-hub) to learn how to upload your own.
 
 ![image](https://github.com/adamk33n3r/runelite-watchdog/assets/1350444/08ecf612-11ba-4bd1-b2c3-d624e40ca9a1)
 
 
 ## Capture Groups
-With glob patterns (or regex) and capture groups you can make your notifications dynamic. Using glob patterns you wrap
-the text you want in curly braces `{}` and in regex you use parenthesis `()`.
-Say you have a Notification Fired Alert with the Message set to `Your {*} is ready to harvest in {*}`.
-This will capture the crop and the location which you can then use in your notifications.
-In message type notifications like Text to Speech, Tray Notification, or Game Message you can use those
-capture groups to create your own message.
-For example, you could have a TTS notification set to `Go get your $1 in $2!` which would make it say something like
+Capture groups can make your alerts dynamic by changing the output depending on what triggered the alert.
+
+Any trigger with a text input can use `{}` to create a capture group around the text inside it. You can then use the
+captured text in your alert output by writing `$1`. Multiple brackets can be read sequentially with `$2`, `$3` etc.
+This is useful when using glob [glob](https://en.wikipedia.org/wiki/Glob_(programming)), since the text that was
+globbed can now be captured with `{*}`. 
+
+Say you have a Notification Fired Alert with the Message set to `Your {*} is ready to harvest in {*}`. 
+You could then have a TTS notification set to `Go get your $1 in $2!` which would make it say something like
 `Go get your Ranarr in Ardougne!`.
 
-You can also use capture groups in a Sound Notification to create a dynamic file path. It's a little tricky since you
-have to have a dummy file that has the capture group values in the name so that the path can be read with the variables.
-But if you select a file with the name `$1.wav` for example you can then have other files in the same directory like
-`ranarr.wav` and `torstol.wav` to have unique sounds for different herb types.
+Another useful output is as the file name for a sound notification. With the above example, we could set the alert
+to play `$1.wav`, which would actually play other files in the same folder such as `ranarr.wav` and `torstol.wav`.
+To set this up, you have to include and select a dummy file `$1.wav` in the folder with the files you wish to use,
+even though the file itself will not be played.
+
+With [regex](https://en.wikipedia.org/wiki/Regular_expression) enabled, you instead use parenthesis `()` to surround the text you wish to capture.
+
+
