@@ -39,17 +39,17 @@ Request Focus should be set to `Off` otherwise you will get some wrong behaviors
 ![Harvest Example](https://user-images.githubusercontent.com/1350444/221425625-4e246cb6-eff0-4f8f-855f-80fd7b36bc9d.png)
 
 ## Alert Hub
-Add alerts other users have shared directly from the panel! You can check out the ![alert hub branch](https://github.com/adamk33n3r/runelite-watchdog/tree/alert-hub) to learn how to upload your own.
+Add alerts other users have shared directly from the panel! You can check out the [alert hub branch](https://github.com/adamk33n3r/runelite-watchdog/tree/alert-hub) to learn how to upload your own.
 
 ![image](https://github.com/adamk33n3r/runelite-watchdog/assets/1350444/08ecf612-11ba-4bd1-b2c3-d624e40ca9a1)
 
 
 ## Capture Groups
-capture groups can make your alerts dynamic by changing the output depending on what triggered the alert.
+Capture groups can make your alerts dynamic by changing the output depending on what triggered the alert.
 
 Any trigger with a text input can use `{}` to create a capture group around the text inside it. You can then use the
 captured text in your alert output by writing `$1`. Multiple brackets can be read sequentially with `$2`, `$3` etc.
-This is useful when using glob ![glob](https://en.wikipedia.org/wiki/Glob_(programming)), since the text that was
+This is useful when using glob [glob](https://en.wikipedia.org/wiki/Glob_(programming)), since the text that was
 globbed can now be captured with `{*}`. 
 
 Say you have a Notification Fired Alert with the Message set to `Your {*} is ready to harvest in {*}`. 
@@ -61,6 +61,6 @@ to play `$1.wav`, which would actually play other files in the same folder such 
 To set this up, you have to include and select a dummy file `$1.wav` in the folder with the files you wish to use,
 even though the file itself will not be played.
 
-with ![regex](https://en.wikipedia.org/wiki/Regular_expression) enabled, you instead use parenthesis `()` to surround the text you wish to capture.
+With [regex](https://en.wikipedia.org/wiki/Regular_expression) enabled, you instead use parenthesis `()` to surround the text you wish to capture.
 
 
