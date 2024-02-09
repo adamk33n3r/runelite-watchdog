@@ -4,6 +4,7 @@ import com.adamk33n3r.runelite.watchdog.Util;
 import com.adamk33n3r.runelite.watchdog.WatchdogConfig;
 
 import net.runelite.api.Client;
+import net.runelite.api.Constants;
 import net.runelite.api.Player;
 
 import lombok.Getter;
@@ -13,7 +14,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import javax.inject.Inject;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @NoArgsConstructor
@@ -40,11 +40,7 @@ public class Overhead extends MessageNotification {
             return;
         }
         localPlayer.setOverheadText(message);
-        this.executor.schedule(() -> {
-            if (localPlayer.getOverheadText().equals(message)) {
-                localPlayer.setOverheadText("");
-            }
-        }, this.displayTime, TimeUnit.SECONDS);
+        localPlayer.setOverheadCycle(this.displayTime * 1000 / Constants.CLIENT_TICK_LENGTH);
     }
 
     @Override

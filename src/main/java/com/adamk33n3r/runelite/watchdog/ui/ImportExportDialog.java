@@ -4,6 +4,8 @@ import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
 import com.adamk33n3r.runelite.watchdog.alerts.Alert;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
 
+import net.runelite.client.config.RuneLiteConfig;
+
 import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
 
@@ -29,6 +31,7 @@ public class ImportExportDialog extends JDialog {
         this.setLocationRelativeTo(parent);
         this.setModal(true);
         this.setUndecorated(true);
+        this.setAlwaysOnTopIfNeeded();
 
         JPanel wrapper = this.createWrapper();
         this.add(wrapper);
@@ -90,6 +93,7 @@ public class ImportExportDialog extends JDialog {
         this.setLocationRelativeTo(parent);
         this.setModal(true);
         this.setUndecorated(true);
+        this.setAlwaysOnTopIfNeeded();
 
         JTextArea textArea = new JTextArea(exportString);
         textArea.setLineWrap(true);
@@ -130,5 +134,12 @@ public class ImportExportDialog extends JDialog {
         JPanel wrapper = new JPanel(new BorderLayout(5, 5));
         wrapper.setBorder(new EmptyBorder(10, 10, 10, 10));
         return wrapper;
+    }
+
+    private void setAlwaysOnTopIfNeeded() {
+        RuneLiteConfig runeLiteConfig = WatchdogPlugin.getInstance().getInjector().getInstance(RuneLiteConfig.class);
+        if (runeLiteConfig.gameAlwaysOnTop() && this.isAlwaysOnTopSupported()) {
+            this.setAlwaysOnTop(true);
+        }
     }
 }
