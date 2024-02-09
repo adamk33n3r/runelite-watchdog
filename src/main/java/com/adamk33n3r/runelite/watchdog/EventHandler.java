@@ -128,11 +128,9 @@ public class EventHandler {
     //region Stat Changed
     @Subscribe
     private void onGameStateChanged(GameStateChanged gameStateChanged) {
-        if (gameStateChanged.getGameState() == GameState.LOGGED_IN) {
-            for (Skill skill : Skill.values()) {
-                this.previousSkillLevelTable.put(skill, this.client.getBoostedSkillLevel(skill));
-                this.previousSkillXPTable.put(skill, this.client.getSkillExperience(skill));
-            }
+        if (gameStateChanged.getGameState() == GameState.LOGIN_SCREEN) {
+            this.previousSkillLevelTable.clear();
+            this.previousSkillXPTable.clear();
         }
     }
 
