@@ -7,7 +7,6 @@ import net.runelite.client.ui.ClientUI;
 import net.runelite.client.ui.overlay.OverlayMenuEntry;
 import net.runelite.client.ui.overlay.OverlayPanel;
 import net.runelite.client.ui.overlay.OverlayPosition;
-import net.runelite.client.ui.overlay.OverlayPriority;
 import net.runelite.client.ui.overlay.components.PanelComponent;
 import net.runelite.client.ui.overlay.components.TitleComponent;
 import net.runelite.client.util.ImageUtil;
@@ -21,7 +20,10 @@ import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.stream.Collectors;
 
 import static net.runelite.api.MenuAction.RUNELITE_OVERLAY;
 import static net.runelite.api.MenuAction.RUNELITE_OVERLAY_CONFIG;
@@ -93,7 +95,7 @@ public class NotificationOverlay extends OverlayPanel {
         super(plugin);
         this.setPosition(OverlayPosition.TOP_LEFT);
         this.setResizable(true);
-        this.setPriority(OverlayPriority.LOW);
+        this.setPriority(0);
         this.setClearChildren(true);
         this.setPreferredSize(DEFAULT_SIZE);
 
@@ -112,6 +114,13 @@ public class NotificationOverlay extends OverlayPanel {
 
     public void clear() {
         this.overlayNotificationQueue.clear();
+    }
+
+    public void clearById(String id) {
+        List<OverlayNotificationData> stickiesToDismiss = this.overlayNotificationQueue.stream()
+            .filter(notif -> notif.overlayNotification.isSticky() && notif.overlayNotification.getId().equals(id))
+            .collect(Collectors.toList());
+        this.overlayNotificationQueue.removeAll(stickiesToDismiss);
     }
 
     @Override

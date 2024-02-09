@@ -23,6 +23,7 @@ public class Overlay extends MessageNotification {
     private boolean sticky = false;
     private int timeToLive = 5;
     private String imagePath;
+    private String id;
 
     @Inject
     public Overlay(WatchdogConfig config) {

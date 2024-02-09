@@ -1,6 +1,9 @@
 package com.adamk33n3r.runelite.watchdog.ui.notifications.panels;
 
+import com.adamk33n3r.runelite.watchdog.LengthLimitFilter;
+import com.adamk33n3r.runelite.watchdog.SimpleDocumentListener;
 import com.adamk33n3r.runelite.watchdog.notifications.Overlay;
+import com.adamk33n3r.runelite.watchdog.ui.FlatTextArea;
 import com.adamk33n3r.runelite.watchdog.ui.Icons;
 import com.adamk33n3r.runelite.watchdog.ui.panels.NotificationsPanel;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
@@ -12,9 +15,13 @@ import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
+import javax.swing.text.AbstractDocument;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 
 public class OverlayNotificationPanel extends MessageNotificationPanel {
     private JPanel displayTime;
+    private JPanel stickyId;
 
     public OverlayNotificationPanel(Overlay notification, NotificationsPanel parentPanel, ColorPickerManager colorPickerManager, Runnable onChangeListener, PanelUtils.OnRemove onRemove) {
         super(notification, parentPanel, onChangeListener, onRemove);
@@ -59,7 +66,9 @@ public class OverlayNotificationPanel extends MessageNotificationPanel {
             notification.setSticky(val);
             if (val) {
                 this.settings.remove(this.displayTime);
+                this.settings.add(this.stickyId);
             } else {
+                this.settings.remove(this.stickyId);
                 this.settings.add(this.displayTime);
             }
             this.revalidate();
@@ -73,7 +82,28 @@ public class OverlayNotificationPanel extends MessageNotificationPanel {
         });
         this.displayTime = PanelUtils.createIconComponent(Icons.CLOCK, "Time to display in seconds", displayTime);
 
-        if (!notification.isSticky()) {
+        FlatTextArea flatTextArea = new FlatTextArea("ID to use with Dismiss Overlay...", true);
+        flatTextArea.setText(notification.getId());
+        ((AbstractDocument) flatTextArea.getDocument()).setDocumentFilter(new LengthLimitFilter(200));
+        flatTextArea.getDocument().addDocumentListener((SimpleDocumentListener) ev -> {
+            notification.setId(flatTextArea.getText());
+        });
+        flatTextArea.getTextArea().addFocusListener(new FocusListener() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                flatTextArea.getTextArea().selectAll();
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                onChangeListener.run();
+            }
+        });
+        this.stickyId = flatTextArea;
+
+        if (notification.isSticky()) {
+            this.settings.add(this.stickyId);
+        } else {
             this.settings.add(this.displayTime);
         }
     }

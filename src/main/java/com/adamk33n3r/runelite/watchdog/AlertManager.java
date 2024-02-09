@@ -89,7 +89,8 @@ public class AlertManager {
             .registerSubtype(Overhead.class)
             .registerSubtype(Overlay.class)
             .registerSubtype(RequestFocus.class)
-            .registerSubtype(NotificationEvent.class);
+            .registerSubtype(NotificationEvent.class)
+            .registerSubtype(DismissOverlay.class);
         this.gson = this.clientGson.newBuilder()
 //            .serializeNulls()
             .registerTypeAdapterFactory(alertTypeFactory)
