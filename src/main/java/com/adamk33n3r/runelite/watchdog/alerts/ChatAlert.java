@@ -1,5 +1,7 @@
 package com.adamk33n3r.runelite.watchdog.alerts;
 
+import com.adamk33n3r.runelite.watchdog.GameMessageType;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -8,6 +10,7 @@ import lombok.Setter;
 public class ChatAlert extends Alert implements RegexMatcher {
     private String message = "";
     private boolean regexEnabled = false;
+    private GameMessageType gameMessageType = GameMessageType.ANY;
 
     @Override
     public String getPattern() {

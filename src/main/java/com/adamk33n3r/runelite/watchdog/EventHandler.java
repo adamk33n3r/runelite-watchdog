@@ -97,6 +97,7 @@ public class EventHandler {
         }
 
         this.alertManager.getAllEnabledAlertsOfType(ChatAlert.class)
+            .filter(chatAlert -> chatAlert.getGameMessageType() == GameMessageType.ANY || chatAlert.getGameMessageType().isOfType(chatMessage.getType()))
             .forEach(gameAlert -> {
                 String[] groups = this.matchPattern(gameAlert, unformattedMessage);
                 if (groups == null) return;
