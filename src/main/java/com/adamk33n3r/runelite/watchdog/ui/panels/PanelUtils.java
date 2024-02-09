@@ -194,7 +194,8 @@ public class PanelUtils {
     }
 
     public static JSpinner createSpinner(int initialValue, int min, int max, int step, Consumer<Integer> onChange) {
-        JSpinner spinner = new JSpinner(new SpinnerNumberModel(initialValue, min, max, step));
+        int value = Math.min(Math.max(min, initialValue), max);
+        JSpinner spinner = new JSpinner(new SpinnerNumberModel(value, min, max, step));
         spinner.addChangeListener(e -> {
             onChange.accept((Integer) spinner.getValue());
         });
