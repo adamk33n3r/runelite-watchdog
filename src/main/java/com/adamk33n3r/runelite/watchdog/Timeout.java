@@ -1,17 +1,16 @@
 package com.adamk33n3r.runelite.watchdog;
 
-import lombok.NoArgsConstructor;
-
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BiConsumer;
 
 public class Timeout {
-    Runnable runnable;
+    BiConsumer<Timeout, Boolean> task;
     ScheduledFuture<?> future;
-    public Timeout(ScheduledExecutorService executor, Runnable runnable, long delay, TimeUnit unit) {
-        this.runnable = runnable;
-        this.future = executor.schedule(this.runnable, delay, unit);
+    public Timeout(ScheduledExecutorService executor, BiConsumer<Timeout, Boolean> task, long delay, TimeUnit unit) {
+        this.task = task;
+        this.future = executor.schedule(() -> this.task.accept(this, false), delay, unit);
     }
     protected Timeout() {}
 
@@ -27,6 +26,6 @@ public class Timeout {
             return;
         }
         this.future.cancel(true);
-        this.runnable.run();
+        this.task.accept(this, true);
     }
 }

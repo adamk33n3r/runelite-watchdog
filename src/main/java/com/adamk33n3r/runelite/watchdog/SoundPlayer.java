@@ -189,21 +189,24 @@ public class SoundPlayer {
         }
 
         if (delaySeconds < 0) {
-            this.soundTimeout = new Interval(this.executor, () -> {
-                if (this.hasUserInteraction()) {
+            this.soundTimeout = new Interval(this.executor, (interval, stop) -> {
+//                System.out.println("running");
+                if (this.hasUserInteraction() || stop) {
+                    System.out.println("stopping: " + stop);
+                    interval.stop();
                     runnable.run();
                 }
             }, Constants.CLIENT_TICK_LENGTH, TimeUnit.MILLISECONDS);
             return;
         }
-        this.soundTimeout = new Timeout(this.executor, runnable, delaySeconds, TimeUnit.SECONDS);
+        this.soundTimeout = new Timeout(this.executor, (timeout, stop) -> runnable.run(), delaySeconds, TimeUnit.SECONDS);
     }
 
     private boolean hasUserInteraction() {
         // We poll this every client tick, if there was any activity in the past second, that counts
         int clientTicksSinceActivity = 1000 / Constants.CLIENT_TICK_LENGTH;
         if (((client.getMouseIdleTicks() < clientTicksSinceActivity && this.config.mouseMovementCancels())
-                || client.getKeyboardIdleTicks() < clientTicksSinceActivity
+                //|| client.getKeyboardIdleTicks() < clientTicksSinceActivity
                 || client.getMouseLastPressedMillis() > mouseLastPressedMillis) && clientUI.isFocused()
         ) {
             return true;

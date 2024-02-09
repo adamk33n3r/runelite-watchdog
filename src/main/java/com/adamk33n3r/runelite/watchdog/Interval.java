@@ -2,11 +2,12 @@ package com.adamk33n3r.runelite.watchdog;
 
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BiConsumer;
 
 public class Interval extends Timeout {
-    public Interval(ScheduledExecutorService executor, Runnable runnable, long delay, TimeUnit unit) {
+    public Interval(ScheduledExecutorService executor, BiConsumer<Timeout, Boolean> task, long delay, TimeUnit unit) {
         super();
-        this.runnable = runnable;
-        this.future = executor.scheduleAtFixedRate(runnable, 0, delay, unit);
+        this.task = task;
+        this.future = executor.scheduleAtFixedRate(() -> task.accept(this, false), 0, delay, unit);
     }
 }
