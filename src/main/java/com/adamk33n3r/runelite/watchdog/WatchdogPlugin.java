@@ -16,6 +16,7 @@ import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ConfigChanged;
+import net.runelite.client.events.NotificationFired;
 import net.runelite.client.events.OverlayMenuClicked;
 import net.runelite.client.events.ProfileChanged;
 import net.runelite.client.game.ItemManager;
@@ -109,6 +110,9 @@ public class WatchdogPlugin extends Plugin {
     @Getter
     private final Queue<MessageNode> messageQueue = EvictingQueue.create(20);
 
+    @Getter
+    private final Queue<NotificationFired> notificationsQueue = EvictingQueue.create(20);
+
     public WatchdogPlugin() {
         instance = this;
     }
@@ -198,6 +202,11 @@ public class WatchdogPlugin extends Plugin {
     @Subscribe
     private void onChatMessage(ChatMessage chatMessage) {
         this.messageQueue.offer(chatMessage.getMessageNode());
+    }
+    @Subscribe
+    private void onNotificationFired(NotificationFired notificationFired) {
+        log.debug("notification fired: " + notificationFired.getMessage());
+        this.notificationsQueue.offer(notificationFired);
     }
 
     @Subscribe

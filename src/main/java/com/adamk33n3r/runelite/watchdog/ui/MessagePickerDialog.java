@@ -1,22 +1,15 @@
 package com.adamk33n3r.runelite.watchdog.ui;
 
-import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
-
-import net.runelite.api.Client;
-import net.runelite.api.IterableHashTable;
-import net.runelite.api.MessageNode;
 import net.runelite.client.util.Text;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Queue;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 public class MessagePickerDialog extends JDialog {
-    public MessagePickerDialog(Component parent, Consumer<String> callback) {
+    public MessagePickerDialog(Component parent, Stream<String> messageQueue, Consumer<String> callback) {
         this.setTitle("Pick Message");
         this.setSize(500, 250);
         this.setLocationRelativeTo(parent);
@@ -27,9 +20,8 @@ public class MessagePickerDialog extends JDialog {
         this.add(wrapper);
         wrapper.add(new JLabel("Pick a message"), BorderLayout.NORTH);
 
-        Queue<MessageNode> messageQueue = WatchdogPlugin.getInstance().getMessageQueue();
-        String[] messageArray = messageQueue.stream()
-            .map(messageNode -> Text.removeFormattingTags(messageNode.getValue()))
+        String[] messageArray = messageQueue
+            .map(Text::removeFormattingTags)
             .toArray(String[]::new);
         JList<String> messageList = new JList<>(messageArray);
         messageList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);

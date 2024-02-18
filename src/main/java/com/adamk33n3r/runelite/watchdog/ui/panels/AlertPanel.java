@@ -259,10 +259,10 @@ public abstract class AlertPanel<T extends Alert> extends PluginPanel {
     }
 
     public AlertPanel<T> addRegexMatcher(RegexMatcher regexMatcher, String placeholder, String tooltip) {
-        return this.addRegexMatcher(regexMatcher, placeholder, tooltip, false);
+        return this.addRegexMatcher(regexMatcher, placeholder, tooltip, null);
     }
 
-    public AlertPanel<T> addRegexMatcher(RegexMatcher regexMatcher, String placeholder, String tooltip, boolean showChatPicker) {
+    public AlertPanel<T> addRegexMatcher(RegexMatcher regexMatcher, String placeholder, String tooltip, JComponent suffixAppend) {
         JPanel btnGroup = new JPanel(new GridLayout(1, 0, 5, 5));
         JButton regex = PanelUtils.createToggleActionButton(
             Icons.REGEX_SELECTED,
@@ -278,12 +278,8 @@ public abstract class AlertPanel<T extends Alert> extends PluginPanel {
             }
         );
         btnGroup.add(regex);
-        if (showChatPicker) {
-            JButton picker = PanelUtils.createActionButton(Icons.PICKER, Icons.PICKER_HOVER, "Pick a message from chat", (btn, mod) -> this.watchdogPanel.pickMessage(selected -> {
-                regexMatcher.setPattern(selected);
-                this.rebuild();
-            }));
-            btnGroup.add(picker);
+        if (suffixAppend != null) {
+            btnGroup.add(suffixAppend);
         }
         return this.addInputGroupWithSuffix(
             PanelUtils.createTextArea(placeholder, tooltip, regexMatcher.getPattern(), msg -> {
@@ -316,8 +312,8 @@ public abstract class AlertPanel<T extends Alert> extends PluginPanel {
         this.controlContainer.removeAll();
         this.centerContainer.removeAll();
         this.build();
-        this.revalidate();
-        this.repaint();
+//        this.revalidate();
+//        this.repaint();
     }
 
     @Override

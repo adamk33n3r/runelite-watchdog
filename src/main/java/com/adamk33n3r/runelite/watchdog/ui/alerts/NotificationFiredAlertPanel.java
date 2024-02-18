@@ -12,7 +12,10 @@ public class NotificationFiredAlertPanel extends AlertPanel<NotificationFiredAle
     @Override
     protected void build() {
         this.addAlertDefaults()
-            .addRegexMatcher(this.alert, "Enter the message to trigger on...", "The message to trigger on. Supports glob (*)", true)
+            .addRegexMatcher(this.alert, "Enter the message to trigger on...", "The message to trigger on. Supports glob (*)", MessagePickerButton.createNotificationPickerButton((selected) -> {
+                this.alert.setPattern(selected);
+                this.rebuild();
+            }))
             .addNotifications();
     }
 }

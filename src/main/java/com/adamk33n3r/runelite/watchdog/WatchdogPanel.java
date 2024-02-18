@@ -11,6 +11,8 @@ import com.adamk33n3r.runelite.watchdog.ui.panels.HistoryPanel;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
 
 import net.runelite.api.Client;
+import net.runelite.api.MessageNode;
+import net.runelite.client.events.NotificationFired;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.MultiplexingPluginPanel;
 import net.runelite.client.ui.PluginPanel;
@@ -221,7 +223,22 @@ public class WatchdogPanel extends PluginPanel {
     }
 
     public void pickMessage(Consumer<String> callback) {
-        MessagePickerDialog messagePickerDialog = new MessagePickerDialog(SwingUtilities.getWindowAncestor(this), callback);
+        MessagePickerDialog messagePickerDialog = new MessagePickerDialog(
+            SwingUtilities.getWindowAncestor(this),
+            WatchdogPlugin.getInstance().getMessageQueue().stream()
+                .map(MessageNode::getValue),
+            callback
+        );
+        messagePickerDialog.setVisible(true);
+    }
+
+    public void pickNotification(Consumer<String> callback) {
+        MessagePickerDialog messagePickerDialog = new MessagePickerDialog(
+            SwingUtilities.getWindowAncestor(this),
+            WatchdogPlugin.getInstance().getNotificationsQueue().stream()
+                .map(NotificationFired::getMessage),
+            callback
+        );
         messagePickerDialog.setVisible(true);
     }
 }
