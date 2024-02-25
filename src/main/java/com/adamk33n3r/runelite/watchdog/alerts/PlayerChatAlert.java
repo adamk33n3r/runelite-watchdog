@@ -12,9 +12,11 @@ public class PlayerChatAlert extends ChatAlert {
 
     public PlayerChatAlert() {
         super("New Player Chat Message Alert");
+        this.setGameMessageType(null);
     }
 
     public PlayerChatAlert(String name) {
         super(name);
+        this.setGameMessageType(null);
     }
 }

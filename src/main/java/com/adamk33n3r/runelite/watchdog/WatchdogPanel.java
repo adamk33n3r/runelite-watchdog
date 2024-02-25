@@ -10,7 +10,6 @@ import com.adamk33n3r.runelite.watchdog.ui.panels.AlertListPanel;
 import com.adamk33n3r.runelite.watchdog.ui.panels.HistoryPanel;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
 
-import net.runelite.api.Client;
 import net.runelite.api.MessageNode;
 import net.runelite.client.events.NotificationFired;
 import net.runelite.client.ui.ColorScheme;
@@ -22,6 +21,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
 
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Provider;
@@ -29,6 +29,8 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 @Slf4j
 public class WatchdogPanel extends PluginPanel {
@@ -222,11 +224,14 @@ public class WatchdogPanel extends PluginPanel {
         scrollBar.setValue(scrollBar.getMaximum());
     }
 
-    public void pickMessage(Consumer<String> callback) {
+    public void pickMessage(Consumer<String> callback, Predicate<MessageNode> filter) {
+        Stream<MessageNode> messageStream = WatchdogPlugin.getInstance().getMessageQueue().stream();
+        if (filter != null) {
+            messageStream = messageStream.filter(filter);
+        }
         MessagePickerDialog messagePickerDialog = new MessagePickerDialog(
             SwingUtilities.getWindowAncestor(this),
-            WatchdogPlugin.getInstance().getMessageQueue().stream()
-                .map(MessageNode::getValue),
+            messageStream.map(MessageNode::getValue),
             callback
         );
         messagePickerDialog.setVisible(true);

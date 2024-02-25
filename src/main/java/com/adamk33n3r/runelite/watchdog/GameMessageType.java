@@ -29,7 +29,7 @@ public enum GameMessageType implements Displayable {
         this.chatMessageTypes = chatMessageTypes;
     }
 
-    boolean isOfType(ChatMessageType chatMessageType) {
+    public boolean isOfType(ChatMessageType chatMessageType) {
         return this.chatMessageTypes != null && Arrays.asList(this.chatMessageTypes).contains(chatMessageType);
     }
 }

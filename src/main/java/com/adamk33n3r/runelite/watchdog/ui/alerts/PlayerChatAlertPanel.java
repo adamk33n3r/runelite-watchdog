@@ -13,10 +13,10 @@ public class PlayerChatAlertPanel extends AlertPanel<PlayerChatAlert> {
     @Override
     protected void build() {
         this.addAlertDefaults()
-            .addRegexMatcher(this.alert, "Enter the message to trigger on...", "The message to trigger on. Supports glob (*)", new ChatMessagePickerButton((selected) -> {
+            .addRegexMatcher(this.alert, "Enter the message to trigger on...", "The message to trigger on. Supports glob (*)", MessagePickerButton.createPlayerChatPickerButton((selected) -> {
                 this.alert.setPattern(selected);
                 this.rebuild();
-            }))
+            }, this.alert.getPlayerChatType()))
             .addSelect("Chat Type", "The type of message", PlayerChatType.class, PlayerChatType.ANY, this.alert::setPlayerChatType)
             .addNotifications();
     }
