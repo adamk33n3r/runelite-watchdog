@@ -16,7 +16,7 @@ public class PlayerChatAlertPanel extends AlertPanel<PlayerChatAlert> {
             .addRegexMatcher(this.alert, "Enter the message to trigger on...", "The message to trigger on. Supports glob (*)", MessagePickerButton.createPlayerChatPickerButton((selected) -> {
                 this.alert.setPattern(selected);
                 this.rebuild();
-            }, this.alert.getPlayerChatType()))
+            }, this.alert::getPlayerChatType))
             .addSelect("Chat Type", "The type of message", PlayerChatType.class, PlayerChatType.ANY, this.alert::setPlayerChatType)
             .addNotifications();
     }
