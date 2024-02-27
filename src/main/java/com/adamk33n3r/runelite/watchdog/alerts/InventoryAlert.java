@@ -40,7 +40,7 @@ public class InventoryAlert extends Alert implements RegexMatcher {
         ITEM_CHANGE("Item Change", "Triggers when an item is added or removed")
         ;
 
-        public final String name;
-        public final String tooltip;
+        private final String name;
+        private final String tooltip;
     }
 }
