@@ -24,7 +24,7 @@ public class InventoryAlertPanel extends AlertPanel<InventoryAlert> {
             )
             .addIf(
                 panel -> panel.addRegexMatcher(this.alert, "Enter the name of the item to trigger on...", "The name to trigger on. Supports glob (*)")
-                    .addSpinner("Change", "The quantity change of the item (in one tick) to trigger on", this.alert.getItemQuantity(), this.alert::setItemQuantity),
+                    .addSpinner("Change", "The quantity change of the item (in one tick) to trigger on", this.alert.getItemQuantity(), this.alert::setItemQuantity, Integer.MIN_VALUE, Integer.MAX_VALUE, 1),
                 () -> this.alert.getInventoryAlertType() == InventoryAlert.InventoryAlertType.ITEM_CHANGE
             )
             .addNotifications();
