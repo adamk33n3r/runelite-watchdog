@@ -50,6 +50,7 @@ public class EventHandler {
 
     private final Map<Skill, Integer> previousSkillLevelTable = new EnumMap<>(Skill.class);
     private final Map<Skill, Integer> previousSkillXPTable = new EnumMap<>(Skill.class);
+    private Map<Integer, Integer> previousItemsTable = new HashMap<>();
 
     private boolean ignoreNotificationFired = false;
 
@@ -131,6 +132,7 @@ public class EventHandler {
         if (gameStateChanged.getGameState() == GameState.LOGIN_SCREEN) {
             this.previousSkillLevelTable.clear();
             this.previousSkillXPTable.clear();
+            this.previousItemsTable.clear();
         }
     }
 
@@ -189,26 +191,54 @@ public class EventHandler {
         // Ignore everything but inventory
         if (itemContainerChanged.getItemContainer().getId() != InventoryID.INVENTORY.getId())
             return;
-        this.alertManager.getAllEnabledAlertsOfType(InventoryAlert.class)
-            .forEach(inventoryAlert -> {
-                Item[] items = itemContainerChanged.getItemContainer().getItems();
-                long itemCount = Arrays.stream(items).filter(item -> item.getId() > -1).count();
-                if (inventoryAlert.getInventoryAlertType() == InventoryAlert.InventoryAlertType.FULL && itemCount == 28) {
-                    this.fireAlert(inventoryAlert, inventoryAlert.getInventoryAlertType().getName());
-                } else if (inventoryAlert.getInventoryAlertType() == InventoryAlert.InventoryAlertType.EMPTY && itemCount == 0) {
-                    this.fireAlert(inventoryAlert, inventoryAlert.getInventoryAlertType().getName());
-                } else if (inventoryAlert.getInventoryAlertType() == InventoryAlert.InventoryAlertType.ITEM) {
-                    Map<Integer, Integer> allItems = new HashMap<>();
-                    Arrays.stream(items)
-                        .forEach(item -> allItems.merge(item.getId(), item.getQuantity(), Integer::sum));
-                    allItems.entrySet().stream()
-                        .filter(itemWithCount -> inventoryAlert.getItemQuantity() == 0 || itemWithCount.getValue() == inventoryAlert.getItemQuantity())
-                        .map(itemWithCount -> this.matchPattern(inventoryAlert, this.itemManager.getItemComposition(itemWithCount.getKey()).getName()))
-                        .filter(Objects::nonNull)
-                        .findFirst()
-                        .ifPresent(groups -> this.fireAlert(inventoryAlert, groups));
-                }
-            });
+        Item[] items = itemContainerChanged.getItemContainer().getItems();
+        long itemCount = Arrays.stream(items).filter(item -> item.getId() > -1).count();
+        Map<Integer, Integer> allItems = new HashMap<>();
+        Arrays.stream(items)
+                .forEach(item -> allItems.merge(item.getId(), item.getQuantity(), Integer::sum));
+        // Skip firing alerts if there are no previous items, since we just logged in. Even an empty inventory will have a map of -1 itemIds.
+        if (!this.previousItemsTable.isEmpty()) {
+            this.alertManager.getAllEnabledAlertsOfType(InventoryAlert.class)
+                    .forEach(inventoryAlert -> {
+                        if (inventoryAlert.getInventoryAlertType() == InventoryAlert.InventoryAlertType.FULL && itemCount == 28) {
+                            this.fireAlert(inventoryAlert, inventoryAlert.getInventoryAlertType().getName());
+                        } else if (inventoryAlert.getInventoryAlertType() == InventoryAlert.InventoryAlertType.EMPTY && itemCount == 0) {
+                            this.fireAlert(inventoryAlert, inventoryAlert.getInventoryAlertType().getName());
+                        } else if (inventoryAlert.getInventoryAlertType() == InventoryAlert.InventoryAlertType.ITEM) {
+                            allItems.entrySet().stream()
+                                    .filter(itemWithCount -> itemWithCount.getKey() != -1 && (inventoryAlert.getItemQuantity() == 0 || itemWithCount.getValue() == inventoryAlert.getItemQuantity()))
+                                    .map(itemWithCount -> this.matchPattern(inventoryAlert,
+                                            this.itemManager.getItemComposition(itemWithCount.getKey()).getName()))
+                                    .filter(Objects::nonNull)
+                                    .forEach(groups -> this.fireAlert(inventoryAlert, groups));
+                        } else if (inventoryAlert.getInventoryAlertType() == InventoryAlert.InventoryAlertType.ITEM_CHANGE) {
+                            allItems.entrySet().stream()
+                                    .filter(itemWithCount -> {
+                                        if (itemWithCount.getKey() == -1) {
+                                            return false;
+                                        }
+                                        int change = itemWithCount.getValue() - this.previousItemsTable.getOrDefault(
+                                                itemWithCount.getKey(), 0);
+                                        // This would trigger if an item's quantity hasn't changed, but something else in the inventory triggered an inventory change event
+                                        if (inventoryAlert.getItemQuantity() == 0 && change == 0) {
+                                            return true;
+                                        }
+                                        if (inventoryAlert.getItemQuantity() > 0 && change >= inventoryAlert.getItemQuantity()) {
+                                            return true;
+                                        }
+                                        if (inventoryAlert.getItemQuantity() < 0 && change <= inventoryAlert.getItemQuantity()) {
+                                            return true;
+                                        }
+                                        return false;
+                                    })
+                                    .map(itemWithCount -> this.matchPattern(inventoryAlert,
+                                            this.itemManager.getItemComposition(itemWithCount.getKey()).getName()))
+                                    .filter(Objects::nonNull)
+                                    .forEach(groups -> this.fireAlert(inventoryAlert, groups));
+                        }
+                    });
+        }
+        this.previousItemsTable = allItems;
     }
     //endregion
 

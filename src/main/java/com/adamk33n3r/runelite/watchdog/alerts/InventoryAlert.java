@@ -1,5 +1,6 @@
 package com.adamk33n3r.runelite.watchdog.alerts;
 
+import com.adamk33n3r.runelite.watchdog.Displayable;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -32,10 +33,11 @@ public class InventoryAlert extends Alert implements RegexMatcher {
 
     @Getter
     @AllArgsConstructor
-    public enum InventoryAlertType {
+    public enum InventoryAlertType implements Displayable {
         EMPTY("Empty", "Triggers on an empty inventory"),
         FULL("Full", "Triggers on a full inventory"),
-        ITEM("Item", "Triggers when an item hits a certain count")
+        ITEM("Item Count", "Triggers when an item hits a certain count"),
+        ITEM_CHANGE("Item Change", "Triggers when an item is added or removed")
         ;
 
         private final String name;
