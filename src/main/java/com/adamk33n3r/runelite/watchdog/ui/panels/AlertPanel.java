@@ -87,7 +87,8 @@ public abstract class AlertPanel<T extends Alert> extends PluginPanel {
                 (btn, modifiers) -> {
                     String[] triggerValues = {"1", "2", "3", "4", "5"};
                     WatchdogPlugin.getInstance().getPanel().getHistoryPanelProvider().get().addEntry(alert, triggerValues);
-                    alert.getNotifications().forEach(notification -> notification.fireForced(triggerValues));
+                    new AlertProcessor(alert, triggerValues, true).start();
+//                    alert.getNotifications().forEach(notification -> notification.fireForced(triggerValues));
                 }
             );
             rightButtons.add(testAlert);
@@ -185,7 +186,7 @@ public abstract class AlertPanel<T extends Alert> extends PluginPanel {
     }
 
     public AlertPanel<T> addSpinner(String name, String tooltip, int initialValue, Consumer<Integer> saveAction) {
-        return this.addSpinner(name, tooltip, initialValue, saveAction, -99, 99, 1);
+        return this.addSpinner(name, tooltip, initialValue, saveAction, 0, Integer.MAX_VALUE, 1);
     }
 
     public AlertPanel<T> addSpinner(String name, String tooltip, int initialValue, Consumer<Integer> saveAction, int min, int max, int step) {

@@ -372,7 +372,7 @@ public class EventHandler {
                 this.historyPanelProvider.get().addEntry(alert, triggerValues);
             });
             this.lastTriggered.put(alertToDebounceWith, Instant.now());
-            alert.getNotifications().forEach(notification -> notification.fire(triggerValues));
+            new AlertProcessor(alert, triggerValues).start();
         }
     }
 }

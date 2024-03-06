@@ -15,7 +15,7 @@ public class StatChangedAlertPanel extends AlertPanel<StatChangedAlert> {
     protected void build() {
         this.addAlertDefaults()
             .addSelect("Skill", "The skill to track", Skill.class, this.alert.getSkill(), this.alert::setSkill)
-            .addSpinner("Changed Amount", "The difference in level to trigger the alert. Can be positive for boost and negative for drain", this.alert.getChangedAmount(), this.alert::setChangedAmount)
+            .addSpinner("Changed Amount", "The difference in level to trigger the alert. Can be positive for boost and negative for drain", this.alert.getChangedAmount(), this.alert::setChangedAmount, -99, 99, 1)
             .addNotifications();
     }
 }

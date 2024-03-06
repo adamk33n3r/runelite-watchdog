@@ -1,8 +1,6 @@
 package com.adamk33n3r.runelite.watchdog.ui.notifications.panels;
 
 import com.adamk33n3r.runelite.watchdog.NotificationType;
-import com.adamk33n3r.runelite.watchdog.WatchdogConfig;
-import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
 import com.adamk33n3r.runelite.watchdog.notifications.Notification;
 import com.adamk33n3r.runelite.watchdog.ui.Icons;
 import com.adamk33n3r.runelite.watchdog.ui.StretchedStackedLayout;
@@ -19,6 +17,7 @@ import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public abstract class NotificationPanel extends JPanel {
@@ -92,6 +91,7 @@ public abstract class NotificationPanel extends JPanel {
                 previousAFKSeconds.set(val);
                 onChangeListener.run();
             });
+        container.add(afkTimerConfigRow);
         if (notification.isFireWhenAFK()) {
             afkTimerConfigRow.add(afkTimerLabel);
             afkTimerConfigRow.add(afkTimerSpinner);
@@ -119,7 +119,56 @@ public abstract class NotificationPanel extends JPanel {
                 afkTimerConfigRow.repaint();
                 onChangeListener.run();
             });
-        rightActions.add(afkButton, BorderLayout.EAST);
+        rightActions.add(afkButton);
+
+        JPanel delayConfigRow = new JPanel(new GridLayout(1, 2));
+        delayConfigRow.setBorder(new EmptyBorder(4, 10, 0, 5));
+        delayConfigRow.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+        JLabel delayLabel = new JLabel("Delay Time (ms):");
+        delayLabel.setToolTipText("Number of milliseconds to wait before firing this notification");
+        AtomicInteger previousDelayMilliseconds = new AtomicInteger(notification.getDelayMilliseconds());
+
+        JSpinner delaySpinner = PanelUtils.createSpinner(Math.max(notification.getDelayMilliseconds(), 100),
+            100,
+            60000,
+            100,
+            (val) -> {
+                notification.setDelayMilliseconds(val);
+                previousDelayMilliseconds.set(val);
+                onChangeListener.run();
+            });
+        container.add(delayConfigRow);
+        if (notification.isDelayed()) {
+            delayConfigRow.add(delayLabel);
+            delayConfigRow.add(delaySpinner);
+        }
+
+        AtomicBoolean showDelayMilliseconds = new AtomicBoolean(notification.isDelayed());
+
+        JButton delayButton = PanelUtils.createToggleActionButton(
+            Icons.AFK,
+            Icons.AFK_HOVER,
+            Icons.NON_AFK,
+            Icons.NON_AFK_HOVER,
+            "Turn off delay",
+            "Delay notification",
+            showDelayMilliseconds.get(),
+            (btn, modifiers) -> {
+                showDelayMilliseconds.set(!showDelayMilliseconds.get());
+                if (showDelayMilliseconds.get()) {
+                    notification.setDelayMilliseconds(Math.max(previousDelayMilliseconds.get(), 100));
+                    delaySpinner.setValue(notification.getDelayMilliseconds());
+                    delayConfigRow.add(delayLabel);
+                    delayConfigRow.add(delaySpinner);
+                } else {
+                    notification.setDelayMilliseconds(0);
+                    delayConfigRow.removeAll();
+                }
+                delayConfigRow.revalidate();
+                delayConfigRow.repaint();
+                onChangeListener.run();
+            });
+        rightActions.add(delayButton);
 
         JButton focusBtn = PanelUtils.createToggleActionButton(
             Icons.FOREGROUND,
@@ -133,7 +182,7 @@ public abstract class NotificationPanel extends JPanel {
                 notification.setFireWhenFocused(btn.isSelected());
                 onChangeListener.run();
             });
-        rightActions.add(focusBtn, BorderLayout.EAST);
+        rightActions.add(focusBtn);
 
         JButton testBtn = PanelUtils.createActionButton(
             Icons.TEST,
@@ -149,7 +198,6 @@ public abstract class NotificationPanel extends JPanel {
             (btn, modifiers) -> onRemove.elementRemoved(this));
         rightActions.add(deleteBtn);
 
-        container.add(afkTimerConfigRow);
 
         this.settings.setBorder(new EmptyBorder(5, 10, 5, 10));
         this.settings.setBackground(ColorScheme.DARKER_GRAY_COLOR);

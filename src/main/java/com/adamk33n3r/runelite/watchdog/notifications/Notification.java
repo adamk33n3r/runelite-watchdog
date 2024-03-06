@@ -3,7 +3,6 @@ package com.adamk33n3r.runelite.watchdog.notifications;
 import com.adamk33n3r.runelite.watchdog.AlertManager;
 import com.adamk33n3r.runelite.watchdog.NotificationType;
 import com.adamk33n3r.runelite.watchdog.WatchdogConfig;
-import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
 import com.adamk33n3r.runelite.watchdog.alerts.Alert;
 
 import net.runelite.api.Client;
@@ -39,6 +38,13 @@ public abstract class Notification implements INotification {
     @Getter @Setter
     private int fireWhenAFKForSeconds = 1;
 
+    @Getter @Setter
+    private int delayMilliseconds = 0;
+
+    public boolean isDelayed() {
+        return this.delayMilliseconds > 0;
+    }
+
     @Setter
     private transient Alert alert;
     public Alert getAlert() {
@@ -56,7 +62,7 @@ public abstract class Notification implements INotification {
         this.fireWhenAFKForSeconds = config.defaultAFKSeconds();
     }
 
-    protected boolean shouldFire() {
+    public boolean shouldFire() {
         int afkTime = (int)Math.floor(Math.min(client.getKeyboardIdleTicks(), client.getMouseIdleTicks()) * Constants.CLIENT_TICK_LENGTH / 1000f);
         if (this.fireWhenAFK && afkTime < this.fireWhenAFKForSeconds) {
             return false;
@@ -67,7 +73,7 @@ public abstract class Notification implements INotification {
     @Override
     public void fire(String[] triggerValues) {
         if (this.shouldFire()) {
-            new Thread(() -> this.fireImpl(triggerValues)).start();
+            this.fireImpl(triggerValues);
         }
     }
 
