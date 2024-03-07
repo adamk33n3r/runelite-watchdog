@@ -7,6 +7,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum FlashMode {
     FLASH("Flash", "Will flash the screen over an interval"),
+    SMOOTH_FLASH("Smooth Flash", "Flashes the screen over an interval smoothly"),
     SOLID("Solid", "Will be a solid overlay on the screen")
     ;
 

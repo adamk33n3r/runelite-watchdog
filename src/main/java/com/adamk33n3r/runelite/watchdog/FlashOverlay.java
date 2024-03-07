@@ -13,9 +13,7 @@ import net.runelite.client.ui.overlay.OverlayPosition;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.inject.Inject;
-import java.awt.Dimension;
-import java.awt.Graphics2D;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.time.Instant;
 
 @Slf4j
@@ -78,8 +76,17 @@ public class FlashOverlay extends Overlay {
         {
             return null;
         }
-        graphics.setColor(this.screenFlash.getColor());
+        Color color = this.screenFlash.getColor();
+        if (this.screenFlash.getFlashMode() == FlashMode.SMOOTH_FLASH) {
+            color = Util.colorAlpha(color, this.getAlpha(color.getAlpha()));
+        }
+        graphics.setColor(color);
         graphics.fill(new Rectangle(this.client.getCanvas().getSize()));
         return null;
+    }
+
+    private int getAlpha(int maxAlpha) {
+        int scaledAlpha = Util.scale((this.client.getGameCycle() - this.gameCycleStart) % 40, 0, 40, 0, maxAlpha*2);
+        return scaledAlpha <= maxAlpha ? scaledAlpha : maxAlpha*2 - scaledAlpha;
     }
 }

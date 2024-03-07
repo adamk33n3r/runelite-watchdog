@@ -4,6 +4,7 @@ import net.runelite.client.util.Text;
 
 import com.google.common.base.Splitter;
 
+import java.awt.*;
 import java.text.Normalizer;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -153,5 +154,13 @@ public class Util {
         return Text.matchesSearchTerms(
             SPLITTER.split(normalizedSearch),
             keywords.stream().map(term -> Normalizer.normalize(term, Normalizer.Form.NFD).replaceAll("\\p{InCombiningDiacriticalMarks}+", "").toLowerCase()).collect(Collectors.toList()));
+    }
+
+    public static Color colorAlpha(Color color, int alpha) {
+        if (alpha < 0 || alpha > 255) {
+            throw new IllegalArgumentException("alpha must be >= 0 and <= 255");
+        }
+
+        return new Color((alpha << 24) | (color.getRGB() & 0xFFFFFF), true);
     }
 }
