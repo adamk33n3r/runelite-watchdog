@@ -69,4 +69,8 @@ public abstract class Icons {
     public static final ImageIcon CLOCK = new ImageIcon(ImageUtil.luminanceOffset(ImageUtil.loadImageResource(Icons.class, "mdi_clock-outline.png"), -80));
     public static final ImageIcon SPEECH = new ImageIcon(ImageUtil.luminanceOffset(ImageUtil.loadImageResource(Icons.class, "mdi_account-voice.png"), -80));
     public static final ImageIcon SPEED = new ImageIcon(ImageUtil.luminanceOffset(ImageUtil.loadImageResource(Icons.class, "mdi_speedometer.png"), -80));
+    public static final ImageIcon TIMER_PLUS = new ImageIcon(ImageUtil.loadImageResource(Icons.class, "mdi_timer-plus-outline.png"));
+    public static final ImageIcon TIMER_PLUS_HOVER = new ImageIcon(ImageUtil.luminanceOffset(TIMER_PLUS.getImage(), -80));
+    public static final ImageIcon TIMER_REMOVE = new ImageIcon(ImageUtil.loadImageResource(Icons.class, "mdi_timer-remove-outline.png"));
+    public static final ImageIcon TIMER_REMOVE_HOVER = new ImageIcon(ImageUtil.luminanceOffset(TIMER_REMOVE.getImage(), -80));
 }

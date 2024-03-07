@@ -146,10 +146,10 @@ public abstract class NotificationPanel extends JPanel {
         AtomicBoolean showDelayMilliseconds = new AtomicBoolean(notification.isDelayed());
 
         JButton delayButton = PanelUtils.createToggleActionButton(
-            Icons.AFK,
-            Icons.AFK_HOVER,
-            Icons.NON_AFK,
-            Icons.NON_AFK_HOVER,
+            Icons.TIMER_REMOVE,
+            Icons.TIMER_REMOVE_HOVER,
+            Icons.TIMER_PLUS,
+            Icons.TIMER_PLUS_HOVER,
             "Turn off delay",
             "Delay notification",
             showDelayMilliseconds.get(),
