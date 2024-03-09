@@ -10,6 +10,7 @@ import com.adamk33n3r.runelite.watchdog.ui.panels.AlertListPanel;
 import com.adamk33n3r.runelite.watchdog.ui.panels.HistoryPanel;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
 
+import net.runelite.api.Client;
 import net.runelite.api.MessageNode;
 import net.runelite.client.events.NotificationFired;
 import net.runelite.client.ui.ColorScheme;
@@ -73,6 +74,9 @@ public class WatchdogPanel extends PluginPanel {
 
     @Inject
     private WatchdogConfig watchdogConfig;
+
+    @Inject
+    private Client client;
 
     @Inject
     private OkHttpClient httpClient;
@@ -209,6 +213,8 @@ public class WatchdogPanel extends PluginPanel {
             return new InventoryAlertPanel(this, (InventoryAlert) alert);
         } else if (alert instanceof AlertGroup) {
             return new AlertGroupPanel(this, (AlertGroup) alert);
+        } else if (alert instanceof LocationAlert) {
+            return new LocationAlertPanel(this, (LocationAlert) alert, this.client);
         }
 
         return null;

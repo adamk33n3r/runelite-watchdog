@@ -14,6 +14,7 @@ Create custom alerts triggered by
 - Inventory Changes
 - Object/Item/NPC Spawned
 - XP Drop
+- Location
 
 with any amount of unique notification types like
 - Game Message

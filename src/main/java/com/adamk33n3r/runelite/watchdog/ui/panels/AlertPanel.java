@@ -304,7 +304,19 @@ public abstract class AlertPanel<T extends Alert> extends PluginPanel {
 
     public AlertPanel<T> addSubPanel(JPanel sub) {
         this.centerContainer.add(sub);
+        return this;
+    }
 
+    public AlertPanel<T> addSubPanelControl(JPanel sub) {
+        this.controlContainer.add(sub);
+        return this;
+    }
+
+    public AlertPanel<T> addButton(String text, String tooltip, PanelUtils.ButtonClickListener clickListener) {
+        JButton button = new JButton(text);
+        button.setToolTipText(tooltip);
+        button.addActionListener((ev) -> clickListener.clickPerformed(button, ev.getModifiers()));
+        this.controlContainer.add(button);
         return this;
     }
 

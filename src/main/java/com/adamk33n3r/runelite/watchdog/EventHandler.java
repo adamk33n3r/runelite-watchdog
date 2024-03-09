@@ -4,6 +4,7 @@ import com.adamk33n3r.runelite.watchdog.alerts.*;
 import com.adamk33n3r.runelite.watchdog.ui.panels.HistoryPanel;
 
 import net.runelite.api.*;
+import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.*;
 import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
@@ -334,6 +335,16 @@ public class EventHandler {
             });
     }
     //endregion
+
+    @Subscribe
+    private void onGameTick(GameTick gameTick) {
+        WorldPoint worldLocation = this.client.getLocalPlayer().getWorldLocation();
+        this.alertManager.getAllEnabledAlertsOfType(LocationAlert.class)
+            .filter(locationAlert -> locationAlert.shouldFire(worldLocation))
+            .forEach(locationAlert -> {
+                this.fireAlert(locationAlert, new String[] { String.valueOf(worldLocation.getX()), String.valueOf(worldLocation.getY()) });
+            });
+    }
 
     private String[] matchPattern(RegexMatcher regexMatcher, String input) {
         String regex = regexMatcher.isRegexEnabled() ? regexMatcher.getPattern() : Util.createRegexFromGlob(regexMatcher.getPattern());

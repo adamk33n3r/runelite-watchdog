@@ -67,7 +67,6 @@ public class AlertManager {
             .ignoreSubtype("IdleAlert")
             .ignoreSubtype("ResourceAlert")
             .ignoreSubtype("SoundFiredAlert")
-            .ignoreSubtype("AlertGroup")
             .recognizeSubtypes()
             .registerSubtype(ChatAlert.class)
             .registerSubtype(PlayerChatAlert.class)
@@ -77,7 +76,8 @@ public class AlertManager {
             .registerSubtype(XPDropAlert.class)
             .registerSubtype(SpawnedAlert.class)
             .registerSubtype(InventoryAlert.class)
-            .registerSubtype(AlertGroup.class);
+            .registerSubtype(AlertGroup.class)
+            .registerSubtype(LocationAlert.class);
         // Add new notification types here
         final RuntimeTypeAdapterFactory<Notification> notificationTypeFactory = RuntimeTypeAdapterFactory.of(Notification.class)
             .registerSubtype(TrayNotification.class)
