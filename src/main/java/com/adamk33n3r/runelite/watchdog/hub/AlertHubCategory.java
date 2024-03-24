@@ -10,7 +10,7 @@ public enum AlertHubCategory {
     SKILLING("Skilling", "Skilling", "/skill_icons_small/mining.png"),
     BOSSES("Bosses", "Bosses", "/skill_icons_small/slayer.png"),
     AFK("AFK", "AFK", "/skill_icons_small/fishing.png"),
-    MISC("Misc", "Misc", "/skill_icons_small/clue_scroll_all.png")
+    MISC("Misc", "Misc", "/net/runelite/client/plugins/hiscore/activities/clue_scroll_all.png")
     ;
 
     private final String name;

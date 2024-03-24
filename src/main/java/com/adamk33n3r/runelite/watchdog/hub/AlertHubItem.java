@@ -40,7 +40,12 @@ public class AlertHubItem extends JPanel {
         alertAuthor.setFont(FontManager.getRunescapeSmallFont());
         alertAuthor.setToolTipText(manifest.getAuthor());
 
-        alertName.setIcon(new ImageIcon(ImageUtil.loadImageResource(RuneLite.class, manifest.getCategory().getIcon())));
+        try {
+            alertName.setIcon(new ImageIcon(ImageUtil.loadImageResource(RuneLite.class, manifest.getCategory().getIcon())));
+        } catch (Exception e) {
+            // error loading icon
+            alertName.setIcon(Icons.HELP);
+        }
 
         JLabel compatVersion = new JLabel(manifest.getCompatibleVersion());
         compatVersion.setHorizontalAlignment(JLabel.RIGHT);
