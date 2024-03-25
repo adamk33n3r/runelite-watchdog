@@ -1,6 +1,7 @@
 package com.adamk33n3r.runelite.watchdog.alerts;
 
 import com.adamk33n3r.runelite.watchdog.Displayable;
+import com.adamk33n3r.runelite.watchdog.ui.ComparableNumber;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -11,7 +12,8 @@ public class InventoryAlert extends Alert implements RegexMatcher {
     private InventoryAlertType inventoryAlertType = InventoryAlertType.FULL;
     private String itemName = "";
     private boolean isRegexEnabled;
-    private int itemQuantity;
+    private int itemQuantity = 1;
+    private ComparableNumber.Comparator quantityComparator = ComparableNumber.Comparator.GREATER_THAN_OR_EQUALS;
 
     @Override
     public String getPattern() {

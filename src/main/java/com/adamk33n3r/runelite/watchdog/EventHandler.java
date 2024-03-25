@@ -158,14 +158,9 @@ public class EventHandler {
                 }
 
                 int targetLevel = statChanged.getLevel() + alert.getChangedAmount();
-                boolean isNegative = alert.getChangedAmount() < 0;
-                boolean isLower = statChanged.getBoostedLevel() <= targetLevel;
-                boolean wasHigher = previousLevel > targetLevel;
-                boolean isHigher = statChanged.getBoostedLevel() >= targetLevel;
-                boolean wasLower = previousLevel < targetLevel;
-//                log.debug("targetLevel: " + targetLevel);
-//                log.debug("{}, {}, {}", isSkill, isLower, wasHigher);
-                return (isNegative && isLower && wasHigher) || (!isNegative && isHigher && wasLower);
+                boolean currentIs = alert.getChangedComparator().compare(statChanged.getBoostedLevel(), targetLevel);
+                boolean prevWasNot = alert.getChangedComparator().converse().compare(previousLevel, targetLevel);
+                return currentIs && prevWasNot;
             })
             .forEach(alert -> this.fireAlert(alert, statChanged.getSkill().getName()));
     }
@@ -180,7 +175,7 @@ public class EventHandler {
             .filter(alert -> {
                 boolean isSkill = alert.getSkill() == statChanged.getSkill();
                 int gainedXP = statChanged.getXp() - previousXP;
-                return isSkill && gainedXP >= alert.getGainedAmount();
+                return isSkill && alert.getGainedComparator().compare(gainedXP, alert.getGainedAmount());
             })
             .forEach(alert -> this.fireAlert(alert, statChanged.getSkill().getName()));
     }
@@ -196,48 +191,37 @@ public class EventHandler {
         long itemCount = Arrays.stream(items).filter(item -> item.getId() > -1).count();
         Map<Integer, Integer> allItems = new HashMap<>();
         Arrays.stream(items)
-                .forEach(item -> allItems.merge(item.getId(), item.getQuantity(), Integer::sum));
+            .forEach(item -> allItems.merge(item.getId(), item.getQuantity(), Integer::sum));
         // Skip firing alerts if there are no previous items, since we just logged in. Even an empty inventory will have a map of -1 itemIds.
         if (!this.previousItemsTable.isEmpty()) {
             this.alertManager.getAllEnabledAlertsOfType(InventoryAlert.class)
-                    .forEach(inventoryAlert -> {
-                        if (inventoryAlert.getInventoryAlertType() == InventoryAlert.InventoryAlertType.FULL && itemCount == 28) {
-                            this.fireAlert(inventoryAlert, inventoryAlert.getInventoryAlertType().getName());
-                        } else if (inventoryAlert.getInventoryAlertType() == InventoryAlert.InventoryAlertType.EMPTY && itemCount == 0) {
-                            this.fireAlert(inventoryAlert, inventoryAlert.getInventoryAlertType().getName());
-                        } else if (inventoryAlert.getInventoryAlertType() == InventoryAlert.InventoryAlertType.ITEM) {
-                            allItems.entrySet().stream()
-                                    .filter(itemWithCount -> itemWithCount.getKey() != -1 && (inventoryAlert.getItemQuantity() == 0 || itemWithCount.getValue() == inventoryAlert.getItemQuantity()))
-                                    .map(itemWithCount -> this.matchPattern(inventoryAlert,
-                                            this.itemManager.getItemComposition(itemWithCount.getKey()).getName()))
-                                    .filter(Objects::nonNull)
-                                    .forEach(groups -> this.fireAlert(inventoryAlert, groups));
-                        } else if (inventoryAlert.getInventoryAlertType() == InventoryAlert.InventoryAlertType.ITEM_CHANGE) {
-                            allItems.entrySet().stream()
-                                    .filter(itemWithCount -> {
-                                        if (itemWithCount.getKey() == -1) {
-                                            return false;
-                                        }
-                                        int change = itemWithCount.getValue() - this.previousItemsTable.getOrDefault(
-                                                itemWithCount.getKey(), 0);
-                                        // This would trigger if an item's quantity hasn't changed, but something else in the inventory triggered an inventory change event
-                                        if (inventoryAlert.getItemQuantity() == 0 && change == 0) {
-                                            return true;
-                                        }
-                                        if (inventoryAlert.getItemQuantity() > 0 && change >= inventoryAlert.getItemQuantity()) {
-                                            return true;
-                                        }
-                                        if (inventoryAlert.getItemQuantity() < 0 && change <= inventoryAlert.getItemQuantity()) {
-                                            return true;
-                                        }
-                                        return false;
-                                    })
-                                    .map(itemWithCount -> this.matchPattern(inventoryAlert,
-                                            this.itemManager.getItemComposition(itemWithCount.getKey()).getName()))
-                                    .filter(Objects::nonNull)
-                                    .forEach(groups -> this.fireAlert(inventoryAlert, groups));
-                        }
-                    });
+                .forEach(inventoryAlert -> {
+                    if (inventoryAlert.getInventoryAlertType() == InventoryAlert.InventoryAlertType.FULL && itemCount == 28) {
+                        this.fireAlert(inventoryAlert, inventoryAlert.getInventoryAlertType().getName());
+                    } else if (inventoryAlert.getInventoryAlertType() == InventoryAlert.InventoryAlertType.EMPTY && itemCount == 0) {
+                        this.fireAlert(inventoryAlert, inventoryAlert.getInventoryAlertType().getName());
+                    } else if (inventoryAlert.getInventoryAlertType() == InventoryAlert.InventoryAlertType.ITEM) {
+                        allItems.entrySet().stream()
+                            .filter(itemWithCount -> itemWithCount.getKey() != -1 && (inventoryAlert.getItemQuantity() == 0 || itemWithCount.getValue() == inventoryAlert.getItemQuantity()))
+                            .map(itemWithCount -> this.matchPattern(inventoryAlert,
+                                this.itemManager.getItemComposition(itemWithCount.getKey()).getName()))
+                            .filter(Objects::nonNull)
+                            .forEach(groups -> this.fireAlert(inventoryAlert, groups));
+                    } else if (inventoryAlert.getInventoryAlertType() == InventoryAlert.InventoryAlertType.ITEM_CHANGE) {
+                        allItems.entrySet().stream()
+                            .filter(itemWithCount -> {
+                                if (itemWithCount.getKey() == -1) {
+                                    return false;
+                                }
+                                int change = itemWithCount.getValue() - this.previousItemsTable.getOrDefault(itemWithCount.getKey(), 0);
+                                return inventoryAlert.getQuantityComparator().compare(change, inventoryAlert.getItemQuantity());
+                            })
+                            .map(itemWithCount -> this.matchPattern(inventoryAlert,
+                                this.itemManager.getItemComposition(itemWithCount.getKey()).getName()))
+                            .filter(Objects::nonNull)
+                            .forEach(groups -> this.fireAlert(inventoryAlert, groups));
+                    }
+                });
         }
         this.previousItemsTable = allItems;
     }

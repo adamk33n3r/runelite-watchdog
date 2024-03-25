@@ -325,8 +325,6 @@ public abstract class AlertPanel<T extends Alert> extends PluginPanel {
         this.controlContainer.removeAll();
         this.centerContainer.removeAll();
         this.build();
-//        this.revalidate();
-//        this.repaint();
     }
 
     @Override

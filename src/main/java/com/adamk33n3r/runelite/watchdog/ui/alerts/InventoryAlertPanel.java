@@ -2,7 +2,9 @@ package com.adamk33n3r.runelite.watchdog.ui.alerts;
 
 import com.adamk33n3r.runelite.watchdog.WatchdogPanel;
 import com.adamk33n3r.runelite.watchdog.alerts.InventoryAlert;
+import com.adamk33n3r.runelite.watchdog.ui.ComparableNumber;
 import com.adamk33n3r.runelite.watchdog.ui.panels.AlertPanel;
+import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
 
 public class InventoryAlertPanel extends AlertPanel<InventoryAlert> {
     public InventoryAlertPanel(WatchdogPanel watchdogPanel, InventoryAlert alert) {
@@ -11,21 +13,19 @@ public class InventoryAlertPanel extends AlertPanel<InventoryAlert> {
 
     @Override
     protected void build() {
+        boolean isItemChange = this.alert.getInventoryAlertType() == InventoryAlert.InventoryAlertType.ITEM_CHANGE;
         this.addAlertDefaults()
             .addSelect("Type", "Type", InventoryAlert.InventoryAlertType.class, this.alert.getInventoryAlertType(), (val) -> {
                 this.alert.setInventoryAlertType(val);
-                this.muxer.popState();
-                watchdogPanel.openAlert(alert);
+                this.rebuild();
             })
             .addIf(
                 panel -> panel.addRegexMatcher(this.alert, "Enter the name of the item to trigger on...", "The name to trigger on. Supports glob (*)")
-                    .addSpinner("Quantity", "The minimum quantity of item to trigger on, use 0 for every time", this.alert.getItemQuantity(), this.alert::setItemQuantity, 0, Integer.MAX_VALUE, 1),
-                () -> this.alert.getInventoryAlertType() == InventoryAlert.InventoryAlertType.ITEM
-            )
-            .addIf(
-                panel -> panel.addRegexMatcher(this.alert, "Enter the name of the item to trigger on...", "The name to trigger on. Supports glob (*)")
-                    .addSpinner("Change", "The quantity change of the item (in one tick) to trigger on, use 0 for no change", this.alert.getItemQuantity(), this.alert::setItemQuantity, Integer.MIN_VALUE, Integer.MAX_VALUE, 1),
-                () -> this.alert.getInventoryAlertType() == InventoryAlert.InventoryAlertType.ITEM_CHANGE
+                    .addSubPanelControl(PanelUtils.createLabeledComponent(
+                        isItemChange ? "Change" : "Quantity",
+                        isItemChange ? "The quantity change of the item (in one tick) to trigger on, use 0 for no change" : "The minimum quantity of item to trigger on, use 0 for every time",
+                        new ComparableNumber(this.alert.getItemQuantity(), this.alert::setItemQuantity, isItemChange ? Integer.MIN_VALUE : 0, Integer.MAX_VALUE, 1, this.alert.getQuantityComparator(), this.alert::setQuantityComparator))),
+                () -> this.alert.getInventoryAlertType() == InventoryAlert.InventoryAlertType.ITEM || isItemChange
             )
             .addNotifications();
     }

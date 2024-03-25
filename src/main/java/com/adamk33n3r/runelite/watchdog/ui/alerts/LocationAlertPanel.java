@@ -57,8 +57,6 @@ public class LocationAlertPanel extends AlertPanel<LocationAlert> {
             .addSubPanelControl(pointPanel)
             .addButton("Set to Current", "Set world point to current position", (btn, mod) -> {
                 this.alert.setWorldPoint(this.client.getLocalPlayer().getWorldLocation());
-                System.out.println(this.client.getLocalPlayer().getWorldLocation());
-                System.out.println(this.client.getLocalPlayer().getLocalLocation());
                 this.rebuild();
             })
             .addSpinner("Distance", "Minimum distance to the set location to trigger this alert", 0, this.alert::setDistance)
