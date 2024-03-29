@@ -151,7 +151,7 @@ public class WatchdogPanel extends PluginPanel {
 
         this.add(topPanel, BorderLayout.NORTH);
 
-        this.alertListPanel = new AlertListPanel(this.alertManager.getAlerts(), this::rebuild);
+        this.alertListPanel = new AlertListPanel(this.alertManager.getAlerts(), null, this::rebuild);
         this.add(this.alertListPanel, BorderLayout.CENTER);
 
         JPanel importExportGroup = new JPanel(new GridLayout(1, 2, 5, 0));

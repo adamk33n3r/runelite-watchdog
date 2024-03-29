@@ -4,6 +4,7 @@ import com.adamk33n3r.runelite.watchdog.alerts.*;
 import com.adamk33n3r.runelite.watchdog.elevenlabs.ElevenLabs;
 import com.adamk33n3r.runelite.watchdog.hub.AlertHubCategory;
 import com.adamk33n3r.runelite.watchdog.notifications.*;
+import com.adamk33n3r.runelite.watchdog.notifications.tts.TTSSource;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
 
 import net.runelite.client.config.ConfigManager;
@@ -138,6 +139,10 @@ public class AlertManager {
         });
     }
 
+    public <T extends Alert> T createAlert(Class<T> alertClass) {
+        return WatchdogPlugin.getInstance().getInjector().getInstance(alertClass);
+    }
+
     public void addAlert(Alert alert, boolean overrideWithDefaults) {
         this.alerts.add(alert);
         this.setUpAlert(alert, overrideWithDefaults);
@@ -147,6 +152,10 @@ public class AlertManager {
     }
 
     public void removeAlert(Alert alert) {
+        this.removeAlert(alert, true);
+    }
+
+    public void removeAlert(Alert alert, boolean rebuildPanel) {
         AlertGroup parent = alert.getParent();
         if (parent != null) {
             parent.getAlerts().remove(alert);
@@ -155,7 +164,9 @@ public class AlertManager {
         }
         this.saveAlerts();
 
-        SwingUtilities.invokeLater(this.watchdogPanel::rebuild);
+        if (rebuildPanel) {
+            SwingUtilities.invokeLater(this.watchdogPanel::rebuild);
+        }
     }
 
     public Alert cloneAlert(Alert alert) {
@@ -253,7 +264,9 @@ public class AlertManager {
             for (INotification notification : alert.getNotifications()) {
                 if (notification instanceof TextToSpeech) {
                     TextToSpeech tts = (TextToSpeech) notification;
-                    ElevenLabs.getVoice(WatchdogPlugin.getInstance().getHttpClient(), tts.getElevenLabsVoiceId(), tts::setElevenLabsVoice);
+                    if (tts.getSource() == TTSSource.ELEVEN_LABS && tts.getElevenLabsVoiceId() != null) {
+                        ElevenLabs.getVoice(WatchdogPlugin.getInstance().getHttpClient(), tts.getElevenLabsVoiceId(), tts::setElevenLabsVoice);
+                    }
                 }
                 WatchdogPlugin.getInstance().getInjector().injectMembers(notification);
                 if (overrideWithDefaults) {

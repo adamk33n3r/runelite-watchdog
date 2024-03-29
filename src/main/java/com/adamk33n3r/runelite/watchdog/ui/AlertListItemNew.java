@@ -6,6 +6,7 @@ import com.adamk33n3r.runelite.watchdog.alerts.Alert;
 import com.adamk33n3r.runelite.watchdog.alerts.AlertGroup;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
 
+import lombok.Setter;
 import net.runelite.client.plugins.config.ConfigPlugin;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.components.MouseDragEventForwarder;
@@ -16,23 +17,13 @@ import lombok.Getter;
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
-import java.awt.BorderLayout;
-import java.awt.FlowLayout;
+import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.util.List;
 
-//import static com.adamk33n3r.runelite.watchdog.ui.AlertListItem.CLONE_ICON;
-//import static com.adamk33n3r.runelite.watchdog.ui.AlertListItem.DELETE_ICON;
-
 public class AlertListItemNew extends JPanel {
-//    private static final ImageIcon EDIT_ICON;
-//
-//    static {
-//        final BufferedImage editImg = ImageUtil.loadImageResource(ScreenMarkerPlugin.class, "border_color_icon.png");
-//        EDIT_ICON = new ImageIcon(editImg);
-//    }
     private static final ImageIcon SECTION_EXPAND_ICON;
     private static final ImageIcon SECTION_EXPAND_ICON_HOVER;
     private static final ImageIcon SECTION_RETRACT_ICON;
@@ -60,6 +51,10 @@ public class AlertListItemNew extends JPanel {
     private final Alert alert;
     private final Runnable onChange;
 
+    @Getter @Setter
+    private boolean selected = false;
+    private boolean selectMode = false;
+
     public AlertListItemNew(WatchdogPanel panel, AlertManager alertManager, Alert alert, JComponent parent, Runnable onChange) {
         this.panel = panel;
         this.alert = alert;
@@ -70,6 +65,11 @@ public class AlertListItemNew extends JPanel {
         this.setBackground(ColorScheme.DARK_GRAY_COLOR);
         this.mouseDragEventForwarder = new MouseDragEventForwarder(parent);
 
+        this.rebuild();
+    }
+
+    public void setSelectMode(boolean selectMode) {
+        this.selectMode = selectMode;
         this.rebuild();
     }
 
@@ -86,13 +86,20 @@ public class AlertListItemNew extends JPanel {
             BorderFactory.createMatteBorder(0, 0, this.collapsed ? 0 : 2, 0, ColorScheme.DARK_GRAY_COLOR),
             BorderFactory.createMatteBorder(5, 10, 5, 0, ColorScheme.DARKER_GRAY_COLOR)));
 
-        final ToggleButton toggleButton = new ToggleButton();
-        toggleButton.setSelected(this.alert.isEnabled());
-        toggleButton.addItemListener(i -> {
-            this.alert.setEnabled(toggleButton.isSelected());
-            this.alertManager.saveAlerts();
-        });
-        topWrapper.add(toggleButton, BorderLayout.WEST);
+        if (selectMode) {
+            final ToggleButton selectCheckbox = new ToggleButton();
+            topWrapper.add(selectCheckbox, BorderLayout.WEST);
+//            selectCheckbox.setPreferredSize(new Dimension(25, 20));
+            selectCheckbox.addItemListener((ev) -> this.selected = selectCheckbox.isSelected());
+        } else {
+            final ToggleButton toggleButton = new ToggleButton();
+            toggleButton.setSelected(this.alert.isEnabled());
+            toggleButton.addItemListener(i -> {
+                this.alert.setEnabled(toggleButton.isSelected());
+                this.alertManager.saveAlerts();
+            });
+            topWrapper.add(toggleButton, BorderLayout.WEST);
+        }
 
         final JPanel nameWrapper = new JPanel(new BorderLayout());
         nameWrapper.setBackground(ColorScheme.DARKER_GRAY_COLOR);
@@ -140,11 +147,11 @@ public class AlertListItemNew extends JPanel {
         rightActions.setBackground(ColorScheme.DARKER_GRAY_COLOR);
         topWrapper.add(rightActions, BorderLayout.EAST);
 
-        rightActions.add(PanelUtils.createActionButton(Icons.EDIT, Icons.EDIT, "Edit Alert", (btn, modifiers) -> {
+        rightActions.add(PanelUtils.createActionButton(Icons.EDIT, Icons.EDIT_HOVER, "Edit Alert", (btn, modifiers) -> {
             this.panel.openAlert(this.alert);
-        }));
+        })).setEnabled(!selectMode);
 
-        rightActions.add(PanelUtils.createActionButton(Icons.CLONE, Icons.CLONE, "Clone Alert", (btn, modifiers) -> {
+        rightActions.add(PanelUtils.createActionButton(Icons.CLONE, Icons.CLONE_HOVER, "Clone Alert", (btn, modifiers) -> {
             Alert cloned = this.alertManager.cloneAlert(this.alert);
             AlertGroup parent = this.alert.getParent();
             if (parent != null) {
@@ -155,16 +162,15 @@ public class AlertListItemNew extends JPanel {
             }
             this.alertManager.saveAlerts();
             this.onChange.run();
-        }));
+        })).setEnabled(!selectMode);
 
-        final JButton deleteButton = PanelUtils.createActionButton(Icons.DELETE, Icons.DELETE, "Delete Alert", (btn, modifiers) -> {
+        rightActions.add(PanelUtils.createActionButton(Icons.DELETE, Icons.DELETE_HOVER, "Delete Alert", (btn, modifiers) -> {
             int result = JOptionPane.showConfirmDialog(this, "Are you sure you want to delete the " + this.alert.getName() + " alert?", "Delete?", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE);
             if (result == JOptionPane.YES_OPTION) {
                 this.alertManager.removeAlert(this.alert);
                 this.onChange.run();
             }
-        });
-        rightActions.add(deleteButton);
+        })).setEnabled(!selectMode);
 
         if (this.alert instanceof AlertGroup && !this.collapsed) {
             final JPanel settings = new JPanel(new StretchedStackedLayout(3, 3));
@@ -172,9 +178,12 @@ public class AlertListItemNew extends JPanel {
             settings.setBackground(ColorScheme.DARKER_GRAY_COLOR);
             List<Alert> subAlerts = ((AlertGroup) this.alert).getAlerts();
             for (Alert subAlert : subAlerts) {
-                settings.add(new JLabel(subAlert.getName()));
+                String labelStr = String.format("%s (%s)", subAlert.getName(), subAlert.getType().getName());
+                JLabel alertLabel = new JLabel(labelStr);
+                alertLabel.setToolTipText(labelStr);
+                settings.add(alertLabel);
             }
-            if (subAlerts.size() == 0) {
+            if (subAlerts.isEmpty()) {
                 settings.add(new JLabel("No alerts in group"));
             }
             container.add(settings);

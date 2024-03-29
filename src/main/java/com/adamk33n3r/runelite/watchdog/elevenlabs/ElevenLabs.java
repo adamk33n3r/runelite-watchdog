@@ -20,6 +20,9 @@ public class ElevenLabs {
     private static final String BASE_URL = "https://api.elevenlabs.io/";
 
     public static void getVoice(OkHttpClient client, String voiceID, Consumer<Voice> callback) {
+        if (voiceID == null) {
+            return;
+        }
         Request request = new Request.Builder()
             .url(BASE_URL + "v1/voices/" + voiceID)
             .addHeader("accept", "application/json")

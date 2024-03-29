@@ -41,7 +41,7 @@ public class AlertGroupPanel extends AlertPanel<AlertGroup> {
         subGroupPanel.setBorder(new CompoundBorder(new EmptyBorder(0, 5, 0, 5), new HorizontalRuleBorder(10)));
         subGroupPanel.add(buttonPanel, BorderLayout.NORTH);
 
-        AlertListPanel alertListPanel = new AlertListPanel(this.alert.getAlerts(), this::rebuild);
+        AlertListPanel alertListPanel = new AlertListPanel(this.alert.getAlerts(), this.alert, this::rebuild);
 
         subGroupPanel.add(alertListPanel);
         this.addSubPanel(subGroupPanel);

@@ -34,7 +34,9 @@ public abstract class Icons {
     public static final ImageIcon DOWNLOAD = new ImageIcon(ImageUtil.loadImageResource(Icons.class, "mdi_download.png"));
 
     public static final ImageIcon CLONE = new ImageIcon(ImageUtil.loadImageResource(Icons.class, "mdi_content-duplicate.png"));
+    public static final ImageIcon CLONE_HOVER = new ImageIcon(ImageUtil.alphaOffset(CLONE.getImage(), -120));
     public static final ImageIcon EDIT = new ImageIcon(ImageUtil.loadImageResource(Icons.class, "mdi_pencil.png"));
+    public static final ImageIcon EDIT_HOVER = new ImageIcon(ImageUtil.alphaOffset(EDIT.getImage(), -120));
     public static final ImageIcon DRAG_VERT = new ImageIcon(ImageUtil.loadImageResource(Icons.class, "mdi_drag-vertical.png"));
 
     public static final ImageIcon REFRESH = new ImageIcon(ImageUtil.loadImageResource(Icons.class, "mdi_refresh.png"));
