@@ -23,7 +23,7 @@ import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.util.List;
 
-public class AlertListItemNew extends JPanel {
+public class AlertListItem extends JPanel {
     private static final ImageIcon SECTION_EXPAND_ICON;
     private static final ImageIcon SECTION_EXPAND_ICON_HOVER;
     private static final ImageIcon SECTION_RETRACT_ICON;
@@ -55,7 +55,7 @@ public class AlertListItemNew extends JPanel {
     private boolean selected = false;
     private boolean selectMode = false;
 
-    public AlertListItemNew(WatchdogPanel panel, AlertManager alertManager, Alert alert, JComponent parent, Runnable onChange) {
+    public AlertListItem(WatchdogPanel panel, AlertManager alertManager, Alert alert, JComponent parent, Runnable onChange) {
         this.panel = panel;
         this.alert = alert;
         this.alertManager = alertManager;

@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 public class AlertListPanel extends JPanel {
     private String filterText = "";
     private static final Splitter SPLITTER = Splitter.on(" ").trimResults().omitEmptyStrings();
-    private final List<AlertListItemNew> alertListItems = new ArrayList<>();
+    private final List<AlertListItem> alertListItems = new ArrayList<>();
     private final DragAndDropReorderPane dragAndDropReorderPane = new DragAndDropReorderPane();
     @Getter
     private final JScrollPane scrollPane;
@@ -47,7 +47,7 @@ public class AlertListPanel extends JPanel {
         this.dragAndDropReorderPane.setBackground(ColorScheme.GRAND_EXCHANGE_LIMIT);
         this.dragAndDropReorderPane.addDragListener((c) -> {
             int pos = this.dragAndDropReorderPane.getPosition(c);
-            AlertListItemNew alertListItem = (AlertListItemNew) c;
+            AlertListItem alertListItem = (AlertListItem) c;
             this.alertManager.moveAlertTo(alertListItem.getAlert(), pos);
         });
 
@@ -107,7 +107,7 @@ public class AlertListPanel extends JPanel {
         multiSelectActions.setBorder(new EmptyBorder(6, 0, 0, 0));
         multiSelectActions.add(PanelUtils.createActionButton(Icons.IMPORT, Icons.IMPORT_HOVER, "Move selected Alerts to new Alert Group", (btn, modifiers) -> {
             long count = this.alertListItems.stream()
-                .filter(AlertListItemNew::isSelected)
+                .filter(AlertListItem::isSelected)
                 .count();
             if (count == 0) {
                 return;
@@ -119,7 +119,7 @@ public class AlertListPanel extends JPanel {
                 this.parent.getAlerts().add(group);
             }
             this.alertListItems.stream()
-                .filter(AlertListItemNew::isSelected)
+                .filter(AlertListItem::isSelected)
                 .forEach((ali) -> {
                     this.alertManager.removeAlert(ali.getAlert(), false);
                     group.getAlerts().add(ali.getAlert());
@@ -128,8 +128,8 @@ public class AlertListPanel extends JPanel {
         })).setEnabled(this.selectMode);
         multiSelectActions.add(PanelUtils.createActionButton(Icons.EXPORT, Icons.EXPORT_HOVER, "Export selected Alerts", (btn, modifiers) -> {
             List<Alert> selectedAlerts = this.alertListItems.stream()
-                .filter(AlertListItemNew::isSelected)
-                .map(AlertListItemNew::getAlert)
+                .filter(AlertListItem::isSelected)
+                .map(AlertListItem::getAlert)
                 .collect(Collectors.toList());
             if (selectedAlerts.isEmpty()) {
                 return;
@@ -139,7 +139,7 @@ public class AlertListPanel extends JPanel {
         })).setEnabled(this.selectMode);
         multiSelectActions.add(PanelUtils.createActionButton(Icons.DELETE, Icons.DELETE_HOVER, "Delete selected Alerts", (btn, modifiers) -> {
             long count = this.alertListItems.stream()
-                .filter(AlertListItemNew::isSelected)
+                .filter(AlertListItem::isSelected)
                 .count();
             if (count == 0) {
                 return;
@@ -147,7 +147,7 @@ public class AlertListPanel extends JPanel {
             int result = JOptionPane.showConfirmDialog(this, "Are you sure you want to delete the " + count + " selected alerts?", "Delete?", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE);
             if (result == JOptionPane.YES_OPTION) {
                 this.alertListItems.stream()
-                    .filter(AlertListItemNew::isSelected)
+                    .filter(AlertListItem::isSelected)
                     .forEach((ali) -> this.alertManager.removeAlert(ali.getAlert()));
                 onChange.run();
             }
@@ -156,7 +156,7 @@ public class AlertListPanel extends JPanel {
         this.add(multiSelect, BorderLayout.SOUTH);
 
         this.alerts.stream()
-            .map(alert -> new AlertListItemNew(WatchdogPlugin.getInstance().getPanel(), this.alertManager, alert, this.dragAndDropReorderPane, onChange))
+            .map(alert -> new AlertListItem(WatchdogPlugin.getInstance().getPanel(), this.alertManager, alert, this.dragAndDropReorderPane, onChange))
             .forEach(alertListItem -> {
                 alertListItem.setSelectMode(this.selectMode);
                 this.alertListItems.add(alertListItem);
