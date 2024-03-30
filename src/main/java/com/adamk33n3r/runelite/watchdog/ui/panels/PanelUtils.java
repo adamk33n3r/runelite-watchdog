@@ -130,6 +130,13 @@ public class PanelUtils {
         return panel;
     }
 
+    public static JButton createButton(String label, String tooltip, ButtonClickListener listener) {
+        JButton button = new JButton(label);
+        button.setToolTipText(tooltip);
+        button.addActionListener(ev -> listener.clickPerformed(button, ev.getModifiers()));
+        return button;
+    }
+
     public static JButton createActionButton(ImageIcon icon, ImageIcon rolloverIcon, String tooltip, ButtonClickListener listener) {
         JButton actionButton = new JButton();
         SwingUtil.removeButtonDecorations(actionButton);

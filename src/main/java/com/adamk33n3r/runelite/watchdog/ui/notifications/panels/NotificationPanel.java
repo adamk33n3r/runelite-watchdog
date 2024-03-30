@@ -35,6 +35,7 @@ public abstract class NotificationPanel extends JPanel {
 
     @Getter
     protected Notification notification;
+    private final NotificationsPanel parentPanel;
     protected Runnable onChangeListener;
     protected PanelUtils.OnRemove onRemove;
     protected JPanel settings = new JPanel(new StretchedStackedLayout(3, 3));
@@ -45,11 +46,19 @@ public abstract class NotificationPanel extends JPanel {
 
     public NotificationPanel(Notification notification, NotificationsPanel parentPanel, Runnable onChangeListener, PanelUtils.OnRemove onRemove) {
         this.notification = notification;
+        this.parentPanel = parentPanel;
         this.onChangeListener = onChangeListener;
         this.onRemove = onRemove;
 
         this.setLayout(new BorderLayout());
         this.setBorder(new EmptyBorder(3, 0, 0, 0));
+        this.settings.setBorder(new EmptyBorder(5, 10, 5, 10));
+        this.settings.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+        this.rebuild();
+    }
+    private void rebuild() {
+        this.removeAll();
+
         JPanel container = new JPanel(new StretchedStackedLayout(3, 3));
         container.setBackground(ColorScheme.DARKER_GRAY_COLOR);
 
@@ -63,7 +72,7 @@ public abstract class NotificationPanel extends JPanel {
         nameLabel.setToolTipText(notificationType.getTooltip());
         nameWrapper.add(nameLabel, BorderLayout.WEST);
 
-        MouseDragEventForwarder mouseDragEventForwarder = new MouseDragEventForwarder(parentPanel.getNotificationContainer());
+        MouseDragEventForwarder mouseDragEventForwarder = new MouseDragEventForwarder(this.parentPanel.getNotificationContainer());
         nameWrapper.addMouseListener(mouseDragEventForwarder);
         nameWrapper.addMouseMotionListener(mouseDragEventForwarder);
         nameLabel.addMouseListener(mouseDragEventForwarder);
@@ -76,7 +85,7 @@ public abstract class NotificationPanel extends JPanel {
         nameWrapper.add(rightActions, BorderLayout.EAST);
 
         JPanel afkTimerConfigRow = new JPanel(new GridLayout(1, 2));
-        afkTimerConfigRow.setBorder(new EmptyBorder(4, 10, 0, 5));
+        afkTimerConfigRow.setBorder(new EmptyBorder(0, 10, 0, 5));
         afkTimerConfigRow.setBackground(ColorScheme.DARKER_GRAY_COLOR);
         JLabel afkTimerLabel = new JLabel("AFK Seconds:");
         afkTimerLabel.setToolTipText("Number of seconds for which the client doesn't get any mouse or keyboard inputs.");
@@ -91,10 +100,11 @@ public abstract class NotificationPanel extends JPanel {
                 previousAFKSeconds.set(val);
                 onChangeListener.run();
             });
-        container.add(afkTimerConfigRow);
+
+        afkTimerConfigRow.add(afkTimerLabel);
+        afkTimerConfigRow.add(afkTimerSpinner);
         if (notification.isFireWhenAFK()) {
-            afkTimerConfigRow.add(afkTimerLabel);
-            afkTimerConfigRow.add(afkTimerSpinner);
+            container.add(afkTimerConfigRow);
         }
 
         JButton afkButton = PanelUtils.createToggleActionButton(
@@ -110,19 +120,15 @@ public abstract class NotificationPanel extends JPanel {
                 notification.setFireWhenAFKForSeconds(previousAFKSeconds.get());
                 if (notification.isFireWhenAFK()) {
                     afkTimerSpinner.setValue(notification.getFireWhenAFKForSeconds());
-                    afkTimerConfigRow.add(afkTimerLabel);
-                    afkTimerConfigRow.add(afkTimerSpinner);
-                } else {
-                    afkTimerConfigRow.removeAll();
                 }
-                afkTimerConfigRow.revalidate();
-                afkTimerConfigRow.repaint();
+                this.rebuild();
+                this.revalidate();
                 onChangeListener.run();
             });
         rightActions.add(afkButton);
 
         JPanel delayConfigRow = new JPanel(new GridLayout(1, 2));
-        delayConfigRow.setBorder(new EmptyBorder(4, 10, 0, 5));
+        delayConfigRow.setBorder(new EmptyBorder(0, 10, 0, 5));
         delayConfigRow.setBackground(ColorScheme.DARKER_GRAY_COLOR);
         JLabel delayLabel = new JLabel("Delay Time (ms):");
         delayLabel.setToolTipText("Number of milliseconds to wait before firing this notification");
@@ -137,10 +143,11 @@ public abstract class NotificationPanel extends JPanel {
                 previousDelayMilliseconds.set(val);
                 onChangeListener.run();
             });
-        container.add(delayConfigRow);
+
+        delayConfigRow.add(delayLabel);
+        delayConfigRow.add(delaySpinner);
         if (notification.isDelayed()) {
-            delayConfigRow.add(delayLabel);
-            delayConfigRow.add(delaySpinner);
+            container.add(delayConfigRow);
         }
 
         AtomicBoolean showDelayMilliseconds = new AtomicBoolean(notification.isDelayed());
@@ -158,14 +165,11 @@ public abstract class NotificationPanel extends JPanel {
                 if (showDelayMilliseconds.get()) {
                     notification.setDelayMilliseconds(Math.max(previousDelayMilliseconds.get(), 100));
                     delaySpinner.setValue(notification.getDelayMilliseconds());
-                    delayConfigRow.add(delayLabel);
-                    delayConfigRow.add(delaySpinner);
                 } else {
                     notification.setDelayMilliseconds(0);
-                    delayConfigRow.removeAll();
                 }
-                delayConfigRow.revalidate();
-                delayConfigRow.repaint();
+                this.rebuild();
+                this.revalidate();
                 onChangeListener.run();
             });
         rightActions.add(delayButton);
@@ -188,19 +192,17 @@ public abstract class NotificationPanel extends JPanel {
             Icons.TEST,
             Icons.TEST_HOVER,
             "Test the notification",
-            (btn, modifiers) -> notification.fireForced(new String[]{ "1", "2", "3", "4", "5" }));
+            (btn, modifiers) -> this.notification.fireForced(new String[]{ "1", "2", "3", "4", "5" }));
         rightActions.add(testBtn);
 
         JButton deleteBtn = PanelUtils.createActionButton(
             Icons.DELETE,
             Icons.DELETE_HOVER,
             "Remove this notification",
-            (btn, modifiers) -> onRemove.elementRemoved(this));
+            (btn, modifiers) -> this.onRemove.elementRemoved(this));
         rightActions.add(deleteBtn);
 
 
-        this.settings.setBorder(new EmptyBorder(5, 10, 5, 10));
-        this.settings.setBackground(ColorScheme.DARKER_GRAY_COLOR);
         container.add(this.settings);
 
         this.add(container, BorderLayout.CENTER);

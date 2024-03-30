@@ -104,8 +104,8 @@ public class NotificationOverlay extends OverlayPanel {
         this.panelComponent.setGap(new Point(0, 6));
         this.panelComponent.setBackgroundColor(new Color(0, 0, 0, 0));
 
-        getMenuEntries().add(new OverlayMenuEntry(RUNELITE_OVERLAY_CONFIG, OPTION_CONFIGURE, "Watchdog Notification overlay"));
-        getMenuEntries().add(new OverlayMenuEntry(RUNELITE_OVERLAY, CLEAR, "Watchdog Notification overlay"));
+        this.addMenuEntry(RUNELITE_OVERLAY_CONFIG, OPTION_CONFIGURE, "Watchdog Notification overlay");
+        this.addMenuEntry(RUNELITE_OVERLAY, CLEAR, "Watchdog Notification overlay", (me) -> this.clear());
     }
 
     public void add(Overlay overlayNotification, String message) {

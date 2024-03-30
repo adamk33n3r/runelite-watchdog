@@ -17,7 +17,7 @@ public class PlayerChatAlertPanel extends AlertPanel<PlayerChatAlert> {
                 this.alert.setPattern(selected);
                 this.rebuild();
             }, this.alert::getPlayerChatType))
-            .addSelect("Chat Type", "The type of message", PlayerChatType.class, PlayerChatType.ANY, this.alert::setPlayerChatType)
+            .addSelect("Chat Type", "The type of message", PlayerChatType.class, this.alert.getPlayerChatType(), this.alert::setPlayerChatType)
             .addNotifications();
     }
 }

@@ -127,9 +127,8 @@ public class NotificationsPanel extends JPanel {
             notificationPanel = new RequestFocusNotificationPanel((RequestFocus) notification, this, this.alertManager::saveAlerts, removeNotification);
         else if (notification instanceof NotificationEvent)
             notificationPanel = new MessageNotificationPanel((NotificationEvent) notification, this, this.alertManager::saveAlerts, removeNotification);
-        else if (notification instanceof DismissOverlay){
+        else if (notification instanceof DismissOverlay)
             notificationPanel = new DismissOverlayNotificationPanel((DismissOverlay) notification, this, this.alertManager::saveAlerts, removeNotification);
-        }
 
         if (notificationPanel != null)
             this.notificationContainer.add(notificationPanel);
