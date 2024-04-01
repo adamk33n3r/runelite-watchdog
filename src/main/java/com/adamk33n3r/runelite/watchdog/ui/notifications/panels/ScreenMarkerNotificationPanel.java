@@ -11,6 +11,7 @@ import com.adamk33n3r.runelite.watchdog.ui.notifications.screenmarker.ScreenMark
 import com.adamk33n3r.runelite.watchdog.ui.panels.NotificationsPanel;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
 
+import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.components.colorpicker.ColorPickerManager;
 
 import javax.swing.JButton;
@@ -60,22 +61,6 @@ public class ScreenMarkerNotificationPanel extends NotificationPanel {
         });
         this.settings.add(flatTextArea);
 
-        JPanel thickness = new JPanel(new GridLayout(1, 2));
-        JLabel thicknessLabel = new JLabel("Thickness");
-        thicknessLabel.setToolTipText("Border thickness");
-        thickness.add(thicknessLabel);
-        thickness.add(PanelUtils.createSpinner(
-            screenMarker.getBorderThickness(),
-            0,
-            Integer.MAX_VALUE,
-            1,
-            val -> {
-                screenMarker.setBorderThickness(val);
-                onChangeListener.run();
-            }
-        ));
-        this.settings.add(thickness);
-
         this.settings.add(PanelUtils.createColorPicker(
             "Border Color",
             "The color of the border",
@@ -102,11 +87,28 @@ public class ScreenMarkerNotificationPanel extends NotificationPanel {
                 onChangeListener.run();
             }));
 
-        JSpinner displayTime = PanelUtils.createSpinner(notification.getDisplayTime(), 1, 99, 1, val -> {
+        JSpinner thickness = PanelUtils.createSpinner(
+            screenMarker.getBorderThickness(),
+            0,
+            Integer.MAX_VALUE,
+            1,
+            val -> {
+                screenMarker.setBorderThickness(val);
+                onChangeListener.run();
+            }
+        );
+        JPanel iconComponent1 = PanelUtils.createIconComponent(Icons.BORDER_OUTSIDE, "Border thickness", thickness);
+
+        JSpinner displayTime = PanelUtils.createSpinner(notification.getDisplayTime(), 0, 99, 1, val -> {
             notification.setDisplayTime(val);
             onChangeListener.run();
         });
-        this.settings.add(PanelUtils.createIconComponent(Icons.CLOCK, "Time to display the marker in seconds", displayTime));
+        JPanel iconComponent = PanelUtils.createIconComponent(Icons.CLOCK, "Time to display the marker in seconds. If 0, will be sticky and can be dismissed with shift right-click", displayTime);
+        JPanel sub = new JPanel(new GridLayout(1, 2, 3, 3));
+        sub.add(iconComponent1);
+        sub.add(iconComponent);
+        sub.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+        this.settings.add(sub);
 
         this.setMarkerButton = PanelUtils.createButton("Set Marker", "Set Marker", (btn, modifiers) -> {
             ScreenMarkerUtil screenMarkerUtil = WatchdogPlugin.getInstance().getScreenMarkerUtil();

@@ -75,4 +75,5 @@ public abstract class Icons {
     public static final ImageIcon TIMER_PLUS_HOVER = new ImageIcon(ImageUtil.luminanceOffset(TIMER_PLUS.getImage(), -80));
     public static final ImageIcon TIMER_REMOVE = new ImageIcon(ImageUtil.loadImageResource(Icons.class, "mdi_timer-remove-outline.png"));
     public static final ImageIcon TIMER_REMOVE_HOVER = new ImageIcon(ImageUtil.luminanceOffset(TIMER_REMOVE.getImage(), -80));
+    public static final ImageIcon BORDER_OUTSIDE = new ImageIcon(ImageUtil.luminanceOffset(ImageUtil.loadImageResource(Icons.class, "mdi_border-outside.png"), -80));
 }

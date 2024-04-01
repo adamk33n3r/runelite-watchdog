@@ -25,6 +25,7 @@
  */
 package com.adamk33n3r.runelite.watchdog.ui.notifications.screenmarker;
 
+import com.adamk33n3r.runelite.watchdog.WatchdogConfig;
 import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
 import com.adamk33n3r.runelite.watchdog.notifications.ScreenMarker;
 
@@ -37,17 +38,32 @@ import java.time.Instant;
 import lombok.Getter;
 import lombok.NonNull;
 
+import net.runelite.api.Client;
+import net.runelite.api.Constants;
 import net.runelite.api.MenuAction;
+import net.runelite.client.ui.ClientUI;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;
 
-public class ScreenMarkerOverlay extends Overlay
-{
+import javax.inject.Inject;
+
+public class ScreenMarkerOverlay extends Overlay {
     @Getter
     private final ScreenMarker marker;
     private final ScreenMarkerRenderable screenMarkerRenderable;
     private final Instant timeStarted;
+
+    @Inject
+    private Client client;
+
+    @Inject
+    private ClientUI clientUI;
+
+    @Inject
+    private WatchdogConfig config;
+
+    private long mouseLastPressedMillis;
 
     ScreenMarkerOverlay(@NonNull ScreenMarker marker)
     {
@@ -60,7 +76,7 @@ public class ScreenMarkerOverlay extends Overlay
         setResizable(true);
         setMinimumSize(16);
         setResettable(false);
-        this.addMenuEntry(MenuAction.RUNELITE_OVERLAY, "Clear", "Watchdog marker", (me) -> WatchdogPlugin.getInstance().getScreenMarkerUtil().removeScreenMarker(marker));
+        this.addMenuEntry(MenuAction.RUNELITE_OVERLAY, "Dismiss", "Watchdog screen marker", (me) -> WatchdogPlugin.getInstance().getScreenMarkerUtil().removeScreenMarker(marker));
         this.timeStarted = Instant.now();
     }
 
@@ -79,7 +95,7 @@ public class ScreenMarkerOverlay extends Overlay
     {
         net.runelite.client.plugins.screenmarkers.ScreenMarker marker = this.marker.getScreenMarker();
 
-        if (this.isExpired()) {
+        if (this.marker.getDisplayTime() > 0 && this.isExpired()) {
             WatchdogPlugin.getInstance().getScreenMarkerUtil().removeScreenMarker(this.marker);
             return null;
         }
