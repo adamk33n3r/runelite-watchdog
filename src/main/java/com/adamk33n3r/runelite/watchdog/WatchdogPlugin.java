@@ -6,12 +6,13 @@ import com.adamk33n3r.runelite.watchdog.alerts.NotificationFiredAlert;
 import com.adamk33n3r.runelite.watchdog.notifications.ScreenFlash;
 import com.adamk33n3r.runelite.watchdog.notifications.TrayNotification;
 
+import com.adamk33n3r.runelite.watchdog.ui.notifications.screenmarker.ScreenMarkerUtil;
 import net.runelite.api.Client;
 import net.runelite.api.ItemID;
-import net.runelite.api.MenuAction;
 import net.runelite.api.MessageNode;
 import net.runelite.api.events.ChatMessage;
 import net.runelite.api.events.GameStateChanged;
+import net.runelite.api.events.GameTick;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
@@ -88,6 +89,10 @@ public class WatchdogPlugin extends Plugin {
     @Inject
     private NotificationOverlay notificationOverlay;
 
+    @Getter
+    @Inject
+    private ScreenMarkerUtil screenMarkerUtil;
+
     @Inject
     private Provider<ConfigPlugin> configPluginProvider;
 
@@ -130,6 +135,7 @@ public class WatchdogPlugin extends Plugin {
 
         this.overlayManager.add(this.flashOverlay);
         this.overlayManager.add(this.notificationOverlay);
+        this.screenMarkerUtil.startUp();
 
         this.alertManager.loadAlerts();
         List<Alert> alerts = this.alertManager.getAlerts();
@@ -173,25 +179,12 @@ public class WatchdogPlugin extends Plugin {
         this.overlayManager.remove(this.flashOverlay);
         this.overlayManager.remove(this.notificationOverlay);
         this.soundPlayer.shutDown();
+        this.screenMarkerUtil.shutDown();
     }
 
     public void openConfiguration() {
         // We don't have access to the ConfigPlugin so let's just emulate an overlay click
         this.eventBus.post(new OverlayMenuClicked(new OverlayMenuEntry(RUNELITE_OVERLAY_CONFIG, null, null), this.notificationOverlay));
-    }
-
-    @Subscribe
-    public void onOverlayMenuClicked(final OverlayMenuClicked event) {
-        if (!(event.getEntry().getMenuAction() == MenuAction.RUNELITE_OVERLAY
-            && event.getOverlay() == this.notificationOverlay))
-        {
-            return;
-        }
-
-        if (event.getEntry().getOption().equals(NotificationOverlay.CLEAR))
-        {
-            this.notificationOverlay.clear();
-        }
     }
 
     @Subscribe
@@ -205,7 +198,6 @@ public class WatchdogPlugin extends Plugin {
     }
     @Subscribe
     private void onNotificationFired(NotificationFired notificationFired) {
-        log.debug("notification fired: " + notificationFired.getMessage());
         this.notificationsQueue.offer(notificationFired);
     }
 

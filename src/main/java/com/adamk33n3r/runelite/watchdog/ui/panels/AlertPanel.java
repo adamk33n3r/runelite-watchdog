@@ -7,6 +7,7 @@ import com.adamk33n3r.runelite.watchdog.alerts.RegexMatcher;
 import com.adamk33n3r.runelite.watchdog.ui.*;
 
 import net.runelite.client.plugins.info.JRichTextPane;
+import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.MultiplexingPluginPanel;
 import net.runelite.client.ui.PluginPanel;
 
@@ -125,6 +126,7 @@ public abstract class AlertPanel<T extends Alert> extends PluginPanel {
             (btn, modifiers) -> {
                 this.alertManager.saveAlerts();
                 this.muxer.popState();
+                WatchdogPlugin.getInstance().getScreenMarkerUtil().finishCreation(true);
             }
         );
         backButton.setPreferredSize(new Dimension(22, 16));
@@ -158,6 +160,8 @@ public abstract class AlertPanel<T extends Alert> extends PluginPanel {
 
     public AlertPanel<T> addTextField(String placeholder, String tooltip, String initialValue, Consumer<String> saveAction) {
         PlaceholderTextField textField = new PlaceholderTextField(initialValue);
+        textField.setSelectedTextColor(Color.WHITE);
+        textField.setSelectionColor(ColorScheme.BRAND_ORANGE_TRANSPARENT);
         textField.setPlaceholder(placeholder);
         textField.setToolTipText(tooltip);
         textField.addFocusListener(new FocusListener() {

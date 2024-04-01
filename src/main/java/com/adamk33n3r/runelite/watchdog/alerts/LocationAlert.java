@@ -9,6 +9,8 @@ import net.runelite.api.coords.WorldPoint;
 public class LocationAlert extends Alert {
     private WorldPoint worldPoint = new WorldPoint(3223, 3219, 0);
     private int distance;
+    private boolean repeat = false;
+//    private boolean showTileMarker;
 
     public LocationAlert() {
         super("New Location Alert");

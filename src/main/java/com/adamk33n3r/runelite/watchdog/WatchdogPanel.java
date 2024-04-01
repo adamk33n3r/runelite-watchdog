@@ -225,6 +225,11 @@ public class WatchdogPanel extends PluginPanel {
         this.rebuild();
     }
 
+    @Override
+    public void onDeactivate() {
+        WatchdogPlugin.getInstance().getScreenMarkerUtil().finishCreation(true);
+    }
+
     public void scrollToBottom() {
         JScrollBar scrollBar = this.alertListPanel.getScrollPane().getVerticalScrollBar();
         scrollBar.setValue(scrollBar.getMaximum());

@@ -9,6 +9,7 @@ import com.adamk33n3r.runelite.watchdog.ui.Icons;
 import com.adamk33n3r.runelite.watchdog.ui.PlaceholderTextArea;
 import com.adamk33n3r.runelite.watchdog.ui.dropdownbutton.DropDownButtonFactory;
 
+import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.DynamicGridLayout;
 import net.runelite.client.ui.components.ColorJButton;
 import net.runelite.client.ui.components.colorpicker.ColorPickerManager;
@@ -182,6 +183,8 @@ public class PanelUtils {
         PlaceholderTextArea textArea = new PlaceholderTextArea(initialValue);
         textArea.setPlaceholder(placeholder);
         textArea.setToolTipText(tooltip);
+        textArea.setSelectedTextColor(Color.WHITE);
+        textArea.setSelectionColor(ColorScheme.BRAND_ORANGE_TRANSPARENT);
         textArea.setLineWrap(true);
         textArea.setWrapStyleWord(true);
         textArea.setMargin(new Insets(4, 6, 5, 6));
@@ -206,6 +209,9 @@ public class PanelUtils {
         spinner.addChangeListener(e -> {
             onChange.accept((Integer) spinner.getValue());
         });
+        JFormattedTextField spinnerText = (JFormattedTextField) spinner.getEditor().getComponent(0);
+        spinnerText.setSelectedTextColor(Color.WHITE);
+        spinnerText.setSelectionColor(ColorScheme.BRAND_ORANGE_TRANSPARENT);
 
         return spinner;
     }

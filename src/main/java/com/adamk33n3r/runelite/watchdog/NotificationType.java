@@ -16,6 +16,7 @@ public enum NotificationType {
     TRAY_NOTIFICATION("Tray Notification", "Create a tray notification", TrayNotification.class),
     OVERHEAD("Overhead", "Display overhead text", Overhead.class),
     OVERLAY("Overlay", "Create an overlay notification", Overlay.class),
+    SCREEN_MARKER("Screen Marker", "Show a screen marker", ScreenMarker.class),
     DISMISS_OVERLAY("Dismiss Overlay", "Dismiss a sticky overlay by ID", DismissOverlay.class),
     REQUEST_FOCUS("Request Focus", "Requests focus on the window", RequestFocus.class),
     NOTIFICATION_EVENT("Notification Event", "Fire a NotificationFired event so that other plugins may hook into it e.g. RL Tray Notifications", NotificationEvent.class),

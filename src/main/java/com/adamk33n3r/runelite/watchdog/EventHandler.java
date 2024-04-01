@@ -52,6 +52,7 @@ public class EventHandler {
     private final Map<Skill, Integer> previousSkillLevelTable = new EnumMap<>(Skill.class);
     private final Map<Skill, Integer> previousSkillXPTable = new EnumMap<>(Skill.class);
     private Map<Integer, Integer> previousItemsTable = new HashMap<>();
+    private WorldPoint previousLocation = null;
 
     private boolean ignoreNotificationFired = false;
 
@@ -70,7 +71,8 @@ public class EventHandler {
             return;
         }
 
-//        log.debug(chatMessage.getType().name() + ": " + chatMessage.getMessage());
+        log.debug(chatMessage == null ? "is null" : "is not null");
+        log.debug(chatMessage.getType().name() + ": " + chatMessage.getMessage());
         String unformattedMessage = Text.removeFormattingTags(chatMessage.getMessage());
 
         // Send player messages to a different handler
@@ -202,7 +204,7 @@ public class EventHandler {
                         this.fireAlert(inventoryAlert, inventoryAlert.getInventoryAlertType().getName());
                     } else if (inventoryAlert.getInventoryAlertType() == InventoryAlert.InventoryAlertType.ITEM) {
                         allItems.entrySet().stream()
-                            .filter(itemWithCount -> itemWithCount.getKey() != -1 && (inventoryAlert.getItemQuantity() == 0 || itemWithCount.getValue() == inventoryAlert.getItemQuantity()))
+                            .filter(itemWithCount -> itemWithCount.getKey() != -1 && (inventoryAlert.getItemQuantity() == 0 || inventoryAlert.getQuantityComparator().compare(itemWithCount.getValue(), inventoryAlert.getItemQuantity())))
                             .map(itemWithCount -> this.matchPattern(inventoryAlert,
                                 this.itemManager.getItemComposition(itemWithCount.getKey()).getName()))
                             .filter(Objects::nonNull)
@@ -326,8 +328,13 @@ public class EventHandler {
         this.alertManager.getAllEnabledAlertsOfType(LocationAlert.class)
             .filter(locationAlert -> locationAlert.shouldFire(worldLocation))
             .forEach(locationAlert -> {
+                // If we're not repeating, don't fire if previous location is within the area
+                if (!locationAlert.isRepeat() && locationAlert.shouldFire(this.previousLocation)) {
+                    return;
+                }
                 this.fireAlert(locationAlert, new String[] { String.valueOf(worldLocation.getX()), String.valueOf(worldLocation.getY()) });
             });
+        this.previousLocation = worldLocation;
     }
 
     private String[] matchPattern(RegexMatcher regexMatcher, String input) {

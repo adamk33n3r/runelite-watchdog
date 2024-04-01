@@ -9,6 +9,7 @@ import net.runelite.api.Client;
 import net.runelite.api.coords.WorldPoint;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 
 public class LocationAlertPanel extends AlertPanel<LocationAlert> {
@@ -56,10 +57,15 @@ public class LocationAlertPanel extends AlertPanel<LocationAlert> {
         this.addAlertDefaults()
             .addSubPanelControl(pointPanel)
             .addButton("Set to Current", "Set world point to current position", (btn, mod) -> {
-                this.alert.setWorldPoint(this.client.getLocalPlayer().getWorldLocation());
-                this.rebuild();
+                if (this.client.getLocalPlayer() != null) {
+                    this.alert.setWorldPoint(this.client.getLocalPlayer().getWorldLocation());
+                    this.rebuild();
+                }
             })
-            .addSpinner("Distance", "Minimum distance to the set location to trigger this alert", 0, this.alert::setDistance)
+            .addInputGroupWithSuffix(
+                PanelUtils.createLabeledComponent("Distance", "Minimum distance to the set location to trigger this alert", PanelUtils.createSpinner(this.alert.getDistance(), 0, Integer.MAX_VALUE, 1, this.alert::setDistance)),
+                PanelUtils.createCheckbox("Repeat", "Repeat alert while standing in area", this.alert.isRepeat(), this.alert::setRepeat)
+            )
             .addNotifications();
     }
 }
