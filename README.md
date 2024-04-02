@@ -26,6 +26,7 @@ with any amount of unique notification types like
 - Overhead Text
 - Overlay
 - Dismiss Overlay
+- Screen Marker
 - Request Focus
 - RuneLite Notification (to trigger things like RL Tray Notifications)
 
