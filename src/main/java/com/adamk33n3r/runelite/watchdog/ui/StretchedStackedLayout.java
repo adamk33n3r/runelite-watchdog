@@ -8,9 +8,9 @@ import java.util.function.Function;
  */
 public class StretchedStackedLayout extends GridLayout
 {
-    public StretchedStackedLayout(int hgap, int vgap)
+    public StretchedStackedLayout(int vgap)
     {
-        super(0, 1, hgap, vgap);
+        super(0, 1, 0, vgap);
     }
 
     @Override

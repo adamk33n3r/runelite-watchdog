@@ -76,7 +76,7 @@ public class NotificationsPanel extends JPanel {
 
         this.add(buttonPanel, BorderLayout.NORTH);
 
-        ScrollablePanel scrollablePanel = new ScrollablePanel(new StretchedStackedLayout(3, 3));
+        ScrollablePanel scrollablePanel = new ScrollablePanel(new StretchedStackedLayout(3));
         scrollablePanel.setScrollableWidth(ScrollablePanel.ScrollableSizeHint.FIT);
         scrollablePanel.setScrollableHeight(ScrollablePanel.ScrollableSizeHint.STRETCH);
         scrollablePanel.setScrollableBlockIncrement(ScrollablePanel.VERTICAL, ScrollablePanel.IncrementType.PERCENT, 10);

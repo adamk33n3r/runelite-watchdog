@@ -38,7 +38,7 @@ public abstract class NotificationPanel extends JPanel {
     private final NotificationsPanel parentPanel;
     protected Runnable onChangeListener;
     protected PanelUtils.OnRemove onRemove;
-    protected JPanel settings = new JPanel(new StretchedStackedLayout(3, 3));
+    protected JPanel settings = new JPanel(new StretchedStackedLayout(3));
 
     private static final Border NAME_BOTTOM_BORDER = new CompoundBorder(
         BorderFactory.createMatteBorder(0, 0, 1, 0, ColorScheme.DARK_GRAY_COLOR),
@@ -59,7 +59,7 @@ public abstract class NotificationPanel extends JPanel {
     private void rebuild() {
         this.removeAll();
 
-        JPanel container = new JPanel(new StretchedStackedLayout(3, 3));
+        JPanel container = new JPanel(new StretchedStackedLayout(3));
         container.setBackground(ColorScheme.DARKER_GRAY_COLOR);
 
         JPanel nameWrapper = new JPanel(new BorderLayout(3, 3));

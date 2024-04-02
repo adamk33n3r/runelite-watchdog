@@ -76,7 +76,7 @@ public class AlertListItem extends JPanel {
     public void rebuild() {
         this.removeAll();
 
-        final JPanel container = new JPanel(new StretchedStackedLayout(3, 3));
+        final JPanel container = new JPanel(new StretchedStackedLayout(3));
         container.setBackground(ColorScheme.DARKER_GRAY_COLOR);
         final JPanel topWrapper = new JPanel(new BorderLayout(3, 3));
         container.add(topWrapper);
@@ -173,7 +173,7 @@ public class AlertListItem extends JPanel {
         })).setEnabled(!selectMode);
 
         if (this.alert instanceof AlertGroup && !this.collapsed) {
-            final JPanel settings = new JPanel(new StretchedStackedLayout(3, 3));
+            final JPanel settings = new JPanel(new StretchedStackedLayout(3));
             settings.setBorder(new EmptyBorder(0, 10, 5, 10));
             settings.setBackground(ColorScheme.DARKER_GRAY_COLOR);
             List<Alert> subAlerts = ((AlertGroup) this.alert).getAlerts();

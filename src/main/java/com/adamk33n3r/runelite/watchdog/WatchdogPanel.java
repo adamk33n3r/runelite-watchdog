@@ -10,6 +10,7 @@ import com.adamk33n3r.runelite.watchdog.ui.panels.AlertListPanel;
 import com.adamk33n3r.runelite.watchdog.ui.panels.HistoryPanel;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
 
+import com.adamk33n3r.runelite.watchdog.ui.panels.ToolsPanel;
 import net.runelite.api.Client;
 import net.runelite.api.MessageNode;
 import net.runelite.client.events.NotificationFired;
@@ -22,7 +23,6 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
 
-import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Provider;
@@ -65,6 +65,9 @@ public class WatchdogPanel extends PluginPanel {
     @Getter
     @Inject
     private Provider<HistoryPanel> historyPanelProvider;
+
+    @Inject
+    private Provider<ToolsPanel> toolsPanelProvider;
 
     @Inject
     private Provider<AlertHubPanel> alertHubPanelProvider;
@@ -133,8 +136,8 @@ public class WatchdogPanel extends PluginPanel {
         });
         actionButtons.add(configButton);
 
-        JButton historyButton = PanelUtils.createActionButton(Icons.HISTORY, Icons.HISTORY_HOVER, "History", (btn, modifiers) -> {
-            this.muxer.pushState(this.historyPanelProvider.get());
+        JButton historyButton = PanelUtils.createActionButton(Icons.TOOLS, Icons.TOOLS_HOVER, "Tools", (btn, modifiers) -> {
+            this.muxer.pushState(this.toolsPanelProvider.get());
         });
         actionButtons.add(historyButton);
 

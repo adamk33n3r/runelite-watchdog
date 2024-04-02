@@ -60,7 +60,7 @@ public class HistoryPanel extends PluginPanel {
         topPanel.add(this.noHistory, BorderLayout.SOUTH);
         this.add(topPanel, BorderLayout.NORTH);
 
-        this.historyItems = new ScrollablePanel(new StretchedStackedLayout(3, 3));
+        this.historyItems = new ScrollablePanel(new StretchedStackedLayout(3));
         this.historyItems.setBorder(new EmptyBorder(0, 10, 0, 10));
         this.historyItems.setScrollableWidth(ScrollablePanel.ScrollableSizeHint.FIT);
         this.historyItems.setScrollableHeight(ScrollablePanel.ScrollableSizeHint.STRETCH);

@@ -53,7 +53,7 @@ public class AlertListPanel extends JPanel {
 
         this.setLayout(new BorderLayout());
 
-        ScrollablePanel scrollablePanel = new ScrollablePanel(new StretchedStackedLayout(3, 3));
+        ScrollablePanel scrollablePanel = new ScrollablePanel(new StretchedStackedLayout(3));
         scrollablePanel.setScrollableWidth(ScrollablePanel.ScrollableSizeHint.FIT);
         scrollablePanel.setScrollableHeight(ScrollablePanel.ScrollableSizeHint.STRETCH);
         scrollablePanel.setScrollableBlockIncrement(ScrollablePanel.VERTICAL, ScrollablePanel.IncrementType.PERCENT, 10);
@@ -71,15 +71,16 @@ public class AlertListPanel extends JPanel {
         Arrays.stream(TriggerType.values()).map(TriggerType::getName).forEach(searchBar.getSuggestionListModel()::addElement);
         JPanel searchWrapper = new JPanel(new BorderLayout());
         searchWrapper.add(searchBar);
-        searchWrapper.setBorder(new EmptyBorder(0, 0, 2, 0));
+        SwingUtilities.invokeLater(() -> {
+            searchWrapper.setBorder(new EmptyBorder(0, 0, 2, this.scrollPane.getVerticalScrollBar().isVisible() ? 7 : 0));
+        });
         this.add(searchWrapper, BorderLayout.NORTH);
         this.add(this.scrollPane, BorderLayout.CENTER);
 
         final JPanel multiSelect = new JPanel(new BorderLayout());
         multiSelect.setPreferredSize(new Dimension(0, 25));
-        multiSelect.setBorder(new EmptyBorder(0, 10, 0, 7));
+        multiSelect.setBorder(new EmptyBorder(0, 10, 0, 0));
         final JPanel toggleGroup = new JPanel(new DynamicGridLayout(1, 2, 3, 3));
-//        toggleGroup.setPreferredSize(new Dimension(120, 25));
         toggleGroup.setBorder(new EmptyBorder(4, 0, 0, 0));
         final ToggleButton selectModeToggle = new ToggleButton();
         selectModeToggle.setSelected(this.selectMode);
@@ -153,7 +154,7 @@ public class AlertListPanel extends JPanel {
             }
         })).setEnabled(this.selectMode);
         multiSelect.add(multiSelectActions, BorderLayout.EAST);
-        this.add(multiSelect, BorderLayout.SOUTH);
+        searchWrapper.add(multiSelect, BorderLayout.SOUTH);
 
         this.alerts.stream()
             .map(alert -> new AlertListItem(WatchdogPlugin.getInstance().getPanel(), this.alertManager, alert, this.dragAndDropReorderPane, onChange))

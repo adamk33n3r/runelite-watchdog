@@ -48,7 +48,7 @@ public abstract class AlertPanel<T extends Alert> extends PluginPanel {
 
         this.setLayout(new BorderLayout());
 
-        JPanel northPanel = new JPanel(new StretchedStackedLayout(3, 3));
+        JPanel northPanel = new JPanel(new StretchedStackedLayout(3));
         this.add(northPanel, BorderLayout.NORTH);
 
         JPanel nameGroup = new JPanel(new BorderLayout());
@@ -87,7 +87,7 @@ public abstract class AlertPanel<T extends Alert> extends PluginPanel {
                 "Test the whole alert",
                 (btn, modifiers) -> {
                     String[] triggerValues = {"1", "2", "3", "4", "5"};
-                    WatchdogPlugin.getInstance().getPanel().getHistoryPanelProvider().get().addEntry(alert, triggerValues);
+                    this.watchdogPanel.getHistoryPanelProvider().get().addEntry(alert, triggerValues);
                     new AlertProcessor(alert, triggerValues, true).start();
 //                    alert.getNotifications().forEach(notification -> notification.fireForced(triggerValues));
                 }
@@ -133,11 +133,11 @@ public abstract class AlertPanel<T extends Alert> extends PluginPanel {
         backButton.setBorder(new EmptyBorder(0, 0, 0, 5));
         nameGroup.add(backButton, BorderLayout.WEST);
 
-        northPanel.add(nameGroup, BorderLayout.NORTH);
+        northPanel.add(nameGroup);
 
-        this.controlContainer = new JPanel(new StretchedStackedLayout(3, 3));
+        this.controlContainer = new JPanel(new StretchedStackedLayout(3));
         this.controlContainer.setBorder(new EmptyBorder(0, 5, 0, 5));
-        northPanel.add(this.controlContainer, BorderLayout.NORTH);
+        northPanel.add(this.controlContainer);
 
         this.centerContainer = new JPanel(new BorderLayout());
         this.add(this.centerContainer, BorderLayout.CENTER);

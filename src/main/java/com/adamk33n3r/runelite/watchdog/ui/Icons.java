@@ -15,6 +15,8 @@ public abstract class Icons {
 
     public static final ImageIcon HISTORY = new ImageIcon(ImageUtil.loadImageResource(Icons.class, "mdi_history.png"));
     public static final ImageIcon HISTORY_HOVER = new ImageIcon(ImageUtil.luminanceOffset(HISTORY.getImage(), -80));
+    public static final ImageIcon TOOLS = new ImageIcon(ImageUtil.loadImageResource(Icons.class, "mdi_tools.png"));
+    public static final ImageIcon TOOLS_HOVER = new ImageIcon(ImageUtil.luminanceOffset(TOOLS.getImage(), -80));
 
     public static final ImageIcon DISCORD = new ImageIcon(ImageUtil.loadImageResource(InfoPanel.class, "discord_icon.png"));
     public static final ImageIcon DISCORD_HOVER = new ImageIcon(ImageUtil.luminanceOffset(DISCORD.getImage(), -100));
