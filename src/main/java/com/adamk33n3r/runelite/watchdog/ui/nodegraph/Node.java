@@ -1,5 +1,6 @@
 package com.adamk33n3r.runelite.watchdog.ui.nodegraph;
 
+import com.adamk33n3r.runelite.watchdog.Util;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.DynamicGridLayout;
 
@@ -8,6 +9,7 @@ import lombok.Setter;
 
 import javax.swing.*;
 import javax.swing.border.BevelBorder;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -30,12 +32,22 @@ public class Node extends JPanel {
         this.setName(name);
         this.setBounds(x, y, PANEL_WIDTH, PANEL_HEIGHT);
         this.setBackground(color);
-//        this.setBorder(BorderFactory.createLineBorder(ColorScheme.DARK_GRAY_COLOR, 4));
+//        this.setBorder(BorderFactory.createLineBorder(ColorScheme.DARK_GRAY_COLOR, 2));
 //        this.setBorder(BorderFactory.createSoftBevelBorder(BevelBorder.RAISED));
         this.setLayout(new BorderLayout());
         JLabel nameLabel = new JLabel(name);
+        nameLabel.setForeground(Util.textColorForBG(color));
         nameLabel.setPreferredSize(new Dimension(0, 20));
-        this.add(nameLabel, BorderLayout.NORTH);
+        nameLabel.setBorder(new EmptyBorder(0, 5, 0, 0));
+        JPanel topPanel = new JPanel(new BorderLayout());
+        topPanel.setBackground(null);
+        topPanel.add(nameLabel, BorderLayout.CENTER);
+        JButton button = new JButton("X");
+        button.addActionListener((ev) -> {
+            this.graph.removeNode(this);
+        });
+        topPanel.add(button, BorderLayout.EAST);
+        this.add(topPanel, BorderLayout.NORTH);
 
         MouseAdapter onTopAdapter = new MouseAdapter() {
             @Override

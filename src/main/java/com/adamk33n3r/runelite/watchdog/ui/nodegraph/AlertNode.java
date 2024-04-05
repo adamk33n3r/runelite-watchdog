@@ -4,6 +4,7 @@ import com.adamk33n3r.runelite.watchdog.alerts.Alert;
 import com.adamk33n3r.runelite.watchdog.alerts.ChatAlert;
 import com.adamk33n3r.runelite.watchdog.alerts.SpawnedAlert;
 import com.adamk33n3r.runelite.watchdog.ui.alerts.GameMessageAlertPanel;
+import com.adamk33n3r.runelite.watchdog.ui.alerts.SpawnedAlertPanel;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
 
 import javax.swing.JCheckBox;

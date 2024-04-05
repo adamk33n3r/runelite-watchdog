@@ -6,7 +6,6 @@ import com.adamk33n3r.runelite.watchdog.TriggerType;
 
 import com.google.common.collect.ImmutableMap;
 import lombok.Getter;
-import org.pushingpixels.substance.api.renderer.SubstanceDefaultListCellRenderer;
 
 import javax.swing.*;
 import java.awt.*;
@@ -19,7 +18,7 @@ public class CustomList extends JList<Object> {
         super();
         Stream<Object> objectStream = Arrays.stream(items).flatMap(i -> Stream.concat(Stream.of("c:"+i.category), Arrays.stream(i.items)));
         this.setListData(objectStream.toArray());
-        this.setCellRenderer(new SubstanceDefaultListCellRenderer() {
+        this.setCellRenderer(new DefaultListCellRenderer() {
             @Override
             public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
                 super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);

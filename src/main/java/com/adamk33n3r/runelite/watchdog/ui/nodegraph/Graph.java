@@ -6,9 +6,14 @@ import com.adamk33n3r.runelite.watchdog.alerts.Alert;
 import com.adamk33n3r.runelite.watchdog.alerts.ChatAlert;
 import com.adamk33n3r.runelite.watchdog.alerts.SpawnedAlert;
 
+import com.adamk33n3r.runelite.watchdog.notifications.ScreenFlash;
+import com.adamk33n3r.runelite.watchdog.notifications.TextToSpeech;
+import com.adamk33n3r.runelite.watchdog.notifications.tts.TTSSource;
 import net.runelite.client.ui.ColorScheme;
+import net.runelite.client.ui.components.colorpicker.ColorPickerManager;
 import net.runelite.client.util.ImageUtil;
 
+import javax.inject.Inject;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
@@ -28,7 +33,11 @@ public class Graph extends JPanel {
     private final Map<Component, Dimension> originalSizes = new HashMap<>();
     private Point popupLocation;
 
-    public Graph() {
+    @Inject
+    private ColorPickerManager colorPickerManager;
+
+    @Inject
+    public void init() {
         this.setBackground(ColorScheme.DARKER_GRAY_COLOR);
         this.setLayout(null);
         this.setOpaque(false);
@@ -52,12 +61,15 @@ public class Graph extends JPanel {
         alert.setMessage("This is a test message");
         Node gameMessageNode = new AlertNode(this, 50, 50, alert.getType().getName(), Color.red, alert);
         this.nodes.add(gameMessageNode);
-        Node screenFlashNode = new NotificationNode(this, 750, 350, "Screen Flash", Color.green);
+        ScreenFlash screenFlash = new ScreenFlash();
+        Node screenFlashNode = new NotificationNode(this, 750, 350, "Screen Flash", Color.green, screenFlash, colorPickerManager);
         this.nodes.add(screenFlashNode);
         Node logicNode = new IfNode(this, 400, 200, "If Node", Color.CYAN);
         this.nodes.add(logicNode);
-        Node node3 = new NotificationNode(this, 700, 500, "Text to Speech", Color.green);
-        this.nodes.add(node3);
+        TextToSpeech tts = new TextToSpeech();
+//        tts.setSource(TTSSource.ELEVEN_LABS);
+        Node textToSpeechNode = new NotificationNode(this, 700, 500, "Text to Speech", Color.green, tts, colorPickerManager);
+        this.nodes.add(textToSpeechNode);
 
         SpawnedAlert spawnedAlert = new SpawnedAlert("Spawned Alert");
         spawnedAlert.setPattern("Henry");
@@ -68,6 +80,7 @@ public class Graph extends JPanel {
 
         this.connect(gameMessageNode, logicNode);
         this.connect(logicNode, screenFlashNode);
+        this.connect(gameMessageNode, textToSpeechNode);
 
         this.addMouseListener(new MouseAdapter() {
             @Override
@@ -131,7 +144,7 @@ public class Graph extends JPanel {
                 onSelect.accept(node);
             } else if (selected instanceof NotificationType) {
                 System.out.println("create notification node");
-                Node node = new NotificationNode(Graph.this, Graph.this.popupLocation.x, Graph.this.popupLocation.y, ((NotificationType) selected).getName(), Color.ORANGE);
+                Node node = new NotificationNode(Graph.this, Graph.this.popupLocation.x, Graph.this.popupLocation.y, ((NotificationType) selected).getName(), Color.ORANGE, null, colorPickerManager);
                 Graph.this.nodes.add(node, 0);
                 onSelect.accept(node);
             } else if (selected instanceof LogicNodeType) {
@@ -163,6 +176,17 @@ public class Graph extends JPanel {
     public void moveNodeToTop(Node node) {
         this.nodes.remove(node);
         this.nodes.add(node, 0);
+        this.revalidate();
+        this.repaint();
+    }
+
+    public void removeNode(Node node) {
+        this.nodes.remove(node);
+        Arrays.stream(this.connections.getComponents())
+            .filter(component -> component instanceof NodeConnection)
+            .map(component -> (NodeConnection) component)
+            .filter(conn -> conn.getStartNode() == node || conn.getEndNode() == node)
+            .forEach(this.connections::remove);
         this.revalidate();
         this.repaint();
     }

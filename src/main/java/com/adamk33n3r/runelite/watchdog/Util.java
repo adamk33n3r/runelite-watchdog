@@ -166,6 +166,11 @@ public class Util {
         return new Color((alpha << 24) | (color.getRGB() & 0xFFFFFF), true);
     }
 
+    public static Color textColorForBG(Color bgColor) {
+        double luminance = (0.299 * bgColor.getRed() + 0.587 * bgColor.getGreen() + 0.114 * bgColor.getBlue()) / 255;
+        return luminance > 0.5 ? Color.BLACK : Color.WHITE;
+    }
+
     public static WorldPoint getClosestTile(WorldPoint playerLocation, GameObject gameObject) {
         int sizeX = gameObject.sizeX();
         int sizeY = gameObject.sizeY();
