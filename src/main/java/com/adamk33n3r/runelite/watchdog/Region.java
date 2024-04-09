@@ -12,6 +12,7 @@ public enum Region {
     VORKATH(9023),
     INFERNO(9043),
     FIGHT_CAVE(9551),
+    COLOSSEUM(7216),
     ;
 
     public final int REGION_ID;
