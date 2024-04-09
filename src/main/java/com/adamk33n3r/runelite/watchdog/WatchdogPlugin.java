@@ -10,6 +10,8 @@ import com.adamk33n3r.runelite.watchdog.ui.notifications.screenmarker.ScreenMark
 import net.runelite.api.Client;
 import net.runelite.api.ItemID;
 import net.runelite.api.MessageNode;
+import net.runelite.api.Varbits;
+import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.ChatMessage;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.GameTick;
@@ -41,6 +43,7 @@ import okhttp3.OkHttpClient;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 import java.util.Queue;
@@ -118,6 +121,9 @@ public class WatchdogPlugin extends Plugin {
     @Getter
     private final Queue<NotificationFired> notificationsQueue = EvictingQueue.create(20);
 
+    @Getter
+    private boolean isInBannedArea = false;
+
     public WatchdogPlugin() {
         instance = this;
     }
@@ -185,6 +191,15 @@ public class WatchdogPlugin extends Plugin {
     public void openConfiguration() {
         // We don't have access to the ConfigPlugin so let's just emulate an overlay click
         this.eventBus.post(new OverlayMenuClicked(new OverlayMenuEntry(RUNELITE_OVERLAY_CONFIG, null, null), this.notificationOverlay));
+    }
+
+    @Subscribe
+    private void onGameTick(GameTick gameTick) {
+        int regionID = WorldPoint.fromLocalInstance(this.client, this.client.getLocalPlayer().getLocalLocation()).getRegionID();
+        this.isInBannedArea = Arrays.stream(Region.values()).anyMatch(r -> r.REGION_ID == regionID)
+            || this.client.getVarbitValue(Varbits.IN_RAID) > 0
+            || this.client.getVarbitValue(Varbits.TOA_RAID_LEVEL) > 0
+            || this.client.getVarbitValue(Varbits.THEATRE_OF_BLOOD) > 0;
     }
 
     @Subscribe

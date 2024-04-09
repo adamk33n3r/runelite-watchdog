@@ -3,6 +3,7 @@ package com.adamk33n3r.runelite.watchdog.notifications;
 import com.adamk33n3r.runelite.watchdog.AlertManager;
 import com.adamk33n3r.runelite.watchdog.NotificationType;
 import com.adamk33n3r.runelite.watchdog.WatchdogConfig;
+import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
 import com.adamk33n3r.runelite.watchdog.alerts.Alert;
 
 import net.runelite.api.Client;
@@ -63,6 +64,10 @@ public abstract class Notification implements INotification {
     }
 
     public boolean shouldFire() {
+        if (WatchdogPlugin.getInstance().isInBannedArea()) {
+            return false;
+        }
+
         int afkTime = (int)Math.floor(Math.min(client.getKeyboardIdleTicks(), client.getMouseIdleTicks()) * Constants.CLIENT_TICK_LENGTH / 1000f);
         if (this.fireWhenAFK && afkTime < this.fireWhenAFKForSeconds) {
             return false;
