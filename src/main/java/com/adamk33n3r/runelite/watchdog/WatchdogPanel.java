@@ -6,11 +6,8 @@ import com.adamk33n3r.runelite.watchdog.ui.Icons;
 import com.adamk33n3r.runelite.watchdog.ui.ImportExportDialog;
 import com.adamk33n3r.runelite.watchdog.ui.MessagePickerDialog;
 import com.adamk33n3r.runelite.watchdog.ui.alerts.*;
-import com.adamk33n3r.runelite.watchdog.ui.panels.AlertListPanel;
-import com.adamk33n3r.runelite.watchdog.ui.panels.HistoryPanel;
-import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
+import com.adamk33n3r.runelite.watchdog.ui.panels.*;
 
-import com.adamk33n3r.runelite.watchdog.ui.panels.ToolsPanel;
 import net.runelite.api.Client;
 import net.runelite.api.MessageNode;
 import net.runelite.client.events.NotificationFired;
@@ -60,7 +57,15 @@ public class WatchdogPanel extends PluginPanel {
     private String PLUGIN_VERSION_PHASE;
 
     @Getter
-    private final MultiplexingPluginPanel muxer = new MultiplexingPluginPanel(this);
+    private final MultiplexingPluginPanel muxer = new MultiplexingPluginPanel(this) {
+        @Override
+        protected void onAdd(PluginPanel p)
+        {
+            if (p instanceof AlertPanel) {
+                ((AlertPanel<?>) p).rebuild();
+            }
+        }
+    };
 
     @Getter
     @Inject
@@ -210,6 +215,8 @@ public class WatchdogPanel extends PluginPanel {
             return new StatChangedAlertPanel(this, (StatChangedAlert) alert);
         } else if (alert instanceof XPDropAlert) {
             return new XPDropAlertPanel(this, (XPDropAlert) alert);
+        } else if (alert instanceof SoundFiredAlert) {
+            return new SoundFiredAlertPanel(this, (SoundFiredAlert) alert);
         } else if (alert instanceof SpawnedAlert) {
             return new SpawnedAlertPanel(this, (SpawnedAlert) alert);
         } else if (alert instanceof InventoryAlert) {

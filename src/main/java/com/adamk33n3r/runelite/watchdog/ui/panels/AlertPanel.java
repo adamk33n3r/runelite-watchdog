@@ -325,7 +325,7 @@ public abstract class AlertPanel<T extends Alert> extends PluginPanel {
     }
 
     protected abstract void build();
-    protected void rebuild() {
+    public void rebuild() {
         this.controlContainer.removeAll();
         this.centerContainer.removeAll();
         this.build();
@@ -333,6 +333,9 @@ public abstract class AlertPanel<T extends Alert> extends PluginPanel {
 
     @Override
     public void onActivate() {
-        this.rebuild();
+        // Getting some weird resizing issues when this is called when switching tabs or collapsing the side panel
+        // if there is lots of text in a text area? idk
+        // Moved to the muxer.onAdd
+//        this.rebuild();
     }
 }

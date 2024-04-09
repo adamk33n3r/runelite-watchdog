@@ -183,6 +183,24 @@ public class EventHandler {
     }
     //endregion
 
+    //region Sound Effects
+    @Subscribe
+    private void onSoundEffectPlayed(SoundEffectPlayed soundEffectPlayed) {
+        this.handleSoundEffectPlayed(soundEffectPlayed.getSoundId());
+    }
+
+    @Subscribe
+    private void onAreaSoundEffectPlayed(AreaSoundEffectPlayed areaSoundEffectPlayed) {
+        this.handleSoundEffectPlayed(areaSoundEffectPlayed.getSoundId());
+    }
+
+    private void handleSoundEffectPlayed(int soundID) {
+        this.alertManager.getAllEnabledAlertsOfType(SoundFiredAlert.class)
+            .filter(soundFiredAlert -> soundFiredAlert.getSoundID() == soundID)
+            .forEach(alert -> this.fireAlert(alert, "" + soundID));
+    }
+    //endregion
+
     //region Inventory
     @Subscribe
     private void onItemContainerChanged(ItemContainerChanged itemContainerChanged) {

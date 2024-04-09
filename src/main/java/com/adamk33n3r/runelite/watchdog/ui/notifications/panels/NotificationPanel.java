@@ -136,7 +136,7 @@ public abstract class NotificationPanel extends JPanel {
 
         JSpinner delaySpinner = PanelUtils.createSpinner(Math.max(notification.getDelayMilliseconds(), 100),
             100,
-            60000,
+            5 * 60000,
             100,
             (val) -> {
                 notification.setDelayMilliseconds(val);
