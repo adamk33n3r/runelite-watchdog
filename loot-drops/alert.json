@@ -1,6 +1,6 @@
 {
   "displayName": "Loot Drops",
-  "description": "Some alerts for watching drops you care about",
+  "description": "Some alerts for watching drops you care about. Example custom sound names must be replaced",
   "compatibleVersion": "3.0.0",
   "author": "iatethedinosaurs",
   "category": "COMBAT",
