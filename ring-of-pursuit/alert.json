@@ -1,0 +1,9 @@
+{
+  "displayName": "Ring of Pursuit",
+  "description": "Simple notification that watches for your ring of pursuit to proc and ping you.",
+  "compatibleVersion": "3.3.0",
+  "author": "Lorkhan",
+  "category": "SKILLING",
+  "tags": [ "proc", "hunter", "kebbit" ],
+  "alert": {"type":"ChatAlert","message":"Your ring of pursuit reveals the entire trail to you.*","regexEnabled":false,"gameMessageType":"ANY","enabled":true,"name":"Ring of Pursuit Notify","debounceTime":0,"notifications":[{"type":"ScreenFlash","color":"#46FF0000","flashMode":"SMOOTH_FLASH","flashDuration":2,"fireWhenFocused":true,"fireWhenAFK":false,"fireWhenAFKForSeconds":5,"delayMilliseconds":0},{"type":"SoundEffect","soundID":3925,"gain":8,"fireWhenFocused":true,"fireWhenAFK":false,"fireWhenAFKForSeconds":5,"delayMilliseconds":0}]}
+}

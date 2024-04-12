@@ -1,0 +1,9 @@
+{
+  "displayName": "Not Enough Free Inventory",
+  "description": "\"You don't have enough free inventory space to do that\" when equipping a 2h weapon fails",
+  "compatibleVersion": "3.3.0",
+  "author": "Mirk",
+  "category": "COMBAT",
+  "tags": [ "equip", "inventory" ],
+  "alert": {"type":"ChatAlert","message":"You don\u0027t have enough free inventory space to do that.","regexEnabled":false,"gameMessageType":"ANY","enabled":true,"name":"Not Enough Inv","debounceTime":0,"notifications":[{"type":"Overhead","displayTime":3,"message":"\u003ccol\u003dFf0000\u003eError: Inventory is full\u003c/col\u003e","fireWhenFocused":true,"fireWhenAFK":false,"fireWhenAFKForSeconds":5,"delayMilliseconds":0}]}
+}

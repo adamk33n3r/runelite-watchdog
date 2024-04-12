@@ -1,0 +1,9 @@
+{
+  "displayName": "Shooting Star",
+  "description": "Alerts you when the tier of the star changes.",
+  "compatibleVersion": "3.2.0",
+  "author": "Zanven",
+  "category": "SKILLING",
+  "tags": [ "tier" ],
+  "alert": {"type":"SpawnedAlert","spawnedDespawned":"DESPAWNED","spawnedType":"GAME_OBJECT","spawnedName":"Crashed Star","regexEnabled":false,"enabled":true,"name":"Shooting Star","debounceTime":0,"notifications":[{"type":"TextToSpeech","gain":8,"rate":1,"voice":"LUCAS","source":"LEGACY","message":"Star","fireWhenFocused":true,"fireWhenAFK":false,"fireWhenAFKForSeconds":5},{"type":"ScreenFlash","color":"#46FF0000","flashMode":"FLASH","flashDuration":2,"fireWhenFocused":true,"fireWhenAFK":false,"fireWhenAFKForSeconds":5}]}
+}

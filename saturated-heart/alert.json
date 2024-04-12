@@ -1,0 +1,9 @@
+{
+  "displayName": "Saturated Heart",
+  "description": "Reminds you to use your saturated heart after it wears off.",
+  "compatibleVersion": "3.3.0",
+  "author": "Dirty",
+  "category": "COMBAT",
+  "tags": [ "wears", "off" ],
+  "alert": {"type":"ChatAlert","message":"The Effects of the saturated heart have worn off.","regexEnabled":false,"gameMessageType":"GAME_MESSAGE","enabled":true,"name":"Saturated Heart","debounceTime":0,"notifications":[{"type":"ScreenFlash","color":"#2BFF00B7","flashMode":"FLASH","flashDuration":2,"fireWhenFocused":true,"fireWhenAFK":false,"fireWhenAFKForSeconds":5}]}
+}

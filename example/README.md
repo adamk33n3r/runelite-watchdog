@@ -10,6 +10,7 @@ This is an example readme for this alert. This folder will be linked to on the a
 | author | It you. | "adamk33n3r" |
 | category | The category to put the alert in. Shows a related icon. | <ul><li>`COMBAT`</li><li>`SKILLING`</li><li>`BOSSES`</li><li>`AFK`</li><li>`MISC`</li></ul> |
 | tags | A list of strings that will be used as search keywords. | `[ "farming", "plot", "harvest" ]`
+| dependsOn | A list of plugins that this alert depends on being enabled. | `[ "Tempoross" ]`
 | alert | The exported json of your alert. This must be a single `Alert` or `AlertGroup`. | See below
 
 ## Example `alert.json`
@@ -21,6 +22,7 @@ This is an example readme for this alert. This folder will be linked to on the a
   "author": "adamk33n3r",
   "category": "SKILLING",
   "tags": [ "farming", "plot", "harvest" ],
+  "dependsOn": [ "Tempoross" ],
   "alert": {"type":"ChatAlert","message":"*is ready to harvest*","regexEnabled":false,"enabled":true,"name":"Ready to Harvest","debounceTime":500,"notifications":[{"type":"TrayNotification","message":"Time to harvest your crops!","fireWhenFocused":true},{"type":"Sound","path":"airplane_seatbelt.mp3","gain":8,"fireWhenFocused":true}]}
 }
 ```

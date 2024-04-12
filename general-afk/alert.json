@@ -1,0 +1,10 @@
+{
+  "displayName": "General AFK",
+  "description": "Lets you know when you are idle.",
+  "compatibleVersion": "3.3.0",
+  "author": "Lorkhan",
+  "category": "AFK",
+  "tags": [],
+  "dependsOn": [ "Idle Notifier" ],
+  "alert": {"type":"ChatAlert","message":"You are now idle!","regexEnabled":false,"gameMessageType":"ANY","enabled":true,"name":"General AFK","debounceTime":0,"notifications":[{"type":"Overhead","displayTime":3,"message":"Hey! Stop being afk!","fireWhenFocused":true,"fireWhenAFK":true,"fireWhenAFKForSeconds":5,"delayMilliseconds":0},{"type":"ScreenFlash","color":"#46FF0000","flashMode":"SMOOTH_FLASH","flashDuration":0,"fireWhenFocused":true,"fireWhenAFK":true,"fireWhenAFKForSeconds":5,"delayMilliseconds":0},{"type":"RequestFocus","forceFocus":true,"fireWhenFocused":true,"fireWhenAFK":true,"fireWhenAFKForSeconds":5,"delayMilliseconds":0}]}
+}

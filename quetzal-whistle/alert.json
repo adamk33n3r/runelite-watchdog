@@ -1,0 +1,10 @@
+{
+  "displayName": "Quetzal Whistle Recharge",
+  "description": "For the new Hunter Guild teleport. Alerts when it reaches 0 charges to remind you to recharge it before you leave.",
+  "compatibleVersion": "3.3.0",
+  "author": "bloodred",
+  "category": "MISC",
+  "tags": [ "quetzal", "whistle", "charge" ],
+  "alert": {"type":"AlertGroup","alerts":[{"type":"ChatAlert","message":"Your quetzal whistle has 0 charges remaining.","regexEnabled":false,"gameMessageType":"ANY","enabled":true,"name":"Whistle Empty","debounceTime":0,"notifications":[{"type":"Overlay","color":"#46FF0000","textColor":"#FFFFFFFF","sticky":true,"timeToLive":5,"imagePath":"","id":"whistlerecharged","message":"Recharge quetzal whistle","fireWhenFocused":true,"fireWhenAFK":false,"fireWhenAFKForSeconds":5},{"type":"SoundEffect","soundID":1156,"gain":10,"fireWhenFocused":true,"fireWhenAFK":false,"fireWhenAFKForSeconds":5},{"type":"SoundEffect","soundID":2297,"gain":10,"fireWhenFocused":true,"fireWhenAFK":false,"fireWhenAFKForSeconds":5}]},{"type":"ChatAlert","message":"Your quetzal whistle has ([1-9]\\d*) charges remaining\\.","regexEnabled":true,"gameMessageType":"ANY","enabled":true,"name":"Check Whistle Charges","debounceTime":0,"notifications":[{"type":"DismissOverlay","dismissId":"whistlerecharged","fireWhenFocused":true,"fireWhenAFK":false,"fireWhenAFKForSeconds":1}]},{"type":"ChatAlert","message":"Soar Leader Pitri|Looks like the birds are all full for now. Make them work a bit before feeding them again!","regexEnabled":false,"gameMessageType":"ANY","enabled":true,"name":"Recharged Whistle","debounceTime":0,"notifications":[{"type":"DismissOverlay","dismissId":"whistlerecharged","fireWhenFocused":true,"fireWhenAFK":false,"fireWhenAFKForSeconds":1}]}],"enabled":true,"name":"Quetzal Whistle","debounceTime":0}
+}
+  
