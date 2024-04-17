@@ -59,7 +59,7 @@ public class EventHandler {
     public synchronized void notify(String message) {
         this.ignoreNotificationFired = true;
         // The event bus is synchronous
-        this.eventBus.post(new NotificationFired(message, TrayIcon.MessageType.NONE));
+        this.eventBus.post(new NotificationFired(null, message, TrayIcon.MessageType.NONE));
         this.ignoreNotificationFired = false;
     }
 
