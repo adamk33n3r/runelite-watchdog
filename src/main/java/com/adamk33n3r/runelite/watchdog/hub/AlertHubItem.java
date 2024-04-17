@@ -76,7 +76,7 @@ public class AlertHubItem extends JPanel {
 
         JLabel dependsOn = new JLabel();
         dependsOn.setFont(FontManager.getRunescapeSmallFont());
-        if (manifest.getDependsOn() != null) {
+        if (manifest.getDependsOn() != null && !manifest.getDependsOn().isEmpty()) {
             dependsOn.setText("Depends On: " + String.join(", ", manifest.getDependsOn()));
         }
 

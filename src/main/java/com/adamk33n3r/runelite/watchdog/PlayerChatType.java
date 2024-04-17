@@ -26,15 +26,10 @@ public enum PlayerChatType implements Displayable {
     private static final List<ChatMessageType> ANY_TYPES;
 
     static {
-        ANY_TYPES = Stream.of(
-            PUBLIC,
-            PRIVATE,
-            FRIENDS,
-            CLAN,
-            GUEST_CLAN,
-            GIM
-        ).flatMap((playerChatType) -> Arrays.stream(playerChatType.chatMessageTypes))
-        .collect(Collectors.toList());
+        ANY_TYPES = Arrays.stream(values())
+            .filter(playerChatType -> playerChatType != ANY)
+            .flatMap((playerChatType) -> Arrays.stream(playerChatType.chatMessageTypes))
+            .collect(Collectors.toList());
     }
 
     PlayerChatType(String name, String tooltip, ChatMessageType... chatMessageTypes) {

@@ -63,6 +63,10 @@ public class AlertHubClient {
                 String[] splitPath = filePath.split("/", 2);
                 if (splitPath.length == 2) {
                     String alertName = splitPath[0];
+                    // Don't need to show the example in the panel
+                    if (alertName.equals("example") || alertName.equals(".vscode")) {
+                        continue;
+                    }
                     if (!alerts.containsKey(alertName)) {
                         alerts.put(alertName, new AlertDisplayInfo());
                     }

@@ -61,6 +61,7 @@ public class WatchdogPanel extends PluginPanel {
         @Override
         protected void onAdd(PluginPanel p)
         {
+            // TODO remove if it ever gets fixed https://github.com/runelite/runelite/issues/17712
             if (p instanceof AlertPanel) {
                 ((AlertPanel<?>) p).rebuild();
             }

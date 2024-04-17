@@ -28,17 +28,10 @@ public enum GameMessageType implements Displayable {
     private static final List<ChatMessageType> ANY_TYPES;
 
     static {
-        ANY_TYPES = Stream.of(
-            BROADCAST,
-            DIALOG,
-            DUEL,
-            EXAMINE,
-            GAME_MESSAGE,
-            LOGIN_LOGOUT,
-            TRADE,
-            SPAM
-        ).flatMap((gameMessageType) -> Arrays.stream(gameMessageType.chatMessageTypes))
-        .collect(Collectors.toList());
+        ANY_TYPES = Arrays.stream(values())
+            .filter(gameMessageType -> gameMessageType != ANY)
+            .flatMap((gameMessageType) -> Arrays.stream(gameMessageType.chatMessageTypes))
+            .collect(Collectors.toList());
     }
 
     GameMessageType(String name, String tooltip, ChatMessageType... chatMessageTypes) {

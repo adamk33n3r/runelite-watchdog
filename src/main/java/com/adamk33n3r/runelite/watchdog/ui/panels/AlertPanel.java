@@ -17,10 +17,7 @@ import org.apache.commons.text.WordUtils;
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.GridLayout;
+import java.awt.*;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.util.Collections;
@@ -124,9 +121,17 @@ public abstract class AlertPanel<T extends Alert> extends PluginPanel {
             Icons.BACK_HOVER,
             "Back",
             (btn, modifiers) -> {
+                WatchdogPlugin.getInstance().getScreenMarkerUtil().finishCreation(true);
                 this.alertManager.saveAlerts();
                 this.muxer.popState();
-                WatchdogPlugin.getInstance().getScreenMarkerUtil().finishCreation(true);
+
+                // Workaround for the onActivate rebuild issue
+                // TODO remove if it ever gets fixed https://github.com/runelite/runelite/issues/17712
+                int componentCount = this.muxer.getComponentCount();
+                Component component = this.muxer.getComponent(componentCount - 1);
+                if (component instanceof AlertPanel) {
+                    ((AlertPanel<?>) component).rebuild();
+                }
             }
         );
         backButton.setPreferredSize(new Dimension(22, 16));
@@ -336,6 +341,12 @@ public abstract class AlertPanel<T extends Alert> extends PluginPanel {
         // Getting some weird resizing issues when this is called when switching tabs or collapsing the side panel
         // if there is lots of text in a text area? idk
         // Moved to the muxer.onAdd
+
+        // this causes it to resize on collapse/restore
 //        this.rebuild();
+//        SwingUtilities.invokeLater(() -> {
+//            // this causes it to resize on edit
+//            this.rebuild();
+//        });
     }
 }
