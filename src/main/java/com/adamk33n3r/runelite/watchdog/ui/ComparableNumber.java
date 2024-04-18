@@ -17,11 +17,11 @@ public class ComparableNumber extends JPanel {
         int val, Consumer<Integer> onNumChange, int min, int max, int step,
         Comparator comparatorVal, Consumer<Comparator> onComparatorChange
     ) {
-        this.number = PanelUtils.createSpinner(val, min, max, step, onNumChange);
         this.comparator = PanelUtils.createSelect(Comparator.values(), comparatorVal, onComparatorChange);
+        this.number = PanelUtils.createSpinner(val, min, max, step, onNumChange);
 
         this.setLayout(new DynamicGridLayout(1, 2, 5, 5));
-        this.comparator.setPreferredSize(new Dimension(100, 0));
+        this.comparator.setPreferredSize(new Dimension(50, 0));
         this.add(this.comparator);
         this.add(this.number);
     }
