@@ -1,13 +1,13 @@
 package com.adamk33n3r.runelite.watchdog.ui.panels;
 
 import com.adamk33n3r.runelite.watchdog.Util;
+import com.adamk33n3r.runelite.watchdog.WatchdogMuxer;
 import com.adamk33n3r.runelite.watchdog.alerts.Alert;
 import com.adamk33n3r.runelite.watchdog.notifications.IMessageNotification;
 import com.adamk33n3r.runelite.watchdog.ui.Icons;
 import com.adamk33n3r.runelite.watchdog.ui.SearchBar;
 import com.adamk33n3r.runelite.watchdog.ui.StretchedStackedLayout;
 
-import net.runelite.client.ui.MultiplexingPluginPanel;
 import net.runelite.client.ui.PluginPanel;
 
 import com.google.common.base.Splitter;
@@ -28,16 +28,15 @@ import java.util.stream.Stream;
 @Slf4j
 @Singleton
 public class HistoryPanel extends PluginPanel {
-    private final Provider<MultiplexingPluginPanel> muxer;
+    private final Provider<WatchdogMuxer> muxer;
     private final ScrollablePanel historyItems;
     private final List<HistoryEntryPanel> previousAlerts = new ArrayList<>();
     private final JLabel noHistory;
 
     private static final int MAX_HISTORY_ITEMS = 100;
-    private static final Splitter SPLITTER = Splitter.on(" ").trimResults().omitEmptyStrings();
 
     @Inject
-    public HistoryPanel(Provider<MultiplexingPluginPanel> muxer) {
+    public HistoryPanel(Provider<WatchdogMuxer> muxer) {
         super(false);
         this.muxer = muxer;
 

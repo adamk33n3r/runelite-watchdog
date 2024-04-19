@@ -27,7 +27,7 @@ import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.plugins.config.ConfigPlugin;
 import net.runelite.client.ui.ClientToolbar;
-import net.runelite.client.ui.MultiplexingPluginPanel;
+import net.runelite.client.ui.ClientUI;
 import net.runelite.client.ui.NavigationButton;
 import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.ui.overlay.OverlayMenuEntry;
@@ -43,6 +43,7 @@ import okhttp3.OkHttpClient;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
+import javax.swing.*;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
@@ -67,6 +68,8 @@ public class WatchdogPlugin extends Plugin {
 
     @Inject
     private ClientToolbar clientToolbar;
+    @Inject
+    private ClientUI clientUI;
 
     @Inject
     private OverlayManager overlayManager;
@@ -100,6 +103,7 @@ public class WatchdogPlugin extends Plugin {
     private Provider<ConfigPlugin> configPluginProvider;
 
     @Getter
+    @Inject
     private WatchdogPanel panel;
 
     @Getter
@@ -111,6 +115,7 @@ public class WatchdogPlugin extends Plugin {
     private OkHttpClient httpClient;
 
     private NavigationButton navButton;
+    private NavigationButton navButtonDisabled;
 
     @Getter
     private static WatchdogPlugin instance;
@@ -132,7 +137,7 @@ public class WatchdogPlugin extends Plugin {
     public void configure(Binder binder) {
         Properties properties = WatchdogProperties.getProperties();
         Names.bindProperties(binder, properties);
-        binder.bind(MultiplexingPluginPanel.class).toProvider(() -> alertManager.getWatchdogPanel().getMuxer());
+        binder.bind(WatchdogMuxer.class).toProvider(() -> this.panel.getMuxer());
     }
 
     @Override
@@ -161,11 +166,18 @@ public class WatchdogPlugin extends Plugin {
             this.alertManager.addAlert(outOfCombat, false);
         }
 
-        this.panel = this.alertManager.getWatchdogPanel();
+//        this.panel = this.alertManager.getWatchdogPanel();
         AsyncBufferedImage icon = this.itemManager.getImage(ItemID.BELL_BAUBLE);
+        AsyncBufferedImage iconDisabled = this.itemManager.getImage(ItemID.BELL_BAUBLE_6848);
         this.navButton = NavigationButton.builder()
             .tooltip("Watchdog")
             .icon(icon)
+            .priority(1)
+            .panel(this.panel.getMuxer())
+            .build();
+        this.navButtonDisabled = NavigationButton.builder()
+            .tooltip("Watchdog (disabled area)")
+            .icon(iconDisabled)
             .priority(1)
             .panel(this.panel.getMuxer())
             .build();
@@ -182,6 +194,7 @@ public class WatchdogPlugin extends Plugin {
     protected void shutDown() throws Exception {
         this.eventBus.unregister(this.eventHandler);
         this.clientToolbar.removeNavigation(this.navButton);
+        this.clientToolbar.removeNavigation(this.navButtonDisabled);
         this.overlayManager.remove(this.flashOverlay);
         this.overlayManager.remove(this.notificationOverlay);
         this.soundPlayer.shutDown();
@@ -196,10 +209,28 @@ public class WatchdogPlugin extends Plugin {
     @Subscribe
     private void onGameTick(GameTick gameTick) {
         int regionID = WorldPoint.fromLocalInstance(this.client, this.client.getLocalPlayer().getLocalLocation()).getRegionID();
-        this.isInBannedArea = Arrays.stream(Region.values()).anyMatch(r -> r.REGION_ID == regionID)
+        boolean before = this.isInBannedArea;
+        this.isInBannedArea = Region.isBannedRegion(regionID)
             || this.client.getVarbitValue(Varbits.IN_RAID) > 0
             || this.client.getVarbitValue(Varbits.TOA_RAID_LEVEL) > 0
             || this.client.getVarbitValue(Varbits.THEATRE_OF_BLOOD) > 0;
+
+        // State changed so switch panel icon
+        if (before != this.isInBannedArea) {
+            if (this.isInBannedArea) {
+                this.clientToolbar.removeNavigation(this.navButton);
+                this.clientToolbar.addNavigation(this.navButtonDisabled);
+                if (this.panel.getMuxer().isActive()) {
+                    SwingUtilities.invokeLater(() -> this.clientToolbar.openPanel(this.navButtonDisabled));
+                }
+            } else {
+                this.clientToolbar.removeNavigation(this.navButtonDisabled);
+                this.clientToolbar.addNavigation(this.navButton);
+                if (this.panel.getMuxer().isActive()) {
+                    SwingUtilities.invokeLater(() -> this.clientToolbar.openPanel(this.navButton));
+                }
+            }
+        }
     }
 
     @Subscribe

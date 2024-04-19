@@ -23,6 +23,7 @@ import okhttp3.OkHttpClient;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Provider;
+import javax.inject.Singleton;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
@@ -31,6 +32,7 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 @Slf4j
+@Singleton
 public class WatchdogPanel extends PluginPanel {
     @Inject
     @Named("watchdog.helpURL")
@@ -57,16 +59,7 @@ public class WatchdogPanel extends PluginPanel {
     private String PLUGIN_VERSION_PHASE;
 
     @Getter
-    private final MultiplexingPluginPanel muxer = new MultiplexingPluginPanel(this) {
-        @Override
-        protected void onAdd(PluginPanel p)
-        {
-            // TODO remove if it ever gets fixed https://github.com/runelite/runelite/issues/17712
-            if (p instanceof AlertPanel) {
-                ((AlertPanel<?>) p).rebuild();
-            }
-        }
-    };
+    private final WatchdogMuxer muxer = new WatchdogMuxer(this);
 
     @Getter
     @Inject

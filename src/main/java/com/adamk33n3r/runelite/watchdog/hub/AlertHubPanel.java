@@ -2,13 +2,13 @@ package com.adamk33n3r.runelite.watchdog.hub;
 
 import com.adamk33n3r.runelite.watchdog.Util;
 import com.adamk33n3r.runelite.watchdog.WatchdogConfig;
+import com.adamk33n3r.runelite.watchdog.WatchdogMuxer;
 import com.adamk33n3r.runelite.watchdog.ui.Icons;
 import com.adamk33n3r.runelite.watchdog.ui.SearchBar;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
 import com.adamk33n3r.runelite.watchdog.ui.panels.ScrollablePanel;
 
 import net.runelite.client.ui.DynamicGridLayout;
-import net.runelite.client.ui.MultiplexingPluginPanel;
 import net.runelite.client.ui.PluginPanel;
 import net.runelite.client.ui.components.IconTextField;
 
@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 public class AlertHubPanel extends PluginPanel {
-    private final Provider<MultiplexingPluginPanel> muxer;
+    private final Provider<WatchdogMuxer> muxer;
     private final AlertHubClient alertHubClient;
     private final ScheduledExecutorService executor;
     private final WatchdogConfig watchdogConfig;
@@ -41,7 +41,7 @@ public class AlertHubPanel extends PluginPanel {
     private final JScrollPane scrollPane;
 
     @Inject
-    public AlertHubPanel(Provider<MultiplexingPluginPanel> muxer, AlertHubClient alertHubClient, ScheduledExecutorService executor, WatchdogConfig watchdogConfig) {
+    public AlertHubPanel(Provider<WatchdogMuxer> muxer, AlertHubClient alertHubClient, ScheduledExecutorService executor, WatchdogConfig watchdogConfig) {
         super(false);
         this.muxer = muxer;
         this.alertHubClient = alertHubClient;

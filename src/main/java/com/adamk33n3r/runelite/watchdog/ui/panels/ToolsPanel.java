@@ -1,10 +1,9 @@
 package com.adamk33n3r.runelite.watchdog.ui.panels;
 
+import com.adamk33n3r.runelite.watchdog.WatchdogMuxer;
 import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
 import com.adamk33n3r.runelite.watchdog.ui.Icons;
 import com.adamk33n3r.runelite.watchdog.ui.StretchedStackedLayout;
-import lombok.Getter;
-import net.runelite.client.ui.MultiplexingPluginPanel;
 import net.runelite.client.ui.PluginPanel;
 
 import lombok.extern.slf4j.Slf4j;
@@ -21,10 +20,10 @@ import java.awt.*;
 public class ToolsPanel extends PluginPanel {
     @Inject
     private Provider<HistoryPanel> historyPanelProvider;
-    private final Provider<MultiplexingPluginPanel> muxer;
+    private final Provider<WatchdogMuxer> muxer;
 
     @Inject
-    public ToolsPanel(Provider<MultiplexingPluginPanel> muxer) {
+    public ToolsPanel(Provider<WatchdogMuxer> muxer) {
         super(false);
         this.muxer = muxer;
 
