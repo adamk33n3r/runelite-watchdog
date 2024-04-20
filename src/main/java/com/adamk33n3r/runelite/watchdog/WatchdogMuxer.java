@@ -27,13 +27,11 @@ public class WatchdogMuxer extends MultiplexingPluginPanel {
     public void onActivate() {
         super.onActivate();
         this.isActive = true;
-        System.out.println("is active");
     }
 
     @Override
     public void onDeactivate() {
         super.onDeactivate();
         this.isActive = false;
-        System.out.println("is deactive");
     }
 }

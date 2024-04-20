@@ -16,7 +16,18 @@ public enum Region {
     TEST(12850),
 
     COX(
-        13137
+        13136, // End of floor
+        13137, 13393, // Lobbies/Room transitions
+        13138, 13394, // Vasa/Tekton/Vespula Lizardmen/Skeletal Mystics/Guardian
+        13139, 13395, 13140, 13396, // Puzzle rooms/bosses
+        13141, 13397, // Rest room
+
+        // bunch of weird gray blocks
+
+        13145, // New floor
+        13401, // New floor?
+
+        12889 // Olm
     ),
     TOB(
 //        12869, // Lobby
@@ -27,6 +38,8 @@ public enum Region {
         12612, // Xarpus
         12611 // Verzik
 //        12867 // Loot room
+
+        // Outside
 //        14386,
 //        14642
     ),

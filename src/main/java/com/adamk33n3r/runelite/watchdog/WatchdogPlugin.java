@@ -176,7 +176,7 @@ public class WatchdogPlugin extends Plugin {
             .panel(this.panel.getMuxer())
             .build();
         this.navButtonDisabled = NavigationButton.builder()
-            .tooltip("Watchdog (disabled area)")
+            .tooltip("Watchdog (In disabled area)")
             .icon(iconDisabled)
             .priority(1)
             .panel(this.panel.getMuxer())
@@ -187,7 +187,10 @@ public class WatchdogPlugin extends Plugin {
             this.clientToolbar.removeNavigation(this.navButton);
             this.clientToolbar.addNavigation(this.navButton);
         });
+
         this.soundPlayer.startUp();
+
+        ToolTipManager.sharedInstance().setDismissDelay(Integer.MAX_VALUE);
     }
 
     @Override
@@ -210,10 +213,10 @@ public class WatchdogPlugin extends Plugin {
     private void onGameTick(GameTick gameTick) {
         int regionID = WorldPoint.fromLocalInstance(this.client, this.client.getLocalPlayer().getLocalLocation()).getRegionID();
         boolean before = this.isInBannedArea;
-        this.isInBannedArea = Region.isBannedRegion(regionID)
-            || this.client.getVarbitValue(Varbits.IN_RAID) > 0
-            || this.client.getVarbitValue(Varbits.TOA_RAID_LEVEL) > 0
-            || this.client.getVarbitValue(Varbits.THEATRE_OF_BLOOD) > 0;
+        this.isInBannedArea = Region.isBannedRegion(regionID);
+//            || this.client.getVarbitValue(Varbits.IN_RAID) > 0
+//            || this.client.getVarbitValue(Varbits.TOA_RAID_LEVEL) > 0
+//            || this.client.getVarbitValue(Varbits.THEATRE_OF_BLOOD) > 0;
 
         // State changed so switch panel icon
         if (before != this.isInBannedArea) {

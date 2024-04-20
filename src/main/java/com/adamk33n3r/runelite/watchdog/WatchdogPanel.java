@@ -27,8 +27,10 @@ import javax.inject.Singleton;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.util.Arrays;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Slf4j
@@ -84,6 +86,7 @@ public class WatchdogPanel extends PluginPanel {
     private OkHttpClient httpClient;
 
     private AlertListPanel alertListPanel;
+    private JLabel title;
 
     public WatchdogPanel() {
         super(false);
@@ -98,15 +101,23 @@ public class WatchdogPanel extends PluginPanel {
         JPanel topPanel = new JPanel(new BorderLayout());
         topPanel.setBorder(new EmptyBorder(5, 0, 0, 0));
         JPanel titlePanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 3));
-        JLabel title = new JLabel(WatchdogPlugin.getInstance().getName());
-        title.setFont(title.getFont().deriveFont(Font.BOLD));
-        title.setHorizontalAlignment(JLabel.LEFT);
-        title.setForeground(Color.WHITE);
-        boolean isPreRelease = !PLUGIN_VERSION_PHASE.equals("release") && !PLUGIN_VERSION_PHASE.isEmpty();
-        title.setToolTipText("Watchdog v" + (isPreRelease ? PLUGIN_VERSION_FULL : PLUGIN_VERSION));
-        titlePanel.add(title);
+        this.title = new JLabel(WatchdogPlugin.getInstance().getName());
+        this.title.setFont(this.title.getFont().deriveFont(Font.BOLD));
+        this.title.setHorizontalAlignment(JLabel.LEFT);
+        this.title.setForeground(Color.WHITE);
+        if (WatchdogPlugin.getInstance().isInBannedArea()) {
+            this.title.setForeground(Color.RED);
+            String tooltip = "You are in a banned area. Watchdog is disabled in the following areas:\n";
+            tooltip += Arrays.stream(Region.values()).map(Region::name).collect(Collectors.joining(", "));
+            this.title.setToolTipText(tooltip);
+        } else {
+            this.title.setForeground(Color.WHITE);
+            boolean isPreRelease = !PLUGIN_VERSION_PHASE.equals("release") && !PLUGIN_VERSION_PHASE.isEmpty();
+            this.title.setToolTipText("Watchdog v" + (isPreRelease ? PLUGIN_VERSION_FULL : PLUGIN_VERSION));
+        }
+        titlePanel.add(this.title);
+
         JLabel version = new JLabel("v"+PLUGIN_VERSION);
-        title.setToolTipText(version.getText());
         version.setFont(version.getFont().deriveFont(10f));
         version.setBorder(new EmptyBorder(5, 0, 0, 0));
         titlePanel.add(version);
