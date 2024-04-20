@@ -13,20 +13,14 @@ public enum Region {
     INFERNO(9043),
     FIGHT_CAVE(9551),
     COLOSSEUM(7216),
-    TEST(12850),
-
     COX(
         13136, // End of floor
         13137, 13393, // Lobbies/Room transitions
         13138, 13394, // Vasa/Tekton/Vespula Lizardmen/Skeletal Mystics/Guardian
         13139, 13395, 13140, 13396, // Puzzle rooms/bosses
         13141, 13397, // Rest room
-
-        // bunch of weird gray blocks
-
         13145, // New floor
         13401, // New floor?
-
         12889 // Olm
     ),
     TOB(
@@ -39,7 +33,7 @@ public enum Region {
         12611 // Verzik
 //        12867 // Loot room
 
-        // Outside
+//        // Outside
 //        14386,
 //        14642
     ),
@@ -55,7 +49,7 @@ public enum Region {
         14674, // Het
         14676, // Akkha
         15184, 15696, // Wardens
-        14672 // Tomb Lobby
+        14672 // Chest room
     ),
     ;
 
