@@ -10,7 +10,6 @@ import com.adamk33n3r.runelite.watchdog.ui.notifications.screenmarker.ScreenMark
 import net.runelite.api.Client;
 import net.runelite.api.ItemID;
 import net.runelite.api.MessageNode;
-import net.runelite.api.Varbits;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.ChatMessage;
 import net.runelite.api.events.GameStateChanged;
@@ -27,7 +26,6 @@ import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.plugins.config.ConfigPlugin;
 import net.runelite.client.ui.ClientToolbar;
-import net.runelite.client.ui.ClientUI;
 import net.runelite.client.ui.NavigationButton;
 import net.runelite.client.ui.overlay.OverlayManager;
 import net.runelite.client.ui.overlay.OverlayMenuEntry;
@@ -44,7 +42,6 @@ import okhttp3.OkHttpClient;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.swing.*;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 import java.util.Queue;
@@ -68,8 +65,6 @@ public class WatchdogPlugin extends Plugin {
 
     @Inject
     private ClientToolbar clientToolbar;
-    @Inject
-    private ClientUI clientUI;
 
     @Inject
     private OverlayManager overlayManager;
@@ -166,7 +161,6 @@ public class WatchdogPlugin extends Plugin {
             this.alertManager.addAlert(outOfCombat, false);
         }
 
-//        this.panel = this.alertManager.getWatchdogPanel();
         AsyncBufferedImage icon = this.itemManager.getImage(ItemID.BELL_BAUBLE);
         AsyncBufferedImage iconDisabled = this.itemManager.getImage(ItemID.BELL_BAUBLE_6848);
         this.navButton = NavigationButton.builder()
