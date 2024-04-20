@@ -23,14 +23,18 @@ import okhttp3.OkHttpClient;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Provider;
+import javax.inject.Singleton;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.util.Arrays;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Slf4j
+@Singleton
 public class WatchdogPanel extends PluginPanel {
     @Inject
     @Named("watchdog.helpURL")
@@ -57,16 +61,7 @@ public class WatchdogPanel extends PluginPanel {
     private String PLUGIN_VERSION_PHASE;
 
     @Getter
-    private final MultiplexingPluginPanel muxer = new MultiplexingPluginPanel(this) {
-        @Override
-        protected void onAdd(PluginPanel p)
-        {
-            // TODO remove if it ever gets fixed https://github.com/runelite/runelite/issues/17712
-            if (p instanceof AlertPanel) {
-                ((AlertPanel<?>) p).rebuild();
-            }
-        }
-    };
+    private final WatchdogMuxer muxer = new WatchdogMuxer(this);
 
     @Getter
     @Inject
@@ -109,11 +104,19 @@ public class WatchdogPanel extends PluginPanel {
         title.setFont(title.getFont().deriveFont(Font.BOLD));
         title.setHorizontalAlignment(JLabel.LEFT);
         title.setForeground(Color.WHITE);
-        boolean isPreRelease = !PLUGIN_VERSION_PHASE.equals("release") && !PLUGIN_VERSION_PHASE.isEmpty();
-        title.setToolTipText("Watchdog v" + (isPreRelease ? PLUGIN_VERSION_FULL : PLUGIN_VERSION));
+        if (WatchdogPlugin.getInstance().isInBannedArea()) {
+            title.setForeground(Color.RED);
+            String tooltip = "You are in a banned area. Watchdog is disabled in the following areas:\n";
+            tooltip += Arrays.stream(Region.values()).map(Region::name).collect(Collectors.joining(", "));
+            title.setToolTipText(tooltip);
+        } else {
+            title.setForeground(Color.WHITE);
+            boolean isPreRelease = !PLUGIN_VERSION_PHASE.equals("release") && !PLUGIN_VERSION_PHASE.isEmpty();
+            title.setToolTipText("Watchdog v" + (isPreRelease ? PLUGIN_VERSION_FULL : PLUGIN_VERSION));
+        }
         titlePanel.add(title);
+
         JLabel version = new JLabel("v"+PLUGIN_VERSION);
-        title.setToolTipText(version.getText());
         version.setFont(version.getFont().deriveFont(10f));
         version.setBorder(new EmptyBorder(5, 0, 0, 0));
         titlePanel.add(version);
