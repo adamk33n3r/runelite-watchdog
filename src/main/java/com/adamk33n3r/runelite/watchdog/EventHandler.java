@@ -209,9 +209,14 @@ public class EventHandler {
             return;
         Item[] items = itemContainerChanged.getItemContainer().getItems();
         long itemCount = Arrays.stream(items).filter(item -> item.getId() > -1).count();
+        Map<Integer, Integer> currentItems = new HashMap<>();
         Map<Integer, Integer> allItems = new HashMap<>();
         Arrays.stream(items)
-            .forEach(item -> allItems.merge(item.getId(), item.getQuantity(), Integer::sum));
+            .forEach(item -> {
+                currentItems.merge(item.getId(), item.getQuantity(), Integer::sum);
+                allItems.merge(item.getId(), item.getQuantity(), Integer::sum);
+            });
+        this.previousItemsTable.keySet().forEach((itemId) -> allItems.merge(itemId, 0, Integer::sum));
         // Skip firing alerts if there are no previous items, since we just logged in. Even an empty inventory will have a map of -1 itemIds.
         if (!this.previousItemsTable.isEmpty()) {
             this.alertManager.getAllEnabledAlertsOfType(InventoryAlert.class)
@@ -243,7 +248,7 @@ public class EventHandler {
                     }
                 });
         }
-        this.previousItemsTable = allItems;
+        this.previousItemsTable = currentItems;
     }
     //endregion
 
