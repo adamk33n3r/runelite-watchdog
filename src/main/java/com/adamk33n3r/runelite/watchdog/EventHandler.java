@@ -216,7 +216,7 @@ public class EventHandler {
                 currentItems.merge(item.getId(), item.getQuantity(), Integer::sum);
                 allItems.merge(item.getId(), item.getQuantity(), Integer::sum);
             });
-        this.previousItemsTable.keySet().forEach((itemId) -> allItems.merge(itemId, 0, Integer::sum));
+        this.previousItemsTable.keySet().forEach((itemId) -> allItems.putIfAbsent(itemId, 0));
         // Skip firing alerts if there are no previous items, since we just logged in. Even an empty inventory will have a map of -1 itemIds.
         if (!this.previousItemsTable.isEmpty()) {
             this.alertManager.getAllEnabledAlertsOfType(InventoryAlert.class)
