@@ -1,5 +1,8 @@
 package com.adamk33n3r.runelite.watchdog;
 
+import net.runelite.api.GameObject;
+import net.runelite.api.coords.WorldArea;
+import net.runelite.api.coords.WorldPoint;
 import net.runelite.client.util.Text;
 
 import com.google.common.base.Splitter;
@@ -162,5 +165,23 @@ public class Util {
         }
 
         return new Color((alpha << 24) | (color.getRGB() & 0xFFFFFF), true);
+    }
+
+    public static WorldPoint getClosestTile(WorldPoint playerLocation, GameObject gameObject) {
+        int sizeX = gameObject.sizeX();
+        int sizeY = gameObject.sizeY();
+        WorldPoint worldLocation = gameObject.getWorldLocation();
+
+        // given that the object is larger than 1 tile, the location is the center most tile, rounded to the south-west,
+        // calculate the rectangle of all the tiles the object is in
+        WorldPoint southWest = new WorldPoint(worldLocation.getX() - (sizeX - 1) / 2, worldLocation.getY() - (sizeY - 1) / 2, worldLocation.getPlane());
+        WorldPoint northEast = new WorldPoint(worldLocation.getX() + sizeX / 2, worldLocation.getY() + sizeY / 2, worldLocation.getPlane());
+
+        // calculate the closest tile on the edge of the rect made from southWest to northEast
+        return new WorldPoint(
+            Math.min(Math.max(playerLocation.getX(), southWest.getX()), northEast.getX()),
+            Math.min(Math.max(playerLocation.getY(), southWest.getY()), northEast.getY()),
+            worldLocation.getPlane()
+        );
     }
 }

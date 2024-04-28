@@ -21,7 +21,7 @@ public class ComparableNumber extends JPanel {
         this.number = PanelUtils.createSpinner(val, min, max, step, onNumChange);
 
         this.setLayout(new DynamicGridLayout(1, 2, 5, 5));
-        this.comparator.setPreferredSize(new Dimension(50, 0));
+        this.number.setPreferredSize(new Dimension(70, 0));
         this.add(this.comparator);
         this.add(this.number);
     }

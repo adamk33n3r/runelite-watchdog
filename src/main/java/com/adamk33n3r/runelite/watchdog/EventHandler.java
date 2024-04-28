@@ -256,12 +256,12 @@ public class EventHandler {
     @Subscribe
     private void onItemSpawned(ItemSpawned itemSpawned) {
         ItemComposition comp = this.itemManager.getItemComposition(itemSpawned.getItem().getId());
-        this.onSpawned(comp.getName(), SPAWNED, ITEM);
+        this.onSpawned(comp.getName(), itemSpawned.getTile().getWorldLocation(), SPAWNED, ITEM);
     }
     @Subscribe
     private void onItemDespawned(ItemDespawned itemDespawned) {
         ItemComposition comp = this.itemManager.getItemComposition(itemDespawned.getItem().getId());
-        this.onSpawned(comp.getName(), DESPAWNED, ITEM);
+        this.onSpawned(comp.getName(), itemDespawned.getTile().getWorldLocation(), DESPAWNED, ITEM);
     }
     @Subscribe
     private void onNpcSpawned(NpcSpawned npcSpawned) {
@@ -280,10 +280,10 @@ public class EventHandler {
         this.onActorDespawned(playerDespawned.getPlayer(), PLAYER);
     }
     private void onActorSpawned(Actor actor, SpawnedAlert.SpawnedType type) {
-        this.onSpawned(actor.getName(), SPAWNED, type);
+        this.onSpawned(actor.getName(), actor.getWorldLocation(), SPAWNED, type);
     }
     private void onActorDespawned(Actor actor, SpawnedAlert.SpawnedType type) {
-        this.onSpawned(actor.getName(), DESPAWNED, type);
+        this.onSpawned(actor.getName(), actor.getWorldLocation(), DESPAWNED, type);
     }
 
     @Subscribe
@@ -328,14 +328,21 @@ public class EventHandler {
         if (impostor == null) {
             return;
         }
-        this.onSpawned(impostor.getName(), mode, type);
+        WorldPoint location = tileObject.getWorldLocation();
+        if (tileObject instanceof GameObject) {
+            WorldPoint playerLocation = this.client.getLocalPlayer().getWorldLocation();
+            location = Util.getClosestTile(playerLocation, (GameObject) tileObject);
+        }
+        this.onSpawned(impostor.getName(), location, mode, type);
     }
 
-    private void onSpawned(String name, SpawnedAlert.SpawnedDespawned mode, SpawnedAlert.SpawnedType type) {
+    private void onSpawned(String name, WorldPoint location, SpawnedAlert.SpawnedDespawned mode, SpawnedAlert.SpawnedType type) {
         String unformattedName = Text.removeFormattingTags(name);
+        int distanceToObject = location.distanceTo(this.client.getLocalPlayer().getWorldLocation());
         this.alertManager.getAllEnabledAlertsOfType(SpawnedAlert.class)
             .filter(spawnedAlert -> spawnedAlert.getSpawnedDespawned() == mode)
             .filter(spawnedAlert -> spawnedAlert.getSpawnedType() == type)
+            .filter(spawnedAlert -> spawnedAlert.getDistance() == -1 || spawnedAlert.getDistanceComparator().compare(distanceToObject, spawnedAlert.getDistance()))
             .forEach(spawnedAlert -> {
                 String[] groups = this.matchPattern(spawnedAlert, unformattedName);
                 if (groups == null) return;

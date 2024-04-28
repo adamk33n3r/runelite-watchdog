@@ -1,6 +1,7 @@
 package com.adamk33n3r.runelite.watchdog.alerts;
 
 import com.adamk33n3r.runelite.watchdog.Displayable;
+import com.adamk33n3r.runelite.watchdog.ui.ComparableNumber;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -13,6 +14,8 @@ public class SpawnedAlert extends Alert implements RegexMatcher {
     private SpawnedType spawnedType = SpawnedType.ITEM;
     private String spawnedName = "";
     private boolean regexEnabled = false;
+    private int distance = -1;
+    private ComparableNumber.Comparator distanceComparator = ComparableNumber.Comparator.LESS_THAN_OR_EQUALS;
 
     @Override
     public String getPattern() {
