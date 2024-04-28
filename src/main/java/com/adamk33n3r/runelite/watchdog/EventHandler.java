@@ -227,7 +227,7 @@ public class EventHandler {
                         this.fireAlert(inventoryAlert, inventoryAlert.getInventoryAlertType().getName());
                     } else if (inventoryAlert.getInventoryAlertType() == InventoryAlert.InventoryAlertType.ITEM) {
                         allItems.entrySet().stream()
-                            .filter(itemWithCount -> itemWithCount.getKey() != -1 && (inventoryAlert.getItemQuantity() == 0 || inventoryAlert.getQuantityComparator().compare(itemWithCount.getValue(), inventoryAlert.getItemQuantity())))
+                            .filter(itemWithCount -> itemWithCount.getKey() != -1 && inventoryAlert.getQuantityComparator().compare(itemWithCount.getValue(), inventoryAlert.getItemQuantity()))
                             .map(itemWithCount -> this.matchPattern(inventoryAlert,
                                 this.itemManager.getItemComposition(itemWithCount.getKey()).getName()))
                             .filter(Objects::nonNull)
