@@ -219,7 +219,7 @@ public class PanelUtils {
     public static ColorJButton createColorPicker(String placeholder, String tooltip, String windowTitle, Component parentComponent, Color initialValue, ColorPickerManager colorPickerManager, boolean showAlpha, Consumer<Color> onChange) {
         ColorJButton colorPickerBtn = new ColorJButton(placeholder, Color.BLACK);
         if (initialValue != null) {
-            String colorHex = "#" + ColorUtil.colorToAlphaHexCode(initialValue).toUpperCase();
+            String colorHex = "#" + (showAlpha ? ColorUtil.colorToAlphaHexCode(initialValue) : ColorUtil.colorToHexCode(initialValue)).toUpperCase();
             colorPickerBtn.setText(colorHex);
             colorPickerBtn.setColor(initialValue);
         }
@@ -228,6 +228,12 @@ public class PanelUtils {
         colorPickerBtn.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
+                if (e.getButton() == MouseEvent.BUTTON3) {
+                    colorPickerBtn.setColor(Color.BLACK);
+                    colorPickerBtn.setText(placeholder);
+                    onChange.accept(null);
+                    return;
+                }
                 RuneliteColorPicker colorPicker = colorPickerManager.create(
                     SwingUtilities.getWindowAncestor(colorPickerBtn),
                     colorPickerBtn.getColor(),
@@ -236,7 +242,7 @@ public class PanelUtils {
                 colorPicker.setLocation(parentComponent.getLocationOnScreen());
                 colorPicker.setOnColorChange(c -> {
                     colorPickerBtn.setColor(c);
-                    colorPickerBtn.setText("#" + ColorUtil.colorToAlphaHexCode(c).toUpperCase());
+                    colorPickerBtn.setText("#" + (showAlpha ? ColorUtil.colorToAlphaHexCode(c) : ColorUtil.colorToHexCode(c)).toUpperCase());
                 });
                 colorPicker.setOnClose(onChange);
                 colorPicker.setVisible(true);
