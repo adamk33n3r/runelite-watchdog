@@ -69,7 +69,8 @@ public abstract class AlertPanel<T extends Alert> extends PluginPanel {
                         SwingUtilities.getWindowAncestor(this),
                         (json, append) -> {
                             boolean result = this.alertManager.importAlerts(json, ((AlertGroup) alert).getAlerts(), append, true, WatchdogPlugin.getInstance().getConfig().overrideImportsWithDefaults());
-                            this.rebuild();
+                            // Delay for layout. Without this, it would sometimes make the search/actions narrower.
+                            SwingUtilities.invokeLater(this::rebuild);
                             return result;
                         }
                     );

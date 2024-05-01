@@ -16,6 +16,8 @@ import java.awt.image.BufferedImage;
 public class ToggleButton extends JToggleButton {
     private static final ImageIcon ON_SWITCHER;
     private static final ImageIcon OFF_SWITCHER;
+    private final String selectedTooltip;
+    private final String unSelectedTooltip;
 
     static {
         BufferedImage onSwitcher = ImageUtil.loadImageResource(ConfigPlugin.class, "switcher_on.png");
@@ -31,7 +33,13 @@ public class ToggleButton extends JToggleButton {
     }
 
     public ToggleButton() {
+        this("Disable alert", "Enable alert");
+    }
+
+    public ToggleButton(String selectedTooltip, String unSelectedTooltip) {
         super(OFF_SWITCHER);
+        this.selectedTooltip = selectedTooltip;
+        this.unSelectedTooltip = unSelectedTooltip;
         this.setSelectedIcon(ON_SWITCHER);
         SwingUtil.removeButtonDecorations(this);
         this.setPreferredSize(new Dimension(25, 0));
@@ -40,7 +48,7 @@ public class ToggleButton extends JToggleButton {
     }
 
     private void updateTooltip() {
-        this.setToolTipText(this.isSelected() ? "Disable alert" :  "Enable alert");
+        this.setToolTipText(this.isSelected() ? this.selectedTooltip :  this.unSelectedTooltip);
     }
 }
 
