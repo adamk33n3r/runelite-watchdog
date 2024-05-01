@@ -22,6 +22,7 @@ public abstract class Alert {
     private boolean enabled = true;
     private String name;
     private int debounceTime;
+    private boolean randomNotifications = false;
 
     @Nullable
     private transient AlertGroup parent;

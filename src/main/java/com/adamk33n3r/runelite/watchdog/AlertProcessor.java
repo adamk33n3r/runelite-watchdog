@@ -5,10 +5,11 @@ import com.adamk33n3r.runelite.watchdog.notifications.Notification;
 
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.Random;
 
 public class AlertProcessor extends Thread {
     private final String[] triggerValues;
-    private boolean forceFire;
+    private final boolean forceFire;
     private final Queue<Notification> notificationQueue = new LinkedList<>();
 
     public AlertProcessor(Alert alert, String[] triggerValues) {
@@ -18,7 +19,11 @@ public class AlertProcessor extends Thread {
     public AlertProcessor(Alert alert, String[] triggerValues, boolean forceFire) {
         this.triggerValues = triggerValues;
         this.forceFire = forceFire;
-        this.notificationQueue.addAll(alert.getNotifications());
+        if (alert.isRandomNotifications()) {
+            this.notificationQueue.add(alert.getNotifications().get(new Random().nextInt(alert.getNotifications().size())));
+        } else {
+            this.notificationQueue.addAll(alert.getNotifications());
+        }
     }
 
     @Override
