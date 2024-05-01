@@ -86,20 +86,19 @@ public class AlertListItem extends JPanel {
             BorderFactory.createMatteBorder(0, 0, this.collapsed ? 0 : 2, 0, ColorScheme.DARK_GRAY_COLOR),
             BorderFactory.createMatteBorder(5, 10, 5, 0, ColorScheme.DARKER_GRAY_COLOR)));
 
+        final ToggleButton toggleButton;
         if (selectMode) {
-            final ToggleButton selectCheckbox = new ToggleButton();
-            topWrapper.add(selectCheckbox, BorderLayout.WEST);
-//            selectCheckbox.setPreferredSize(new Dimension(25, 20));
-            selectCheckbox.addItemListener((ev) -> this.selected = selectCheckbox.isSelected());
+            toggleButton = new ToggleButton("Deselect", "Select");
+            toggleButton.addItemListener((ev) -> this.selected = toggleButton.isSelected());
         } else {
-            final ToggleButton toggleButton = new ToggleButton();
+            toggleButton = new ToggleButton();
             toggleButton.setSelected(this.alert.isEnabled());
             toggleButton.addItemListener(i -> {
                 this.alert.setEnabled(toggleButton.isSelected());
                 this.alertManager.saveAlerts();
             });
-            topWrapper.add(toggleButton, BorderLayout.WEST);
         }
+        topWrapper.add(toggleButton, BorderLayout.WEST);
 
         final JPanel nameWrapper = new JPanel(new BorderLayout());
         nameWrapper.setBackground(ColorScheme.DARKER_GRAY_COLOR);

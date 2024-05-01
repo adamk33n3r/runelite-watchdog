@@ -82,7 +82,7 @@ public class AlertListPanel extends JPanel {
         multiSelect.setBorder(new EmptyBorder(0, 10, 0, 0));
         final JPanel toggleGroup = new JPanel(new DynamicGridLayout(1, 2, 3, 3));
         toggleGroup.setBorder(new EmptyBorder(4, 0, 0, 0));
-        final ToggleButton selectModeToggle = new ToggleButton();
+        final ToggleButton selectModeToggle = new ToggleButton("Disable Select Mode", "Enable Select Mode");
         selectModeToggle.setSelected(this.selectMode);
         selectModeToggle.addItemListener((i) -> {
             this.selectMode = selectModeToggle.isSelected();
@@ -127,6 +127,28 @@ public class AlertListPanel extends JPanel {
                 });
             WatchdogPlugin.getInstance().getPanel().openAlert(group);
         })).setEnabled(this.selectMode);
+        if (this.parent != null) {
+            multiSelectActions.add(PanelUtils.createActionButton(Icons.BACK, Icons.BACK_HOVER, "Move selected Alerts back a level", (btn, modifiers) -> {
+                long count = this.alertListItems.stream()
+                    .filter(AlertListItem::isSelected)
+                    .count();
+                if (count == 0) {
+                    return;
+                }
+                AlertGroup alertGroupParent = this.parent.getParent();
+                this.alertListItems.stream()
+                    .filter(AlertListItem::isSelected)
+                    .forEach((ali) -> {
+                        this.alertManager.removeAlert(ali.getAlert(), false);
+                        if (alertGroupParent == null) {
+                            this.alertManager.addAlert(ali.getAlert(), false);
+                        } else {
+                            alertGroupParent.getAlerts().add(ali.getAlert());
+                        }
+                    });
+                WatchdogPlugin.getInstance().getPanel().getMuxer().popState();
+            })).setEnabled(this.selectMode);
+        }
         multiSelectActions.add(PanelUtils.createActionButton(Icons.EXPORT, Icons.EXPORT_HOVER, "Export selected Alerts", (btn, modifiers) -> {
             List<Alert> selectedAlerts = this.alertListItems.stream()
                 .filter(AlertListItem::isSelected)
