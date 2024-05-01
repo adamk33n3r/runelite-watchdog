@@ -11,7 +11,7 @@ import net.runelite.client.util.ColorUtil;
 
 import java.awt.Color;
 
-@ConfigGroup("watchdog")
+@ConfigGroup(WatchdogConfig.CONFIG_GROUP_NAME)
 public interface WatchdogConfig extends Config {
     String CONFIG_GROUP_NAME = "watchdog";
     Color DEFAULT_NOTIFICATION_COLOR = ColorUtil.fromHex("#46FF0000");

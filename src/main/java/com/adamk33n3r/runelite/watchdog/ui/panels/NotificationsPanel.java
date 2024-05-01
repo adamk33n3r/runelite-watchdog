@@ -10,6 +10,7 @@ import com.adamk33n3r.runelite.watchdog.ui.StretchedStackedLayout;
 import com.adamk33n3r.runelite.watchdog.ui.dropdownbutton.DropDownButtonFactory;
 import com.adamk33n3r.runelite.watchdog.ui.notifications.panels.*;
 
+import net.runelite.client.ui.DynamicGridLayout;
 import net.runelite.client.ui.components.DragAndDropReorderPane;
 import net.runelite.client.ui.components.colorpicker.ColorPickerManager;
 
@@ -20,8 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import javax.inject.Inject;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import java.awt.BorderLayout;
-import java.awt.Dimension;
+import java.awt.*;
 import java.awt.event.ActionListener;
 import java.util.Arrays;
 
@@ -69,12 +69,30 @@ public class NotificationsPanel extends JPanel {
         JButton addDropDownButton = DropDownButtonFactory.createDropDownButton(Icons.ADD, popupMenu);
         addDropDownButton.setPreferredSize(new Dimension(40, addDropDownButton.getPreferredSize().height));
         addDropDownButton.setToolTipText("Create New Notification");
-        JPanel buttonPanel = new JPanel(new BorderLayout());
-        buttonPanel.add(new JLabel("Notifications"), BorderLayout.WEST);
-        buttonPanel.add(addDropDownButton, BorderLayout.EAST);
-        buttonPanel.setBorder(new EmptyBorder(0, 5, 0, 0));
+        JPanel headerPanel = new JPanel(new BorderLayout());
+        JPanel leftPanel = new JPanel(new DynamicGridLayout(1, 0, 5, 5));
+        headerPanel.add(leftPanel, BorderLayout.WEST);
+        leftPanel.add(new JLabel("Notifications"));
+        JButton randomBtn = PanelUtils.createToggleActionButton(
+            Icons.DICE_MULTIPLE,
+            Icons.DICE_MULTIPLE_HOVER,
+            Icons.DICE_MULTIPLE_OFF,
+            Icons.DICE_MULTIPLE_OFF_HOVER,
+            "Fire all notifications in sequence",
+            "Fire a random notification",
+            alert.isRandomNotifications(),
+            (btn, mods) -> {
+                alert.setRandomNotifications(!alert.isRandomNotifications());
+                this.alertManager.saveAlerts();
+            }
+        );
+        leftPanel.add(randomBtn);
+        JPanel buttonPanel = new JPanel(new DynamicGridLayout(1, 0));
+        buttonPanel.add(addDropDownButton);
+        headerPanel.add(buttonPanel, BorderLayout.EAST);
+        headerPanel.setBorder(new EmptyBorder(0, 5, 0, 0));
 
-        this.add(buttonPanel, BorderLayout.NORTH);
+        this.add(headerPanel, BorderLayout.NORTH);
 
         ScrollablePanel scrollablePanel = new ScrollablePanel(new StretchedStackedLayout(3));
         scrollablePanel.setScrollableWidth(ScrollablePanel.ScrollableSizeHint.FIT);

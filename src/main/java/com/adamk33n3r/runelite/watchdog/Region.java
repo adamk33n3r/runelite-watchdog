@@ -38,7 +38,7 @@ public enum Region {
 //        14642
     ),
     TOA(
-//        13454, // Lobby
+//        13454, 13456, // Lobby
         14160, // Nexus Lobby
         15698, // Crondis
         15700, // Zebak

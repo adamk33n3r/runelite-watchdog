@@ -7,16 +7,26 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class PlayerChatAlert extends ChatAlert {
+public class PlayerChatAlert extends Alert implements RegexMatcher {
+    private String message = "";
+    private boolean regexEnabled = false;
     private PlayerChatType playerChatType = PlayerChatType.ANY;
+
+    @Override
+    public String getPattern() {
+        return this.message;
+    }
+
+    @Override
+    public void setPattern(String pattern) {
+        this.message = pattern;
+    }
 
     public PlayerChatAlert() {
         super("New Player Chat Message Alert");
-        this.setGameMessageType(null);
     }
 
     public PlayerChatAlert(String name) {
         super(name);
-        this.setGameMessageType(null);
     }
 }

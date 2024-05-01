@@ -117,7 +117,7 @@ public class WatchdogPanel extends PluginPanel {
         titlePanel.add(title);
 
         JLabel version = new JLabel("v"+PLUGIN_VERSION);
-        version.setFont(version.getFont().deriveFont(10f));
+        version.setFont(version.getFont().deriveFont(Font.BOLD, 10f));
         version.setBorder(new EmptyBorder(5, 0, 0, 0));
         titlePanel.add(version);
         topPanel.add(titlePanel);

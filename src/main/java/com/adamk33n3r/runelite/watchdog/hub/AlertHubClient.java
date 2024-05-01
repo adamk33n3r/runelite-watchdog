@@ -146,30 +146,6 @@ public class AlertHubClient {
 //        ));
     }
 
-    public BufferedImage downloadIcon(AlertManifest alertManifest) throws IOException {
-        // TODO: Use defaults
-        if (!alertManifest.isHasIcon()) {
-            return null;
-        }
-
-        HttpUrl url = Objects.requireNonNull(HttpUrl.parse("https://raw.githubusercontent.com/melkypie/resource-packs"))
-            .newBuilder()
-            .addPathSegment(alertManifest.getCommit())
-            .addPathSegment("icon.png")
-            .build();
-
-        try (Response res  = this.cachingClient.newCall(new Request.Builder().url(url).build()).execute()) {
-            if (res.code() != 200) {
-                throw new IOException("Non-OK response code: " + res.code());
-            }
-
-            byte[] bytes = Objects.requireNonNull(res.body()).bytes();
-            synchronized (ImageIO.class) {
-                return ImageIO.read(new ByteArrayInputStream(bytes));
-            }
-        }
-    }
-
     static class CacheInterceptor implements Interceptor {
         private final int minutes;
         public CacheInterceptor(int minutes) {
