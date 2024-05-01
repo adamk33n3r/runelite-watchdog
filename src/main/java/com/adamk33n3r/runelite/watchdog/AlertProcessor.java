@@ -31,7 +31,7 @@ public class AlertProcessor extends Thread {
         while (!this.notificationQueue.isEmpty()) {
             Notification nextNotification = this.notificationQueue.poll();
             // This is checked in .fire(), but we don't want to delay if it won't fire
-            if (!nextNotification.shouldFire()) {
+            if (!nextNotification.shouldFire() && !this.forceFire) {
                 continue;
             }
             int delayMilliseconds = nextNotification.getDelayMilliseconds();
