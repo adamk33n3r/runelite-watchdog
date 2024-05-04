@@ -7,6 +7,7 @@ import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.Accessors;
 
 import javax.inject.Inject;
 import java.awt.Color;
@@ -17,6 +18,7 @@ import static com.adamk33n3r.runelite.watchdog.WatchdogConfig.DEFAULT_NOTIFICATI
 @Getter
 @Setter
 @NoArgsConstructor
+@Accessors(chain = true)
 public class Overlay extends MessageNotification {
     private Color color = DEFAULT_NOTIFICATION_COLOR;
     private Color textColor = DEFAULT_NOTIFICATION_TEXT_COLOR;

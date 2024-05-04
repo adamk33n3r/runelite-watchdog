@@ -5,10 +5,12 @@ import com.adamk33n3r.runelite.watchdog.Util;
 import com.adamk33n3r.runelite.watchdog.WatchdogConfig;
 
 import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 
 import javax.inject.Inject;
 
 @NoArgsConstructor
+@Accessors(chain = true)
 public class NotificationEvent extends MessageNotification {
     @Inject
     private transient EventHandler eventHandler;

@@ -2,6 +2,7 @@ package com.adamk33n3r.runelite.watchdog.notifications;
 
 import com.adamk33n3r.runelite.watchdog.WatchdogConfig;
 
+import lombok.experimental.Accessors;
 import net.runelite.client.ui.ClientUI;
 
 import lombok.Getter;
@@ -13,6 +14,7 @@ import javax.inject.Inject;
 @Getter
 @Setter
 @NoArgsConstructor
+@Accessors(chain = true)
 public class RequestFocus extends Notification {
     private boolean forceFocus = false;
 

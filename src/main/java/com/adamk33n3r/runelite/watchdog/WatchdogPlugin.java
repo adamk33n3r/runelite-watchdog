@@ -144,22 +144,6 @@ public class WatchdogPlugin extends Plugin {
         this.screenMarkerUtil.startUp();
 
         this.alertManager.loadAlerts();
-        List<Alert> alerts = this.alertManager.getAlerts();
-
-        if (alerts.isEmpty()) {
-            ChatAlert readyToHarvest = new ChatAlert("Ready to Harvest");
-            readyToHarvest.setDebounceTime(500);
-            readyToHarvest.setMessage("*is ready to harvest*");
-            TrayNotification harvestNotification = this.injector.getInstance(TrayNotification.class);
-            harvestNotification.setMessage("Time to harvest your crops!");
-            readyToHarvest.getNotifications().add(harvestNotification);
-            this.alertManager.addAlert(readyToHarvest, false);
-
-            NotificationFiredAlert outOfCombat = new NotificationFiredAlert("Out of Combat");
-            outOfCombat.setMessage("You are now out of combat!");
-            outOfCombat.getNotifications().add(this.injector.getInstance(ScreenFlash.class));
-            this.alertManager.addAlert(outOfCombat, false);
-        }
 
         AsyncBufferedImage icon = this.itemManager.getImage(ItemID.BELL_BAUBLE);
         AsyncBufferedImage iconDisabled = this.itemManager.getImage(ItemID.BELL_BAUBLE_6848);

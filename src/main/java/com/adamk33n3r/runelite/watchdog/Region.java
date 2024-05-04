@@ -38,7 +38,7 @@ public enum Region {
 //        14642
     ),
     TOA(
-//        13454, 13456, // Lobby
+//        13454, // Lobby
         14160, // Nexus Lobby
         15698, // Crondis
         15700, // Zebak
@@ -48,8 +48,8 @@ public enum Region {
         15188, // Ba-Ba
         14674, // Het
         14676, // Akkha
-        15184, 15696, // Wardens
-        14672 // Chest room
+        15184, 15696 // Wardens
+//        14672 // Chest room
     ),
     ;
 

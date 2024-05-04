@@ -4,6 +4,7 @@ import com.adamk33n3r.runelite.watchdog.WatchdogConfig;
 import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
 import com.adamk33n3r.runelite.watchdog.alerts.FlashMode;
 
+import lombok.experimental.Accessors;
 import net.runelite.client.config.FlashNotification;
 
 import lombok.Getter;
@@ -18,6 +19,7 @@ import static com.adamk33n3r.runelite.watchdog.WatchdogConfig.DEFAULT_NOTIFICATI
 @Getter
 @Setter
 @NoArgsConstructor
+@Accessors(chain = true)
 public class ScreenFlash extends Notification {
     private Color color = DEFAULT_NOTIFICATION_COLOR;
     private FlashMode flashMode = FlashMode.FLASH;

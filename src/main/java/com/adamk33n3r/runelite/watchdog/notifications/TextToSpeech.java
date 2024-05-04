@@ -11,6 +11,7 @@ import com.google.gson.annotations.SerializedName;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.inject.Inject;
@@ -28,6 +29,7 @@ import static net.runelite.client.RuneLite.CACHE_DIR;
 @Slf4j
 @Getter @Setter
 @NoArgsConstructor
+@Accessors(chain = true)
 public class TextToSpeech extends MessageNotification implements IAudioNotification {
     private int gain = 5;
     private int rate = 1;

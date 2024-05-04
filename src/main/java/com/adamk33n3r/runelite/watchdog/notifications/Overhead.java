@@ -3,6 +3,7 @@ package com.adamk33n3r.runelite.watchdog.notifications;
 import com.adamk33n3r.runelite.watchdog.Util;
 import com.adamk33n3r.runelite.watchdog.WatchdogConfig;
 
+import lombok.experimental.Accessors;
 import net.runelite.api.Client;
 import net.runelite.api.Constants;
 import net.runelite.api.Player;
@@ -17,8 +18,8 @@ import javax.inject.Inject;
 import java.awt.Color;
 import java.util.concurrent.ScheduledExecutorService;
 
-@Slf4j
 @NoArgsConstructor
+@Accessors(chain = true)
 public class Overhead extends MessageNotification {
     @Getter @Setter
     private int displayTime = 3;

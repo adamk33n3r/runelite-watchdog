@@ -76,19 +76,7 @@ public class EventHandler {
         String unformattedMessage = Text.removeFormattingTags(chatMessage.getMessage());
 
         // Send player messages to a different handler
-        if (
-            chatMessage.getType() == ChatMessageType.PUBLICCHAT
-                || chatMessage.getType() == ChatMessageType.AUTOTYPER
-                || chatMessage.getType() == ChatMessageType.PRIVATECHAT
-                || chatMessage.getType() == ChatMessageType.PRIVATECHATOUT
-                || chatMessage.getType() == ChatMessageType.MODCHAT
-                || chatMessage.getType() == ChatMessageType.MODPRIVATECHAT
-                || chatMessage.getType() == ChatMessageType.MODAUTOTYPER
-                || chatMessage.getType() == ChatMessageType.FRIENDSCHAT
-                || chatMessage.getType() == ChatMessageType.CLAN_CHAT
-                || chatMessage.getType() == ChatMessageType.CLAN_GUEST_CHAT
-                || chatMessage.getType() == ChatMessageType.CLAN_GIM_CHAT
-        ) {
+        if (PlayerChatType.ANY.isOfType(chatMessage.getType())) {
             this.alertManager.getAllEnabledAlertsOfType(PlayerChatAlert.class)
                 .filter(chatAlert -> chatAlert.getPlayerChatType() == PlayerChatType.ANY || chatAlert.getPlayerChatType().isOfType(chatMessage.getType()))
                 .forEach(chatAlert -> {

@@ -6,6 +6,7 @@ import com.adamk33n3r.runelite.watchdog.WatchdogConfig;
 import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
 import com.adamk33n3r.runelite.watchdog.alerts.Alert;
 
+import lombok.experimental.Accessors;
 import net.runelite.api.Client;
 import net.runelite.api.Constants;
 import net.runelite.client.ui.ClientUI;
@@ -37,7 +38,7 @@ public abstract class Notification implements INotification {
     @Getter @Setter
     private boolean fireWhenAFK = false;
     @Getter @Setter
-    private int fireWhenAFKForSeconds = 1;
+    private int fireWhenAFKForSeconds = 5;
 
     @Getter @Setter
     private int delayMilliseconds = 0;

@@ -4,8 +4,10 @@ import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.experimental.Accessors;
 
 @Getter @Setter
+@Accessors(chain = true)
 public class DismissOverlay extends Notification {
     private String dismissId;
 

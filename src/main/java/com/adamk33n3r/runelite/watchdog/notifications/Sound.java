@@ -7,15 +7,16 @@ import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.inject.Inject;
 import java.io.File;
 
-@Slf4j
 @Getter
 @Setter
 @NoArgsConstructor
+@Accessors(chain = true)
 public class Sound extends AudioNotification {
     private String path;
     private int repeatDuration = 0;

@@ -4,6 +4,7 @@ import com.adamk33n3r.runelite.watchdog.Util;
 import com.adamk33n3r.runelite.watchdog.WatchdogConfig;
 import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
 
+import lombok.experimental.Accessors;
 import net.runelite.api.ChatMessageType;
 import net.runelite.client.chat.ChatColorType;
 import net.runelite.client.chat.ChatMessageBuilder;
@@ -17,6 +18,7 @@ import javax.inject.Inject;
 
 @Slf4j
 @NoArgsConstructor
+@Accessors(chain = true)
 public class GameMessage extends MessageNotification {
     @Inject
     private transient ChatMessageManager chatMessageManager;
