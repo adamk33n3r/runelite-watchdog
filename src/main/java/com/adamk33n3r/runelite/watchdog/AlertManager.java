@@ -113,165 +113,153 @@ public class AlertManager {
             return;
         }
 
-        AlertGroup kraken = AlertGroup.builder()
-            .name("Kraken")
-            .alerts(List.of(
-                SpawnedAlert.builder()
-                    .name("Kraken Dies")
-                    .spawnedDespawned(SpawnedAlert.SpawnedDespawned.DESPAWNED)
-                    .spawnedType(SpawnedAlert.SpawnedType.NPC)
-                    .spawnedName("Kraken")
-                    .notifications(List.of(
-                        this.plugin.getInjector().getInstance(Overhead.class)
-                            .setDisplayTime(3)
-                            .setTextColor(Color.CYAN)
-                            .setMessage("Sit Krak"),
-                        this.plugin.getInjector().getInstance(ScreenMarker.class)
-                            .setDisplayTime(8)
-                            .setScreenMarkerProperties("Get Fishing Explosive Ready", Color.MAGENTA, Color.BLUE, 2),
-                        this.plugin.getInjector().getInstance(RequestFocus.class)
-                            .setForceFocus(true)
-                    ))
-                    .build(),
-                SpawnedAlert.builder()
-                    .name("Whirlpool Appears")
-                    .spawnedDespawned(SpawnedAlert.SpawnedDespawned.DESPAWNED)
-                    .spawnedType(SpawnedAlert.SpawnedType.NPC)
-                    .spawnedName("Whirlpool")
-                    .debounceTime(15000)
-                    .notifications(List.of(
-                        this.plugin.getInjector().getInstance(ScreenFlash.class)
-                            .setColor(ColorUtil.fromHex("#6D0030"))
-                            .setFlashMode(FlashMode.SMOOTH_FLASH)
-                            .setFlashDuration(1),
-                        this.plugin.getInjector().getInstance(Overhead.class)
-                            .setDisplayTime(3)
-                            .setTextColor(Color.GREEN)
-                            .setMessage("Throw Explosive!")
-                    ))
-                    .build(),
-                InventoryAlert.builder()
-                    .name("Fishing Explosive Changes")
-                    .inventoryAlertType(InventoryAlert.InventoryAlertType.ITEM_CHANGE)
-                    .itemName("Fishing explosive")
-                    .itemQuantity(-1)
-                    .quantityComparator(ComparableNumber.Comparator.EQUALS)
-                    .notifications(List.of(
-                        this.plugin.getInjector().getInstance(Overhead.class)
-                            .setDisplayTime(2)
-                            .setTextColor(Color.RED)
-                            .setMessage("Attack!"),
-                        this.plugin.getInjector().getInstance(ScreenFlash.class)
-                            .setColor(ColorUtil.fromHex("#46FF00"))
-                            .setFlashMode(FlashMode.FLASH)
-                            .setFlashDuration(2)
-                    ))
-                    .build()
-            ))
-            .build();
+        AlertGroup kraken = new AlertGroup("Kraken");
+        kraken.setAlerts(List.of(
+            new SpawnedAlert("Kraken Dies")
+                .setSpawnedDespawned(SpawnedAlert.SpawnedDespawned.DESPAWNED)
+                .setSpawnedType(SpawnedAlert.SpawnedType.NPC)
+                .setSpawnedName("Kraken")
+                .addNotifications(
+                    this.plugin.getInjector().getInstance(Overhead.class)
+                        .setDisplayTime(3)
+                        .setTextColor(Color.CYAN)
+                        .setMessage("Sit Krak"),
+                    this.plugin.getInjector().getInstance(ScreenMarker.class)
+                        .setDisplayTime(8)
+                        .setScreenMarkerProperties("Get Fishing Explosive Ready", Color.MAGENTA, Color.BLUE, 2),
+                    this.plugin.getInjector().getInstance(RequestFocus.class)
+                        .setForceFocus(true)
+                ),
+            new SpawnedAlert("Whirlpool Appears")
+                .setSpawnedDespawned(SpawnedAlert.SpawnedDespawned.DESPAWNED)
+                .setSpawnedType(SpawnedAlert.SpawnedType.NPC)
+                .setSpawnedName("Whirlpool")
+                .setDebounceTime(15000)
+                .addNotifications(
+                    this.plugin.getInjector().getInstance(ScreenFlash.class)
+                        .setColor(ColorUtil.fromHex("#6D0030"))
+                        .setFlashMode(FlashMode.SMOOTH_FLASH)
+                        .setFlashDuration(1),
+                    this.plugin.getInjector().getInstance(Overhead.class)
+                        .setDisplayTime(3)
+                        .setTextColor(Color.GREEN)
+                        .setMessage("Throw Explosive!")
+                ),
+            new InventoryAlert("Fishing Explosive Used")
+                .setInventoryAlertType(InventoryAlert.InventoryAlertType.ITEM_CHANGE)
+                .setItemName("Fishing explosive")
+                .setItemQuantity(-1)
+                .setQuantityComparator(ComparableNumber.Comparator.EQUALS)
+                .addNotifications(
+                    this.plugin.getInjector().getInstance(Overhead.class)
+                        .setDisplayTime(2)
+                        .setTextColor(Color.RED)
+                        .setMessage("Attack!"),
+                    this.plugin.getInjector().getInstance(ScreenFlash.class)
+                        .setColor(ColorUtil.fromHex("#46FF00"))
+                        .setFlashMode(FlashMode.FLASH)
+                        .setFlashDuration(2)
+                )
+        ));
 
-        AlertGroup chatboxTTS = AlertGroup.builder()
-            .enabled(false)
-            .name("Chatbox TTS")
-            .alerts(List.of(
-                PlayerChatAlert.builder()
-                    .name("Clan Chat TTS")
-                    .playerChatType(PlayerChatType.CLAN)
-                    .message("{*}")
-                    .notifications(List.of(
-                        this.plugin.getInjector().getInstance(TextToSpeech.class)
-                            .setGain(5).setRate(2)
-                            .setLegacyVoice(Voice.GEORGE)
-                            .setSource(TTSSource.LEGACY)
-                            .setMessage("$1")
-                    ))
-                    .build(),
-                PlayerChatAlert.builder()
-                    .name("Friends Chat TTS")
-                    .playerChatType(PlayerChatType.FRIENDS)
-                    .message("{*}")
-                    .notifications(List.of(
-                        this.plugin.getInjector().getInstance(TextToSpeech.class)
-                            .setGain(5).setRate(2)
-                            .setLegacyVoice(Voice.GEORGE)
-                            .setSource(TTSSource.LEGACY)
-                            .setMessage("$1")
-                    ))
-                    .build(),
-                PlayerChatAlert.builder()
-                    .enabled(false)
-                    .name("Guest Clan Chat TTS")
-                    .playerChatType(PlayerChatType.GUEST_CLAN)
-                    .message("{*}")
-                    .notifications(List.of(
-                        this.plugin.getInjector().getInstance(TextToSpeech.class)
-                            .setGain(5).setRate(2)
-                            .setLegacyVoice(Voice.GEORGE)
-                            .setSource(TTSSource.LEGACY)
-                            .setMessage("$1")
-                    ))
-                    .build(),
-                PlayerChatAlert.builder()
-                    .enabled(false)
-                    .name("GIM Chat TTS")
-                    .playerChatType(PlayerChatType.GIM)
-                    .message("{*}")
-                    .notifications(List.of(
-                        this.plugin.getInjector().getInstance(TextToSpeech.class)
-                            .setGain(5).setRate(2)
-                            .setLegacyVoice(Voice.GEORGE)
-                            .setSource(TTSSource.LEGACY)
-                            .setMessage("$1")
-                    )).build(),
-                PlayerChatAlert.builder()
-                    .enabled(false)
-                    .name("Public Chat TTS - ENABLE AT OWN RISK")
-                    .playerChatType(PlayerChatType.PUBLIC)
-                    .message("{*}")
-                    .notifications(List.of(
-                        this.plugin.getInjector().getInstance(TextToSpeech.class)
-                            .setGain(5).setRate(2)
-                            .setLegacyVoice(Voice.GEORGE)
-                            .setSource(TTSSource.LEGACY)
-                            .setMessage("$1")
-                    )).build()
-            ))
-            .build();
+        AlertGroup chatboxTTS = new AlertGroup("Chatbox TTS");
+        chatboxTTS.setEnabled(false);
+        chatboxTTS.setAlerts(List.of(
+            new PlayerChatAlert("Clan Chat TTS")
+                .setPlayerChatType(PlayerChatType.CLAN)
+                .setMessage("{*}")
+                .addNotification(
+                    this.plugin.getInjector().getInstance(TextToSpeech.class)
+                        .setGain(5).setRate(2)
+                        .setLegacyVoice(Voice.GEORGE)
+                        .setSource(TTSSource.LEGACY)
+                        .setMessage("$1")
+                ),
+            new PlayerChatAlert("Friends Chat TTS")
+                .setPlayerChatType(PlayerChatType.FRIENDS)
+                .setMessage("{*}")
+                .addNotification(
+                    this.plugin.getInjector().getInstance(TextToSpeech.class)
+                        .setGain(5).setRate(2)
+                        .setLegacyVoice(Voice.GEORGE)
+                        .setSource(TTSSource.LEGACY)
+                        .setMessage("$1")
+                ),
+            new PlayerChatAlert("Guest Clan Chat TTS")
+                .setPlayerChatType(PlayerChatType.GUEST_CLAN)
+                .setMessage("{*}")
+                .addNotification(
+                    this.plugin.getInjector().getInstance(TextToSpeech.class)
+                        .setGain(5).setRate(2)
+                        .setLegacyVoice(Voice.GEORGE)
+                        .setSource(TTSSource.LEGACY)
+                        .setMessage("$1")
+                ),
+            new PlayerChatAlert("GIM Chat TTS")
+                .setPlayerChatType(PlayerChatType.GIM)
+                .setMessage("{*}")
+                .addNotification(
+                    this.plugin.getInjector().getInstance(TextToSpeech.class)
+                        .setGain(5).setRate(2)
+                        .setLegacyVoice(Voice.GEORGE)
+                        .setSource(TTSSource.LEGACY)
+                        .setMessage("$1")
+                ),
+            new PlayerChatAlert("Private Chat TTS")
+                .setPlayerChatType(PlayerChatType.PRIVATE)
+                .setMessage("{*}")
+                .addNotification(
+                    this.plugin.getInjector().getInstance(TextToSpeech.class)
+                        .setGain(5).setRate(2)
+                        .setLegacyVoice(Voice.GEORGE)
+                        .setSource(TTSSource.LEGACY)
+                        .setMessage("$1")
+                ),
+            new PlayerChatAlert("Public Chat TTS - ENABLE AT OWN RISK")
+                .setPlayerChatType(PlayerChatType.PUBLIC)
+                .setMessage("{*}")
+                .addNotification(
+                    this.plugin.getInjector().getInstance(TextToSpeech.class)
+                        .setGain(5).setRate(2)
+                        .setLegacyVoice(Voice.GEORGE)
+                        .setSource(TTSSource.LEGACY)
+                        .setMessage("$1")
+                )
+        ));
 
-        ChatAlert cannonReload = ChatAlert.builder()
-            .name("Reload Cannon")
-            .message("Your cannon has * cannon balls remaining!")
-            .gameMessageType(GameMessageType.ANY)
-            .notifications(List.of(
-                this.plugin.getInjector().getInstance(ScreenFlash.class)
-                    .setColor(ColorUtil.fromHex("#46FF00"))
-                    .setFlashMode(FlashMode.SMOOTH_FLASH)
-                    .setFlashDuration(2),
-                this.plugin.getInjector().getInstance(TextToSpeech.class)
-                    .setGain(5)
-                    .setElevenLabsVoiceId("2EiwWnXFnvU5JabPnv8n")
-                    .setSource(TTSSource.ELEVEN_LABS)
-                    .setMessage("Reload!")
-            ))
-            .build();
+        ChatAlert cannonReload = new ChatAlert("Reload Cannon");
+        cannonReload.setMessage("Your cannon has * cannon balls remaining!");
+        cannonReload.setGameMessageType(GameMessageType.ANY);
+        cannonReload.addNotifications(
+            this.plugin.getInjector().getInstance(ScreenFlash.class)
+                .setColor(ColorUtil.fromHex("#46FF00"))
+                .setFlashMode(FlashMode.SMOOTH_FLASH)
+                .setFlashDuration(2),
+            this.plugin.getInjector().getInstance(TextToSpeech.class)
+                .setGain(5)
+                .setElevenLabsVoiceId("2EiwWnXFnvU5JabPnv8n")
+                .setSource(TTSSource.ELEVEN_LABS)
+                .setMessage("Reload!")
+        );
 
-        ChatAlert readyToHarvest = ChatAlert.builder()
-            .name("Ready to Harvest")
-            .message("Your {*} is ready to harvest in {*}.")
-            .debounceTime(100)
-            .notifications(List.of(
-                this.plugin.getInjector().getInstance(TextToSpeech.class)
-                    .setGain(5).setRate(1)
-                    .setLegacyVoice(Voice.LUCAS)
-                    .setSource(TTSSource.LEGACY)
-                    .setMessage("Your $1 patch in $2 is ready to harvest!")
-            ))
-            .build();
+        ChatAlert readyToHarvest = new ChatAlert("Ready to Harvest");
+        readyToHarvest.setMessage("Your {*} is ready to harvest in {*}.");
+        readyToHarvest.setDebounceTime(100);
+        readyToHarvest.addNotification(
+            this.plugin.getInjector().getInstance(TextToSpeech.class)
+                .setGain(5).setRate(1)
+                .setLegacyVoice(Voice.LUCAS)
+                .setSource(TTSSource.LEGACY)
+                .setMessage("Your $1 patch in $2 is ready to harvest!")
+        );
 
-        AlertGroup starterAlerts = AlertGroup.builder()
-            .name("Starter Alerts")
-            .alerts(List.of(kraken, chatboxTTS, cannonReload, readyToHarvest))
-            .build();
+        AlertGroup starterAlerts = new AlertGroup("Starter Alerts");
+        starterAlerts.setAlerts(List.of(
+            kraken,
+            chatboxTTS,
+            cannonReload,
+            readyToHarvest
+        ));
 
         this.addAlert(starterAlerts, false);
     }
@@ -483,6 +471,7 @@ public class AlertManager {
                 // Not sure why I thought it was a good idea to store the decibels in the JSON
                 log.debug("Need to convert all Sound and TTS gain back to 0,10 scale.");
                 this.alerts.stream()
+                    .filter(alert -> !(alert instanceof AlertGroup))
                     .flatMap(alert -> alert.getNotifications().stream())
                     .filter(notification -> notification instanceof IAudioNotification)
                     .map(notification -> (IAudioNotification) notification)
@@ -492,6 +481,7 @@ public class AlertManager {
             if (configVersion.compareTo(new Version("2.8.0")) < 0) {
                 log.debug("Need to convert flash notifications to new properties");
                 this.alerts.stream()
+                    .filter(alert -> !(alert instanceof AlertGroup))
                     .flatMap(alert -> alert.getNotifications().stream())
                     .filter(notification -> notification instanceof ScreenFlash)
                     .map(notification -> (ScreenFlash) notification)
@@ -506,6 +496,7 @@ public class AlertManager {
             if (configVersion.compareTo(new Version("2.13.0")) < 0) {
                 log.debug("Need to set default overlay notification text color");
                 this.alerts.stream()
+                    .filter(alert -> !(alert instanceof AlertGroup))
                     .flatMap(alert -> alert.getNotifications().stream())
                     .filter(notification -> notification instanceof Overlay)
                     .map(notification -> (Overlay) notification)
