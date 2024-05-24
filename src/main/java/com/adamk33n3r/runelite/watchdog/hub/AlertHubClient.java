@@ -15,7 +15,6 @@ import javax.imageio.ImageIO;
 import javax.inject.Inject;
 import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Comparator;

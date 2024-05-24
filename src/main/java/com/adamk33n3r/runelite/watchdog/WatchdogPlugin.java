@@ -1,12 +1,7 @@
 package com.adamk33n3r.runelite.watchdog;
 
-import com.adamk33n3r.runelite.watchdog.alerts.Alert;
-import com.adamk33n3r.runelite.watchdog.alerts.ChatAlert;
-import com.adamk33n3r.runelite.watchdog.alerts.NotificationFiredAlert;
-import com.adamk33n3r.runelite.watchdog.notifications.ScreenFlash;
-import com.adamk33n3r.runelite.watchdog.notifications.TrayNotification;
-
 import com.adamk33n3r.runelite.watchdog.ui.notifications.screenmarker.ScreenMarkerUtil;
+
 import net.runelite.api.Client;
 import net.runelite.api.ItemID;
 import net.runelite.api.MessageNode;
@@ -41,8 +36,8 @@ import okhttp3.OkHttpClient;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
-import javax.swing.*;
-import java.util.List;
+import javax.swing.SwingUtilities;
+import javax.swing.ToolTipManager;
 import java.util.Properties;
 import java.util.Queue;
 

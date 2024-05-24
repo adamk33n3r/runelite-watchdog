@@ -6,18 +6,19 @@ import com.adamk33n3r.runelite.watchdog.alerts.Alert;
 import com.adamk33n3r.runelite.watchdog.alerts.AlertGroup;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
 
-import lombok.Setter;
 import net.runelite.client.plugins.config.ConfigPlugin;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.components.MouseDragEventForwarder;
 import net.runelite.client.util.ImageUtil;
 
 import lombok.Getter;
+import lombok.Setter;
 
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;

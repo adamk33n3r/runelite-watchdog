@@ -26,15 +26,15 @@ package com.adamk33n3r.runelite.watchdog.ui.notifications.screenmarker;
 
 import com.adamk33n3r.runelite.watchdog.notifications.ScreenMarker;
 
+import net.runelite.client.ui.overlay.Overlay;
+import net.runelite.client.ui.overlay.OverlayLayer;
+import net.runelite.client.ui.overlay.OverlayPosition;
+
+import javax.inject.Inject;
 import java.awt.BasicStroke;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Stroke;
-import javax.inject.Inject;
-
-import net.runelite.client.ui.overlay.Overlay;
-import net.runelite.client.ui.overlay.OverlayLayer;
-import net.runelite.client.ui.overlay.OverlayPosition;
 
 class ScreenMarkerCreationOverlay extends Overlay
 {

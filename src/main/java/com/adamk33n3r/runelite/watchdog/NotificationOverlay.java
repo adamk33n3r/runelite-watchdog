@@ -4,7 +4,6 @@ import com.adamk33n3r.runelite.watchdog.notifications.Overlay;
 
 import net.runelite.api.Client;
 import net.runelite.client.ui.ClientUI;
-import net.runelite.client.ui.overlay.OverlayMenuEntry;
 import net.runelite.client.ui.overlay.OverlayPanel;
 import net.runelite.client.ui.overlay.OverlayPosition;
 import net.runelite.client.ui.overlay.components.PanelComponent;
@@ -21,7 +20,6 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
 

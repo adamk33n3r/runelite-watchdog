@@ -25,17 +25,18 @@
  */
 package com.adamk33n3r.runelite.watchdog.ui.notifications.screenmarker;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics2D;
-import java.awt.Rectangle;
-import javax.inject.Inject;
 import net.runelite.api.Client;
 import net.runelite.api.MenuEntry;
 import net.runelite.api.widgets.Widget;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;
+
+import javax.inject.Inject;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics2D;
+import java.awt.Rectangle;
 
 class ScreenMarkerWidgetHighlightOverlay extends Overlay
 {

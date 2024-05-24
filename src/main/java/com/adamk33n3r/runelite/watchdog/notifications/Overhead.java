@@ -3,7 +3,6 @@ package com.adamk33n3r.runelite.watchdog.notifications;
 import com.adamk33n3r.runelite.watchdog.Util;
 import com.adamk33n3r.runelite.watchdog.WatchdogConfig;
 
-import lombok.experimental.Accessors;
 import net.runelite.api.Client;
 import net.runelite.api.Constants;
 import net.runelite.api.Player;
@@ -12,7 +11,7 @@ import net.runelite.client.util.ColorUtil;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
+import lombok.experimental.Accessors;
 
 import javax.inject.Inject;
 import java.awt.Color;

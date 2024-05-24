@@ -24,10 +24,11 @@
  */
 package com.adamk33n3r.runelite.watchdog.ui.notifications.screenmarker;
 
+import net.runelite.client.input.MouseAdapter;
+
+import javax.swing.SwingUtilities;
 import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
-import javax.swing.SwingUtilities;
-import net.runelite.client.input.MouseAdapter;
 
 class ScreenMarkerMouseListener extends MouseAdapter
 {

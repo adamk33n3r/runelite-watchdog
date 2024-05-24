@@ -6,13 +6,15 @@ import com.adamk33n3r.runelite.watchdog.ui.Icons;
 import com.adamk33n3r.runelite.watchdog.ui.ImportExportDialog;
 import com.adamk33n3r.runelite.watchdog.ui.MessagePickerDialog;
 import com.adamk33n3r.runelite.watchdog.ui.alerts.*;
-import com.adamk33n3r.runelite.watchdog.ui.panels.*;
+import com.adamk33n3r.runelite.watchdog.ui.panels.AlertListPanel;
+import com.adamk33n3r.runelite.watchdog.ui.panels.HistoryPanel;
+import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
+import com.adamk33n3r.runelite.watchdog.ui.panels.ToolsPanel;
 
 import net.runelite.api.Client;
 import net.runelite.api.MessageNode;
 import net.runelite.client.events.NotificationFired;
 import net.runelite.client.ui.ColorScheme;
-import net.runelite.client.ui.MultiplexingPluginPanel;
 import net.runelite.client.ui.PluginPanel;
 import net.runelite.client.util.LinkBrowser;
 

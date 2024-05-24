@@ -1,6 +1,7 @@
 package com.adamk33n3r.runelite.watchdog;
 
-import lombok.*;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 import java.io.File;
 

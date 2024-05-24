@@ -4,7 +4,9 @@ import net.runelite.client.util.Text;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.GridLayout;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 

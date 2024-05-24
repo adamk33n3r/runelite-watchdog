@@ -16,7 +16,9 @@ import javax.swing.*;
 import javax.swing.border.Border;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
+import java.awt.GridLayout;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 

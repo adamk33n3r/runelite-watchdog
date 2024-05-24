@@ -4,8 +4,8 @@ import com.adamk33n3r.runelite.watchdog.WatchdogPanel;
 import com.adamk33n3r.runelite.watchdog.alerts.StatChangedAlert;
 import com.adamk33n3r.runelite.watchdog.ui.ComparableNumber;
 import com.adamk33n3r.runelite.watchdog.ui.panels.AlertPanel;
-
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
+
 import net.runelite.api.Skill;
 
 public class StatChangedAlertPanel extends AlertPanel<StatChangedAlert> {
