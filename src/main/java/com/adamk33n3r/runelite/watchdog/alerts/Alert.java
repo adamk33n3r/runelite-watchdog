@@ -5,11 +5,8 @@ import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
 import com.adamk33n3r.runelite.watchdog.notifications.MessageNotification;
 import com.adamk33n3r.runelite.watchdog.notifications.Notification;
 
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.experimental.SuperBuilder;
+import lombok.*;
+import lombok.experimental.Accessors;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -20,13 +17,11 @@ import java.util.stream.Stream;
 
 @Getter
 @Setter
-@SuperBuilder
+@Accessors(chain = true)
 public abstract class Alert {
-    @Builder.Default
     private boolean enabled = true;
     private String name;
     private int debounceTime;
-    @Builder.Default
     private boolean randomNotifications = false;
 
     @Nullable
@@ -44,9 +39,18 @@ public abstract class Alert {
         return this.parent;
     }
 
-    @Builder.Default
     @Setter(AccessLevel.PROTECTED)
     private List<Notification> notifications = new ArrayList<>();
+
+    public Alert addNotification(Notification notification) {
+        this.notifications.add(notification);
+        return this;
+    }
+
+    public Alert addNotifications(Notification... notifications) {
+        this.notifications.addAll(Arrays.asList(notifications));
+        return this;
+    }
 
     public Alert(String name) {
         this.name = name;

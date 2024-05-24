@@ -1,29 +1,29 @@
 plugins {
-	id 'java'
+    id 'java'
 }
 
 repositories {
-	mavenLocal()
-	maven {
-		url = 'https://repo.runelite.net'
-	}
-	mavenCentral()
+    mavenLocal()
+    maven {
+        url = 'https://repo.runelite.net'
+    }
+    mavenCentral()
 }
 
 def runeLiteVersion = 'latest.release'
 
 dependencies {
-	implementation files('lib/jaco-mp3-player-0.9.5.jar')
-	compileOnly group: 'net.runelite', name:'client', version: runeLiteVersion
+    implementation files('lib/jaco-mp3-player-0.9.5.jar')
+    compileOnly group: 'net.runelite', name:'client', version: runeLiteVersion
 
-	compileOnly 'org.projectlombok:lombok:1.18.20'
-	annotationProcessor 'org.projectlombok:lombok:1.18.20'
+    compileOnly 'org.projectlombok:lombok:1.18.20'
+    annotationProcessor 'org.projectlombok:lombok:1.18.20'
 
-	testImplementation 'junit:junit:4.13.2'
-	testImplementation 'org.mockito:mockito-core:3.4.0'
-	testImplementation 'com.google.inject.extensions:guice-testlib:4.1.0'
-	testImplementation group: 'net.runelite', name:'client', version: runeLiteVersion
-	testImplementation group: 'net.runelite', name:'jshell', version: runeLiteVersion
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.mockito:mockito-core:3.4.0'
+    testImplementation 'com.google.inject.extensions:guice-testlib:4.1.0'
+    testImplementation group: 'net.runelite', name:'client', version: runeLiteVersion
+    testImplementation group: 'net.runelite', name:'jshell', version: runeLiteVersion
 }
 
 group = 'com.adamk33n3r.runelite.watchdog'
@@ -31,7 +31,7 @@ group = 'com.adamk33n3r.runelite.watchdog'
 def versionProps = new Properties()
 def versionPropsFile = file("src/main/resources/${group.replace('.', '/')}/version.properties")
 if (versionPropsFile.exists())
-	versionProps.load(versionPropsFile.newReader())
+    versionProps.load(versionPropsFile.newReader())
 
 def major = (versionProps['VERSION_MAJOR'] as String ?: '0').toInteger()
 def minor = (versionProps['VERSION_MINOR'] as String ?: '0').toInteger()
@@ -41,58 +41,58 @@ def phase = (versionProps['VERSION_PHASE'] as String ?: '')
 
 version = major+'.'+minor+'.'+patch
 if (!phase.empty)
-	version = version+'-'+phase
+    version = version+'-'+phase
 version = version+'+'+build
 
 sourceCompatibility = '1.8'
 targetCompatibility = '1.8'
 
 compileJava.doFirst {
-	def runTasks = gradle.startParameter.taskNames
-	if ("shadowJar" in runTasks) return
-	build += 1
-	versionProps['VERSION_BUILD'] = build.toString()
-	versionProps.store(versionPropsFile.newWriter(), null)
-	version = major+'.'+minor+'.'+patch
-	if (!phase.empty)
-		version = version+'-'+phase
-	version = version+'+'+build
+    def runTasks = gradle.startParameter.taskNames
+    if ("shadowJar" in runTasks) return
+    build += 1
+    versionProps['VERSION_BUILD'] = build.toString()
+    versionProps.store(versionPropsFile.newWriter(), null)
+    version = major+'.'+minor+'.'+patch
+    if (!phase.empty)
+        version = version+'-'+phase
+    version = version+'+'+build
 }
 
 tasks.withType(JavaCompile) {
-	options.encoding = 'UTF-8'
-	options.release.set(11)
+    options.encoding = 'UTF-8'
+    options.release.set(11)
 }
 
 tasks.register("shadowJar", Jar) {
-	dependsOn configurations.testRuntimeClasspath
-	manifest {
-		attributes 'Main-Class': 'com.adamk33n3r.runelite.watchdog.WatchdogPluginLauncher'
-	}
+    dependsOn configurations.testRuntimeClasspath
+    manifest {
+        attributes 'Main-Class': 'com.adamk33n3r.runelite.watchdog.WatchdogPluginLauncher'
+    }
 
-	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-	from sourceSets.main.output
-	from sourceSets.test.output
-	from({
-		configurations.testRuntimeClasspath.collect {
-			// Ignore test framework stuff, especially bytebuddy because it's like 4MB
-			if (it.path.contains("mockito") ||
-				it.path.contains("guice-testlib") ||
-				it.path.contains("junit") ||
-				it.path.contains("bytebuddy")) {
-				return null
-			}
-			it.isDirectory() ? it : zipTree(it)
-		}
-	})
-	exclude("META-INF/INDEX.LIST")
-	exclude("META-INF/*.SF")
-	exclude("META-INF/*.DSA")
-	exclude("META-INF/*.RSA")
-	exclude "**/module-info.class"
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from sourceSets.main.output
+    from sourceSets.test.output
+    from({
+        configurations.testRuntimeClasspath.collect {
+            // Ignore test framework stuff, especially bytebuddy because it's like 4MB
+            if (it.path.contains("mockito") ||
+                it.path.contains("guice-testlib") ||
+                it.path.contains("junit") ||
+                it.path.contains("bytebuddy")) {
+                return null
+            }
+            it.isDirectory() ? it : zipTree(it)
+        }
+    })
+    exclude("META-INF/INDEX.LIST")
+    exclude("META-INF/*.SF")
+    exclude("META-INF/*.DSA")
+    exclude("META-INF/*.RSA")
+    exclude "**/module-info.class"
 
-	group = BasePlugin.BUILD_GROUP
-	archiveClassifier = "shadow"
-	archiveFileName = rootProject.name + "-" + project.version + "-all.jar"
-	destinationDirectory = file('jars')
+    group = BasePlugin.BUILD_GROUP
+    archiveClassifier = "shadow"
+    archiveFileName = rootProject.name + "-" + project.version + "-all.jar"
+    destinationDirectory = file('jars')
 }
