@@ -4,6 +4,7 @@ import com.adamk33n3r.runelite.watchdog.WatchdogMuxer;
 import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
 import com.adamk33n3r.runelite.watchdog.ui.Icons;
 import com.adamk33n3r.runelite.watchdog.ui.StretchedStackedLayout;
+
 import net.runelite.client.ui.PluginPanel;
 
 import lombok.extern.slf4j.Slf4j;
@@ -11,9 +12,12 @@ import lombok.extern.slf4j.Slf4j;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
-import javax.swing.*;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
 
 @Slf4j
 @Singleton

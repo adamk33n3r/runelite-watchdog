@@ -1,9 +1,5 @@
 package com.adamk33n3r.runelite.watchdog;
 
-import com.google.common.base.Strings;
-import com.google.common.escape.Escaper;
-import com.google.common.escape.Escapers;
-import lombok.extern.slf4j.Slf4j;
 import net.runelite.client.RuneLite;
 import net.runelite.client.RuneLiteProperties;
 import net.runelite.client.chat.ChatMessageManager;
@@ -12,10 +8,15 @@ import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.ui.ClientUI;
 import net.runelite.client.util.OSType;
 
+import com.google.common.base.Strings;
+import com.google.common.escape.Escaper;
+import com.google.common.escape.Escapers;
+import lombok.extern.slf4j.Slf4j;
+
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
-import java.awt.*;
+import java.awt.TrayIcon;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;

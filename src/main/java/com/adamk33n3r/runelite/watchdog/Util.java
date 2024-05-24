@@ -1,13 +1,12 @@
 package com.adamk33n3r.runelite.watchdog;
 
 import net.runelite.api.GameObject;
-import net.runelite.api.coords.WorldArea;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.client.util.Text;
 
 import com.google.common.base.Splitter;
 
-import java.awt.*;
+import java.awt.Color;
 import java.text.Normalizer;
 import java.util.List;
 import java.util.stream.Collectors;

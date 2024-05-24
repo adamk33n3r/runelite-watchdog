@@ -2,12 +2,16 @@ package com.adamk33n3r.runelite.watchdog.ui;
 
 import com.adamk33n3r.runelite.watchdog.Displayable;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+
 import net.runelite.client.ui.DynamicGridLayout;
 
-import javax.swing.*;
-import java.awt.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
+import javax.swing.JComboBox;
+import javax.swing.JPanel;
+import javax.swing.JSpinner;
+import java.awt.Dimension;
 import java.util.function.Consumer;
 
 public class ComparableNumber extends JPanel {

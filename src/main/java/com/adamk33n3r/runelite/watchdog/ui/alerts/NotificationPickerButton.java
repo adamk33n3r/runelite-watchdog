@@ -4,7 +4,8 @@ import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
 import com.adamk33n3r.runelite.watchdog.ui.Icons;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
 
-import javax.swing.*;
+import javax.swing.JButton;
+import javax.swing.JPanel;
 import java.util.function.Consumer;
 
 public class NotificationPickerButton extends JPanel {

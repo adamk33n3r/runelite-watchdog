@@ -2,15 +2,13 @@ package com.adamk33n3r.runelite.watchdog.ui.alerts;
 
 import com.adamk33n3r.runelite.watchdog.WatchdogPanel;
 import com.adamk33n3r.runelite.watchdog.alerts.LocationAlert;
-import com.adamk33n3r.runelite.watchdog.ui.PlaceholderTextField;
 import com.adamk33n3r.runelite.watchdog.ui.panels.AlertPanel;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
-import net.runelite.api.Client;
-import net.runelite.api.coords.WorldPoint;
 
-import javax.swing.*;
-import javax.swing.border.EmptyBorder;
-import java.awt.*;
+import net.runelite.api.Client;
+
+import javax.swing.JPanel;
+import java.awt.GridLayout;
 
 public class LocationAlertPanel extends AlertPanel<LocationAlert> {
     private final Client client;

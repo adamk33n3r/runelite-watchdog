@@ -6,7 +6,6 @@ import com.adamk33n3r.runelite.watchdog.WatchdogConfig;
 import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
 import com.adamk33n3r.runelite.watchdog.alerts.Alert;
 
-import lombok.experimental.Accessors;
 import net.runelite.api.Client;
 import net.runelite.api.Constants;
 import net.runelite.client.ui.ClientUI;

@@ -24,14 +24,16 @@
  */
 package com.adamk33n3r.runelite.watchdog.ui.notifications.screenmarker;
 
+import net.runelite.client.ui.overlay.RenderableEntity;
+
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Stroke;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.Setter;
-import net.runelite.client.ui.overlay.RenderableEntity;
 
 @Getter(AccessLevel.PACKAGE)
 @Setter(AccessLevel.PACKAGE)

@@ -2,12 +2,12 @@ package com.adamk33n3r.runelite.watchdog.notifications;
 
 import com.adamk33n3r.runelite.watchdog.WatchdogConfig;
 
-import lombok.experimental.Accessors;
 import net.runelite.client.ui.ClientUI;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.Accessors;
 
 import javax.inject.Inject;
 

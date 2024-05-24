@@ -13,7 +13,10 @@ import net.runelite.client.ui.overlay.OverlayPosition;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.inject.Inject;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics2D;
+import java.awt.Rectangle;
 import java.time.Instant;
 
 @Slf4j

@@ -29,24 +29,22 @@ import com.adamk33n3r.runelite.watchdog.WatchdogConfig;
 import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
 import com.adamk33n3r.runelite.watchdog.notifications.ScreenMarker;
 
-import java.awt.BasicStroke;
-import java.awt.Dimension;
-import java.awt.Graphics2D;
-import java.time.Duration;
-import java.time.Instant;
-
-import lombok.Getter;
-import lombok.NonNull;
-
 import net.runelite.api.Client;
-import net.runelite.api.Constants;
 import net.runelite.api.MenuAction;
 import net.runelite.client.ui.ClientUI;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPosition;
 
+import lombok.Getter;
+import lombok.NonNull;
+
 import javax.inject.Inject;
+import java.awt.BasicStroke;
+import java.awt.Dimension;
+import java.awt.Graphics2D;
+import java.time.Duration;
+import java.time.Instant;
 
 public class ScreenMarkerOverlay extends Overlay {
     @Getter

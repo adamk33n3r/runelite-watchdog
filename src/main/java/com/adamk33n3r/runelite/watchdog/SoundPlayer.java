@@ -1,11 +1,12 @@
 package com.adamk33n3r.runelite.watchdog;
 
-import jaco.mp3.player.MP3Player;
-import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
 import net.runelite.api.Constants;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.ui.ClientUI;
+
+import jaco.mp3.player.MP3Player;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;

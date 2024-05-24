@@ -420,7 +420,8 @@ public interface WatchdogConfig extends Config {
     @ConfigItem(
         keyName = DEFAULT_FORCE_FOCUS,
         name = "Force Focus",
-        description = "Sets the default focus mode to force"
+        description = "Sets the default focus mode to force",
+        section = requestFocusSection
     )
     default boolean defaultRequestFocusForce() { return false; }
     //endregion
