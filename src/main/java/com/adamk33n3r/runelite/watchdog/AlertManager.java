@@ -426,6 +426,9 @@ public class AlertManager {
         if (alert instanceof AlertGroup) {
             ((AlertGroup) alert).getAlerts().forEach(subAlert -> this.setUpAlert(subAlert, overrideWithDefaults));
         } else {
+            if (alert.getNotifications() == null) {
+                return;
+            }
             for (INotification notification : alert.getNotifications()) {
                 if (notification instanceof TextToSpeech) {
                     TextToSpeech tts = (TextToSpeech) notification;
