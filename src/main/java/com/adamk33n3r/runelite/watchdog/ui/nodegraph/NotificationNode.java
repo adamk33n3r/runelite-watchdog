@@ -150,6 +150,7 @@ public class NotificationNode extends AcceptsConnectionNode {
                     break;
                 case LEGACY:
                     JSlider rateSlider = new JSlider(1, 5, tts.getRate());
+                    rateSlider.setSnapToTicks(true);
                     rateSlider.setBackground(ColorScheme.MEDIUM_GRAY_COLOR);
                     rateSlider.addChangeListener(ev -> {
                         tts.setRate(rateSlider.getValue());
