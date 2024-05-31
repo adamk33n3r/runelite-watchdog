@@ -45,7 +45,7 @@ public class ConnectionPointOut<T> extends ConnectionPoint {
                 Component deepestComponentAt = SwingUtilities.getDeepestComponentAt(nodePanel.getGraphPanel(), point.x, point.y);
                 System.out.print("deepest component: ");
                 System.out.println(deepestComponentAt);
-                if (deepestComponentAt.equals(nodePanel.getGraphPanel())) {
+                if (deepestComponentAt.getParent().equals(nodePanel.getGraphPanel())) {
                     System.out.println("dropped on graph");
                     nodePanel.getGraphPanel().createNode(e.getComponent(), e.getX(), e.getY(), new Class[]{NotificationType.class, LogicNodeType.class},(newNode) -> {
                         if (newNode instanceof NotificationNodePanel) {
