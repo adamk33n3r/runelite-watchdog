@@ -1,6 +1,9 @@
 package com.adamk33n3r.runelite.watchdog.ui.nodegraph;
 
 import com.adamk33n3r.runelite.watchdog.NotificationType;
+import com.adamk33n3r.runelite.watchdog.nodegraph.Node;
+import com.adamk33n3r.runelite.watchdog.nodegraph.Var;
+import lombok.Getter;
 
 import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
@@ -8,71 +11,13 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
-public class ConnectionPoint extends JComponent {
-    private DragConnection newConnection;
+public abstract class ConnectionPoint extends JComponent {
+    @Getter
+    private NodePanel nodePanel;
 
-    public ConnectionPoint(Node node) {
+    public ConnectionPoint(NodePanel nodePanel) {
+        this.nodePanel = nodePanel;
         System.out.println("new connection point");
-        MouseAdapter mouseAdapter = new MouseAdapter() {
-            @Override
-            public void mousePressed(MouseEvent e) {
-                super.mousePressed(e);
-                System.out.println("mouse pressed");
-                Point point = SwingUtilities.convertPoint(ConnectionPoint.this, e.getPoint(), node);
-                point.x -= Node.PANEL_WIDTH;
-                ConnectionPoint.this.newConnection = new DragConnection(node, point);
-                node.getGraph().add(ConnectionPoint.this.newConnection, 0);
-                node.getGraph().revalidate();
-                node.getGraph().repaint();
-            }
-
-            @Override
-            public void mouseReleased(MouseEvent e) {
-                super.mouseReleased(e);
-                System.out.println("mouse released");
-                System.out.println(ConnectionPoint.this.newConnection);
-                node.getGraph().remove(ConnectionPoint.this.newConnection);
-                node.getGraph().revalidate();
-                node.getGraph().repaint();
-                ConnectionPoint.this.newConnection = null;
-
-                Point point = SwingUtilities.convertPoint(ConnectionPoint.this, e.getPoint(), node.getGraph());
-                Component deepestComponentAt = SwingUtilities.getDeepestComponentAt(node.getGraph(), point.x, point.y);
-                System.out.print("deepest component");
-                System.out.println(deepestComponentAt);
-                if (deepestComponentAt.getParent().equals(node.getGraph())) {
-                    System.out.println("dropped on graph");
-                    node.getGraph().createNode(e.getComponent(), e.getX(), e.getY(), new Class[]{NotificationType.class, LogicNodeType.class},(newNode) -> {
-                        node.getGraph().connect(node, newNode);
-                    });
-                    return;
-                }
-
-                AcceptsConnectionNode droppedNode = (AcceptsConnectionNode) SwingUtilities.getAncestorOfClass(AcceptsConnectionNode.class, deepestComponentAt);
-                if (droppedNode == null || droppedNode.equals(node)) {
-                    return;
-                }
-                System.out.println(point);
-                System.out.println(droppedNode);
-                System.out.println(droppedNode.getName());
-                node.getGraph().connect(node, droppedNode);
-            }
-
-            @Override
-            public void mouseDragged(MouseEvent e) {
-                if (ConnectionPoint.this.newConnection == null)
-                    return;
-                Point point = e.getPoint();
-                point = SwingUtilities.convertPoint(ConnectionPoint.this, point, node);
-//                point = SwingUtilities.convertPoint(ConnectionPoint.this, point, node);
-                point.x -= Node.PANEL_WIDTH;
-//                SwingUtilities.convertPointToScreen(point, ConnectionPoint.this);
-                ConnectionPoint.this.newConnection.setEndOffset(point);
-                ConnectionPoint.this.newConnection.repaint();
-            }
-        };
-        this.addMouseListener(mouseAdapter);
-        this.addMouseMotionListener(mouseAdapter);
     }
 
     @Override

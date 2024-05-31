@@ -9,17 +9,17 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum LogicNodeType implements Displayable {
 //    IF("If", "If condition", IfNode.class),
-    AND("And", "And", IfNode.class),
-    OR("Or", "Or", IfNode.class),
+    AND("And", "And", IfNodePanel.class),
+    OR("Or", "Or", IfNodePanel.class),
 
     // Equality
-    EQUALS("Equals", "Equals", IfNode.class),
-    NOT_EQUALS("Not Equals", "Not Equals", IfNode.class),
-    GREATER_THAN("Greater Than", "Greater Than", IfNode.class),
-    LESS_THAN("Less Than", "Less Than", IfNode.class),
+    EQUALS("Equals", "Equals", IfNodePanel.class),
+    NOT_EQUALS("Not Equals", "Not Equals", IfNodePanel.class),
+    GREATER_THAN("Greater Than", "Greater Than", IfNodePanel.class),
+    LESS_THAN("Less Than", "Less Than", IfNodePanel.class),
     ;
 
     private final String name;
     private final String tooltip;
-    private final Class<? extends Node> implClass;
+    private final Class<? extends NodePanel> implClass;
 }

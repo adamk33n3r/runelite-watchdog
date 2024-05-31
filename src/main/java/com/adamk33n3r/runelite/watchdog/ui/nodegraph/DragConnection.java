@@ -1,15 +1,16 @@
 package com.adamk33n3r.runelite.watchdog.ui.nodegraph;
 
-import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Point;
 
 public class DragConnection extends Connection {
-    private final Node startNode;
-    public DragConnection(Node start, Point end) {
+    private final NodePanel startNodePanel;
+    private final ConnectionPointOut<?> startPoint;
+    public DragConnection(NodePanel start, ConnectionPointOut<?> startPoint, Point end) {
         super(start.getLocation(), end);
-        this.start.x += Node.PANEL_WIDTH;
-        this.startNode = start;
+        this.start.x += NodePanel.PANEL_WIDTH;
+        this.startNodePanel = start;
+        this.startPoint = startPoint;
         this.recalculateBounds();
     }
 
@@ -22,7 +23,7 @@ public class DragConnection extends Connection {
     @Override
     protected void paintComponent(Graphics g) {
         this.start.x = this.end.x > 0 ? 0 : -this.end.x;
-        this.start.y = this.startNode.getY() - this.getY() - BOUNDS_OFFSET + Node.PANEL_HEIGHT / 2;
+        this.start.y = this.startNodePanel.getY() - this.getY() - BOUNDS_OFFSET + NodePanel.PANEL_HEIGHT / 2;
 
         // I think this doesn't break things because we are setting the bounds every time
         this.end.x = Math.max(0, this.end.x);
@@ -36,15 +37,15 @@ public class DragConnection extends Connection {
 
     @Override
     public void recalculateBounds() {
-        if (this.startNode == null)
+        if (this.startNodePanel == null)
             return;
-        int baseX = this.startNode.getX() + Node.PANEL_WIDTH;
+        int baseX = this.startNodePanel.getX() + NodePanel.PANEL_WIDTH;
 
         this.setBounds(
             Math.min(baseX, baseX + this.end.x) - BOUNDS_OFFSET,
-            Math.min(this.startNode.getY(), this.startNode.getY() + this.end.y) - BOUNDS_OFFSET,
+            Math.min(this.startNodePanel.getY(), this.startNodePanel.getY() + this.end.y) - BOUNDS_OFFSET,
             Math.abs(baseX - (baseX + this.end.x)) + BOUNDS_OFFSET * 2,
-            Node.PANEL_HEIGHT + Math.max(0, this.end.y - Node.PANEL_HEIGHT) - Math.min(0, this.end.y) + BOUNDS_OFFSET * 2
+            NodePanel.PANEL_HEIGHT + Math.max(0, this.end.y - NodePanel.PANEL_HEIGHT) - Math.min(0, this.end.y) + BOUNDS_OFFSET * 2
         );
 //        System.out.println(this.getBounds());
 //        int i = Math.abs(baseX - (baseX + this.end.x));

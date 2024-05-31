@@ -6,6 +6,7 @@ import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
 import com.adamk33n3r.runelite.watchdog.alerts.FlashMode;
 import com.adamk33n3r.runelite.watchdog.elevenlabs.ElevenLabs;
 import com.adamk33n3r.runelite.watchdog.elevenlabs.Voice;
+import com.adamk33n3r.runelite.watchdog.nodegraph.nodes.NotificationNode;
 import com.adamk33n3r.runelite.watchdog.notifications.Notification;
 import com.adamk33n3r.runelite.watchdog.notifications.ScreenFlash;
 import com.adamk33n3r.runelite.watchdog.notifications.TextToSpeech;
@@ -15,6 +16,8 @@ import com.adamk33n3r.runelite.watchdog.ui.Icons;
 import com.adamk33n3r.runelite.watchdog.ui.notifications.VoiceChooser;
 import com.adamk33n3r.runelite.watchdog.ui.notifications.VolumeSlider;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
+import com.google.gson.reflect.TypeToken;
+import lombok.Getter;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.components.ColorJButton;
 import net.runelite.client.ui.components.colorpicker.ColorPickerManager;
@@ -24,13 +27,18 @@ import javax.swing.text.AbstractDocument;
 import java.awt.*;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.util.List;
 
-public class NotificationNode extends AcceptsConnectionNode {
-    public NotificationNode(Graph graph, int x, int y, String name, Color color, Notification notification, ColorPickerManager colorPickerManager) {
-        super(graph, x, y, name, color);
+public class NotificationNodePanel extends AcceptsConnectionNodePanel {
+    @Getter
+    private final ConnectionPointIn<String[]> inputConnectionPoint;
 
-        ConnectionPoint inputConnectionPoint = new ConnectionPoint(this);
-        this.add(inputConnectionPoint, BorderLayout.WEST);
+    public NotificationNodePanel(GraphPanel graphPanel, int x, int y, String name, Color color, NotificationNode notificationNode, ColorPickerManager colorPickerManager) {
+        super(graphPanel, notificationNode, x, y, name, color);
+        Notification notification = notificationNode.getNotification();
+
+        this.inputConnectionPoint = new ConnectionPointIn<>(this, name, String[].class, new String[0]);
+        this.add(this.inputConnectionPoint, BorderLayout.WEST);
 
         JButton testBtn = new JButton("TEST");
         testBtn.addActionListener((ev) -> notification.fireForced(new String[]{}));

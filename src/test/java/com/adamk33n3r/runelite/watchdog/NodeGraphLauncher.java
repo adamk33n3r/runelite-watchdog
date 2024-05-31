@@ -1,6 +1,6 @@
 package com.adamk33n3r.runelite.watchdog;
 
-import com.adamk33n3r.runelite.watchdog.ui.nodegraph.Graph;
+import com.adamk33n3r.runelite.watchdog.ui.nodegraph.GraphPanel;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import net.runelite.client.*;
@@ -45,7 +45,7 @@ public class NodeGraphLauncher {
             SwingUtilities.invokeLater(NodeGraphLauncher::rebuild);
         });
 
-        Graph content = injector.getInstance(Graph.class);
+        GraphPanel content = injector.getInstance(GraphPanel.class);
 
 //        Graph content = new Graph();
         JScrollPane viewport = new JScrollPane(content);

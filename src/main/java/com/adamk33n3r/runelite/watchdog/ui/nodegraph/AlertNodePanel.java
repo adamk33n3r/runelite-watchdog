@@ -3,20 +3,25 @@ package com.adamk33n3r.runelite.watchdog.ui.nodegraph;
 import com.adamk33n3r.runelite.watchdog.alerts.Alert;
 import com.adamk33n3r.runelite.watchdog.alerts.ChatAlert;
 import com.adamk33n3r.runelite.watchdog.alerts.SpawnedAlert;
-import com.adamk33n3r.runelite.watchdog.ui.alerts.GameMessageAlertPanel;
-import com.adamk33n3r.runelite.watchdog.ui.alerts.SpawnedAlertPanel;
+import com.adamk33n3r.runelite.watchdog.nodegraph.Node;
+import com.adamk33n3r.runelite.watchdog.nodegraph.nodes.TriggerNode;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
+import lombok.Getter;
 
-import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.util.List;
 
-public class AlertNode extends Node {
-    public AlertNode(Graph graph, int x, int y, String name, Color color, Alert alert) {
-        super(graph, x, y, name, color);
+@Getter
+public class AlertNodePanel extends NodePanel {
+    private final ConnectionPointOut<String[]> outputConnectionPoint;
+
+    public AlertNodePanel(GraphPanel graphPanel, int x, int y, String name, Color color, TriggerNode triggerNode) {
+        super(graphPanel, triggerNode, x, y, name, color);
+        Alert alert = triggerNode.getAlert();
 
         this.items.add(new TextInput("Name", alert.getName()));
         JSpinner debounce = PanelUtils.createSpinner(alert.getDebounceTime(), 0, 8640000, 100, alert::setDebounceTime);
@@ -40,7 +45,7 @@ public class AlertNode extends Node {
              */
         }
 
-        ConnectionPoint connectionPoint = new ConnectionPoint(this);
-        this.add(connectionPoint, BorderLayout.EAST);
+        this.outputConnectionPoint = new ConnectionPointOut<>(this, name, String[].class, new String[0]);
+        this.add(this.outputConnectionPoint, BorderLayout.EAST);
     }
 }
