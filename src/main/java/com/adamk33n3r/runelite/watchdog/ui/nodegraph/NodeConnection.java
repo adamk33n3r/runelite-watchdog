@@ -23,6 +23,10 @@ public class NodeConnection extends Connection {
 //            this.startNodePanel.addConnection(this);
 //        if (this.endNodePanel != null)
 //            this.endNodePanel.addConnection(this);
+        if (this.startPoint != null)
+            this.startPoint.getNodePanel().addConnection(this);
+        if (this.endPoint != null)
+            this.endPoint.getNodePanel().addConnection(this);
         this.recalculateBounds();
     }
 
@@ -37,16 +41,19 @@ public class NodeConnection extends Connection {
 //        this.start.y = Math.max(this.startNodePanel.getY() - this.endNodePanel.getY(), 0) + this.startNodePanel.getHeight() / 2;
 //        this.end.x = Math.max(this.endNodePanel.getX() - this.startNodePanel.getX(), 0);
 //        this.end.y = Math.max(this.endNodePanel.getY() - this.startNodePanel.getY(), 0) + this.endNodePanel.getHeight() / 2;
+        System.out.println(this.startPoint);
 
-        this.start.x = NodePanel.PANEL_WIDTH + Math.max(this.startPoint.getX() - this.endPoint.getX(), 0);
-        this.start.y = Math.max(this.startPoint.getY() - this.endPoint.getY(), 0) + NodePanel.PANEL_HEIGHT / 2;
-        this.end.x = Math.max(this.endPoint.getX() - this.startPoint.getX(), 0);
-        this.end.y = Math.max(this.endPoint.getY() - this.startPoint.getY(), 0) + NodePanel.PANEL_HEIGHT / 2;
+        NodePanel startPanel = this.startPoint.getNodePanel();
+        NodePanel endPanel = this.endPoint.getNodePanel();
+        this.start.x = NodePanel.PANEL_WIDTH + Math.max(startPanel.getX() - endPanel.getX(), 0);
+        this.start.y = Math.max(startPanel.getY() - endPanel.getY(), 0) + NodePanel.PANEL_HEIGHT / 2;
+        this.end.x = Math.max(endPanel.getX() - startPanel.getX(), 0);
+        this.end.y = Math.max(endPanel.getY() - startPanel.getY(), 0) + NodePanel.PANEL_HEIGHT / 2;
 
         super.paintComponent(g);
 
-//        g.setColor(Color.CYAN);
-//        g.drawRect(0, 0, this.getWidth()-5, this.getHeight()-5);
+        g.setColor(Color.CYAN);
+        g.drawRect(0, 0, this.getWidth()-5, this.getHeight()-5);
     }
 
     @Override
@@ -61,11 +68,13 @@ public class NodeConnection extends Connection {
 //            Math.abs(this.startNodePanel.getX() - this.endNodePanel.getX()) + NodePanel.PANEL_WIDTH + BOUNDS_OFFSET * 2,
 //            Math.abs(this.startNodePanel.getY() - this.endNodePanel.getY()) + NodePanel.PANEL_HEIGHT + BOUNDS_OFFSET * 2
 //        );
+        NodePanel startPanel = this.startPoint.getNodePanel();
+        NodePanel endPanel = this.endPoint.getNodePanel();
         this.setBounds(
-            Math.min(this.startPoint.getX(), this.endPoint.getX()) - BOUNDS_OFFSET,
-            Math.min(this.startPoint.getY(), this.endPoint.getY()) - BOUNDS_OFFSET,
-            Math.abs(this.startPoint.getX() - this.endPoint.getX()) + NodePanel.PANEL_WIDTH + BOUNDS_OFFSET * 2,
-            Math.abs(this.startPoint.getY() - this.endPoint.getY()) + NodePanel.PANEL_HEIGHT + BOUNDS_OFFSET * 2
+            Math.min(startPanel.getX(), endPanel.getX()) - BOUNDS_OFFSET,
+            Math.min(startPanel.getY(), endPanel.getY()) - BOUNDS_OFFSET,
+            Math.abs(startPanel.getX() - endPanel.getX()) + NodePanel.PANEL_WIDTH + BOUNDS_OFFSET * 2,
+            Math.abs(startPanel.getY() - endPanel.getY()) + NodePanel.PANEL_HEIGHT + BOUNDS_OFFSET * 2
         );
     }
 }

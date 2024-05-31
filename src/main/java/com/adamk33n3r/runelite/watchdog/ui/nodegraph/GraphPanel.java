@@ -226,11 +226,11 @@ public class GraphPanel extends JLayeredPane {
         });
     }
 
-//    public void onNodeMoved(NodePanel nodePanel) {
-//        for (Connection connection : nodePanel.getConnections()) {
-//            connection.recalculateBounds();
-//        }
-//    }
+    public void onNodeMoved(NodePanel nodePanel) {
+        for (Connection connection : nodePanel.getConnections()) {
+            connection.recalculateBounds();
+        }
+    }
 
     public void moveNodeToTop(NodePanel nodePanel) {
         this.setLayer(nodePanel, NODE_LAYER, 0);

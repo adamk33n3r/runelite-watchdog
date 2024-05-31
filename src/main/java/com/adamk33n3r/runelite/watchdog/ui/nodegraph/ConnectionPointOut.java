@@ -21,7 +21,8 @@ public class ConnectionPointOut<T> extends ConnectionPoint {
             @Override
             public void mousePressed(MouseEvent e) {
                 super.mousePressed(e);
-                System.out.println("mouse pressed");
+                System.out.print("mouse pressed: ");
+                System.out.println(ConnectionPointOut.this);
                 Point point = SwingUtilities.convertPoint(ConnectionPointOut.this, e.getPoint(), nodePanel);
                 point.x -= NodePanel.PANEL_WIDTH;
                 ConnectionPointOut.this.newConnection = new DragConnection(nodePanel, ConnectionPointOut.this, point);
@@ -44,7 +45,7 @@ public class ConnectionPointOut<T> extends ConnectionPoint {
                 Component deepestComponentAt = SwingUtilities.getDeepestComponentAt(nodePanel.getGraphPanel(), point.x, point.y);
                 System.out.print("deepest component: ");
                 System.out.println(deepestComponentAt);
-                if (deepestComponentAt.getParent().equals(nodePanel.getGraphPanel())) {
+                if (deepestComponentAt.equals(nodePanel.getGraphPanel())) {
                     System.out.println("dropped on graph");
                     nodePanel.getGraphPanel().createNode(e.getComponent(), e.getX(), e.getY(), new Class[]{NotificationType.class, LogicNodeType.class},(newNode) -> {
                         if (newNode instanceof NotificationNodePanel) {

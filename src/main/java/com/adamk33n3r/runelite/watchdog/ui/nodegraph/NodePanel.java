@@ -21,7 +21,7 @@ public class NodePanel extends JPanel {
     public static final int PANEL_WIDTH = 300;
     public static final int PANEL_HEIGHT = 200;
     protected JPanel items;
-//    private List<NodeConnection> connections = new ArrayList<>();
+    private List<NodeConnection> connections = new ArrayList<>();
     private Color color;
     private GraphPanel graphPanel;
     private Node node;
@@ -80,7 +80,7 @@ public class NodePanel extends JPanel {
 //            setLocation(point.x - start.x, point.y - start.y);
             point.setLocation(Math.min(Math.max(point.x, 0), graphPanel.getWidth() - PANEL_WIDTH), Math.min(Math.max(point.y, 0), graphPanel.getHeight() - PANEL_HEIGHT));
             this.setLocation(point);
-//            graphPanel.onNodeMoved(this);
+            graphPanel.onNodeMoved(this);
         });
         this.addMouseListener(draggingMouseAdapter);
         this.addMouseMotionListener(draggingMouseAdapter);
@@ -89,7 +89,7 @@ public class NodePanel extends JPanel {
 
     }
 
-//    public void addConnection(NodeConnection connection) {
-//        this.connections.add(connection);
-//    }
+    public void addConnection(NodeConnection connection) {
+        this.connections.add(connection);
+    }
 }
