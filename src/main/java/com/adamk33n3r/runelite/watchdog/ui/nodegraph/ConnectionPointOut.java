@@ -55,21 +55,22 @@ public class ConnectionPointOut<T> extends ConnectionPoint {
                     return;
                 }
 
-                ConnectionPointIn<?> droppedNode = (ConnectionPointIn<?>) SwingUtilities.getAncestorOfClass(ConnectionPointIn.class, deepestComponentAt);
-                if (droppedNode == null) {
-                    return;
+                if (deepestComponentAt instanceof ConnectionPointIn) {
+                    ConnectionPointIn<?> droppedNode = (ConnectionPointIn<?>) deepestComponentAt;
+                    // Disallow connecting of incompatible types
+                    if (droppedNode.getInputVar().getType() != ConnectionPointOut.this.outputVar.getType()) {
+                        System.err.print("Incompatible connection points: ");
+                        System.err.println(ConnectionPointOut.this.outputVar.getType() + " -> " + droppedNode.getInputVar().getType());
+                        return;
+                    }
+                    // This is ok since we checked above
+                    @SuppressWarnings("unchecked")
+                    ConnectionPointIn<T> casted = (ConnectionPointIn<T>) droppedNode;
+                    System.out.println(point);
+                    System.out.println(casted);
+                    System.out.println(casted.getName());
+                    nodePanel.getGraphPanel().connect(ConnectionPointOut.this, casted);
                 }
-                // Disallow connecting of incompatible types
-                if (droppedNode.getInputVar().getType() != ConnectionPointOut.this.outputVar.getType()) {
-                    return;
-                }
-                // This is ok since we checked above
-                @SuppressWarnings("unchecked")
-                ConnectionPointIn<T> casted = (ConnectionPointIn<T>) droppedNode;
-                System.out.println(point);
-                System.out.println(casted);
-                System.out.println(casted.getName());
-                nodePanel.getGraphPanel().connect(ConnectionPointOut.this, casted);
             }
 
             @Override
