@@ -7,8 +7,6 @@ import com.adamk33n3r.runelite.watchdog.nodegraph.VarOutput;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.List;
-
 @Getter
 public class TriggerNode extends Node {
     @Setter
@@ -20,5 +18,6 @@ public class TriggerNode extends Node {
 
 //    private final VarOutput<Alert> outAlert = new VarOutput<>("Alert", this.alert);
     // Perhaps only need to send this one
-    private final VarOutput<String[]> captureGroups = new VarOutput<>(this, "Capture Groups", String[].class, new String[0]);
+    private final VarOutput<String[]> captureGroups = new VarOutput<>(this, "Capture Groups Out", String[].class, new String[0]);
+    private final VarOutput<String> nameOut = new VarOutput<>(this, "Name", String.class, this.name.getValue());
 }

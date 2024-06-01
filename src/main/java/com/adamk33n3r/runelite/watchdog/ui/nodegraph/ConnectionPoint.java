@@ -1,19 +1,13 @@
 package com.adamk33n3r.runelite.watchdog.ui.nodegraph;
 
-import com.adamk33n3r.runelite.watchdog.NotificationType;
-import com.adamk33n3r.runelite.watchdog.nodegraph.Node;
-import com.adamk33n3r.runelite.watchdog.nodegraph.Var;
 import lombok.Getter;
 
 import javax.swing.JComponent;
-import javax.swing.SwingUtilities;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 
+@Getter
 public abstract class ConnectionPoint extends JComponent {
-    @Getter
-    private NodePanel nodePanel;
+    private final NodePanel nodePanel;
 
     public ConnectionPoint(NodePanel nodePanel) {
         this.nodePanel = nodePanel;

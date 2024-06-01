@@ -8,9 +8,9 @@ public class IfNodePanel extends AcceptsConnectionNodePanel {
     public IfNodePanel(GraphPanel graphPanel, Node node, int x, int y, String name, Color color) {
         super(graphPanel, node, x, y, name, color);
 
-        ConnectionPoint inputConnectionPoint = new ConnectionPointIn<>(this, name, String.class, "TEST IF INPUT");
-        this.add(inputConnectionPoint, BorderLayout.WEST);
-        ConnectionPoint outputConnectionPoint = new ConnectionPointOut<>(this, name, String.class, "IF OUTPUT");
-        this.add(outputConnectionPoint, BorderLayout.EAST);
+//        ConnectionPoint inputConnectionPoint = new ConnectionPointIn<>(this);
+//        this.inConnectionPoints.add(inputConnectionPoint);
+//        ConnectionPoint outputConnectionPoint = new ConnectionPointOut<>(this, name, String.class, "IF OUTPUT");
+//        this.outConnectionPoints.add(outputConnectionPoint);
     }
 }

@@ -9,7 +9,6 @@ import com.adamk33n3r.runelite.watchdog.nodegraph.Graph;
 import com.adamk33n3r.runelite.watchdog.nodegraph.nodes.NotificationNode;
 import com.adamk33n3r.runelite.watchdog.nodegraph.nodes.TriggerNode;
 import com.adamk33n3r.runelite.watchdog.nodegraph.nodes.logic.And;
-import com.adamk33n3r.runelite.watchdog.nodegraph.nodes.math.Add;
 import com.adamk33n3r.runelite.watchdog.notifications.ScreenFlash;
 import com.adamk33n3r.runelite.watchdog.notifications.TextToSpeech;
 import net.runelite.client.ui.ColorScheme;
@@ -85,13 +84,12 @@ public class GraphPanel extends JLayeredPane {
         notificationNode.setNotification(tts);
         graph.add(notificationNode);
 
-        graph.connect(triggerNode.getCaptureGroups(), notificationNode.getCaptureGroups());
 
         AlertNodePanel test = new AlertNodePanel(this, 50, 50, "Test", Color.RED, triggerNode);
         this.add(test, NODE_LAYER);
         NotificationNodePanel testTEST = new NotificationNodePanel(this, 700, 500, "TestTEST", Color.PINK, notificationNode, colorPickerManager);
         this.add(testTEST, NODE_LAYER);
-        this.connect(test.getOutputConnectionPoint(), testTEST.getInputConnectionPoint());
+        this.connect(test.getCaptureGroupsOut(), testTEST.getCaptureGroupsIn());
 
 
         this.addMouseListener(new MouseAdapter() {
@@ -174,9 +172,18 @@ public class GraphPanel extends JLayeredPane {
 //    }
 
     public <T> void connect(ConnectionPointOut<T> output, ConnectionPointIn<T> input) {
-        this.graph.connect(output.getOutputVar(), input.getInputVar());
-        Connection conn = new NodeConnection(output, input);
-        this.add(conn, CONNECTION_LAYER);
+        boolean connected = this.graph.connect(output.getOutputVar(), input.getInputVar());
+        if (connected) {
+            Connection conn = new NodeConnection(output, input);
+            this.add(conn, CONNECTION_LAYER);
+        } else {
+            this.graph.disconnect(output.getOutputVar(), input.getInputVar());
+            Optional<NodeConnection> first = output.getNodePanel().getConnections().stream().filter(c -> c.getEndPoint().getNodePanel().equals(input.getNodePanel())).findFirst();
+            first.ifPresent(nc -> {
+                nc.remove();
+                this.remove(nc);
+            });
+        }
     }
 
     public void createNode(Component parent, int x, int y, Class<? extends Enum<?>>[] filter, Consumer<NodePanel> onSelect) {

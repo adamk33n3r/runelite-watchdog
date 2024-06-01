@@ -11,12 +11,12 @@ import java.awt.event.MouseEvent;
 
 @Getter
 public class ConnectionPointOut<T> extends ConnectionPoint {
-    private VarOutput<T> outputVar;
+    private final VarOutput<T> outputVar;
     private DragConnection newConnection;
 
-    public ConnectionPointOut(NodePanel nodePanel, String name, Class<T> type, T initialValue) {
+    public ConnectionPointOut(NodePanel nodePanel, VarOutput<T> outputVar) {
         super(nodePanel);
-        this.outputVar = new VarOutput<>(nodePanel.getNode(), name, type, initialValue);
+        this.outputVar = outputVar;
         MouseAdapter mouseAdapter = new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
@@ -45,11 +45,11 @@ public class ConnectionPointOut<T> extends ConnectionPoint {
                 Component deepestComponentAt = SwingUtilities.getDeepestComponentAt(nodePanel.getGraphPanel(), point.x, point.y);
                 System.out.print("deepest component: ");
                 System.out.println(deepestComponentAt);
-                if (deepestComponentAt.getParent().equals(nodePanel.getGraphPanel())) {
+                if (deepestComponentAt.equals(nodePanel.getGraphPanel()) || (deepestComponentAt instanceof NodeConnection && deepestComponentAt.getParent().equals(nodePanel.getGraphPanel()))) {
                     System.out.println("dropped on graph");
                     nodePanel.getGraphPanel().createNode(e.getComponent(), e.getX(), e.getY(), new Class[]{NotificationType.class, LogicNodeType.class},(newNode) -> {
                         if (newNode instanceof NotificationNodePanel) {
-                            nodePanel.getGraphPanel().connect(((AlertNodePanel)nodePanel).getOutputConnectionPoint(), ((NotificationNodePanel) newNode).getInputConnectionPoint());
+                            nodePanel.getGraphPanel().connect(((AlertNodePanel)nodePanel).getCaptureGroupsOut(), ((NotificationNodePanel) newNode).getCaptureGroupsIn());
                         }
                     });
                     return;
@@ -68,7 +68,7 @@ public class ConnectionPointOut<T> extends ConnectionPoint {
                     ConnectionPointIn<T> casted = (ConnectionPointIn<T>) droppedNode;
                     System.out.println(point);
                     System.out.println(casted);
-                    System.out.println(casted.getName());
+                    System.out.println(casted.getInputVar().getName());
                     nodePanel.getGraphPanel().connect(ConnectionPointOut.this, casted);
                 }
             }

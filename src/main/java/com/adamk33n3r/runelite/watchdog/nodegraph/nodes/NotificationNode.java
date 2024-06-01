@@ -15,7 +15,7 @@ public class NotificationNode extends Node {
     private final VarInput<Boolean> fireWhenFocused = new VarInput<>(this, "Fire When Focused", Boolean.class, true);
     private final VarInput<Number> fireWhenAfk = new VarInput<>(this, "Fire When AFK", Number.class, 0);
     private final VarInput<Number> delayMilliseconds = new VarInput<>(this, "Delay (ms)", Number.class, 0);
-    private final VarInput<String[]> captureGroups = new VarInput<>(this, "Capture Groups", String[].class, new String[0]);
+    private final VarInput<String[]> captureGroups = new VarInput<>(this, "Capture Groups In", String[].class, new String[0]);
 
     // Could maybe output "if fired" or something
 

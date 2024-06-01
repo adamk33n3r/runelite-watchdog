@@ -16,7 +16,6 @@ import com.adamk33n3r.runelite.watchdog.ui.Icons;
 import com.adamk33n3r.runelite.watchdog.ui.notifications.VoiceChooser;
 import com.adamk33n3r.runelite.watchdog.ui.notifications.VolumeSlider;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
-import com.google.gson.reflect.TypeToken;
 import lombok.Getter;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.components.ColorJButton;
@@ -27,18 +26,17 @@ import javax.swing.text.AbstractDocument;
 import java.awt.*;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
-import java.util.List;
 
 public class NotificationNodePanel extends AcceptsConnectionNodePanel {
     @Getter
-    private final ConnectionPointIn<String[]> inputConnectionPoint;
+    private final ConnectionPointIn<String[]> captureGroupsIn;
 
     public NotificationNodePanel(GraphPanel graphPanel, int x, int y, String name, Color color, NotificationNode notificationNode, ColorPickerManager colorPickerManager) {
         super(graphPanel, notificationNode, x, y, name, color);
         Notification notification = notificationNode.getNotification();
 
-        this.inputConnectionPoint = new ConnectionPointIn<>(this, name, String[].class, new String[0]);
-        this.add(this.inputConnectionPoint, BorderLayout.WEST);
+        this.captureGroupsIn = new ConnectionPointIn<>(this, notificationNode.getCaptureGroups());
+        this.inConnectionPoints.add(this.captureGroupsIn);
 
         JButton testBtn = new JButton("TEST");
         testBtn.addActionListener((ev) -> notification.fireForced(new String[]{}));

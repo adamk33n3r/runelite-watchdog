@@ -41,7 +41,6 @@ public class NodeConnection extends Connection {
 //        this.start.y = Math.max(this.startNodePanel.getY() - this.endNodePanel.getY(), 0) + this.startNodePanel.getHeight() / 2;
 //        this.end.x = Math.max(this.endNodePanel.getX() - this.startNodePanel.getX(), 0);
 //        this.end.y = Math.max(this.endNodePanel.getY() - this.startNodePanel.getY(), 0) + this.endNodePanel.getHeight() / 2;
-        System.out.println(this.startPoint);
 
         NodePanel startPanel = this.startPoint.getNodePanel();
         NodePanel endPanel = this.endPoint.getNodePanel();
@@ -76,5 +75,12 @@ public class NodeConnection extends Connection {
             Math.abs(startPanel.getX() - endPanel.getX()) + NodePanel.PANEL_WIDTH + BOUNDS_OFFSET * 2,
             Math.abs(startPanel.getY() - endPanel.getY()) + NodePanel.PANEL_HEIGHT + BOUNDS_OFFSET * 2
         );
+    }
+
+    public void remove() {
+        if (this.startPoint != null)
+            this.startPoint.getNodePanel().removeConnection(this);
+        if (this.endPoint != null)
+            this.endPoint.getNodePanel().removeConnection(this);
     }
 }

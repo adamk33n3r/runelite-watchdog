@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 public class Graph {
@@ -19,14 +20,25 @@ public class Graph {
         this.nodes.remove(node);
     }
 
-    public <T> void connect(VarOutput<T> output, VarInput<T> input) {
+    public <T> boolean connect(VarOutput<T> output, VarInput<T> input) {
         if (output.getConnections().stream().anyMatch(c -> c.getInput().equals(input))) {
             log.warn("Connection already exists");
-            return;
+            return false;
         }
 
         Connection<?> connection = new Connection<>(output, input);
         this.connections.add(connection);
+        return true;
+    }
+
+    public <T> void disconnect(VarOutput<T> output, VarInput<T> input) {
+        this.connections.stream()
+            .filter(c -> c.getOutput().equals(output) && c.getInput().equals(input))
+            .findFirst()
+            .ifPresent(c -> {
+                c.remove();
+                this.connections.remove(c);
+            });
     }
 
     @Override

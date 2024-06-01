@@ -3,14 +3,12 @@ package com.adamk33n3r.runelite.watchdog.ui.nodegraph;
 import com.adamk33n3r.runelite.watchdog.nodegraph.VarInput;
 import lombok.Getter;
 
-import java.lang.reflect.Type;
-
 @Getter
 public class ConnectionPointIn<T> extends ConnectionPoint {
     private final VarInput<T> inputVar;
 
-    public ConnectionPointIn(NodePanel nodePanel, String name, Class<T> type, T initialValue) {
+    public ConnectionPointIn(NodePanel nodePanel, VarInput<T> varInput) {
         super(nodePanel);
-        this.inputVar = new VarInput<>(nodePanel.getNode(), name, type, initialValue);
+        this.inputVar = varInput;
     }
 }

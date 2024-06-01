@@ -2,6 +2,7 @@ package com.adamk33n3r.runelite.watchdog.ui.nodegraph;
 
 import com.adamk33n3r.runelite.watchdog.Util;
 import com.adamk33n3r.runelite.watchdog.nodegraph.Node;
+import com.adamk33n3r.runelite.watchdog.ui.StretchedStackedLayout;
 import net.runelite.client.ui.DynamicGridLayout;
 
 import lombok.Getter;
@@ -25,6 +26,9 @@ public class NodePanel extends JPanel {
     private Color color;
     private GraphPanel graphPanel;
     private Node node;
+
+    protected JPanel inConnectionPoints;
+    protected JPanel outConnectionPoints;
 
     public NodePanel(GraphPanel graphPanel, Node node, int x, int y, String name, Color color) {
         this.graphPanel = graphPanel;
@@ -87,9 +91,17 @@ public class NodePanel extends JPanel {
         this.addMouseListener(onTopAdapter);
 
 
+        this.inConnectionPoints = new JPanel(new StretchedStackedLayout(5));
+        this.add(this.inConnectionPoints, BorderLayout.WEST);
+        this.outConnectionPoints = new JPanel(new StretchedStackedLayout(5));
+        this.add(this.outConnectionPoints, BorderLayout.EAST);
     }
 
     public void addConnection(NodeConnection connection) {
         this.connections.add(connection);
+    }
+
+    public void removeConnection(NodeConnection connection) {
+        this.connections.remove(connection);
     }
 }
