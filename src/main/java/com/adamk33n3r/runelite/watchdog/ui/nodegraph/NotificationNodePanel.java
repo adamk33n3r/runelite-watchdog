@@ -30,6 +30,8 @@ import java.awt.event.FocusListener;
 public class NotificationNodePanel extends AcceptsConnectionNodePanel {
     @Getter
     private final ConnectionPointIn<String[]> captureGroupsIn;
+    @Getter
+    private final ConnectionPointIn<String> alertNameIn;
 
     public NotificationNodePanel(GraphPanel graphPanel, int x, int y, String name, Color color, NotificationNode notificationNode, ColorPickerManager colorPickerManager) {
         super(graphPanel, notificationNode, x, y, name, color);
@@ -37,6 +39,8 @@ public class NotificationNodePanel extends AcceptsConnectionNodePanel {
 
         this.captureGroupsIn = new ConnectionPointIn<>(this, notificationNode.getCaptureGroups());
         this.inConnectionPoints.add(this.captureGroupsIn);
+        this.alertNameIn = new ConnectionPointIn<>(this, notificationNode.getAlertName());
+        this.inConnectionPoints.add(this.alertNameIn);
 
         JButton testBtn = new JButton("TEST");
         testBtn.addActionListener((ev) -> notification.fireForced(new String[]{}));

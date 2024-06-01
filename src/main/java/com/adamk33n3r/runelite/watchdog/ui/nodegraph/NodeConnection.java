@@ -45,9 +45,9 @@ public class NodeConnection extends Connection {
         NodePanel startPanel = this.startPoint.getNodePanel();
         NodePanel endPanel = this.endPoint.getNodePanel();
         this.start.x = NodePanel.PANEL_WIDTH + Math.max(startPanel.getX() - endPanel.getX(), 0);
-        this.start.y = Math.max(startPanel.getY() - endPanel.getY(), 0) + NodePanel.PANEL_HEIGHT / 2;
+        this.start.y = Math.max(startPanel.getY() - endPanel.getY(), 0) + startPanel.getOutConnectionPoints().getY() + this.startPoint.getY() + this.startPoint.getSize().height / 2;
         this.end.x = Math.max(endPanel.getX() - startPanel.getX(), 0);
-        this.end.y = Math.max(endPanel.getY() - startPanel.getY(), 0) + NodePanel.PANEL_HEIGHT / 2;
+        this.end.y = Math.max(endPanel.getY() - startPanel.getY(), 0) + endPanel.getInConnectionPoints().getY() + this.endPoint.getY() + this.endPoint.getSize().height / 2;
 
         super.paintComponent(g);
 

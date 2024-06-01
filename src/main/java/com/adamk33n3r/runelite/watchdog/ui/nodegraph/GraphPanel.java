@@ -90,6 +90,7 @@ public class GraphPanel extends JLayeredPane {
         NotificationNodePanel testTEST = new NotificationNodePanel(this, 700, 500, "TestTEST", Color.PINK, notificationNode, colorPickerManager);
         this.add(testTEST, NODE_LAYER);
         this.connect(test.getCaptureGroupsOut(), testTEST.getCaptureGroupsIn());
+        this.connect(test.getAlertName(), testTEST.getAlertNameIn());
 
 
         this.addMouseListener(new MouseAdapter() {
@@ -178,7 +179,7 @@ public class GraphPanel extends JLayeredPane {
             this.add(conn, CONNECTION_LAYER);
         } else {
             this.graph.disconnect(output.getOutputVar(), input.getInputVar());
-            Optional<NodeConnection> first = output.getNodePanel().getConnections().stream().filter(c -> c.getEndPoint().getNodePanel().equals(input.getNodePanel())).findFirst();
+            Optional<NodeConnection> first = output.getNodePanel().getConnections().stream().filter(c -> c.getEndPoint().equals(input)).findFirst();
             first.ifPresent(nc -> {
                 nc.remove();
                 this.remove(nc);

@@ -1,14 +1,12 @@
 package com.adamk33n3r.runelite.watchdog.ui.nodegraph;
 
-import java.awt.Graphics;
-import java.awt.Point;
+import java.awt.*;
 
 public class DragConnection extends Connection {
     private final NodePanel startNodePanel;
     private final ConnectionPointOut<?> startPoint;
     public DragConnection(NodePanel start, ConnectionPointOut<?> startPoint, Point end) {
         super(start.getLocation(), end);
-        this.start.x += NodePanel.PANEL_WIDTH;
         this.startNodePanel = start;
         this.startPoint = startPoint;
         this.recalculateBounds();
@@ -23,7 +21,7 @@ public class DragConnection extends Connection {
     @Override
     protected void paintComponent(Graphics g) {
         this.start.x = this.end.x > 0 ? 0 : -this.end.x;
-        this.start.y = this.startNodePanel.getY() - this.getY() - BOUNDS_OFFSET + NodePanel.PANEL_HEIGHT / 2;
+        this.start.y = this.startNodePanel.getY() - this.getY() - BOUNDS_OFFSET + this.startNodePanel.getOutConnectionPoints().getY() + this.startPoint.getY() + this.startPoint.getSize().height / 2;
 
         // I think this doesn't break things because we are setting the bounds every time
         this.end.x = Math.max(0, this.end.x);
@@ -31,8 +29,8 @@ public class DragConnection extends Connection {
 
         super.paintComponent(g);
 
-//        g.setColor(Color.CYAN);
-//        g.drawRect(0, 0, this.getWidth()-1, this.getHeight()-1);
+        g.setColor(Color.CYAN);
+        g.drawRect(0, 0, this.getWidth()-1, this.getHeight()-1);
     }
 
     @Override
