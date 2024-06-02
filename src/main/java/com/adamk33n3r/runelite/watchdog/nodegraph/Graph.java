@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class Graph {
@@ -74,12 +75,39 @@ public class Graph {
     }
 
     // TODO only does one level of processing
-    public void process(TriggerNode triggerNode) {
-        triggerNode.process();
+    public void process(Node node) {
+        node.process();
         this.connections.stream()
-            .filter(c -> c.getOutput().getNode() == triggerNode)
+            .filter(c -> c.getOutput().getNode() == node)
             .map(c -> c.getInput().getNode())
             .distinct()
             .forEach(Node::process);
+    }
+
+    /**
+     * Finds and returns all notifications recursively that can be reached from triggerNode via connections to the enabled input
+     * @param triggerNode The trigger node to start from
+     * @return List of reachable notifications
+     */
+    public List<NotificationNode> getReachableNotificationsFromTrigger(TriggerNode triggerNode) {
+        List<NotificationNode> reachableNotifications = new ArrayList<>();
+        List<Node> nodesToProcess = new ArrayList<>();
+        nodesToProcess.add(triggerNode);
+        while (!nodesToProcess.isEmpty()) {
+            Node node = nodesToProcess.remove(0);
+            if (node instanceof NotificationNode) {
+                NotificationNode notification = ((NotificationNode) node);
+                if (notification.getEnabled().getValue()) {
+                    reachableNotifications.add(notification);
+                }
+                continue;
+            }
+            this.connections.stream()
+                .filter(c -> c.getOutput().getNode() == node)
+                .map(c -> c.getInput().getNode())
+                .distinct()
+                .forEach(nodesToProcess::add);
+        }
+        return reachableNotifications;
     }
 }

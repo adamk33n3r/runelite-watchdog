@@ -29,6 +29,7 @@ import java.awt.event.FocusListener;
 
 @Getter
 public class NotificationNodePanel extends AcceptsConnectionNodePanel {
+    private final ConnectionPointIn<Boolean> enabledIn;
     private final ConnectionPointIn<String[]> captureGroupsIn;
     private final ConnectionPointIn<String> alertNameIn;
     private final ConnectionPointIn<Number> delayMillisecondsIn;
@@ -37,6 +38,8 @@ public class NotificationNodePanel extends AcceptsConnectionNodePanel {
         super(graphPanel, notificationNode, x, y, name, color);
         Notification notification = notificationNode.getNotification();
 
+        this.enabledIn = new ConnectionPointIn<>(this, notificationNode.getEnabled());
+        this.inConnectionPoints.add(this.enabledIn);
         this.captureGroupsIn = new ConnectionPointIn<>(this, notificationNode.getCaptureGroups());
         this.inConnectionPoints.add(this.captureGroupsIn);
         this.alertNameIn = new ConnectionPointIn<>(this, notificationNode.getAlertName());

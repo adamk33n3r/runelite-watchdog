@@ -29,12 +29,12 @@ public class NotificationNode extends Node {
     @Override
     public void process() {
         //I think this needs to be a separate function to handle this, process should be "update current state"
-//        if (this.enabled.getValue()) {
-//            this.notification.fire(this.captureGroups.getValue());
-//        }
-
         this.notification.setFireWhenFocused(this.fireWhenFocused.getValue());
         this.notification.setFireWhenAFKForSeconds(this.fireWhenAfk.getValue().intValue());
         this.notification.setDelayMilliseconds(this.delayMilliseconds.getValue().intValue());
+    }
+
+    public void fire() {
+        this.notification.fire(this.captureGroups.getValue());
     }
 }

@@ -6,12 +6,13 @@ import com.adamk33n3r.runelite.watchdog.alerts.ChatAlert;
 import com.adamk33n3r.runelite.watchdog.alerts.SpawnedAlert;
 
 import com.adamk33n3r.runelite.watchdog.nodegraph.Graph;
+import com.adamk33n3r.runelite.watchdog.nodegraph.Node;
 import com.adamk33n3r.runelite.watchdog.nodegraph.nodes.NotificationNode;
 import com.adamk33n3r.runelite.watchdog.nodegraph.nodes.TriggerNode;
+import com.adamk33n3r.runelite.watchdog.nodegraph.nodes.constants.Bool;
 import com.adamk33n3r.runelite.watchdog.nodegraph.nodes.logic.And;
 import com.adamk33n3r.runelite.watchdog.notifications.ScreenFlash;
 import com.adamk33n3r.runelite.watchdog.notifications.TextToSpeech;
-import com.adamk33n3r.runelite.watchdog.notifications.tts.TTSSource;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.components.colorpicker.ColorPickerManager;
 import net.runelite.client.util.ImageUtil;
@@ -25,6 +26,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.util.*;
+import java.util.List;
 import java.util.function.Consumer;
 
 public class GraphPanel extends JLayeredPane {
@@ -76,6 +78,9 @@ public class GraphPanel extends JLayeredPane {
         this.graph.add(notificationNode);
         NotificationNode screenFlashNode = new NotificationNode(screenFlash);
         this.graph.add(screenFlashNode);
+        Bool boolNode = new Bool();
+        boolNode.setValue(false);
+        this.graph.add(boolNode);
 
 
         /*
@@ -90,12 +95,16 @@ public class GraphPanel extends JLayeredPane {
         NotificationNodePanel screenFlashNodePanel = new NotificationNodePanel(this, 700, 50, "Screen Flash", Color.PINK, screenFlashNode, colorPickerManager);
         this.add(screenFlashNodePanel, NODE_LAYER);
 
+        BoolNodePanel boolNodePanel = new BoolNodePanel(this, boolNode, 100, 300, "Bool Node", Color.CYAN);
+        this.add(boolNodePanel, NODE_LAYER);
+
 //        NodePanel logicNodePanel = new IfNodePanel(this, null, 400, 200, "If Node", Color.CYAN);
 //        this.add(logicNodePanel, NODE_LAYER);
 
         this.connect(test.getCaptureGroupsOut(), testTEST.getCaptureGroupsIn());
         this.connect(test.getAlertName(), testTEST.getAlertNameIn());
         this.connect(test.getCaptureGroupsOut(), screenFlashNodePanel.getCaptureGroupsIn());
+        this.connect(boolNodePanel.getBoolValue(), screenFlashNodePanel.getEnabledIn());
 
 
         this.addMouseListener(new MouseAdapter() {
@@ -291,7 +300,17 @@ public class GraphPanel extends JLayeredPane {
         }
     }
 
-    public void processNode(TriggerNode triggerNode) {
+    public void processNode(Node node) {
+        this.graph.process(node);
+    }
+
+    public void trigger(TriggerNode triggerNode) {
         this.graph.process(triggerNode);
+        List<NotificationNode> reachableNotificationsFromTrigger = this.graph.getReachableNotificationsFromTrigger(triggerNode);
+        System.out.println("Will fire the following notifications:");
+        for (NotificationNode notificationNode : reachableNotificationsFromTrigger) {
+            System.out.println("  " + notificationNode.getNotification().getType().getName());
+//            notificationNode.fire();
+        }
     }
 }

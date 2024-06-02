@@ -5,10 +5,10 @@ import com.adamk33n3r.runelite.watchdog.nodegraph.VarOutput;
 import lombok.Getter;
 
 @Getter
-public class Num extends Node {
-    private final VarOutput<Number> value = new VarOutput<>(this, "Value", Number.class, 0);
+public class Bool extends Node {
+    private final VarOutput<Boolean> value = new VarOutput<>(this, "Value", Boolean.class, true);
 
-    public void setValue(int value) {
+    public void setValue(boolean value) {
         this.value.setValue(value);
     }
 }

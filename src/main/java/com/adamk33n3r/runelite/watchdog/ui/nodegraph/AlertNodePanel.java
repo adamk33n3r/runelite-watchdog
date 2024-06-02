@@ -29,7 +29,7 @@ public class AlertNodePanel extends NodePanel {
         this.outConnectionPoints.add(this.testOut);
 
         JButton testBtn = new JButton("TEST");
-        testBtn.addActionListener((ev) -> graphPanel.processNode(triggerNode));
+        testBtn.addActionListener((ev) -> graphPanel.trigger(triggerNode));
         this.items.add(testBtn);
 
         this.items.add(new TextInput("Name", alert.getName()));

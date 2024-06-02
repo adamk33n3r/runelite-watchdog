@@ -12,7 +12,6 @@ public class Logger<T> extends Node {
 
     public Logger(Class<T> type) {
         this.input = new VarInput<>(this, "Input", type, null);
-        this.inputs.add(input);
     }
 
     @Override
