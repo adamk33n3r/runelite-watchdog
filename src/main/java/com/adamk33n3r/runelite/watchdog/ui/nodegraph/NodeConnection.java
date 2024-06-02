@@ -10,8 +10,8 @@ import java.awt.*;
 public class NodeConnection extends Connection {
 //    private NodePanel startNodePanel;
 //    private NodePanel endNodePanel;
-    private final ConnectionPoint startPoint;
-    private final ConnectionPoint endPoint;
+    private final ConnectionPointOut<?> startPoint;
+    private final ConnectionPointIn<?> endPoint;
 
     public NodeConnection(ConnectionPointOut<?> start, ConnectionPointIn<?> end) {
         super(start == null ? new Point() : start.getLocation(), end == null ? new Point() : end.getLocation());
@@ -51,8 +51,8 @@ public class NodeConnection extends Connection {
 
         super.paintComponent(g);
 
-        g.setColor(Color.CYAN);
-        g.drawRect(0, 0, this.getWidth()-5, this.getHeight()-5);
+//        g.setColor(Color.CYAN);
+//        g.drawRect(0, 0, this.getWidth()-5, this.getHeight()-5);
     }
 
     @Override

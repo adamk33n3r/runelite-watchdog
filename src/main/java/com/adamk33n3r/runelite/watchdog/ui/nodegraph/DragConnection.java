@@ -29,8 +29,8 @@ public class DragConnection extends Connection {
 
         super.paintComponent(g);
 
-        g.setColor(Color.CYAN);
-        g.drawRect(0, 0, this.getWidth()-1, this.getHeight()-1);
+//        g.setColor(Color.CYAN);
+//        g.drawRect(0, 0, this.getWidth()-1, this.getHeight()-1);
     }
 
     @Override

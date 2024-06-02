@@ -11,6 +11,7 @@ import com.adamk33n3r.runelite.watchdog.nodegraph.nodes.TriggerNode;
 import com.adamk33n3r.runelite.watchdog.nodegraph.nodes.logic.And;
 import com.adamk33n3r.runelite.watchdog.notifications.ScreenFlash;
 import com.adamk33n3r.runelite.watchdog.notifications.TextToSpeech;
+import com.adamk33n3r.runelite.watchdog.notifications.tts.TTSSource;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.components.colorpicker.ColorPickerManager;
 import net.runelite.client.util.ImageUtil;
@@ -48,49 +49,54 @@ public class GraphPanel extends JLayeredPane {
         this.setPreferredSize(new Dimension(6000, 4000));
         this.setName("Graph");
 
+        /*
+         * Alerts
+         */
+
         ChatAlert alert = new ChatAlert("Test Chat Alert");
         alert.setMessage("This is a test message");
-//        NodePanel gameMessageNodePanel = new AlertNodePanel(this, 50, 50, alert.getType().getName(), Color.red, alert);
-//        this.add(gameMessageNodePanel, NODE_LAYER);
         ScreenFlash screenFlash = new ScreenFlash();
-//        NodePanel screenFlashNodePanel = new NotificationNodePanel(this, 750, 350, "Screen Flash", Color.green, screenFlash, colorPickerManager);
-//        this.add(screenFlashNodePanel, NODE_LAYER);
-        NodePanel logicNodePanel = new IfNodePanel(this, null, 400, 200, "If Node", Color.CYAN);
-        this.add(logicNodePanel, NODE_LAYER);
         TextToSpeech tts = new TextToSpeech();
 //        tts.setSource(TTSSource.ELEVEN_LABS);
-//        NodePanel textToSpeechNodePanel = new NotificationNodePanel(this, 700, 500, "Text to Speech", Color.green, tts, colorPickerManager);
-//        this.add(textToSpeechNodePanel, NODE_LAYER);
 
         SpawnedAlert spawnedAlert = new SpawnedAlert("Spawned Alert");
         spawnedAlert.setPattern("Henry");
         spawnedAlert.setSpawnedDespawned(SpawnedAlert.SpawnedDespawned.SPAWNED);
         spawnedAlert.setSpawnedType(SpawnedAlert.SpawnedType.NPC);
-//        NodePanel nodePanel4 = new AlertNodePanel(this, 150, 500, spawnedAlert.getType().getName(), Color.red, spawnedAlert);
-//        this.add(nodePanel4, NODE_LAYER);
-
-//        this.connect(gameMessageNodePanel, logicNodePanel);
-//        this.connect(logicNodePanel, screenFlashNodePanel);
-//        this.connect(gameMessageNodePanel, textToSpeechNodePanel);
 
 
 
 
+        /*
+         * Nodes
+         */
         this.graph = new Graph();
-        TriggerNode triggerNode = new TriggerNode();
-        triggerNode.setAlert(alert);
-        graph.add(triggerNode);
-        NotificationNode notificationNode = new NotificationNode();
-        notificationNode.setNotification(tts);
-        graph.add(notificationNode);
+        TriggerNode triggerNode = new TriggerNode(alert);
+        this.graph.add(triggerNode);
+        NotificationNode notificationNode = new NotificationNode(tts);
+        this.graph.add(notificationNode);
+        NotificationNode screenFlashNode = new NotificationNode(screenFlash);
+        this.graph.add(screenFlashNode);
 
 
+        /*
+         * Node Panels
+         */
         AlertNodePanel test = new AlertNodePanel(this, 50, 50, "Test", Color.RED, triggerNode);
         this.add(test, NODE_LAYER);
+
         NotificationNodePanel testTEST = new NotificationNodePanel(this, 700, 500, "TestTEST", Color.PINK, notificationNode, colorPickerManager);
         this.add(testTEST, NODE_LAYER);
+
+        NotificationNodePanel screenFlashNodePanel = new NotificationNodePanel(this, 700, 50, "Screen Flash", Color.PINK, screenFlashNode, colorPickerManager);
+        this.add(screenFlashNodePanel, NODE_LAYER);
+
+//        NodePanel logicNodePanel = new IfNodePanel(this, null, 400, 200, "If Node", Color.CYAN);
+//        this.add(logicNodePanel, NODE_LAYER);
+
         this.connect(test.getCaptureGroupsOut(), testTEST.getCaptureGroupsIn());
         this.connect(test.getAlertName(), testTEST.getAlertNameIn());
+        this.connect(test.getCaptureGroupsOut(), screenFlashNodePanel.getCaptureGroupsIn());
 
 
         this.addMouseListener(new MouseAdapter() {
@@ -194,7 +200,7 @@ public class GraphPanel extends JLayeredPane {
             System.out.println(selected);
             if (selected instanceof TriggerType) {
                 System.out.println("create alert node");
-                TriggerNode triggerNode = new TriggerNode();
+                TriggerNode triggerNode = new TriggerNode(null);
                 this.graph.add(triggerNode);
                 ChatAlert alert = new ChatAlert();
                 triggerNode.setAlert(alert);
@@ -204,7 +210,7 @@ public class GraphPanel extends JLayeredPane {
                 onSelect.accept(nodePanel);
             } else if (selected instanceof NotificationType) {
                 System.out.println("create notification node");
-                NotificationNode notificationNode = new NotificationNode();
+                NotificationNode notificationNode = new NotificationNode(null);
                 this.graph.add(notificationNode);
                 TextToSpeech tts = new TextToSpeech();
                 notificationNode.setNotification(tts);
@@ -248,6 +254,7 @@ public class GraphPanel extends JLayeredPane {
 
     public void removeNode(NodePanel nodePanel) {
         this.remove(nodePanel);
+        this.graph.remove(nodePanel.getNode());
         Arrays.stream(this.getComponentsInLayer(CONNECTION_LAYER))
             .filter(component -> component instanceof NodeConnection)
             .map(component -> (NodeConnection) component)

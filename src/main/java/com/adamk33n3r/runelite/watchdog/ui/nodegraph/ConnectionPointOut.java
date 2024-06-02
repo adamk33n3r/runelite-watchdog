@@ -36,21 +36,21 @@ public class ConnectionPointOut<T> extends ConnectionPoint {
                 super.mouseReleased(e);
                 System.out.println("mouse released");
                 System.out.println(ConnectionPointOut.this.newConnection);
-                nodePanel.getGraphPanel().remove(ConnectionPointOut.this.newConnection);
-                nodePanel.getGraphPanel().revalidate();
-                nodePanel.getGraphPanel().repaint();
-                ConnectionPointOut.this.newConnection = null;
 
                 Point point = SwingUtilities.convertPoint(ConnectionPointOut.this, e.getPoint(), nodePanel.getGraphPanel());
                 Component deepestComponentAt = SwingUtilities.getDeepestComponentAt(nodePanel.getGraphPanel(), point.x, point.y);
                 System.out.print("deepest component: ");
                 System.out.println(deepestComponentAt);
-                if (deepestComponentAt.equals(nodePanel.getGraphPanel()) || (deepestComponentAt instanceof NodeConnection && deepestComponentAt.getParent().equals(nodePanel.getGraphPanel()))) {
+                if (deepestComponentAt.equals(nodePanel.getGraphPanel()) || (deepestComponentAt instanceof Connection && deepestComponentAt.getParent().equals(nodePanel.getGraphPanel()))) {
                     System.out.println("dropped on graph");
                     nodePanel.getGraphPanel().createNode(e.getComponent(), e.getX(), e.getY(), new Class[]{NotificationType.class, LogicNodeType.class},(newNode) -> {
                         if (newNode instanceof NotificationNodePanel) {
                             nodePanel.getGraphPanel().connect(((AlertNodePanel)nodePanel).getCaptureGroupsOut(), ((NotificationNodePanel) newNode).getCaptureGroupsIn());
                         }
+                        nodePanel.getGraphPanel().remove(ConnectionPointOut.this.newConnection);
+                        nodePanel.getGraphPanel().revalidate();
+                        nodePanel.getGraphPanel().repaint();
+                        ConnectionPointOut.this.newConnection = null;
                     });
                     return;
                 }
@@ -70,6 +70,10 @@ public class ConnectionPointOut<T> extends ConnectionPoint {
                     System.out.println(casted);
                     System.out.println(casted.getInputVar().getName());
                     nodePanel.getGraphPanel().connect(ConnectionPointOut.this, casted);
+                    nodePanel.getGraphPanel().remove(ConnectionPointOut.this.newConnection);
+                    nodePanel.getGraphPanel().revalidate();
+                    nodePanel.getGraphPanel().repaint();
+                    ConnectionPointOut.this.newConnection = null;
                 }
             }
 

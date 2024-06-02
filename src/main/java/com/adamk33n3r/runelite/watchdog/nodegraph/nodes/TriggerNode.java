@@ -4,10 +4,12 @@ import com.adamk33n3r.runelite.watchdog.alerts.Alert;
 import com.adamk33n3r.runelite.watchdog.nodegraph.Node;
 import com.adamk33n3r.runelite.watchdog.nodegraph.VarInput;
 import com.adamk33n3r.runelite.watchdog.nodegraph.VarOutput;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
+@AllArgsConstructor
 public class TriggerNode extends Node {
     @Setter
     private Alert alert;

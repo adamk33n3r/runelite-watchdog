@@ -27,10 +27,9 @@ import java.awt.*;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 
+@Getter
 public class NotificationNodePanel extends AcceptsConnectionNodePanel {
-    @Getter
     private final ConnectionPointIn<String[]> captureGroupsIn;
-    @Getter
     private final ConnectionPointIn<String> alertNameIn;
 
     public NotificationNodePanel(GraphPanel graphPanel, int x, int y, String name, Color color, NotificationNode notificationNode, ColorPickerManager colorPickerManager) {

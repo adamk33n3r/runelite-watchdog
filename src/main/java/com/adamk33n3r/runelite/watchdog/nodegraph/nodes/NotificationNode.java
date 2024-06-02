@@ -3,10 +3,10 @@ package com.adamk33n3r.runelite.watchdog.nodegraph.nodes;
 import com.adamk33n3r.runelite.watchdog.nodegraph.Node;
 import com.adamk33n3r.runelite.watchdog.nodegraph.VarInput;
 import com.adamk33n3r.runelite.watchdog.notifications.Notification;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
+@AllArgsConstructor
 public class NotificationNode extends Node {
     @Setter
     private Notification notification;

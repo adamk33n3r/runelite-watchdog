@@ -18,6 +18,7 @@ public class Graph {
 
     public void remove(Node node) {
         this.nodes.remove(node);
+        this.connections.removeIf(c -> c.getOutput().getNode().equals(node) || c.getInput().getNode().equals(node));
     }
 
     public <T> boolean connect(VarOutput<T> output, VarInput<T> input) {
@@ -53,13 +54,18 @@ public class Graph {
             for (Connection<?> connection : this.connections) {
                 if (connection.getOutput().getNode() == node) {
                     sb.append("  ")
+                        .append(connection.getOutput().getNode().getClass().getSimpleName())
+                        .append(":")
                         .append(connection.getOutput().getName())
                         .append(" -> ")
                         .append(connection.getInput().getName())
-                        .append(" -> ")
+                        .append(":")
                         .append(connection.getInput().getNode().getClass().getSimpleName())
                         .append("\n");
                 }
+            }
+            if (this.connections.isEmpty()) {
+                sb.append("  No connections\n");
             }
         }
         return sb.toString();
