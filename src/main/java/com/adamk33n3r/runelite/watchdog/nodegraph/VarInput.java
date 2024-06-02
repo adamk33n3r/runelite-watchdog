@@ -13,6 +13,7 @@ public class VarInput<T> extends Var<T> {
         this.connection = null;
     }
 
+    @Override
     public T getValue() {
         this.receive();
         return this.value;

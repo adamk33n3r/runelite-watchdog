@@ -42,7 +42,6 @@ public class GraphPanel extends JLayeredPane {
     @Inject
     private ColorPickerManager colorPickerManager;
 
-    @Inject
     public void init() {
         this.setBackground(ColorScheme.DARKER_GRAY_COLOR);
         this.setOpaque(false);
@@ -183,6 +182,9 @@ public class GraphPanel extends JLayeredPane {
         if (connected) {
             Connection conn = new NodeConnection(output, input);
             this.add(conn, CONNECTION_LAYER);
+            if (output.getNodePanel().getNode() instanceof TriggerNode) {
+                this.processNode((TriggerNode) output.getNodePanel().getNode());
+            }
         } else {
             this.graph.disconnect(output.getOutputVar(), input.getInputVar());
             Optional<NodeConnection> first = output.getNodePanel().getConnections().stream().filter(c -> c.getEndPoint().equals(input)).findFirst();
@@ -200,20 +202,18 @@ public class GraphPanel extends JLayeredPane {
             System.out.println(selected);
             if (selected instanceof TriggerType) {
                 System.out.println("create alert node");
-                TriggerNode triggerNode = new TriggerNode(null);
-                this.graph.add(triggerNode);
                 ChatAlert alert = new ChatAlert();
-                triggerNode.setAlert(alert);
+                TriggerNode triggerNode = new TriggerNode(alert);
+                this.graph.add(triggerNode);
 
                 NodePanel nodePanel = new AlertNodePanel(GraphPanel.this, GraphPanel.this.popupLocation.x, GraphPanel.this.popupLocation.y, ((TriggerType) selected).getName(), Color.CYAN, triggerNode);
                 GraphPanel.this.add(nodePanel, NODE_LAYER, 0);
                 onSelect.accept(nodePanel);
             } else if (selected instanceof NotificationType) {
                 System.out.println("create notification node");
-                NotificationNode notificationNode = new NotificationNode(null);
-                this.graph.add(notificationNode);
                 TextToSpeech tts = new TextToSpeech();
-                notificationNode.setNotification(tts);
+                NotificationNode notificationNode = new NotificationNode(tts);
+                this.graph.add(notificationNode);
 
                 NodePanel nodePanel = new NotificationNodePanel(GraphPanel.this, GraphPanel.this.popupLocation.x, GraphPanel.this.popupLocation.y, ((NotificationType) selected).getName(), Color.ORANGE, notificationNode, colorPickerManager);
                 GraphPanel.this.add(nodePanel, NODE_LAYER, 0);
@@ -237,7 +237,7 @@ public class GraphPanel extends JLayeredPane {
             }
             GraphPanel.this.revalidate();
             GraphPanel.this.repaint();
-        });
+        }, () -> onSelect.accept(null));
     }
 
     public void onNodeMoved(NodePanel nodePanel) {
@@ -291,4 +291,7 @@ public class GraphPanel extends JLayeredPane {
         }
     }
 
+    public void processNode(TriggerNode triggerNode) {
+        this.graph.process(triggerNode);
+    }
 }

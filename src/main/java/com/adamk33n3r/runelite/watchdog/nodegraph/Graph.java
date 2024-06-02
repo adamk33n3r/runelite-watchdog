@@ -1,5 +1,6 @@
 package com.adamk33n3r.runelite.watchdog.nodegraph;
 
+import com.adamk33n3r.runelite.watchdog.nodegraph.nodes.NotificationNode;
 import com.adamk33n3r.runelite.watchdog.nodegraph.nodes.TriggerNode;
 import lombok.extern.slf4j.Slf4j;
 
@@ -61,6 +62,7 @@ public class Graph {
                         .append(connection.getInput().getName())
                         .append(":")
                         .append(connection.getInput().getNode().getClass().getSimpleName())
+                        .append(((NotificationNode)connection.getInput().getNode()).getNotification().getDelayMilliseconds())
                         .append("\n");
                 }
             }
@@ -69,5 +71,15 @@ public class Graph {
             }
         }
         return sb.toString();
+    }
+
+    // TODO only does one level of processing
+    public void process(TriggerNode triggerNode) {
+        triggerNode.process();
+        this.connections.stream()
+            .filter(c -> c.getOutput().getNode() == triggerNode)
+            .map(c -> c.getInput().getNode())
+            .distinct()
+            .forEach(Node::process);
     }
 }

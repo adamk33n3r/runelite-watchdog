@@ -6,10 +6,8 @@ import com.adamk33n3r.runelite.watchdog.notifications.Notification;
 import lombok.*;
 
 @Getter
-@AllArgsConstructor
 public class NotificationNode extends Node {
-    @Setter
-    private Notification notification;
+    private final Notification notification;
 
     private final VarInput<Boolean> enabled = new VarInput<>(this, "Enabled", Boolean.class, true);
     private final VarInput<Boolean> fireWhenFocused = new VarInput<>(this, "Fire When Focused", Boolean.class, true);
@@ -20,10 +18,23 @@ public class NotificationNode extends Node {
 
     // Could maybe output "if fired" or something
 
+    public NotificationNode(Notification notification) {
+        this.notification = notification;
+
+        this.fireWhenFocused.setValue(this.notification.isFireWhenFocused());
+        this.fireWhenAfk.setValue(this.notification.getFireWhenAFKForSeconds());
+        this.delayMilliseconds.setValue(this.notification.getDelayMilliseconds());
+    }
+
     @Override
     public void process() {
-        if (this.enabled.getValue()) {
-            this.notification.fire(this.captureGroups.getValue());
-        }
+        //I think this needs to be a separate function to handle this, process should be "update current state"
+//        if (this.enabled.getValue()) {
+//            this.notification.fire(this.captureGroups.getValue());
+//        }
+
+        this.notification.setFireWhenFocused(this.fireWhenFocused.getValue());
+        this.notification.setFireWhenAFKForSeconds(this.fireWhenAfk.getValue().intValue());
+        this.notification.setDelayMilliseconds(this.delayMilliseconds.getValue().intValue());
     }
 }

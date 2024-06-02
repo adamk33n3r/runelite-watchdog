@@ -7,9 +7,7 @@ import net.runelite.client.util.Text;
 import com.google.common.base.Splitter;
 
 import javax.swing.*;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
-import javax.swing.event.ListSelectionListener;
+import javax.swing.event.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.util.Arrays;
@@ -25,8 +23,9 @@ public class NewNodePopup extends JPopupMenu {
     private final JTextField search;
     private final CustomList.Items[] items;
     private ListSelectionListener currentListener;
+    private PopupMenuListener currentPopupListener;
 
-    public void show(Component invoker, int x, int y, Consumer<Object> onSelect) {
+    public void show(Component invoker, int x, int y, Consumer<Object> onSelect, Runnable onDismiss) {
         this.itemList.removeListSelectionListener(this.currentListener);
         this.currentListener = (ls) -> {
             if (this.itemList.getSelectedValue() == null || this.itemList.getSelectedValue().toString().startsWith("c:")) {
@@ -39,6 +38,20 @@ public class NewNodePopup extends JPopupMenu {
             this.itemList.dispatchEvent(new MouseEvent(this.itemList, MouseEvent.MOUSE_EXITED, System.currentTimeMillis(), 0, 0, 0, 0, false));
         };
         this.itemList.addListSelectionListener(this.currentListener);
+        this.removePopupMenuListener(this.currentPopupListener);
+        this.currentPopupListener = new PopupMenuListener() {
+            @Override
+            public void popupMenuWillBecomeVisible(PopupMenuEvent e) {}
+
+            @Override
+            public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {}
+
+            @Override
+            public void popupMenuCanceled(PopupMenuEvent e) {
+                onDismiss.run();
+            }
+        };
+        this.addPopupMenuListener(this.currentPopupListener);
 
         super.show(invoker, x, y);
     }

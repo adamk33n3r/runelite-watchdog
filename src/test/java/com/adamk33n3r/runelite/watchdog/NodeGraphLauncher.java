@@ -46,6 +46,7 @@ public class NodeGraphLauncher {
         });
 
         GraphPanel content = injector.getInstance(GraphPanel.class);
+        content.init();
 
 //        Graph content = new Graph();
         JScrollPane viewport = new JScrollPane(content);

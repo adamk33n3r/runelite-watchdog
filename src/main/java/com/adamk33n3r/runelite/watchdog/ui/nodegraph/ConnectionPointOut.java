@@ -43,8 +43,10 @@ public class ConnectionPointOut<T> extends ConnectionPoint {
                 System.out.println(deepestComponentAt);
                 if (deepestComponentAt.equals(nodePanel.getGraphPanel()) || (deepestComponentAt instanceof Connection && deepestComponentAt.getParent().equals(nodePanel.getGraphPanel()))) {
                     System.out.println("dropped on graph");
-                    nodePanel.getGraphPanel().createNode(e.getComponent(), e.getX(), e.getY(), new Class[]{NotificationType.class, LogicNodeType.class},(newNode) -> {
+                    // TODO: Update this to filter to only allow nodes that have a connection point that will match the connection point being dragged from
+                    nodePanel.getGraphPanel().createNode(e.getComponent(), e.getX(), e.getY(), new Class[]{NotificationType.class, LogicNodeType.class}, (newNode) -> {
                         if (newNode instanceof NotificationNodePanel) {
+                            // TODO: update this to connect the correct connection point after the above
                             nodePanel.getGraphPanel().connect(((AlertNodePanel)nodePanel).getCaptureGroupsOut(), ((NotificationNodePanel) newNode).getCaptureGroupsIn());
                         }
                         nodePanel.getGraphPanel().remove(ConnectionPointOut.this.newConnection);

@@ -21,6 +21,7 @@ public class VarOutput<T> extends Var<T> {
         this.connections.remove(connection);
     }
 
+    @Override
     public void setValue(T value) {
         this.value = value;
         this.send();

@@ -66,7 +66,7 @@ public class NodePanel extends JPanel {
         this.items = new JPanel();
         itemsWrapper.add(this.items, BorderLayout.NORTH);
 //        items.setLayout(new BoxLayout(items, BoxLayout.Y_AXIS));
-        this.items.setLayout(new DynamicGridLayout(0, 1, 5, 5));
+        this.items.setLayout(new StretchedStackedLayout(5));
         this.add(itemsWrapper);
 
 //        this.items.add(new TextInput("Message", "asdf")).addMouseListener(onTopAdapter);
