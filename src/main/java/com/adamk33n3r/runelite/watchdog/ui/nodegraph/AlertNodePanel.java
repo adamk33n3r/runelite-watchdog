@@ -36,7 +36,7 @@ public class AlertNodePanel extends NodePanel {
 //        this.outConnectionPoints.add(this.captureGroupsOut);
 //        this.outConnectionPoints.add(this.alertName);
         this.testOut = new ConnectionPointOut<>(this, triggerNode.getDebounceOut());
-        this.items.add(new ConnectionLine<>(null, new NumberInput("Test", triggerNode.getDebounceOut().getValue().intValue()), this.testOut));
+        this.items.add(new ConnectionLine<>(new ConnectionPointIn<>(this, triggerNode.getDebounce()), new NumberInput("Test", triggerNode.getDebounceOut().getValue().intValue()), this.testOut));
 //        this.outConnectionPoints.add(this.testOut);
         this.enabled = new ConnectionPointIn<>(this, triggerNode.getEnabled());
         BoolInput enabledInput = new BoolInput("Enabled", triggerNode.getEnabled().getValue());

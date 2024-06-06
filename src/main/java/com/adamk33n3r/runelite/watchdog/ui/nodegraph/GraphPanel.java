@@ -1,5 +1,6 @@
 package com.adamk33n3r.runelite.watchdog.ui.nodegraph;
 
+import com.adamk33n3r.nodegraph.nodes.constants.Num;
 import com.adamk33n3r.runelite.watchdog.NotificationType;
 import com.adamk33n3r.runelite.watchdog.TriggerType;
 import com.adamk33n3r.runelite.watchdog.alerts.ChatAlert;
@@ -86,6 +87,10 @@ public class GraphPanel extends JLayeredPane {
         boolNode.setValue(false);
         this.graph.add(boolNode);
 
+        Num numNode = new Num();
+        numNode.setValue(27);
+        this.graph.add(numNode);
+
 
         /*
          * Node Panels
@@ -101,6 +106,9 @@ public class GraphPanel extends JLayeredPane {
 
         BoolNodePanel boolNodePanel = new BoolNodePanel(this, boolNode, 15, 15, "Bool Node", Color.CYAN);
         this.add(boolNodePanel, NODE_LAYER);
+
+        NumberNodePanel numNodePanel = new NumberNodePanel(this, numNode, 15, 215, "Num Node", Color.CYAN);
+        this.add(numNodePanel);
 
 //        NodePanel logicNodePanel = new IfNodePanel(this, null, 400, 200, "If Node", Color.CYAN);
 //        this.add(logicNodePanel, NODE_LAYER);
@@ -196,7 +204,7 @@ public class GraphPanel extends JLayeredPane {
             this.removeConnectionTo(input);
             Connection conn = new NodeConnection(output, input);
             this.add(conn, CONNECTION_LAYER);
-            this.processNode(output.getNodePanel().getNode());
+//            this.processNode(output.getNodePanel().getNode());
         } else {
             this.graph.disconnect(output.getOutputVar(), input.getInputVar());
             Optional<NodeConnection> first = output.getNodePanel().getConnections().stream().filter(c -> c.getEndPoint().equals(input)).findFirst();

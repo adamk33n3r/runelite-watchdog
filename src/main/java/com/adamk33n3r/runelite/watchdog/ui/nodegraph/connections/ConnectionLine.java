@@ -15,7 +15,7 @@ public class ConnectionLine<T> extends JPanel {
         if (this.in != null) {
             this.add(this.in, BorderLayout.WEST);
             this.in.getInputVar().onChange((newValue) -> {
-                variable.setValue(newValue);
+                variable.setValue(newValue); // Sets the value of the swing component
                 if (this.out != null) {
                     this.out.getOutputVar().setValue(newValue);
                 }

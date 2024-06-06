@@ -1,4 +1,4 @@
-package com.adamk33n3r.runelite.watchdog;
+package com.adamk33n3r.runelite.watchdog.nodegraph;
 
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.GraphPanel;
 import com.google.inject.Guice;

@@ -9,6 +9,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.swing.*;
+import javax.swing.border.Border;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
@@ -17,17 +18,21 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-@Getter
-@Setter
 public class NodePanel extends JPanel {
     public static final int PANEL_WIDTH = 300;
     public static final int PANEL_HEIGHT = 200;
     public static final int TITLE_HEIGHT = 20;
+
     protected JPanel items;
+
+    @Getter
     private List<NodeConnection> connections = new ArrayList<>();
-    private Color color;
-    private GraphPanel graphPanel;
-    private Node node;
+    @Getter
+    private final GraphPanel graphPanel;
+    @Getter
+    private final Node node;
+
+    private final Border border;
 
 //    protected JPanel inConnectionPoints;
 //    protected JPanel outConnectionPoints;
@@ -35,19 +40,19 @@ public class NodePanel extends JPanel {
     public NodePanel(GraphPanel graphPanel, Node node, int x, int y, String name, Color color) {
         this.graphPanel = graphPanel;
         this.node = node;
-        this.color = color;
         this.setName(name);
         this.setBounds(x, y, PANEL_WIDTH, PANEL_HEIGHT);
         this.setBackground(color);
 //        this.setBorder(BorderFactory.createLineBorder(ColorScheme.DARK_GRAY_COLOR, 2));
 //        this.setBorder(BorderFactory.createSoftBevelBorder(BevelBorder.RAISED));
+        this.border = BorderFactory.createEmptyBorder(5, 5, 5, 5);
         this.setLayout(new BorderLayout());
         JLabel nameLabel = new JLabel(name);
         nameLabel.setForeground(Util.textColorForBG(color));
         nameLabel.setPreferredSize(new Dimension(0, TITLE_HEIGHT));
         nameLabel.setBorder(new EmptyBorder(0, 5, 0, 0));
         JPanel topPanel = new JPanel(new BorderLayout());
-        topPanel.setBackground(null);
+        topPanel.setBackground(color);
         topPanel.add(nameLabel, BorderLayout.CENTER);
         JButton button = new JButton("X");
         button.addActionListener((ev) -> {
@@ -67,6 +72,7 @@ public class NodePanel extends JPanel {
         JPanel itemsWrapper = new JPanel(new BorderLayout());
         this.items = new JPanel();
         itemsWrapper.add(this.items, BorderLayout.NORTH);
+        this.items.setBorder(this.border);
         this.items.setLayout(new StretchedStackedLayout(5));
         this.add(itemsWrapper);
 
@@ -88,7 +94,8 @@ public class NodePanel extends JPanel {
                 .map(Component::getHeight)
                 .reduce(0, Integer::sum);
             int padding = 5 * (this.items.getComponentCount() - 1);
-            this.setBounds(this.getX(), this.getY(), PANEL_WIDTH, totalHeight + TITLE_HEIGHT + padding + 2); // idk why it's +2
+            Insets borderInsets = this.border.getBorderInsets(this);
+            this.setBounds(this.getX(), this.getY(), PANEL_WIDTH + borderInsets.left + borderInsets.right, totalHeight + TITLE_HEIGHT + padding + 2 + borderInsets.top + borderInsets.bottom); // idk why it's +2
         });
     }
 

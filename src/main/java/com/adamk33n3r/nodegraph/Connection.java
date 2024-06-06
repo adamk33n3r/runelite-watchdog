@@ -12,6 +12,7 @@ public class Connection<T> {
         this.input = input;
         this.output.addConnection(this);
         this.input.setConnection(this);
+        this.input.setValue(this.output.getValue());
     }
 
     public void send(T value) {

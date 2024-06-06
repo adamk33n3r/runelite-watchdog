@@ -36,6 +36,6 @@ public class TriggerNode extends Node {
     public void process() {
         this.nameOut.setValue(this.name.getValue());
         this.captureGroups.setValue(this.captureGroupsIn.getValue());
-        this.debounceOut.setValue(this.debounce.getValue());
+        this.debounceOut.setValue(this.debounce.getConnection() != null ? this.debounce.getValue() : this.alert.getDebounceTime());
     }
 }

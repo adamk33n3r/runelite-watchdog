@@ -19,5 +19,7 @@ public class BoolNodePanel extends NodePanel {
 
         BoolInput boolInput = new BoolInput("Boolean Value", boolNode.getValue().getValue());
         this.items.add(new ConnectionLine<>(null, boolInput, this.boolValue));
+
+        this.pack();
     }
 }
