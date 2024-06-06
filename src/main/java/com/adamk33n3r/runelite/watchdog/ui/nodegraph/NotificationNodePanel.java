@@ -6,13 +6,19 @@ import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
 import com.adamk33n3r.runelite.watchdog.alerts.FlashMode;
 import com.adamk33n3r.runelite.watchdog.elevenlabs.ElevenLabs;
 import com.adamk33n3r.runelite.watchdog.elevenlabs.Voice;
-import com.adamk33n3r.runelite.watchdog.nodegraph.nodes.NotificationNode;
+import com.adamk33n3r.nodegraph.nodes.NotificationNode;
 import com.adamk33n3r.runelite.watchdog.notifications.Notification;
 import com.adamk33n3r.runelite.watchdog.notifications.ScreenFlash;
 import com.adamk33n3r.runelite.watchdog.notifications.TextToSpeech;
 import com.adamk33n3r.runelite.watchdog.notifications.tts.TTSSource;
 import com.adamk33n3r.runelite.watchdog.ui.FlatTextArea;
 import com.adamk33n3r.runelite.watchdog.ui.Icons;
+import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.ConnectionLine;
+import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.ConnectionPointIn;
+import com.adamk33n3r.runelite.watchdog.ui.nodegraph.inputs.BoolInput;
+import com.adamk33n3r.runelite.watchdog.ui.nodegraph.inputs.NumberInput;
+import com.adamk33n3r.runelite.watchdog.ui.nodegraph.inputs.TextInput;
+import com.adamk33n3r.runelite.watchdog.ui.nodegraph.inputs.ViewInput;
 import com.adamk33n3r.runelite.watchdog.ui.notifications.VoiceChooser;
 import com.adamk33n3r.runelite.watchdog.ui.notifications.VolumeSlider;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
@@ -28,7 +34,7 @@ import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 
 @Getter
-public class NotificationNodePanel extends AcceptsConnectionNodePanel {
+public class NotificationNodePanel extends NodePanel {
     private final ConnectionPointIn<Boolean> enabledIn;
     private final ConnectionPointIn<String[]> captureGroupsIn;
     private final ConnectionPointIn<String> alertNameIn;
@@ -39,13 +45,13 @@ public class NotificationNodePanel extends AcceptsConnectionNodePanel {
         Notification notification = notificationNode.getNotification();
 
         this.enabledIn = new ConnectionPointIn<>(this, notificationNode.getEnabled());
-        this.inConnectionPoints.add(this.enabledIn);
+        this.items.add(new ConnectionLine<>(this.enabledIn, new BoolInput("Enabled", notificationNode.getEnabled().getValue()), null));
         this.captureGroupsIn = new ConnectionPointIn<>(this, notificationNode.getCaptureGroups());
-        this.inConnectionPoints.add(this.captureGroupsIn);
+        this.items.add(new ConnectionLine<>(this.captureGroupsIn, new ViewInput<>("Capture Groups", notificationNode.getCaptureGroups().getValue()), null));
         this.alertNameIn = new ConnectionPointIn<>(this, notificationNode.getAlertName());
-        this.inConnectionPoints.add(this.alertNameIn);
+        this.items.add(new ConnectionLine<>(this.alertNameIn, new TextInput("Alert Name", ""), null));
         this.delayMillisecondsIn = new ConnectionPointIn<>(this, notificationNode.getDelayMilliseconds());
-        this.inConnectionPoints.add(this.delayMillisecondsIn);
+        this.items.add(new ConnectionLine<>(this.delayMillisecondsIn, new NumberInput("Delay (ms)", 1), null));
 
         JButton testBtn = new JButton("TEST");
         testBtn.addActionListener((ev) -> notification.fireForced(new String[]{}));
@@ -184,5 +190,7 @@ public class NotificationNodePanel extends AcceptsConnectionNodePanel {
 //            volumeSlider.addChangeListener(e -> onChangeListener.run());
             this.items.add(PanelUtils.createIconComponent(Icons.VOLUME, "The volume to playback speech", volumeSlider));
         }
+
+        this.pack();
     }
 }

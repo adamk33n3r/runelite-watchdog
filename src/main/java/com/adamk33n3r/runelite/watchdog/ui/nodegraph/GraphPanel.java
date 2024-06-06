@@ -5,14 +5,18 @@ import com.adamk33n3r.runelite.watchdog.TriggerType;
 import com.adamk33n3r.runelite.watchdog.alerts.ChatAlert;
 import com.adamk33n3r.runelite.watchdog.alerts.SpawnedAlert;
 
-import com.adamk33n3r.runelite.watchdog.nodegraph.Graph;
-import com.adamk33n3r.runelite.watchdog.nodegraph.Node;
-import com.adamk33n3r.runelite.watchdog.nodegraph.nodes.NotificationNode;
-import com.adamk33n3r.runelite.watchdog.nodegraph.nodes.TriggerNode;
-import com.adamk33n3r.runelite.watchdog.nodegraph.nodes.constants.Bool;
-import com.adamk33n3r.runelite.watchdog.nodegraph.nodes.logic.And;
+import com.adamk33n3r.nodegraph.Graph;
+import com.adamk33n3r.nodegraph.Node;
+import com.adamk33n3r.nodegraph.nodes.NotificationNode;
+import com.adamk33n3r.nodegraph.nodes.TriggerNode;
+import com.adamk33n3r.nodegraph.nodes.constants.Bool;
+import com.adamk33n3r.nodegraph.nodes.logic.And;
 import com.adamk33n3r.runelite.watchdog.notifications.ScreenFlash;
 import com.adamk33n3r.runelite.watchdog.notifications.TextToSpeech;
+import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.Connection;
+import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.ConnectionPointIn;
+import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.ConnectionPointOut;
+import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.NodeConnection;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.components.colorpicker.ColorPickerManager;
 import net.runelite.client.util.ImageUtil;
@@ -86,16 +90,16 @@ public class GraphPanel extends JLayeredPane {
         /*
          * Node Panels
          */
-        AlertNodePanel test = new AlertNodePanel(this, 50, 50, "Test", Color.RED, triggerNode);
+        AlertNodePanel test = new AlertNodePanel(this, 425, 165, "Test", Color.RED, triggerNode);
         this.add(test, NODE_LAYER);
 
-        NotificationNodePanel testTEST = new NotificationNodePanel(this, 700, 500, "TestTEST", Color.PINK, notificationNode, colorPickerManager);
+        NotificationNodePanel testTEST = new NotificationNodePanel(this, 815, 365, "TestTEST", Color.PINK, notificationNode, colorPickerManager);
         this.add(testTEST, NODE_LAYER);
 
-        NotificationNodePanel screenFlashNodePanel = new NotificationNodePanel(this, 700, 50, "Screen Flash", Color.PINK, screenFlashNode, colorPickerManager);
+        NotificationNodePanel screenFlashNodePanel = new NotificationNodePanel(this, 815, 65, "Screen Flash", Color.PINK, screenFlashNode, colorPickerManager);
         this.add(screenFlashNodePanel, NODE_LAYER);
 
-        BoolNodePanel boolNodePanel = new BoolNodePanel(this, boolNode, 100, 300, "Bool Node", Color.CYAN);
+        BoolNodePanel boolNodePanel = new BoolNodePanel(this, boolNode, 15, 15, "Bool Node", Color.CYAN);
         this.add(boolNodePanel, NODE_LAYER);
 
 //        NodePanel logicNodePanel = new IfNodePanel(this, null, 400, 200, "If Node", Color.CYAN);
@@ -187,13 +191,12 @@ public class GraphPanel extends JLayeredPane {
 //    }
 
     public <T> void connect(ConnectionPointOut<T> output, ConnectionPointIn<T> input) {
-        boolean connected = this.graph.connect(output.getOutputVar(), input.getInputVar());
-        if (connected) {
+        boolean madeConnection = this.graph.connect(output.getOutputVar(), input.getInputVar());
+        if (madeConnection) {
+            this.removeConnectionTo(input);
             Connection conn = new NodeConnection(output, input);
             this.add(conn, CONNECTION_LAYER);
-            if (output.getNodePanel().getNode() instanceof TriggerNode) {
-                this.processNode((TriggerNode) output.getNodePanel().getNode());
-            }
+            this.processNode(output.getNodePanel().getNode());
         } else {
             this.graph.disconnect(output.getOutputVar(), input.getInputVar());
             Optional<NodeConnection> first = output.getNodePanel().getConnections().stream().filter(c -> c.getEndPoint().equals(input)).findFirst();
@@ -202,6 +205,17 @@ public class GraphPanel extends JLayeredPane {
                 this.remove(nc);
             });
         }
+    }
+
+    private void removeConnectionTo(ConnectionPointIn<?> input) {
+        Arrays.stream(this.getComponentsInLayer(CONNECTION_LAYER))
+            .filter(component -> component instanceof NodeConnection)
+            .map(component -> (NodeConnection) component)
+            .filter(conn -> conn.getEndPoint().equals(input))
+            .forEach(nc -> {
+                nc.remove();
+                this.remove(nc);
+            });
     }
 
     public void createNode(Component parent, int x, int y, Class<? extends Enum<?>>[] filter, Consumer<NodePanel> onSelect) {

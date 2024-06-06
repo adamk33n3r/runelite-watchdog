@@ -1,10 +1,10 @@
 package com.adamk33n3r.runelite.watchdog.ui.nodegraph;
 
-import com.adamk33n3r.runelite.watchdog.nodegraph.Node;
+import com.adamk33n3r.nodegraph.Node;
 
 import java.awt.*;
 
-public class IfNodePanel extends AcceptsConnectionNodePanel {
+public class IfNodePanel extends NodePanel {
     public IfNodePanel(GraphPanel graphPanel, Node node, int x, int y, String name, Color color) {
         super(graphPanel, node, x, y, name, color);
 

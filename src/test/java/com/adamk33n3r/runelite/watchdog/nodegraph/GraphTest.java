@@ -1,9 +1,13 @@
 package com.adamk33n3r.runelite.watchdog.nodegraph;
 
-import com.adamk33n3r.runelite.watchdog.nodegraph.nodes.Dummy;
-import com.adamk33n3r.runelite.watchdog.nodegraph.nodes.Logger;
-import com.adamk33n3r.runelite.watchdog.nodegraph.nodes.constants.Num;
-import com.adamk33n3r.runelite.watchdog.nodegraph.nodes.math.Add;
+import com.adamk33n3r.nodegraph.Connection;
+import com.adamk33n3r.nodegraph.Graph;
+import com.adamk33n3r.nodegraph.VarInput;
+import com.adamk33n3r.nodegraph.VarOutput;
+import com.adamk33n3r.nodegraph.nodes.Dummy;
+import com.adamk33n3r.nodegraph.nodes.Logger;
+import com.adamk33n3r.nodegraph.nodes.constants.Num;
+import com.adamk33n3r.nodegraph.nodes.math.Add;
 import org.junit.Test;
 import org.slf4j.LoggerFactory;
 

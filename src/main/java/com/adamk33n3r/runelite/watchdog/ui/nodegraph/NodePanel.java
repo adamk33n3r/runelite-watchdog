@@ -1,9 +1,9 @@
 package com.adamk33n3r.runelite.watchdog.ui.nodegraph;
 
 import com.adamk33n3r.runelite.watchdog.Util;
-import com.adamk33n3r.runelite.watchdog.nodegraph.Node;
+import com.adamk33n3r.nodegraph.Node;
 import com.adamk33n3r.runelite.watchdog.ui.StretchedStackedLayout;
-import net.runelite.client.ui.DynamicGridLayout;
+import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.NodeConnection;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -14,6 +14,7 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Getter
@@ -21,14 +22,15 @@ import java.util.List;
 public class NodePanel extends JPanel {
     public static final int PANEL_WIDTH = 300;
     public static final int PANEL_HEIGHT = 200;
+    public static final int TITLE_HEIGHT = 20;
     protected JPanel items;
     private List<NodeConnection> connections = new ArrayList<>();
     private Color color;
     private GraphPanel graphPanel;
     private Node node;
 
-    protected JPanel inConnectionPoints;
-    protected JPanel outConnectionPoints;
+//    protected JPanel inConnectionPoints;
+//    protected JPanel outConnectionPoints;
 
     public NodePanel(GraphPanel graphPanel, Node node, int x, int y, String name, Color color) {
         this.graphPanel = graphPanel;
@@ -42,7 +44,7 @@ public class NodePanel extends JPanel {
         this.setLayout(new BorderLayout());
         JLabel nameLabel = new JLabel(name);
         nameLabel.setForeground(Util.textColorForBG(color));
-        nameLabel.setPreferredSize(new Dimension(0, 20));
+        nameLabel.setPreferredSize(new Dimension(0, TITLE_HEIGHT));
         nameLabel.setBorder(new EmptyBorder(0, 5, 0, 0));
         JPanel topPanel = new JPanel(new BorderLayout());
         topPanel.setBackground(null);
@@ -65,23 +67,12 @@ public class NodePanel extends JPanel {
         JPanel itemsWrapper = new JPanel(new BorderLayout());
         this.items = new JPanel();
         itemsWrapper.add(this.items, BorderLayout.NORTH);
-//        items.setLayout(new BoxLayout(items, BoxLayout.Y_AXIS));
         this.items.setLayout(new StretchedStackedLayout(5));
         this.add(itemsWrapper);
-
-//        this.items.add(new TextInput("Message", "asdf")).addMouseListener(onTopAdapter);
-//        items.add(Box.createVerticalStrut(10));
-//        items.add(Box.createVerticalGlue());
-//        this.items.add(new NumberInput("X", 8)).addMouseListener(onTopAdapter);
-//        Box.Filler verticalGlue = (Box.Filler) Box.createVerticalGlue();
-//        verticalGlue.changeShape(verticalGlue.getMinimumSize(), new Dimension(0, Short.MAX_VALUE), verticalGlue.getMaximumSize());
-//        items.add(verticalGlue);
-//        this.items.add(new NumberInput("Y", 9)).addMouseListener(onTopAdapter);
 
         DraggingMouseAdapter draggingMouseAdapter = new DraggingMouseAdapter((start, point) -> {
             point = SwingUtilities.convertPoint(NodePanel.this, point, graphPanel);
             point.translate(-start.x, -start.y);
-//            setLocation(point.x - start.x, point.y - start.y);
             point.setLocation(Math.min(Math.max(point.x, 0), graphPanel.getWidth() - PANEL_WIDTH), Math.min(Math.max(point.y, 0), graphPanel.getHeight() - PANEL_HEIGHT));
             this.setLocation(point);
             graphPanel.onNodeMoved(this);
@@ -89,12 +80,16 @@ public class NodePanel extends JPanel {
         this.addMouseListener(draggingMouseAdapter);
         this.addMouseMotionListener(draggingMouseAdapter);
         this.addMouseListener(onTopAdapter);
+    }
 
-
-        this.inConnectionPoints = new JPanel(new StretchedStackedLayout(5));
-        this.add(this.inConnectionPoints, BorderLayout.WEST);
-        this.outConnectionPoints = new JPanel(new StretchedStackedLayout(5));
-        this.add(this.outConnectionPoints, BorderLayout.EAST);
+    public void pack() {
+        SwingUtilities.invokeLater(() -> {
+            int totalHeight = Arrays.stream(this.items.getComponents())
+                .map(Component::getHeight)
+                .reduce(0, Integer::sum);
+            int padding = 5 * (this.items.getComponentCount() - 1);
+            this.setBounds(this.getX(), this.getY(), PANEL_WIDTH, totalHeight + TITLE_HEIGHT + padding + 2); // idk why it's +2
+        });
     }
 
     public void addConnection(NodeConnection connection) {
