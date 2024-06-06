@@ -51,7 +51,7 @@ public class NotificationNodePanel extends NodePanel {
         this.alertNameIn = new ConnectionPointIn<>(this, notificationNode.getAlertName());
         this.items.add(new ConnectionLine<>(this.alertNameIn, new TextInput("Alert Name", ""), null));
         this.delayMillisecondsIn = new ConnectionPointIn<>(this, notificationNode.getDelayMilliseconds());
-        this.items.add(new ConnectionLine<>(this.delayMillisecondsIn, new NumberInput("Delay (ms)", 1), null));
+        this.items.add(new ConnectionLine<>(this.delayMillisecondsIn, new NumberInput("Delay (ms)", notificationNode.getNotification().getDelayMilliseconds()), null));
 
         JButton testBtn = new JButton("TEST");
         testBtn.addActionListener((ev) -> notification.fireForced(new String[]{}));

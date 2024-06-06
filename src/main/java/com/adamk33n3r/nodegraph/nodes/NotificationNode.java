@@ -22,8 +22,11 @@ public class NotificationNode extends Node {
         this.notification = notification;
 
         this.fireWhenFocused.setValue(this.notification.isFireWhenFocused());
+        this.fireWhenFocused.onChange(this.notification::setFireWhenFocused);
         this.fireWhenAfk.setValue(this.notification.getFireWhenAFKForSeconds());
+        this.fireWhenAfk.onChange((val) -> this.notification.setFireWhenAFKForSeconds(val.intValue()));
         this.delayMilliseconds.setValue(this.notification.getDelayMilliseconds());
+        this.delayMilliseconds.onChange((val) -> this.notification.setDelayMilliseconds(val.intValue()));
     }
 
     @Override

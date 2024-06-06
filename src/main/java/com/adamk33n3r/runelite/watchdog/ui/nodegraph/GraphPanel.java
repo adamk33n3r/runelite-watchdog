@@ -63,6 +63,7 @@ public class GraphPanel extends JLayeredPane {
         alert.setMessage("This is a test message");
         ScreenFlash screenFlash = new ScreenFlash();
         TextToSpeech tts = new TextToSpeech();
+        tts.setDelayMilliseconds(37);
 //        tts.setSource(TTSSource.ELEVEN_LABS);
 
         SpawnedAlert spawnedAlert = new SpawnedAlert("Spawned Alert");

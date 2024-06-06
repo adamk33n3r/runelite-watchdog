@@ -7,7 +7,7 @@ import java.util.function.Consumer;
 public class NumberInput extends AbstractInput<Number> {
     private final JSpinner spinner;
 
-    public NumberInput(String label, int value) {
+    public NumberInput(String label, Number value) {
         JLabel labelComp = new JLabel(label);
         this.spinner = new JSpinner();
         this.spinner.setValue(value);

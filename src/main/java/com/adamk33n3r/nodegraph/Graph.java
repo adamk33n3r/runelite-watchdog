@@ -72,6 +72,7 @@ public class Graph {
                         .append(connection.getInput().getName())
                         .append(":")
                         .append(connection.getInput().getNode().getClass().getSimpleName())
+                        .append(((NotificationNode)connection.getInput().getNode()).getDelayMilliseconds().getValue())
                         .append(((NotificationNode)connection.getInput().getNode()).getNotification().getDelayMilliseconds())
                         .append("\n");
                 }
