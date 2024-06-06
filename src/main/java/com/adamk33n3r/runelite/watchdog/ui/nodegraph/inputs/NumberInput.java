@@ -26,12 +26,12 @@ public class NumberInput extends AbstractInput<Number> {
     }
 
     @Override
-    public JComponent getComponent() {
-        return this;
+    public void onChange(Consumer<Number> onChange) {
+        this.spinner.addChangeListener((e) -> onChange.accept((Number) this.spinner.getValue()));
     }
 
     @Override
-    public void onChange(Consumer<Number> onChange) {
-        this.spinner.addChangeListener((e) -> onChange.accept((Number) this.spinner.getValue()));
+    protected JComponent getValueComponent() {
+        return this.spinner;
     }
 }

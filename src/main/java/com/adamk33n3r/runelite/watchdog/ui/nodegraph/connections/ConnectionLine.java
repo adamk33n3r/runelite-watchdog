@@ -23,8 +23,12 @@ public class ConnectionLine<T> extends JPanel {
             this.in.getInputVar().onConnectChange((connected) -> {
                 if (connected) {
                     this.in.setBackground(Color.GREEN);
+                    // disable swing component
+                    variable.setEnabled(false);
                 } else {
                     this.in.setBackground(Color.RED);
+                    // enable swing component
+                    variable.setEnabled(true);
                 }
             });
         }

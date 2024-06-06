@@ -8,4 +8,5 @@ public interface ConnectedVariable<T> {
     void setValue(T value);
     JComponent getComponent();
     void onChange(Consumer<T> onChange);
+    void setEnabled(boolean enabled);
 }

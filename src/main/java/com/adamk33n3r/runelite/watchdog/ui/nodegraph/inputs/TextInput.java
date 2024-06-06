@@ -29,11 +29,6 @@ public class TextInput extends AbstractInput<String> {
     }
 
     @Override
-    public JComponent getComponent() {
-        return this;
-    }
-
-    @Override
     public void onChange(Consumer<String> onChange) {
         this.textField.addFocusListener(new FocusListener() {
             @Override
@@ -46,5 +41,10 @@ public class TextInput extends AbstractInput<String> {
                 onChange.accept(textField.getText());
             }
         });
+    }
+
+    @Override
+    protected JComponent getValueComponent() {
+        return this.textField;
     }
 }

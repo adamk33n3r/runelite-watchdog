@@ -26,12 +26,12 @@ public class BoolInput extends AbstractInput<Boolean> {
     }
 
     @Override
-    public JComponent getComponent() {
-        return this;
+    public void onChange(Consumer<Boolean> onChange) {
+        this.checkbox.addItemListener((e) -> onChange.accept(this.checkbox.isSelected()));
     }
 
     @Override
-    public void onChange(Consumer<Boolean> onChange) {
-        this.checkbox.addItemListener((e) -> onChange.accept(this.checkbox.isSelected()));
+    protected JComponent getValueComponent() {
+        return this.checkbox;
     }
 }

@@ -28,11 +28,6 @@ public class ViewInput<T> extends AbstractInput<T> {
     }
 
     @Override
-    public JComponent getComponent() {
-        return this;
-    }
-
-    @Override
     public void onChange(Consumer<T> onChange) {
         // Do nothing since this input is not editable
     }
@@ -44,5 +39,10 @@ public class ViewInput<T> extends AbstractInput<T> {
         } else {
             return this.value.toString();
         }
+    }
+
+    @Override
+    protected JComponent getValueComponent() {
+        return this.valueLabel;
     }
 }
