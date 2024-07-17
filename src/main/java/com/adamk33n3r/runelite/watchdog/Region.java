@@ -13,6 +13,7 @@ public enum Region {
     INFERNO(9043),
     FIGHT_CAVE(9551),
     COLOSSEUM(7216),
+    KALPHITE_QUEEN(13972),
     COX(
         13136, // End of floor
         13137, 13393, // Lobbies/Room transitions

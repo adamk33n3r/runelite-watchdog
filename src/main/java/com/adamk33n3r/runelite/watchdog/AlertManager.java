@@ -259,7 +259,7 @@ public class AlertManager {
             chatboxTTS,
             cannonReload,
             readyToHarvest
-        ));
+        )).setEnabled(false);
 
         this.addAlert(starterAlerts, false);
     }
