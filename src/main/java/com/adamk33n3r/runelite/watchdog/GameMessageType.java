@@ -17,9 +17,9 @@ public enum GameMessageType implements Displayable {
     EXAMINE("Examine", "Examine text", ChatMessageType.ITEM_EXAMINE, ChatMessageType.NPC_EXAMINE, ChatMessageType.OBJECT_EXAMINE),
     GAME_MESSAGE("Game Message", "Game messages", ChatMessageType.GAMEMESSAGE, ChatMessageType.CONSOLE, ChatMessageType.ENGINE),
     LOGIN_LOGOUT("Login/Logout", "Friend Login/Logout messages", ChatMessageType.LOGINLOGOUTNOTIFICATION),
-    TRADE("Trade", "Trade messages", ChatMessageType.TRADE, ChatMessageType.TRADE_SENT, ChatMessageType.TRADEREQ),
+    NPC_SAY("NPC Dialogue", "Overhead text from some NPCs", ChatMessageType.NPC_SAY),
     SPAM("Spam", "Filtered game messages", ChatMessageType.SPAM),
-    NPC_SAY("Npc Dialogue","Overhead text from some NPCs",ChatMessageType.NPC_SAY),
+    TRADE("Trade", "Trade messages", ChatMessageType.TRADE, ChatMessageType.TRADE_SENT, ChatMessageType.TRADEREQ),
     ;
 
     private final String name;
