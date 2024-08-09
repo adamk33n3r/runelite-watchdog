@@ -19,6 +19,7 @@ public enum GameMessageType implements Displayable {
     LOGIN_LOGOUT("Login/Logout", "Friend Login/Logout messages", ChatMessageType.LOGINLOGOUTNOTIFICATION),
     TRADE("Trade", "Trade messages", ChatMessageType.TRADE, ChatMessageType.TRADE_SENT, ChatMessageType.TRADEREQ),
     SPAM("Spam", "Filtered game messages", ChatMessageType.SPAM),
+    NPC_SAY("Npc Dialogue","Overhead text from some NPCs",ChatMessageType.NPC_SAY),
     ;
 
     private final String name;
