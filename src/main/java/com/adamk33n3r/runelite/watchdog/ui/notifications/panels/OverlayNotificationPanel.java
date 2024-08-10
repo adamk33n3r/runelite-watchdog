@@ -76,7 +76,7 @@ public class OverlayNotificationPanel extends MessageNotificationPanel {
         });
         this.settings.add(sticky);
 
-        JSpinner displayTime = PanelUtils.createSpinner(notification.getTimeToLive(), 1, 99, 1, val -> {
+        JSpinner displayTime = PanelUtils.createSpinner(notification.getTimeToLive(), 1, 999, 1, val -> {
             notification.setTimeToLive(val);
             onChangeListener.run();
         });
