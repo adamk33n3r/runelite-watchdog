@@ -99,7 +99,7 @@ public class GraphPanel extends JLayeredPane {
         AlertNodePanel test = new AlertNodePanel(this, 425, 165, "Test", Color.RED, triggerNode);
         this.add(test, NODE_LAYER);
 
-        NotificationNodePanel testTEST = new NotificationNodePanel(this, 815, 365, "TestTEST", Color.PINK, notificationNode, colorPickerManager);
+        NotificationNodePanel testTEST = new NotificationNodePanel(this, 815, 365, "Text to Speech", Color.PINK, notificationNode, colorPickerManager);
         this.add(testTEST, NODE_LAYER);
 
         NotificationNodePanel screenFlashNodePanel = new NotificationNodePanel(this, 815, 65, "Screen Flash", Color.PINK, screenFlashNode, colorPickerManager);
