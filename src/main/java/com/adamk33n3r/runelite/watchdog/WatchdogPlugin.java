@@ -104,6 +104,8 @@ public class WatchdogPlugin extends Plugin {
     @Inject
     private OkHttpClient httpClient;
 
+    private AsyncBufferedImage icon;
+    private AsyncBufferedImage iconDisabled;
     private NavigationButton navButton;
     private NavigationButton navButtonDisabled;
 
@@ -140,30 +142,42 @@ public class WatchdogPlugin extends Plugin {
 
         this.alertManager.loadAlerts();
 
-        AsyncBufferedImage icon = this.itemManager.getImage(ItemID.BELL_BAUBLE);
-        AsyncBufferedImage iconDisabled = this.itemManager.getImage(ItemID.BELL_BAUBLE_6848);
+        this.icon = this.itemManager.getImage(ItemID.BELL_BAUBLE);
+        this.iconDisabled = this.itemManager.getImage(ItemID.BELL_BAUBLE_6848);
+
+        this.rebuildSidePanelButtons();
+
+        this.soundPlayer.startUp();
+
+        ToolTipManager.sharedInstance().setDismissDelay(Integer.MAX_VALUE);
+    }
+
+    private void rebuildSidePanelButtons() {
+        if (this.navButton != null) {
+            this.clientToolbar.removeNavigation(this.navButton);
+        }
+        if (this.navButtonDisabled != null) {
+            this.clientToolbar.removeNavigation(this.navButtonDisabled);
+        }
         this.navButton = NavigationButton.builder()
             .tooltip("Watchdog")
             .icon(icon)
-            .priority(1)
+            .priority(this.config.sidePanelPriority())
             .panel(this.panel.getMuxer())
             .build();
         this.navButtonDisabled = NavigationButton.builder()
             .tooltip("Watchdog (In disabled area)")
             .icon(iconDisabled)
-            .priority(1)
+            .priority(this.config.sidePanelPriority())
             .panel(this.panel.getMuxer())
             .build();
-        this.clientToolbar.addNavigation(this.navButton);
-        // For first load
-        icon.onLoaded(() -> {
-            this.clientToolbar.removeNavigation(this.navButton);
-            this.clientToolbar.addNavigation(this.navButton);
+        this.icon.onLoaded(() -> {
+            if (this.isInBannedArea) {
+                this.clientToolbar.addNavigation(this.navButtonDisabled);
+            } else {
+                this.clientToolbar.addNavigation(this.navButton);
+            }
         });
-
-        this.soundPlayer.startUp();
-
-        ToolTipManager.sharedInstance().setDismissDelay(Integer.MAX_VALUE);
     }
 
     @Override
@@ -232,6 +246,8 @@ public class WatchdogPlugin extends Plugin {
                     this.panel.getMuxer().popState();
                 }
                 this.panel.rebuild();
+            } else if (configChanged.getKey().equals(WatchdogConfig.SIDE_PANEL_PRIORITY)) {
+                this.rebuildSidePanelButtons();
             }
         }
     }
