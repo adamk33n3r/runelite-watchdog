@@ -13,6 +13,8 @@ import net.runelite.client.game.ItemManager;
 import net.runelite.client.util.Text;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.MutablePair;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -23,6 +25,8 @@ import java.time.Instant;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static com.adamk33n3r.runelite.watchdog.alerts.SpawnedAlert.SpawnedDespawned.DESPAWNED;
@@ -51,7 +55,7 @@ public class EventHandler {
 
     private final Map<Skill, Integer> previousSkillLevelTable = new EnumMap<>(Skill.class);
     private final Map<Skill, Integer> previousSkillXPTable = new EnumMap<>(Skill.class);
-    private Map<Integer, Integer> previousItemsTable = new HashMap<>();
+    private Map<String, Integer> previousItemsTable = new HashMap<>();
     private WorldPoint previousLocation = null;
 
     private boolean ignoreNotificationFired = false;
@@ -71,8 +75,7 @@ public class EventHandler {
             return;
         }
 
-        log.debug(chatMessage == null ? "is null" : "is not null");
-        log.debug(chatMessage.getType().name() + ": " + chatMessage.getMessage());
+        log.debug("{}: {}", chatMessage.getType().name(), chatMessage.getMessage());
         String unformattedMessage = Text.removeFormattingTags(chatMessage.getMessage());
 
         // Send player messages to a different handler
@@ -197,14 +200,18 @@ public class EventHandler {
             return;
         Item[] items = itemContainerChanged.getItemContainer().getItems();
         long itemCount = Arrays.stream(items).filter(item -> item.getId() > -1).count();
-        Map<Integer, Integer> currentItems = new HashMap<>();
-        Map<Integer, Integer> allItems = new HashMap<>();
+        Map<String, Integer> currentItems = new HashMap<>();
+        Map<String, Integer> allItems = new HashMap<>();
         Arrays.stream(items)
             .forEach(item -> {
-                currentItems.merge(item.getId(), item.getQuantity(), Integer::sum);
-                allItems.merge(item.getId(), item.getQuantity(), Integer::sum);
+                String itemName = this.itemManager.getItemComposition(item.getId()).getName();
+                currentItems.merge(itemName, item.getQuantity(), Integer::sum);
+                allItems.merge(itemName, item.getQuantity(), Integer::sum);
             });
-        this.previousItemsTable.keySet().forEach((itemId) -> allItems.putIfAbsent(itemId, 0));
+        this.previousItemsTable.keySet().forEach((item) -> allItems.putIfAbsent(item, 0));
+        for (Map.Entry<String, Integer> itemWithCount : currentItems.entrySet()) {
+            System.out.println(itemWithCount.getKey() + ": " + itemWithCount.getValue());
+        }
         // Skip firing alerts if there are no previous items, since we just logged in. Even an empty inventory will have a map of -1 itemIds.
         if (!this.previousItemsTable.isEmpty()) {
             this.alertManager.getAllEnabledAlertsOfType(InventoryAlert.class)
@@ -214,25 +221,53 @@ public class EventHandler {
                     } else if (inventoryAlert.getInventoryAlertType() == InventoryAlert.InventoryAlertType.EMPTY && itemCount == 0) {
                         this.fireAlert(inventoryAlert, inventoryAlert.getInventoryAlertType().getName());
                     } else if (inventoryAlert.getInventoryAlertType() == InventoryAlert.InventoryAlertType.ITEM) {
-                        allItems.entrySet().stream()
-                            .filter(itemWithCount -> itemWithCount.getKey() != -1 && inventoryAlert.getQuantityComparator().compare(itemWithCount.getValue(), inventoryAlert.getItemQuantity()))
-                            .map(itemWithCount -> this.matchPattern(inventoryAlert,
-                                this.itemManager.getItemComposition(itemWithCount.getKey()).getName()))
-                            .filter(Objects::nonNull)
-                            .forEach(groups -> this.fireAlert(inventoryAlert, groups));
-                    } else if (inventoryAlert.getInventoryAlertType() == InventoryAlert.InventoryAlertType.ITEM_CHANGE) {
-                        allItems.entrySet().stream()
-                            .filter(itemWithCount -> {
-                                if (itemWithCount.getKey() == -1) {
-                                    return false;
-                                }
-                                int change = itemWithCount.getValue() - this.previousItemsTable.getOrDefault(itemWithCount.getKey(), 0);
-                                return inventoryAlert.getQuantityComparator().compare(change, inventoryAlert.getItemQuantity());
+                        Optional<MutablePair<List<String>, Integer>> matchedItems = allItems.entrySet().stream()
+                            .map(itemWithCount -> {
+                                String[] groups = this.matchPattern(inventoryAlert, itemWithCount.getKey());
+                                if (groups == null) return null;
+                                return new MutablePair<List<String>, Integer>(new ArrayList<>(List.of(groups)), itemWithCount.getValue());
                             })
-                            .map(itemWithCount -> this.matchPattern(inventoryAlert,
-                                this.itemManager.getItemComposition(itemWithCount.getKey()).getName()))
                             .filter(Objects::nonNull)
-                            .forEach(groups -> this.fireAlert(inventoryAlert, groups));
+                            .reduce((acc, b) -> {
+                                List<String> zipped = IntStream.range(0, Math.min(acc.getLeft().size(), b.getLeft().size()))
+                                    .mapToObj(i -> acc.getLeft().get(i) + ", " + b.getLeft().get(i))
+                                    .collect(Collectors.toList());
+                                acc.setLeft(zipped);
+                                acc.setRight(acc.getRight() + b.getRight());
+                                return acc;
+                            });
+                        if (matchedItems.isPresent() && inventoryAlert.getQuantityComparator().compare(matchedItems.get().getRight(), inventoryAlert.getItemQuantity())) {
+                            this.fireAlert(inventoryAlert, matchedItems.get().getLeft().toArray(new String[0]));
+                        }
+                    } else if (inventoryAlert.getInventoryAlertType() == InventoryAlert.InventoryAlertType.ITEM_CHANGE) {
+                        Optional<MutablePair<List<String>, ImmutablePair<Integer, Integer>>> matchedItems = allItems.entrySet().stream()
+                            .map(itemWithCount -> {
+                                String[] groups = this.matchPattern(inventoryAlert, itemWithCount.getKey());
+                                if (groups == null) return null;
+                                return new MutablePair<List<String>, ImmutablePair<Integer, Integer>>(
+                                    new ArrayList<>(List.of(groups)),
+                                    new ImmutablePair<>(
+                                        this.previousItemsTable.getOrDefault(itemWithCount.getKey(), 0),
+                                        itemWithCount.getValue()
+                                    )
+                                );
+                            })
+                            .filter(Objects::nonNull)
+                            .reduce((acc, b) -> {
+                                List<String> zipped = IntStream.range(0, Math.min(acc.getLeft().size(), b.getLeft().size()))
+                                    .mapToObj(i -> acc.getLeft().get(i) + ", " + b.getLeft().get(i))
+                                    .collect(Collectors.toList());
+                                acc.setLeft(zipped);
+                                // I love generic pairs.....to the left to the left
+                                acc.setRight(new ImmutablePair<>(acc.getRight().getLeft() + b.getRight().getLeft(), acc.getRight().getRight() + b.getRight().getRight()));
+                                return acc;
+                            });
+                        if (matchedItems.isPresent()) {
+                            int change = matchedItems.get().getRight().getRight() - matchedItems.get().getRight().getLeft();
+                            if (inventoryAlert.getQuantityComparator().compare(change, inventoryAlert.getItemQuantity())) {
+                                this.fireAlert(inventoryAlert, matchedItems.get().getLeft().toArray(new String[0]));
+                            }
+                        }
                     }
                 });
         }
