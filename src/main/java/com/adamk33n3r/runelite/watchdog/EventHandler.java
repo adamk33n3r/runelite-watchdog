@@ -4,6 +4,7 @@ import com.adamk33n3r.runelite.watchdog.alerts.*;
 import com.adamk33n3r.runelite.watchdog.ui.panels.HistoryPanel;
 
 import net.runelite.api.*;
+import net.runelite.api.coords.LocalPoint;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.*;
 import net.runelite.client.eventbus.EventBus;
@@ -342,7 +343,7 @@ public class EventHandler {
 
     @Subscribe
     private void onGameTick(GameTick gameTick) {
-        WorldPoint worldLocation = this.client.getLocalPlayer().getWorldLocation();
+        WorldPoint worldLocation = getWorldPoint();
         this.alertManager.getAllEnabledAlertsOfType(LocationAlert.class)
             .filter(locationAlert -> locationAlert.shouldFire(worldLocation))
             .forEach(locationAlert -> {
@@ -353,6 +354,26 @@ public class EventHandler {
                 this.fireAlert(locationAlert, new String[] { String.valueOf(worldLocation.getX()), String.valueOf(worldLocation.getY()) });
             });
         this.previousLocation = worldLocation;
+    }
+
+    private WorldPoint getWorldPoint() {
+        WorldPoint worldLocation = this.client.getLocalPlayer().getWorldLocation();
+        System.out.println(worldLocation);
+        WorldView worldView = this.client.getLocalPlayer().getWorldView();
+        if (worldView.isInstance()) {
+            int[][][] instanceTemplateChunks = worldView.getInstanceTemplateChunks();
+            LocalPoint localPoint = this.client.getLocalPlayer().getLocalLocation();
+            int chunkData = instanceTemplateChunks[worldView.getPlane()][localPoint.getSceneX() / 8][localPoint.getSceneY() / 8];
+
+            int tileX = worldLocation.getX();
+            int tileY = worldLocation.getY();
+            final int chunkTileX = tileX % 8;
+            final int chunkTileY = tileY % 8;
+            tileX = (chunkData >> 14 & 0x3FF) * 8 + chunkTileX;
+            tileY = (chunkData >> 3 & 0x7FF) * 8 + chunkTileY;
+            worldLocation = new WorldPoint(tileX, tileY, worldLocation.getPlane());
+        }
+        return worldLocation;
     }
 
     private String[] matchPattern(RegexMatcher regexMatcher, String input) {
