@@ -24,6 +24,7 @@ public interface WatchdogConfig extends Config {
     // Core
     String ENABLE_TTS = "enableTTS";
     String OVERRIDE_IMPORTS_WITH_DEFAULTS = "overrideImportsWithDefaults";
+    String SIDE_PANEL_PRIORITY = "sidePanelPriority";
 
     // AFK Notification
     String DEFAULT_AFK_MODE = "defaultAFKMode";
@@ -96,6 +97,13 @@ public interface WatchdogConfig extends Config {
     default boolean ttsEnabled() { return false; }
 
     @ConfigItem(
+        keyName = MOUSE_MOVEMENT_CANCELS_FLASH,
+        name = "Mouse Movement Cancels",
+        description = "Cancel the repeated sounds/flashes with mouse movement as well as click and keyboard"
+    )
+    default boolean mouseMovementCancels() { return true; }
+
+    @ConfigItem(
         keyName = OVERRIDE_IMPORTS_WITH_DEFAULTS,
         name = "Override Imports with Defaults",
         description = "Will override imported alerts with your defaults set here"
@@ -110,11 +118,12 @@ public interface WatchdogConfig extends Config {
     default boolean putSoundsIntoQueue() { return true; }
 
     @ConfigItem(
-        keyName = MOUSE_MOVEMENT_CANCELS_FLASH,
-        name = "Mouse Movement Cancels",
-        description = "Cancel the repeated sounds/flashes with mouse movement as well as click and keyboard"
+        keyName = SIDE_PANEL_PRIORITY,
+        name = "Side Panel Priority",
+        description = "Panel icon priority, Lower # = higher pos, Higher # = lower pos "
     )
-    default boolean mouseMovementCancels() { return true; }
+    @Range(min = Integer.MIN_VALUE)
+    default int sidePanelPriority() { return 1; }
 
     //region AFK Notification
     @ConfigSection(

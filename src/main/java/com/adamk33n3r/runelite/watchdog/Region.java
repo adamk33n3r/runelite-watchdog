@@ -52,6 +52,9 @@ public enum Region {
         15184, 15696 // Wardens
 //        14672 // Chest room
     ),
+//    LUMBRIDGE_CASTLE(
+//        12850
+//    )
     ;
 
     public final int[] regionIDs;
