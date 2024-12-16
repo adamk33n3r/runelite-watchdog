@@ -23,6 +23,7 @@ import javax.swing.SwingUtilities;
 import java.awt.TrayIcon;
 import java.time.Instant;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -55,8 +56,8 @@ public class EventHandler {
 
     private final Map<Skill, Integer> previousSkillLevelTable = new EnumMap<>(Skill.class);
     private final Map<Skill, Integer> previousSkillXPTable = new EnumMap<>(Skill.class);
-    private final Map<Integer, String> itemNameCache = new HashMap<>();
-    private Map<String, Integer> previousItemsTable = new HashMap<>();
+    private final Map<Integer, String> itemNameCache = new ConcurrentHashMap<>();
+    private Map<String, Integer> previousItemsTable = new ConcurrentHashMap<>();
     private WorldPoint previousLocation = null;
 
     private boolean ignoreNotificationFired = false;
@@ -418,7 +419,7 @@ public class EventHandler {
     }
 
     @AllArgsConstructor
-    private class MatchedItem {
+    private static class MatchedItem {
         List<String> groups;
         int previousQuantity;
         int currentQuantity;
