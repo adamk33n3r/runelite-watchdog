@@ -4,9 +4,11 @@ import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
+import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Type;
 
+@Slf4j
 public class MixedCaseEnumAdapter implements JsonDeserializer<Enum> {
     @Override
     public Enum deserialize(JsonElement jsonElement, Type type, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
@@ -16,7 +18,7 @@ public class MixedCaseEnumAdapter implements JsonDeserializer<Enum> {
             }
             return null;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Failed to deserialize enum", e);
             return null;
         }
     }
