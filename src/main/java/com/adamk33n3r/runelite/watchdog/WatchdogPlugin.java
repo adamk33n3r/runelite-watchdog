@@ -113,7 +113,7 @@ public class WatchdogPlugin extends Plugin {
     private static WatchdogPlugin instance;
 
     @Getter
-    private final Queue<MessageNode> messageQueue = EvictingQueue.create(20);
+    private final Queue<MessageNode> messageQueue = EvictingQueue.create(200);
 
     @Getter
     private final Queue<NotificationFired> notificationsQueue = EvictingQueue.create(20);
