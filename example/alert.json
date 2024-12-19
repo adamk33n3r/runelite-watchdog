@@ -2,7 +2,7 @@
   "displayName": "Example Alert Hub Alert",
   "description": "This is an example alert for the alert hub.",
   "compatibleVersion": "3.0.0",
-  "author": "adamk33n3r",
+  "author": "Grynjolf",
   "category": "SKILLING",
   "tags": [ "example", "simple" ],
   "alert": {"type":"ChatAlert","message":"*is ready to harvest*","regexEnabled":false,"enabled":true,"name":"Ready to Harvest","debounceTime":500,"notifications":[{"type":"TrayNotification","message":"Time to harvest your crops!","fireWhenFocused":true},{"type":"Sound","path":"airplane_seatbelt.mp3","gain":8,"fireWhenFocused":true}]}

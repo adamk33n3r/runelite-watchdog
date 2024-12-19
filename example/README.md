@@ -7,7 +7,7 @@ This is an example readme for this alert. This folder will be linked to on the a
 | displayName | The name that will show up in the alert hub. | `"Example Alert Hub Alert"` |
 | description | "The description that will show up in the alert hub. | `"This is an example alert for the alert hub."` |
 | compatibleVersion | The last version this alert was tested with. | `"3.0.0"` |
-| author | It you. | "adamk33n3r" |
+| author | It you. | "Grynjolf" |
 | category | The category to put the alert in. Shows a related icon. | <ul><li>`COMBAT`</li><li>`SKILLING`</li><li>`BOSSES`</li><li>`AFK`</li><li>`MISC`</li></ul> |
 | tags | A list of strings that will be used as search keywords. | `[ "farming", "plot", "harvest" ]`
 | dependsOn | A list of plugins that this alert depends on being enabled. | `[ "Tempoross" ]`
@@ -19,7 +19,7 @@ This is an example readme for this alert. This folder will be linked to on the a
   "displayName": "Example Alert Hub Alert",
   "description": "This is an example alert for the alert hub.",
   "compatibleVersion": "3.0.0",
-  "author": "adamk33n3r",
+  "author": "Grynjolf",
   "category": "SKILLING",
   "tags": [ "farming", "plot", "harvest" ],
   "dependsOn": [ "Tempoross" ],
