@@ -2,10 +2,12 @@ package com.adamk33n3r.runelite.watchdog;
 
 import net.runelite.api.GameObject;
 import net.runelite.api.coords.WorldPoint;
+import net.runelite.client.config.RuneLiteConfig;
 import net.runelite.client.util.Text;
 
 import com.google.common.base.Splitter;
 
+import javax.swing.*;
 import java.awt.Color;
 import java.text.Normalizer;
 import java.util.List;
@@ -182,5 +184,12 @@ public class Util {
             Math.min(Math.max(playerLocation.getY(), southWest.getY()), northEast.getY()),
             worldLocation.getPlane()
         );
+    }
+
+    public static void syncAlwaysOnTop(JDialog dialog) {
+        RuneLiteConfig runeLiteConfig = WatchdogPlugin.getInstance().getInjector().getInstance(RuneLiteConfig.class);
+        if (runeLiteConfig.gameAlwaysOnTop() && dialog.isAlwaysOnTopSupported()) {
+            dialog.setAlwaysOnTop(true);
+        }
     }
 }

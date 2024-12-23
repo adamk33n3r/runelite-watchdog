@@ -1,5 +1,8 @@
 package com.adamk33n3r.runelite.watchdog.ui;
 
+import com.adamk33n3r.runelite.watchdog.Util;
+import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
+import net.runelite.client.config.RuneLiteConfig;
 import net.runelite.client.util.Text;
 
 import javax.swing.*;
@@ -17,6 +20,8 @@ public class MessagePickerDialog extends JDialog {
         this.setLocationRelativeTo(parent);
         this.setModal(true);
         this.setUndecorated(true);
+        Util.syncAlwaysOnTop(this);
+
         JPanel wrapper = new JPanel(new BorderLayout());
         wrapper.setBorder(new EmptyBorder(10, 10, 10, 10));
         this.add(wrapper);
