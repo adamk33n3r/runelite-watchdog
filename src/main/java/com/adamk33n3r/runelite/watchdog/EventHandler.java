@@ -364,6 +364,7 @@ public class EventHandler {
 
     @Subscribe
     private void onGameTick(GameTick gameTick) {
+        // Location alerts
         WorldPoint worldLocation = this.client.getLocalPlayer().getWorldLocation();
         this.alertManager.getAllEnabledAlertsOfType(LocationAlert.class)
             .filter(locationAlert -> locationAlert.shouldFire(worldLocation))

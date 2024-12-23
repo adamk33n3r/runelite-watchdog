@@ -12,7 +12,7 @@ import javax.swing.JSpinner;
 
 public class OverheadNotificationPanel extends MessageNotificationPanel {
     public OverheadNotificationPanel(Overhead notification, NotificationsPanel parentPanel, ColorPickerManager colorPickerManager, Runnable onChangeListener, PanelUtils.OnRemove onRemove) {
-        super(notification, parentPanel, onChangeListener, onRemove);
+        super(notification, true, parentPanel, onChangeListener, onRemove);
 
         ColorJButton colorPickerBtn = PanelUtils.createColorPicker(
             "Pick a color",

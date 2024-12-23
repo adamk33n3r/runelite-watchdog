@@ -96,6 +96,7 @@ public class AlertManager {
             .registerSubtype(GameMessage.class)
             .registerSubtype(Overhead.class)
             .registerSubtype(Overlay.class)
+            .registerSubtype(Popup.class)
             .registerSubtype(RequestFocus.class)
             .registerSubtype(NotificationEvent.class)
             .registerSubtype(ScreenMarker.class)
