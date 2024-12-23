@@ -204,7 +204,7 @@ public class WatchdogPlugin extends Plugin {
     private void onGameTick(GameTick gameTick) {
         int regionID = WorldPoint.fromLocalInstance(this.client, this.client.getLocalPlayer().getLocalLocation()).getRegionID();
         boolean before = this.isInBannedArea;
-        this.isInBannedArea = Region.isBannedRegion(regionID);
+        this.isInBannedArea = Region.isBannedRegion(this.client.getLocalPlayer().getWorldView().isInstance(), regionID);
 //            || this.client.getVarbitValue(Varbits.IN_RAID) > 0
 //            || this.client.getVarbitValue(Varbits.TOA_RAID_LEVEL) > 0
 //            || this.client.getVarbitValue(Varbits.THEATRE_OF_BLOOD) > 0;
