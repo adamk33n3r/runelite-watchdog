@@ -26,6 +26,7 @@ with any amount of unique notification types like
 - Tray Notification
 - Overhead Text
 - Overlay
+- Popup
 - Dismiss Overlay
 - Screen Marker
 - Request Focus
