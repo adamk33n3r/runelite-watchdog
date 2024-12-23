@@ -5,6 +5,7 @@ import com.adamk33n3r.runelite.watchdog.NotificationType;
 import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
 import com.adamk33n3r.runelite.watchdog.alerts.Alert;
 import com.adamk33n3r.runelite.watchdog.notifications.*;
+import com.adamk33n3r.runelite.watchdog.notifications.Popup;
 import com.adamk33n3r.runelite.watchdog.ui.Icons;
 import com.adamk33n3r.runelite.watchdog.ui.StretchedStackedLayout;
 import com.adamk33n3r.runelite.watchdog.ui.dropdownbutton.DropDownButtonFactory;
@@ -127,7 +128,7 @@ public class NotificationsPanel extends JPanel {
 
         NotificationPanel notificationPanel = null;
         if (notification instanceof GameMessage) {
-            notificationPanel = new MessageNotificationPanel((GameMessage) notification, this, this.alertManager::saveAlerts, removeNotification);
+            notificationPanel = new MessageNotificationPanel((GameMessage) notification, true, this, this.alertManager::saveAlerts, removeNotification);
         } else if (notification instanceof TextToSpeech)
             notificationPanel = new TextToSpeechNotificationPanel((TextToSpeech) notification, this, this.alertManager::saveAlerts, removeNotification);
         else if (notification instanceof Sound)
@@ -142,6 +143,8 @@ public class NotificationsPanel extends JPanel {
             notificationPanel = new OverheadNotificationPanel((Overhead) notification, this, this.colorPickerManager, this.alertManager::saveAlerts, removeNotification);
         else if (notification instanceof Overlay)
             notificationPanel = new OverlayNotificationPanel((Overlay) notification, this, this.colorPickerManager, this.alertManager::saveAlerts, removeNotification);
+        else if (notification instanceof Popup)
+            notificationPanel = new PopupNotificationPanel((Popup) notification, this, this.colorPickerManager, this.alertManager::saveAlerts, removeNotification);
         else if (notification instanceof RequestFocus)
             notificationPanel = new RequestFocusNotificationPanel((RequestFocus) notification, this, this.alertManager::saveAlerts, removeNotification);
         else if (notification instanceof NotificationEvent)

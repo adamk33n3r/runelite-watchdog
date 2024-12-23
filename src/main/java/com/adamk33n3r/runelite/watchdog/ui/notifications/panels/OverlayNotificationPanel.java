@@ -24,12 +24,12 @@ public class OverlayNotificationPanel extends MessageNotificationPanel {
     private JPanel stickyId;
 
     public OverlayNotificationPanel(Overlay notification, NotificationsPanel parentPanel, ColorPickerManager colorPickerManager, Runnable onChangeListener, PanelUtils.OnRemove onRemove) {
-        super(notification, parentPanel, onChangeListener, onRemove);
+        super(notification, true, parentPanel, onChangeListener, onRemove);
 
         ColorJButton fgColorPicker = PanelUtils.createColorPicker(
             "Pick a color",
-            "The foreground color of the notification",
-            "Foreground Color",
+            "The text color of the notification",
+            "Text Color",
             this,
             notification.getTextColor(),
             colorPickerManager,

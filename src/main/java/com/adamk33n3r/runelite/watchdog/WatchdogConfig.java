@@ -43,6 +43,10 @@ public interface WatchdogConfig extends Config {
     String DEFAULT_OVERLAY_TTL = "defaultOverlayTTL";
     String DEFAULT_OVERLAY_IMAGE_PATH = "defaultOverlayImagePath";
 
+    // Popup
+    String DEFAULT_POPUP_COLOR = "defaultPopupColor";
+    String DEFAULT_POPUP_TEXT_COLOR = "defaultPopupTextColor";
+
     // Screen Flash
     String MOUSE_MOVEMENT_CANCELS_FLASH = "mouseMovementCancelsFlash";
     String DEFAULT_SCREEN_FLASH_COLOR = "defaultScreenFlashColor";
@@ -255,11 +259,30 @@ public interface WatchdogConfig extends Config {
     default String defaultOverlayImagePath() { return ""; }
     //endregion
 
+    //region Popup
+    @ConfigSection(
+        name = "Popup",
+        description = "The options that control the popup notifications",
+        position = 3,
+        closedByDefault = true
+    )
+    String popupSection = "popupSection";
+
+    @ConfigItem(
+        keyName = DEFAULT_POPUP_TEXT_COLOR,
+        name = "Default Text Color",
+        description = "The default text color",
+        section = popupSection,
+        position = 1
+    )
+    default Color defaultPopupTextColor() { return null; }
+    //endregion
+
     //region Screen Flash
     @ConfigSection(
         name = "Screen Flash",
         description = "The options that control the screen flash notifications",
-        position = 3,
+        position = 4,
         closedByDefault = true
     )
     String screenFlashSection = "screenFlashSection";
@@ -307,7 +330,7 @@ public interface WatchdogConfig extends Config {
     @ConfigSection(
         name = "Custom Sound",
         description = "The options that control the custom sound notifications",
-        position = 4,
+        position = 5,
         closedByDefault = true
     )
     String soundSection = "soundSection";
@@ -334,7 +357,7 @@ public interface WatchdogConfig extends Config {
     @ConfigSection(
         name = "Sound Effect",
         description = "The options that control the custom sound notifications",
-        position = 5,
+        position = 6,
         closedByDefault = true
     )
     String soundEffectSection = "soundEffectSection";
@@ -361,7 +384,7 @@ public interface WatchdogConfig extends Config {
     @ConfigSection(
         name = "Text to Speech",
         description = "The options that control the text to speech notifications",
-        position = 6,
+        position = 7,
         closedByDefault = true
     )
     String ttsSection = "ttsSection";
@@ -421,7 +444,7 @@ public interface WatchdogConfig extends Config {
     @ConfigSection(
         name = "Request Focus",
         description = "The options that control the request focus notifications",
-        position = 7,
+        position = 8,
         closedByDefault = true
     )
     String requestFocusSection = "requestFocusSection";

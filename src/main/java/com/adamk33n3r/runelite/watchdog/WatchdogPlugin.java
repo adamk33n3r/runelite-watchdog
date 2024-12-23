@@ -68,6 +68,10 @@ public class WatchdogPlugin extends Plugin {
     @Inject
     private AlertManager alertManager;
 
+    @Getter
+    @Inject
+    private PopupManager popupManager;
+
     @Inject
     private Client client;
 
@@ -221,6 +225,8 @@ public class WatchdogPlugin extends Plugin {
                 }
             }
         }
+
+        this.popupManager.processPopupQueue();
     }
 
     @Subscribe

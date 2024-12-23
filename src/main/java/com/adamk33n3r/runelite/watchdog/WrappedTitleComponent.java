@@ -72,7 +72,7 @@ public class WrappedTitleComponent implements LayoutableRenderableEntity {
         }
 
         if (!this.text.isEmpty()) {
-            textComponent.setPosition(new Point(x + ((smallWidth - fontMetrics.stringWidth(this.text) + TEXT_PADDING) / 2), y + LINE_GAP));
+            textComponent.setPosition(new Point(x + ((smallWidth - fontMetrics.stringWidth(Text.removeTags(this.text)) + TEXT_PADDING) / 2), y + LINE_GAP));
             textComponent.setText(this.text);
             textComponent.setColor(this.color);
             textComponent.setFont(font);

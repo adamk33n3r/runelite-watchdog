@@ -16,6 +16,7 @@ public enum NotificationType {
     TRAY_NOTIFICATION("Tray Notification", "Create a tray notification", TrayNotification.class),
     OVERHEAD("Overhead", "Display overhead text", Overhead.class),
     OVERLAY("Overlay", "Create an overlay notification", Overlay.class),
+    POPUP("Popup", "Create a popup notification (like collection log or league task)", Popup.class),
     SCREEN_MARKER("Screen Marker", "Show a screen marker", ScreenMarker.class),
     DISMISS_OVERLAY("Dismiss Overlay", "Dismiss a sticky overlay by ID", DismissOverlay.class),
     REQUEST_FOCUS("Request Focus", "Requests focus on the window", RequestFocus.class),

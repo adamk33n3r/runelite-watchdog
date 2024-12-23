@@ -13,9 +13,13 @@ import java.awt.event.FocusListener;
 
 public class MessageNotificationPanel extends NotificationPanel {
     public MessageNotificationPanel(MessageNotification notification, NotificationsPanel parentPanel, Runnable onChangeListener, PanelUtils.OnRemove onRemove) {
+        this(notification, false, parentPanel, onChangeListener, onRemove);
+    }
+
+    public MessageNotificationPanel(MessageNotification notification, boolean supportsFormattingTags, NotificationsPanel parentPanel, Runnable onChangeListener, PanelUtils.OnRemove onRemove) {
         super(notification, parentPanel, onChangeListener, onRemove);
 
-        FlatTextArea flatTextArea = new FlatTextArea("Enter your message...", true);
+        FlatTextArea flatTextArea = new FlatTextArea(supportsFormattingTags ? "Enter your formatted message..." : "Enter your message...", true);
         flatTextArea.setText(notification.getMessage());
         ((AbstractDocument) flatTextArea.getDocument()).setDocumentFilter(new LengthLimitFilter(200));
         flatTextArea.getDocument().addDocumentListener((SimpleDocumentListener) ev -> {
