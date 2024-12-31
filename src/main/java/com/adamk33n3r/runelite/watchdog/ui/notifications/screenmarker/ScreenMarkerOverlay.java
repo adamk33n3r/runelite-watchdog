@@ -93,7 +93,7 @@ public class ScreenMarkerOverlay extends Overlay {
     {
         net.runelite.client.plugins.screenmarkers.ScreenMarker marker = this.marker.getScreenMarker();
 
-        if (this.marker.getDisplayTime() > 0 && this.isExpired()) {
+        if (!this.marker.isSticky() && this.isExpired()) {
             WatchdogPlugin.getInstance().getScreenMarkerUtil().removeScreenMarker(this.marker);
             return null;
         }

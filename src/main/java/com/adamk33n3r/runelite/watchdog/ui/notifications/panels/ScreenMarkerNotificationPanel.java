@@ -14,9 +14,7 @@ import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.components.colorpicker.ColorPickerManager;
 
-import javax.swing.JButton;
-import javax.swing.JPanel;
-import javax.swing.JSpinner;
+import javax.swing.*;
 import javax.swing.text.AbstractDocument;
 import java.awt.GridLayout;
 import java.awt.event.FocusEvent;
@@ -25,6 +23,9 @@ import java.awt.event.FocusListener;
 public class ScreenMarkerNotificationPanel extends NotificationPanel {
     private ScreenMarkerOverlay screenMarkerOverlay;
     private JButton setMarkerButton;
+    private JPanel displayTime;
+    private JPanel stickyId;
+
     public ScreenMarkerNotificationPanel(ScreenMarker notification, NotificationsPanel parentPanel, ColorPickerManager colorPickerManager, Runnable onChangeListener, PanelUtils.OnRemove onRemove) {
         super(notification, parentPanel, onChangeListener, onRemove);
         // Rebind onRemove to hook into it so that we can delete the screen marker when this notification is deleted
@@ -40,17 +41,17 @@ public class ScreenMarkerNotificationPanel extends NotificationPanel {
 
         net.runelite.client.plugins.screenmarkers.ScreenMarker screenMarker = notification.getScreenMarker();
 
-        FlatTextArea flatTextArea = new FlatTextArea("Optional marker label...", true);
-        flatTextArea.setText(screenMarker.getName());
-        ((AbstractDocument) flatTextArea.getDocument()).setDocumentFilter(new LengthLimitFilter(200));
-        flatTextArea.getDocument().addDocumentListener((SimpleDocumentListener) ev -> {
-            screenMarker.setName(flatTextArea.getText());
-            screenMarker.setLabelled(!flatTextArea.getText().isEmpty());
+        FlatTextArea markerLabel = new FlatTextArea("Optional marker label...", true);
+        markerLabel.setText(screenMarker.getName());
+        ((AbstractDocument) markerLabel.getDocument()).setDocumentFilter(new LengthLimitFilter(200));
+        markerLabel.getDocument().addDocumentListener((SimpleDocumentListener) ev -> {
+            screenMarker.setName(markerLabel.getText());
+            screenMarker.setLabelled(!markerLabel.getText().isEmpty());
         });
-        flatTextArea.getTextArea().addFocusListener(new FocusListener() {
+        markerLabel.getTextArea().addFocusListener(new FocusListener() {
             @Override
             public void focusGained(FocusEvent e) {
-                flatTextArea.getTextArea().selectAll();
+                markerLabel.getTextArea().selectAll();
             }
 
             @Override
@@ -58,7 +59,7 @@ public class ScreenMarkerNotificationPanel extends NotificationPanel {
                 onChangeListener.run();
             }
         });
-        this.settings.add(flatTextArea);
+        this.settings.add(markerLabel);
 
         this.settings.add(PanelUtils.createColorPicker(
             "Border Color",
@@ -86,29 +87,6 @@ public class ScreenMarkerNotificationPanel extends NotificationPanel {
                 onChangeListener.run();
             }));
 
-        JSpinner thickness = PanelUtils.createSpinner(
-            screenMarker.getBorderThickness(),
-            0,
-            Integer.MAX_VALUE,
-            1,
-            val -> {
-                screenMarker.setBorderThickness(val);
-                onChangeListener.run();
-            }
-        );
-        JPanel iconComponent1 = PanelUtils.createIconComponent(Icons.BORDER_OUTSIDE, "Border thickness", thickness);
-
-        JSpinner displayTime = PanelUtils.createSpinner(notification.getDisplayTime(), 0, 99, 1, val -> {
-            notification.setDisplayTime(val);
-            onChangeListener.run();
-        });
-        JPanel iconComponent = PanelUtils.createIconComponent(Icons.CLOCK, "Time to display the marker in seconds. If 0, will be sticky and can be dismissed with shift right-click", displayTime);
-        JPanel sub = new JPanel(new GridLayout(1, 2, 3, 3));
-        sub.add(iconComponent1);
-        sub.add(iconComponent);
-        sub.setBackground(ColorScheme.DARKER_GRAY_COLOR);
-        this.settings.add(sub);
-
         this.setMarkerButton = PanelUtils.createButton("Set Marker", "Set Marker", (btn, modifiers) -> {
             ScreenMarkerUtil screenMarkerUtil = WatchdogPlugin.getInstance().getScreenMarkerUtil();
             // Done
@@ -116,7 +94,7 @@ public class ScreenMarkerNotificationPanel extends NotificationPanel {
                 this.screenMarkerOverlay = screenMarkerUtil.finishCreation(false);
                 this.setMarkerButton.setText("Set Marker");
                 this.setMarkerButton.setToolTipText("Set Marker");
-            // Start
+                // Start
             } else {
                 if (this.screenMarkerOverlay != null) {
                     screenMarkerUtil.deleteMarker(this.screenMarkerOverlay);
@@ -129,5 +107,66 @@ public class ScreenMarkerNotificationPanel extends NotificationPanel {
             }
         });
         this.settings.add(this.setMarkerButton);
+
+        JSpinner thickness = PanelUtils.createSpinner(
+            screenMarker.getBorderThickness(),
+            0,
+            Integer.MAX_VALUE,
+            1,
+            val -> {
+                screenMarker.setBorderThickness(val);
+                onChangeListener.run();
+            }
+        );
+
+        JCheckBox sticky = PanelUtils.createCheckbox("Sticky", "Set the notification to not expire", notification.isSticky(), val -> {
+            notification.setSticky(val);
+            if (val) {
+                this.settings.remove(this.displayTime);
+                this.settings.add(this.stickyId);
+            } else {
+                this.settings.remove(this.stickyId);
+                this.settings.add(this.displayTime);
+            }
+            this.revalidate();
+            onChangeListener.run();
+        });
+
+        JSpinner displayTime = PanelUtils.createSpinner(notification.getDisplayTime(), 0, 99, 1, val -> {
+            notification.setDisplayTime(val);
+            onChangeListener.run();
+        });
+        JPanel borderThickness = PanelUtils.createIconComponent(Icons.BORDER_OUTSIDE, "Border thickness", thickness);
+        this.displayTime = PanelUtils.createIconComponent(Icons.CLOCK, "Time to display the marker in seconds.", displayTime);
+        JPanel sub = new JPanel(new GridLayout(1, 2, 3, 3));
+        sub.add(borderThickness);
+        sub.add(sticky);
+        sub.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+        this.settings.add(sub);
+
+        FlatTextArea stickyId = new FlatTextArea("ID to use with Dismiss Overlay...", true);
+        stickyId.setText(notification.getId());
+        ((AbstractDocument) stickyId.getDocument()).setDocumentFilter(new LengthLimitFilter(200));
+        stickyId.getDocument().addDocumentListener((SimpleDocumentListener) ev -> {
+            notification.setId(stickyId.getText());
+        });
+        stickyId.getTextArea().addFocusListener(new FocusListener() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                stickyId.getTextArea().selectAll();
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                onChangeListener.run();
+            }
+        });
+        this.stickyId = stickyId;
+
+        if (notification.isSticky()) {
+            this.settings.add(this.stickyId);
+        } else {
+            this.settings.add(this.displayTime);
+        }
     }
 }

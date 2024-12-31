@@ -151,6 +151,8 @@ public class NotificationsPanel extends JPanel {
             notificationPanel = new MessageNotificationPanel((NotificationEvent) notification, this, this.alertManager::saveAlerts, removeNotification);
         else if (notification instanceof DismissOverlay)
             notificationPanel = new DismissOverlayNotificationPanel((DismissOverlay) notification, this, this.alertManager::saveAlerts, removeNotification);
+        else if (notification instanceof DismissScreenMarker)
+            notificationPanel = new DismissScreenMarkerNotificationPanel((DismissScreenMarker) notification, this, this.alertManager::saveAlerts, removeNotification);
         else if (notification instanceof ScreenMarker)
             notificationPanel = new ScreenMarkerNotificationPanel((ScreenMarker) notification, this, this.colorPickerManager, this.alertManager::saveAlerts, removeNotification);
 
