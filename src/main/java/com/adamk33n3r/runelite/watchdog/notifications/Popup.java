@@ -21,18 +21,15 @@ import static com.adamk33n3r.runelite.watchdog.WatchdogConfig.DEFAULT_NOTIFICATI
 public class Popup extends MessageNotification {
     private Color textColor = DEFAULT_NOTIFICATION_TEXT_COLOR;
 
-    private transient PopupManager popupManager;
-
     @Inject
     public Popup(WatchdogConfig config) {
         super(config);
-        this.popupManager = WatchdogPlugin.getInstance().getPopupManager();
         this.setDefaults();
     }
 
     @Override
     protected void fireImpl(String[] triggerValues) {
-        this.popupManager.getPopupQueue().offer(new PopupData(
+        WatchdogPlugin.getInstance().getPopupManager().getPopupQueue().offer(new PopupData(
             this.getAlert().getName(),
             this.getMessage(),
             this.getTextColor()
