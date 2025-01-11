@@ -22,10 +22,12 @@ public class Connection extends JComponent {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        double startX = this.start.x;
-        double startY = this.start.y;
-        double endX = this.end.x;
-        double endY = this.end.y;
+        int startX = this.start.x;
+        startX += 10;
+        int startY = this.start.y;
+        int endX = this.end.x;
+        endX -= 2;
+        int endY = this.end.y;
 
         Graphics2D g2 = (Graphics2D) g;
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -47,10 +49,13 @@ public class Connection extends JComponent {
 //        g.setColor(Color.RED);
 //        g.fillRect((int) (endX - END_SIZE/2), (int) (endY - END_SIZE / 2), END_SIZE, END_SIZE);
         g2.setColor(Color.WHITE);
-        g2.setStroke(new BasicStroke(5));
-        g2.fillArc(this.start.x-10, this.start.y-10, 20, 20, 90, -180);
-        g2.drawLine(this.end.x-10, this.end.y-7, this.end.x-2, this.end.y);
-        g2.drawLine(this.end.x-10, this.end.y+7, this.end.x-2, this.end.y);
+        g2.setStroke(new BasicStroke(5, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+        int arcDiameter = 20;
+        g2.fillArc(startX-arcDiameter/2, startY-arcDiameter/2, arcDiameter, arcDiameter, 90, -180);
+
+        // Draw a right facing equilateral triangle at endX, endY
+        g2.drawPolygon(new int[]{endX - 10, endX-10, endX}, new int[]{endY-10, endY+10, endY}, 3);
+        g2.fillPolygon(new int[]{endX - 10, endX-10, endX}, new int[]{endY-10, endY+10, endY}, 3);
 
 //        g.setColor(Color.red);
 //        g.drawRect(0, 0, this.getWidth() - BOUNDS_OFFSET*2, this.getHeight() - BOUNDS_OFFSET*2);

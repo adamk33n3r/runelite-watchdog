@@ -3,9 +3,11 @@ package com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections;
 import com.adamk33n3r.runelite.watchdog.NotificationType;
 import com.adamk33n3r.nodegraph.VarOutput;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.AlertNodePanel;
+import com.adamk33n3r.runelite.watchdog.ui.nodegraph.GraphPanel;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.LogicNodeType;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.NodePanel;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.NotificationNodePanel;
+import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
 import lombok.Getter;
 
 import javax.swing.*;
@@ -30,7 +32,7 @@ public class ConnectionPointOut<T> extends ConnectionPoint {
                 Point point = SwingUtilities.convertPoint(ConnectionPointOut.this, e.getPoint(), nodePanel);
                 point.x -= NodePanel.PANEL_WIDTH;
                 ConnectionPointOut.this.newConnection = new DragConnection(nodePanel, ConnectionPointOut.this, point);
-                nodePanel.getGraphPanel().add(ConnectionPointOut.this.newConnection, 0);
+                nodePanel.getGraphPanel().add(ConnectionPointOut.this.newConnection, GraphPanel.NEW_CONNECTION_LAYER, 0);
                 nodePanel.getGraphPanel().revalidate();
                 nodePanel.getGraphPanel().repaint();
             }
@@ -42,7 +44,7 @@ public class ConnectionPointOut<T> extends ConnectionPoint {
 //                System.out.println(ConnectionPointOut.this.newConnection);
 
                 Point point = SwingUtilities.convertPoint(ConnectionPointOut.this, e.getPoint(), nodePanel.getGraphPanel());
-                Component deepestComponentAt = SwingUtilities.getDeepestComponentAt(nodePanel.getGraphPanel(), point.x, point.y);
+                Component deepestComponentAt = PanelUtils.getDeepestComponentAt(nodePanel.getGraphPanel(), GraphPanel.NODE_LAYER, point.x, point.y);
 //                System.out.print("deepest component: ");
 //                System.out.println(deepestComponentAt);
                 if (deepestComponentAt.equals(nodePanel.getGraphPanel()) || (deepestComponentAt instanceof Connection && deepestComponentAt.getParent().equals(nodePanel.getGraphPanel()))) {
@@ -89,6 +91,7 @@ public class ConnectionPointOut<T> extends ConnectionPoint {
                 Point point = e.getPoint();
                 point = SwingUtilities.convertPoint(ConnectionPointOut.this, point, nodePanel);
                 point.x -= NodePanel.PANEL_WIDTH;
+                point.x -= 2;
                 ConnectionPointOut.this.newConnection.setEndOffset(point);
                 ConnectionPointOut.this.newConnection.repaint();
             }

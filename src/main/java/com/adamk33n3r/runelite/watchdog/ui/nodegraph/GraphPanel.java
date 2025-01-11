@@ -38,8 +38,9 @@ public class GraphPanel extends JLayeredPane {
     private static final int ZOOM_FACTOR = 10; // Adjust this value for zoom sensitivity
     private static final double MIN_ZOOM = 0.1; // Minimum zoom level
     private static final double MAX_ZOOM = 3.0; // Maximum zoom level
-    private static final Integer NODE_LAYER = 1;
-    private static final Integer CONNECTION_LAYER = 0;
+    public static final Integer NODE_LAYER = 1;
+    public static final Integer CONNECTION_LAYER = 0;
+    public static final Integer NEW_CONNECTION_LAYER = 2;
     private static final BufferedImage BACKGROUND_IMG = ImageUtil.loadImageResource(GraphPanel.class, "graph-bg.png");
     private double zoomLevel = 1;
     private final Map<Component, Dimension> originalSizes = new HashMap<>();
@@ -109,7 +110,7 @@ public class GraphPanel extends JLayeredPane {
         this.add(boolNodePanel, NODE_LAYER);
 
         NumberNodePanel numNodePanel = new NumberNodePanel(this, numNode, 15, 215, "Num Node", Color.CYAN);
-        this.add(numNodePanel);
+        this.add(numNodePanel, NODE_LAYER);
 
 //        NodePanel logicNodePanel = new IfNodePanel(this, null, 400, 200, "If Node", Color.CYAN);
 //        this.add(logicNodePanel, NODE_LAYER);

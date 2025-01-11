@@ -336,4 +336,25 @@ public class PanelUtils {
         addDropDownButton.setToolTipText("Create New Alert");
         return addDropDownButton;
     }
+
+    public static Component getDeepestComponentAt(JLayeredPane parent, Integer layer, int x, int y) {
+        if (!parent.contains(x, y)) {
+            return null;
+        }
+        Component[] components = parent.getComponentsInLayer(layer);
+        for (Component comp : components) {
+            if (comp != null && comp.isVisible()) {
+                Point loc = comp.getLocation();
+                if (comp instanceof Container) {
+                    comp = SwingUtilities.getDeepestComponentAt(comp, x - loc.x, y - loc.y);
+                } else {
+                    comp = comp.getComponentAt(x - loc.x, y - loc.y);
+                }
+                if (comp != null && comp.isVisible()) {
+                    return comp;
+                }
+            }
+        }
+        return parent;
+    }
 }
