@@ -77,20 +77,19 @@ public class ElevenLabs {
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(@Nonnull Call call, @Nonnull IOException e) {
-                System.err.println("Error with request at: " + request.url());
-                e.printStackTrace();
+                log.error("Error with request at: {}", request.url(), e);
             }
 
             @Override
             public void onResponse(@Nonnull Call call, @Nonnull Response response) throws IOException {
                 try (ResponseBody responseBody = response.body()) {
                     if (!response.isSuccessful()) {
-                        log.error("Unexpected error code: " + response);
+                        log.error("Unexpected error code: {}", response);
                         return;
                     }
 
                     if (responseBody == null) {
-                        log.error("Response body is null: " + response);
+                        log.error("Response body is null: {}", response);
                         return;
                     }
 
@@ -112,7 +111,7 @@ public class ElevenLabs {
                             }
                         }
 
-                        log.debug("tmp file: " + tmpFile);
+                        log.debug("tmp file: {}", tmpFile);
 //                        WatchdogPlugin.getInstance().getSoundPlayer().play(tmpFile, 10);
 //                        WatchdogPlugin.getInstance().getSoundPlayer().play(tmpFile, 5);
 //                        WatchdogPlugin.getInstance().getSoundPlayer().play(tmpFile, 2);

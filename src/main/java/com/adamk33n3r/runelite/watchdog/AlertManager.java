@@ -96,10 +96,12 @@ public class AlertManager {
             .registerSubtype(GameMessage.class)
             .registerSubtype(Overhead.class)
             .registerSubtype(Overlay.class)
+            .registerSubtype(Popup.class)
             .registerSubtype(RequestFocus.class)
             .registerSubtype(NotificationEvent.class)
             .registerSubtype(ScreenMarker.class)
-            .registerSubtype(DismissOverlay.class);
+            .registerSubtype(DismissOverlay.class)
+            .registerSubtype(DismissScreenMarker.class);
         this.gson = this.clientGson.newBuilder()
 //            .serializeNulls()
             .registerTypeAdapterFactory(alertTypeFactory)

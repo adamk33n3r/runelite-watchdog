@@ -1,8 +1,10 @@
 package com.adamk33n3r.runelite.watchdog;
 
 import com.adamk33n3r.runelite.watchdog.alerts.*;
+import com.adamk33n3r.runelite.watchdog.alerts.InventoryAlert.InventoryAlertType;
 import com.adamk33n3r.runelite.watchdog.ui.panels.HistoryPanel;
 
+import lombok.AllArgsConstructor;
 import net.runelite.api.*;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.*;
@@ -21,8 +23,11 @@ import javax.swing.SwingUtilities;
 import java.awt.TrayIcon;
 import java.time.Instant;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static com.adamk33n3r.runelite.watchdog.alerts.SpawnedAlert.SpawnedDespawned.DESPAWNED;
@@ -51,7 +56,8 @@ public class EventHandler {
 
     private final Map<Skill, Integer> previousSkillLevelTable = new EnumMap<>(Skill.class);
     private final Map<Skill, Integer> previousSkillXPTable = new EnumMap<>(Skill.class);
-    private Map<Integer, Integer> previousItemsTable = new HashMap<>();
+    private final Map<Integer, String> itemNameCache = new ConcurrentHashMap<>();
+    private Map<String, Integer> previousItemsTable = new ConcurrentHashMap<>();
     private WorldPoint previousLocation = null;
 
     private boolean ignoreNotificationFired = false;
@@ -71,8 +77,7 @@ public class EventHandler {
             return;
         }
 
-        log.debug(chatMessage == null ? "is null" : "is not null");
-        log.debug(chatMessage.getType().name() + ": " + chatMessage.getMessage());
+        log.debug("{}: {}", chatMessage.getType().name(), chatMessage.getMessage());
         String unformattedMessage = Text.removeFormattingTags(chatMessage.getMessage());
 
         // Send player messages to a different handler
@@ -197,46 +202,63 @@ public class EventHandler {
             return;
         Item[] items = itemContainerChanged.getItemContainer().getItems();
         long itemCount = Arrays.stream(items).filter(item -> item.getId() > -1).count();
-        Map<Integer, Integer> currentItems = new HashMap<>();
-        Map<Integer, Integer> allItems = new HashMap<>();
+        Map<String, Integer> currentItems = new HashMap<>();
+        Map<String, Integer> allItems = new HashMap<>();
         Arrays.stream(items)
             .forEach(item -> {
-                currentItems.merge(item.getId(), item.getQuantity(), Integer::sum);
-                allItems.merge(item.getId(), item.getQuantity(), Integer::sum);
+                String itemName = this.itemNameCache.computeIfAbsent(item.getId(), id -> this.itemManager.getItemComposition(id).getName());
+                currentItems.merge(itemName, item.getQuantity(), Integer::sum);
+                allItems.merge(itemName, item.getQuantity(), Integer::sum);
             });
-        this.previousItemsTable.keySet().forEach((itemId) -> allItems.putIfAbsent(itemId, 0));
+        this.previousItemsTable.keySet().forEach((item) -> allItems.putIfAbsent(item, 0));
         // Skip firing alerts if there are no previous items, since we just logged in. Even an empty inventory will have a map of -1 itemIds.
         if (!this.previousItemsTable.isEmpty()) {
             this.alertManager.getAllEnabledAlertsOfType(InventoryAlert.class)
                 .forEach(inventoryAlert -> {
-                    if (inventoryAlert.getInventoryAlertType() == InventoryAlert.InventoryAlertType.FULL && itemCount == 28) {
-                        this.fireAlert(inventoryAlert, inventoryAlert.getInventoryAlertType().getName());
-                    } else if (inventoryAlert.getInventoryAlertType() == InventoryAlert.InventoryAlertType.EMPTY && itemCount == 0) {
-                        this.fireAlert(inventoryAlert, inventoryAlert.getInventoryAlertType().getName());
-                    } else if (inventoryAlert.getInventoryAlertType() == InventoryAlert.InventoryAlertType.ITEM) {
-                        allItems.entrySet().stream()
-                            .filter(itemWithCount -> itemWithCount.getKey() != -1 && inventoryAlert.getQuantityComparator().compare(itemWithCount.getValue(), inventoryAlert.getItemQuantity()))
-                            .map(itemWithCount -> this.matchPattern(inventoryAlert,
-                                this.itemManager.getItemComposition(itemWithCount.getKey()).getName()))
-                            .filter(Objects::nonNull)
-                            .forEach(groups -> this.fireAlert(inventoryAlert, groups));
-                    } else if (inventoryAlert.getInventoryAlertType() == InventoryAlert.InventoryAlertType.ITEM_CHANGE) {
-                        allItems.entrySet().stream()
-                            .filter(itemWithCount -> {
-                                if (itemWithCount.getKey() == -1) {
-                                    return false;
+                    InventoryAlertType alertType = inventoryAlert.getInventoryAlertType();
+                    switch (alertType) {
+                        case FULL:
+                            if (itemCount == 28) this.fireAlert(inventoryAlert, alertType.getName());
+                            break;
+                        case EMPTY:
+                            if (itemCount == 0) this.fireAlert(inventoryAlert, alertType.getName());
+                            break;
+                        case ITEM:
+                        case ITEM_CHANGE:
+                            Optional<MatchedItem> matchedItems = this.getMatchedItems(inventoryAlert, allItems);
+                            matchedItems.ifPresent((matched) -> {
+                                int change = alertType == InventoryAlertType.ITEM ? 0 : matchedItems.get().previousQuantity;
+                                if (inventoryAlert.getQuantityComparator().compare(matched.currentQuantity - change, inventoryAlert.getItemQuantity())) {
+                                    this.fireAlert(inventoryAlert, matchedItems.get().groups.toArray(new String[0]));
                                 }
-                                int change = itemWithCount.getValue() - this.previousItemsTable.getOrDefault(itemWithCount.getKey(), 0);
-                                return inventoryAlert.getQuantityComparator().compare(change, inventoryAlert.getItemQuantity());
-                            })
-                            .map(itemWithCount -> this.matchPattern(inventoryAlert,
-                                this.itemManager.getItemComposition(itemWithCount.getKey()).getName()))
-                            .filter(Objects::nonNull)
-                            .forEach(groups -> this.fireAlert(inventoryAlert, groups));
+                            });
+                            break;
                     }
                 });
         }
         this.previousItemsTable = currentItems;
+    }
+
+    private Optional<MatchedItem> getMatchedItems(InventoryAlert inventoryAlert, Map<String, Integer> allItems) {
+        return allItems.entrySet().stream()
+            .map(itemWithCount -> {
+                String[] groups = this.matchPattern(inventoryAlert, itemWithCount.getKey());
+                if (groups == null) return null;
+                return new MatchedItem(
+                    new ArrayList<>(List.of(groups)),
+                    this.previousItemsTable.getOrDefault(itemWithCount.getKey(), 0),
+                    itemWithCount.getValue()
+                );
+            })
+            .filter(Objects::nonNull)
+            .reduce((acc, b) -> {
+                acc.groups = IntStream.range(0, Math.min(acc.groups.size(), b.groups.size()))
+                    .mapToObj(i -> acc.groups.get(i) + ", " + b.groups.get(i))
+                    .collect(Collectors.toList());
+                acc.previousQuantity = acc.previousQuantity + b.previousQuantity;
+                acc.currentQuantity = acc.currentQuantity + b.currentQuantity;
+                return acc;
+            });
     }
     //endregion
 
@@ -342,6 +364,7 @@ public class EventHandler {
 
     @Subscribe
     private void onGameTick(GameTick gameTick) {
+        // Location alerts
         WorldPoint worldLocation = this.client.getLocalPlayer().getWorldLocation();
         this.alertManager.getAllEnabledAlertsOfType(LocationAlert.class)
             .filter(locationAlert -> locationAlert.shouldFire(worldLocation))
@@ -394,5 +417,12 @@ public class EventHandler {
             this.lastTriggered.put(alertToDebounceWith, Instant.now());
             new AlertProcessor(alert, triggerValues).start();
         }
+    }
+
+    @AllArgsConstructor
+    private static class MatchedItem {
+        List<String> groups;
+        int previousQuantity;
+        int currentQuantity;
     }
 }

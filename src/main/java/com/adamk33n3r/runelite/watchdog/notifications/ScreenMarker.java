@@ -11,12 +11,16 @@ import javax.inject.Inject;
 import java.awt.Color;
 import java.time.Instant;
 
+@Getter
 @Accessors(chain = true)
 public class ScreenMarker extends Notification {
-    @Getter
     private net.runelite.client.plugins.screenmarkers.ScreenMarker screenMarker;
-    @Getter @Setter
+    @Setter
     private int displayTime = 5;
+    @Setter
+    private boolean sticky = false;
+    @Setter
+    private String id;
 
     @Inject
     public ScreenMarker(WatchdogConfig config) {

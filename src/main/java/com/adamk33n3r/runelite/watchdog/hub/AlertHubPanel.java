@@ -118,7 +118,7 @@ public class AlertHubPanel extends PluginPanel {
                 List<AlertHubClient.AlertDisplayInfo> alerts = this.alertHubClient.downloadManifest(forceDownload);
                 this.reloadList(alerts);
             } catch (IOException e) {
-                e.printStackTrace();
+                log.error("Failed to download alert hub manifest", e);
             }
         });
     }

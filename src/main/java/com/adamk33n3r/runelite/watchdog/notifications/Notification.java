@@ -28,7 +28,6 @@ public abstract class Notification implements INotification {
     @Inject
     protected transient AlertManager alertManager;
 
-    @Inject
     protected transient WatchdogConfig watchdogConfig;
 
     @Getter @Setter
@@ -59,6 +58,7 @@ public abstract class Notification implements INotification {
 
     @Inject
     public Notification(WatchdogConfig config) {
+        this.watchdogConfig = config;
         this.fireWhenAFK = config.defaultAFKMode();
         this.fireWhenAFKForSeconds = config.defaultAFKSeconds();
     }

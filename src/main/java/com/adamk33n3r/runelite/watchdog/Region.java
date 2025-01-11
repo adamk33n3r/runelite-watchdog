@@ -4,7 +4,7 @@ import java.util.Arrays;
 
 // Use https://explv.github.io to find region ids
 public enum Region {
-    ALCHEMICAL_HYDRA(5536),
+    ALCHEMICAL_HYDRA(true, 5536),
     VARDORVIS(4405),
     LEVIATHAN(8291),
     WHISPERER(10595),
@@ -52,16 +52,26 @@ public enum Region {
         15184, 15696 // Wardens
 //        14672 // Chest room
     ),
+//    LUMBRIDGE_CASTLE(
+//        12850
+//    )
     ;
 
+    public final boolean onlyInInstance;
     public final int[] regionIDs;
 
     Region(int... regionIDs) {
+        this(false, regionIDs);
+    }
+
+    Region(boolean onlyInInstance, int... regionIDs) {
+        this.onlyInInstance = onlyInInstance;
         this.regionIDs = regionIDs;
     }
 
-    public static boolean isBannedRegion(int regionID) {
+    public static boolean isBannedRegion(boolean inInstance, int regionID) {
         return Arrays.stream(values())
+            .filter(r -> inInstance || !r.onlyInInstance)
             .flatMapToInt(r -> Arrays.stream(r.regionIDs))
             .anyMatch(id -> id == regionID);
     }

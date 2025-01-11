@@ -68,6 +68,10 @@ public class WatchdogPlugin extends Plugin {
     @Inject
     private AlertManager alertManager;
 
+    @Getter
+    @Inject
+    private PopupManager popupManager;
+
     @Inject
     private Client client;
 
@@ -104,6 +108,8 @@ public class WatchdogPlugin extends Plugin {
     @Inject
     private OkHttpClient httpClient;
 
+    private AsyncBufferedImage icon;
+    private AsyncBufferedImage iconDisabled;
     private NavigationButton navButton;
     private NavigationButton navButtonDisabled;
 
@@ -111,7 +117,7 @@ public class WatchdogPlugin extends Plugin {
     private static WatchdogPlugin instance;
 
     @Getter
-    private final Queue<MessageNode> messageQueue = EvictingQueue.create(20);
+    private final Queue<MessageNode> messageQueue = EvictingQueue.create(200);
 
     @Getter
     private final Queue<NotificationFired> notificationsQueue = EvictingQueue.create(20);
@@ -140,30 +146,42 @@ public class WatchdogPlugin extends Plugin {
 
         this.alertManager.loadAlerts();
 
-        AsyncBufferedImage icon = this.itemManager.getImage(ItemID.BELL_BAUBLE);
-        AsyncBufferedImage iconDisabled = this.itemManager.getImage(ItemID.BELL_BAUBLE_6848);
+        this.icon = this.itemManager.getImage(ItemID.BELL_BAUBLE);
+        this.iconDisabled = this.itemManager.getImage(ItemID.BELL_BAUBLE_6848);
+
+        this.rebuildSidePanelButtons();
+
+        this.soundPlayer.startUp();
+
+        ToolTipManager.sharedInstance().setDismissDelay(Integer.MAX_VALUE);
+    }
+
+    private void rebuildSidePanelButtons() {
+        if (this.navButton != null) {
+            this.clientToolbar.removeNavigation(this.navButton);
+        }
+        if (this.navButtonDisabled != null) {
+            this.clientToolbar.removeNavigation(this.navButtonDisabled);
+        }
         this.navButton = NavigationButton.builder()
             .tooltip("Watchdog")
             .icon(icon)
-            .priority(1)
+            .priority(this.config.sidePanelPriority())
             .panel(this.panel.getMuxer())
             .build();
         this.navButtonDisabled = NavigationButton.builder()
             .tooltip("Watchdog (In disabled area)")
             .icon(iconDisabled)
-            .priority(1)
+            .priority(this.config.sidePanelPriority())
             .panel(this.panel.getMuxer())
             .build();
-        this.clientToolbar.addNavigation(this.navButton);
-        // For first load
-        icon.onLoaded(() -> {
-            this.clientToolbar.removeNavigation(this.navButton);
-            this.clientToolbar.addNavigation(this.navButton);
+        this.icon.onLoaded(() -> {
+            if (this.isInBannedArea) {
+                this.clientToolbar.addNavigation(this.navButtonDisabled);
+            } else {
+                this.clientToolbar.addNavigation(this.navButton);
+            }
         });
-
-        this.soundPlayer.startUp();
-
-        ToolTipManager.sharedInstance().setDismissDelay(Integer.MAX_VALUE);
     }
 
     @Override
@@ -186,7 +204,7 @@ public class WatchdogPlugin extends Plugin {
     private void onGameTick(GameTick gameTick) {
         int regionID = WorldPoint.fromLocalInstance(this.client, this.client.getLocalPlayer().getLocalLocation()).getRegionID();
         boolean before = this.isInBannedArea;
-        this.isInBannedArea = Region.isBannedRegion(regionID);
+        this.isInBannedArea = Region.isBannedRegion(this.client.getLocalPlayer().getWorldView().isInstance(), regionID);
 //            || this.client.getVarbitValue(Varbits.IN_RAID) > 0
 //            || this.client.getVarbitValue(Varbits.TOA_RAID_LEVEL) > 0
 //            || this.client.getVarbitValue(Varbits.THEATRE_OF_BLOOD) > 0;
@@ -207,6 +225,8 @@ public class WatchdogPlugin extends Plugin {
                 }
             }
         }
+
+        this.popupManager.processPopupQueue();
     }
 
     @Subscribe
@@ -232,6 +252,8 @@ public class WatchdogPlugin extends Plugin {
                     this.panel.getMuxer().popState();
                 }
                 this.panel.rebuild();
+            } else if (configChanged.getKey().equals(WatchdogConfig.SIDE_PANEL_PRIORITY)) {
+                this.rebuildSidePanelButtons();
             }
         }
     }

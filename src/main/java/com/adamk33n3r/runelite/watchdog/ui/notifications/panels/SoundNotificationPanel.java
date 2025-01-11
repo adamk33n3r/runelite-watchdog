@@ -27,7 +27,7 @@ public class SoundNotificationPanel extends NotificationPanel {
                 .map(AudioFileFormat.Type::getExtension),
             Stream.of("mp3")
         ).toArray(String[]::new);
-        this.settings.add(new JLabel("Supports " + Arrays.stream(supportedExtensions).map(ext -> '.' + ext).collect(Collectors.joining(", "))));
+        this.settings.add(new JLabel("Choose sound (" + Arrays.stream(supportedExtensions).map(ext -> '.' + ext).collect(Collectors.joining(", ")) + ")"));
         this.settings.add(PanelUtils.createFileChooser(null, "Path to the sound file", ev -> {
             JFileChooser fileChooser = (JFileChooser) ev.getSource();
             sound.setPath(fileChooser.getSelectedFile().getAbsolutePath());

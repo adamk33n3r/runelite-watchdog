@@ -2,6 +2,7 @@ package com.adamk33n3r.runelite.watchdog;
 
 import com.adamk33n3r.runelite.watchdog.notifications.Overlay;
 
+import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
 import net.runelite.client.ui.ClientUI;
 import net.runelite.client.ui.overlay.OverlayPanel;
@@ -28,6 +29,7 @@ import static net.runelite.api.MenuAction.RUNELITE_OVERLAY_CONFIG;
 import static net.runelite.client.ui.overlay.OverlayManager.OPTION_CONFIGURE;
 import static org.apache.commons.lang3.time.DurationFormatUtils.formatDuration;
 
+@Slf4j
 public class NotificationOverlay extends OverlayPanel {
     @Inject
     private Client client;
@@ -52,7 +54,7 @@ public class NotificationOverlay extends OverlayPanel {
                 try {
                     this.image = ImageUtil.resizeImage(ImageIO.read(new File(overlayNotification.getImagePath())), 128, 128, true);
                 } catch(IOException e) {
-                    e.printStackTrace();
+                    log.error("Failed to load image", e);
                 }
             }
             this.message = message;

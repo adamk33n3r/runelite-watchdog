@@ -172,6 +172,11 @@ public class ScreenMarkerUtil {
         this.overlayManager.removeIf(overlay -> overlay instanceof ScreenMarkerOverlay && ((ScreenMarkerOverlay) overlay).getMarker() == screenMarker);
     }
 
+    public void removeScreenMarkerById(String id) {
+        this.screenMarkers.removeIf(overlay -> overlay.getMarker().getId().equals(id));
+        this.overlayManager.removeIf(overlay -> overlay instanceof ScreenMarkerOverlay && ((ScreenMarkerOverlay) overlay).getMarker().getId().equals(id));
+    }
+
     public void removeAllMarkers() {
         this.screenMarkers.clear();
         this.overlayManager.removeIf(ScreenMarkerOverlay.class::isInstance);
