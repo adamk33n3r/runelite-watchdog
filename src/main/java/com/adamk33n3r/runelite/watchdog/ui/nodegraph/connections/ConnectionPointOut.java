@@ -43,45 +43,51 @@ public class ConnectionPointOut<T> extends ConnectionPoint {
 //                System.out.println("mouse released");
 //                System.out.println(ConnectionPointOut.this.newConnection);
 
-                Point point = SwingUtilities.convertPoint(ConnectionPointOut.this, e.getPoint(), nodePanel.getGraphPanel());
-                Component deepestComponentAt = PanelUtils.getDeepestComponentAt(nodePanel.getGraphPanel(), GraphPanel.NODE_LAYER, point.x, point.y);
-//                System.out.print("deepest component: ");
-//                System.out.println(deepestComponentAt);
-                if (deepestComponentAt.equals(nodePanel.getGraphPanel()) || (deepestComponentAt instanceof Connection && deepestComponentAt.getParent().equals(nodePanel.getGraphPanel()))) {
-//                    System.out.println("dropped on graph");
-                    // TODO: Update this to filter to only allow nodes that have a connection point that will match the connection point being dragged from
-                    nodePanel.getGraphPanel().createNode(e.getComponent(), e.getX(), e.getY(), new Class[]{NotificationType.class, LogicNodeType.class}, (newNode) -> {
-                        if (newNode instanceof NotificationNodePanel) {
-                            // TODO: update this to connect the correct connection point after the above
-                            nodePanel.getGraphPanel().connect(((AlertNodePanel)nodePanel).getCaptureGroupsOut(), ((NotificationNodePanel) newNode).getCaptureGroupsIn());
-                        }
+                try {
+                    Point point = SwingUtilities.convertPoint(ConnectionPointOut.this, e.getPoint(), nodePanel.getGraphPanel());
+                    Component deepestComponentAt = PanelUtils.getDeepestComponentAt(nodePanel.getGraphPanel(), GraphPanel.NODE_LAYER, point.x, point.y);
+                    //                System.out.print("deepest component: ");
+                    //                System.out.println(deepestComponentAt);
+                    if (deepestComponentAt.equals(nodePanel.getGraphPanel()) || (deepestComponentAt instanceof Connection && deepestComponentAt.getParent().equals(nodePanel.getGraphPanel()))) {
+                        //                    System.out.println("dropped on graph");
+                        // TODO: Update this to filter to only allow nodes that have a connection point that will match the connection point being dragged from
+                        nodePanel.getGraphPanel().createNode(e.getComponent(), e.getX(), e.getY(), new Class[]{NotificationType.class, LogicNodeType.class}, (newNode) -> {
+                            // TODO: will probably be able to remove this condition once the below TODO is implemented
+                            if (nodePanel instanceof AlertNodePanel && newNode instanceof NotificationNodePanel) {
+                                // TODO: update this to connect to the connection point that you're dragging from
+                                nodePanel.getGraphPanel().connect(((AlertNodePanel) nodePanel).getCaptureGroupsOut(), ((NotificationNodePanel) newNode).getCaptureGroupsIn());
+                            }
+                            removeNewConnection();
+                        });
+                        return;
+                    }
+
+                    if (deepestComponentAt instanceof ConnectionPointIn) {
                         removeNewConnection();
-                    });
-                    return;
-                }
+                        ConnectionPointIn<?> droppedNode = (ConnectionPointIn<?>) deepestComponentAt;
+                        // Disallow connecting of incompatible types
+                        if (droppedNode.getInputVar().getType() != ConnectionPointOut.this.outputVar.getType()) {
+                            System.err.print("Incompatible connection points: ");
+                            System.err.println(ConnectionPointOut.this.outputVar.getType() + " -> " + droppedNode.getInputVar().getType());
+                            return;
+                        }
+                        // Disallow connecting to the same node
+                        if (droppedNode.getNodePanel().equals(ConnectionPointOut.this.getNodePanel())) {
+                            System.err.println("Cannot connect to the same node");
+                            return;
+                        }
+                        // This is ok since we checked above
+                        @SuppressWarnings("unchecked")
+                        ConnectionPointIn<T> casted = (ConnectionPointIn<T>) droppedNode;
+                        nodePanel.getGraphPanel().connect(ConnectionPointOut.this, casted);
+                        return;
+                    }
 
-                if (deepestComponentAt instanceof ConnectionPointIn) {
                     removeNewConnection();
-                    ConnectionPointIn<?> droppedNode = (ConnectionPointIn<?>) deepestComponentAt;
-                    // Disallow connecting of incompatible types
-                    if (droppedNode.getInputVar().getType() != ConnectionPointOut.this.outputVar.getType()) {
-                        System.err.print("Incompatible connection points: ");
-                        System.err.println(ConnectionPointOut.this.outputVar.getType() + " -> " + droppedNode.getInputVar().getType());
-                        return;
-                    }
-                    // Disallow connecting to the same node
-                    if (droppedNode.getNodePanel().equals(ConnectionPointOut.this.getNodePanel())) {
-                        System.err.println("Cannot connect to the same node");
-                        return;
-                    }
-                    // This is ok since we checked above
-                    @SuppressWarnings("unchecked")
-                    ConnectionPointIn<T> casted = (ConnectionPointIn<T>) droppedNode;
-                    nodePanel.getGraphPanel().connect(ConnectionPointOut.this, casted);
-                    return;
-                }
 
-                removeNewConnection();
+                } catch (Exception ex) {
+                    removeNewConnection();
+                }
             }
 
             @Override
@@ -101,9 +107,12 @@ public class ConnectionPointOut<T> extends ConnectionPoint {
     }
 
     private void removeNewConnection() {
-        this.getNodePanel().getGraphPanel().remove(ConnectionPointOut.this.newConnection);
+        if (this.newConnection == null) {
+            return;
+        }
+        this.getNodePanel().getGraphPanel().remove(this.newConnection);
         this.getNodePanel().getGraphPanel().revalidate();
         this.getNodePanel().getGraphPanel().repaint();
-        ConnectionPointOut.this.newConnection = null;
+        this.newConnection = null;
     }
 }
