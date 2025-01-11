@@ -110,6 +110,7 @@ public class TextToSpeechNotificationPanel extends NotificationPanel {
                 break;
             case LEGACY:
                 JSlider rateSlider = new JSlider(1, 5, notification.getRate());
+                rateSlider.setSnapToTicks(true);
                 rateSlider.setBackground(ColorScheme.MEDIUM_GRAY_COLOR);
                 rateSlider.addChangeListener(ev -> {
                     notification.setRate(rateSlider.getValue());

@@ -7,7 +7,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public enum TriggerType {
+public enum TriggerType implements Displayable {
     ALERT_GROUP("Alert Group", "Group alerts together", AlertGroup.class),
     GAME_MESSAGE("Game Message", "Game messages sent in chat", ChatAlert.class),
     PLAYER_CHAT_MESSAGE("Player Chat Message", "Player messages sent in chat", PlayerChatAlert.class),

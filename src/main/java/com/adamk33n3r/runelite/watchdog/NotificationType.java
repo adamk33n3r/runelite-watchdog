@@ -7,7 +7,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public enum NotificationType {
+public enum NotificationType implements Displayable {
     GAME_MESSAGE("Game Message", "Put a game message in your chat", GameMessage.class),
     SCREEN_FLASH("Screen Flash", "Flash your screen a custom color", ScreenFlash.class),
     SOUND_EFFECT("Sound Effect", "Play a builtin sound effect", SoundEffect.class),
