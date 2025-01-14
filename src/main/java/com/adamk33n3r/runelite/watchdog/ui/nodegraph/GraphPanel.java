@@ -1,9 +1,11 @@
 package com.adamk33n3r.runelite.watchdog.ui.nodegraph;
 
+import com.adamk33n3r.nodegraph.nodes.ContinuousTriggerNode;
 import com.adamk33n3r.nodegraph.nodes.constants.Num;
 import com.adamk33n3r.runelite.watchdog.NotificationType;
 import com.adamk33n3r.runelite.watchdog.TriggerType;
 import com.adamk33n3r.runelite.watchdog.alerts.ChatAlert;
+import com.adamk33n3r.runelite.watchdog.alerts.LocationAlert;
 import com.adamk33n3r.runelite.watchdog.alerts.SpawnedAlert;
 
 import com.adamk33n3r.nodegraph.Graph;
@@ -12,7 +14,9 @@ import com.adamk33n3r.nodegraph.nodes.NotificationNode;
 import com.adamk33n3r.nodegraph.nodes.TriggerNode;
 import com.adamk33n3r.nodegraph.nodes.constants.Bool;
 import com.adamk33n3r.nodegraph.nodes.logic.And;
+import com.adamk33n3r.runelite.watchdog.alerts.StatChangedAlert;
 import com.adamk33n3r.runelite.watchdog.notifications.ScreenFlash;
+import com.adamk33n3r.runelite.watchdog.notifications.SoundEffect;
 import com.adamk33n3r.runelite.watchdog.notifications.TextToSpeech;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.Connection;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.ConnectionPointIn;
@@ -50,12 +54,7 @@ public class GraphPanel extends JLayeredPane {
     @Inject
     private ColorPickerManager colorPickerManager;
 
-    public void init() {
-        this.setBackground(ColorScheme.DARKER_GRAY_COLOR);
-        this.setOpaque(false);
-        this.setPreferredSize(new Dimension(6000, 4000));
-        this.setName("Graph");
-
+    private void setUpExample1() {
         /*
          * Alerts
          */
@@ -78,7 +77,6 @@ public class GraphPanel extends JLayeredPane {
         /*
          * Nodes
          */
-        this.graph = new Graph();
         TriggerNode triggerNode = new TriggerNode(alert);
         this.graph.add(triggerNode);
         NotificationNode notificationNode = new NotificationNode(tts);
@@ -118,8 +116,45 @@ public class GraphPanel extends JLayeredPane {
         this.connect(test.getCaptureGroupsOut(), testTEST.getCaptureGroupsIn());
         this.connect(test.getAlertName(), testTEST.getAlertNameIn());
         this.connect(test.getCaptureGroupsOut(), screenFlashNodePanel.getCaptureGroupsIn());
-        this.connect(boolNodePanel.getBoolValue(), screenFlashNodePanel.getEnabledIn());
+        this.connect(boolNodePanel.getBoolValueOut(), screenFlashNodePanel.getEnabledIn());
+    }
 
+    public void setUpExample2() {
+        LocationAlert insideNMZ = new LocationAlert();
+        TriggerNode nmzTriggerNode = new ContinuousTriggerNode(insideNMZ);
+        this.graph.add(nmzTriggerNode);
+        AlertNodePanel nmzTriggerNodePanel = new AlertNodePanel(this, 15, 15, "Inside NMZ", Color.RED, nmzTriggerNode);
+        this.add(nmzTriggerNodePanel, NODE_LAYER);
+
+        NotificationNode soundEffectNode = new NotificationNode(new SoundEffect());
+        this.graph.add(soundEffectNode);
+        NotificationNodePanel soundEffectNodePanel = new NotificationNodePanel(this, 815, 300, "Sound Effect", Color.PINK, soundEffectNode, colorPickerManager);
+        this.add(soundEffectNodePanel, NODE_LAYER);
+
+        NotificationNode screenFlashNode = new NotificationNode(new ScreenFlash());
+        this.graph.add(screenFlashNode);
+        NotificationNodePanel screenFlashNodePanel = new NotificationNodePanel(this, 815, 15, "Screen Flash", Color.PINK, screenFlashNode, colorPickerManager);
+        this.add(screenFlashNodePanel, NODE_LAYER);
+
+        TriggerNode statChangedTriggerNode = new TriggerNode(new StatChangedAlert());
+        this.graph.add(statChangedTriggerNode);
+        AlertNodePanel statChangedTriggerNodePanel = new AlertNodePanel(this, 425, 15, "Stat Changed", Color.RED, statChangedTriggerNode);
+        this.add(statChangedTriggerNodePanel, NODE_LAYER);
+
+        this.connect(nmzTriggerNodePanel.getIsTriggered(), statChangedTriggerNodePanel.getEnabled());
+        this.connect(statChangedTriggerNodePanel.getCaptureGroupsOut(), soundEffectNodePanel.getCaptureGroupsIn());
+        this.connect(statChangedTriggerNodePanel.getCaptureGroupsOut(), screenFlashNodePanel.getCaptureGroupsIn());
+    }
+
+    public void init() {
+        this.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+        this.setOpaque(false);
+        this.setPreferredSize(new Dimension(6000, 4000));
+        this.setName("Graph");
+
+        this.graph = new Graph();
+//        this.setUpExample1();
+        this.setUpExample2();
 
         this.addMouseListener(new MouseAdapter() {
             @Override

@@ -26,7 +26,7 @@ public class NumberInput extends AbstractInput<Number> {
     }
 
     @Override
-    public void onChange(Consumer<Number> onChange) {
+    public void registerOnChange(Consumer<Number> onChange) {
         this.spinner.addChangeListener((e) -> onChange.accept((Number) this.spinner.getValue()));
     }
 

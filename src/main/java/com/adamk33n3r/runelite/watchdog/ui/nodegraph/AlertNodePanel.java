@@ -1,5 +1,6 @@
 package com.adamk33n3r.runelite.watchdog.ui.nodegraph;
 
+import com.adamk33n3r.nodegraph.nodes.ContinuousTriggerNode;
 import com.adamk33n3r.runelite.watchdog.alerts.Alert;
 import com.adamk33n3r.runelite.watchdog.alerts.ChatAlert;
 import com.adamk33n3r.runelite.watchdog.alerts.SpawnedAlert;
@@ -19,33 +20,42 @@ import java.awt.Color;
 
 @Getter
 public class AlertNodePanel extends NodePanel {
+    private ConnectionPointOut<Boolean> isTriggered;
+
     private final ConnectionPointOut<String[]> captureGroupsOut;
     private final ConnectionPointOut<String> alertName;
     private final ConnectionPointOut<Number> testOut;
-    private final ConnectionPointOut<Boolean> enabledOut;
     private final ConnectionPointIn<Boolean> enabled;
 
     public AlertNodePanel(GraphPanel graphPanel, int x, int y, String name, Color color, TriggerNode triggerNode) {
         super(graphPanel, triggerNode, x, y, name, color);
         Alert alert = triggerNode.getAlert();
 
+        if (triggerNode instanceof ContinuousTriggerNode) {
+            ContinuousTriggerNode continuousTriggerNode = (ContinuousTriggerNode) triggerNode;
+            this.isTriggered = new ConnectionPointOut<>(this, continuousTriggerNode.getIsTriggered());
+            ViewInput<Boolean> isTriggered = new ViewInput<>("Is Triggered", continuousTriggerNode.getIsTriggered().getValue());
+//            isTriggered.setEnabled(false);
+            this.items.add(new ConnectionLine<>(null, isTriggered, this.isTriggered));
+
+            JButton toggleIsTriggered = new JButton("Toggle Is Triggered");
+            toggleIsTriggered.addActionListener((ev) -> isTriggered.setValue(!isTriggered.getValue()));
+            this.items.add(toggleIsTriggered);
+
+        }
+
         this.captureGroupsOut = new ConnectionPointOut<>(this, triggerNode.getCaptureGroups());
-        this.items.add(new ConnectionLine<>(null, new ViewInput<>("Capture Groups", triggerNode.getCaptureGroups().getValue()), this.captureGroupsOut));
+        this.items.add(new ConnectionLine<>(null, new ViewInput<>("Triggered", triggerNode.getCaptureGroups().getValue()), this.captureGroupsOut));
         this.alertName = new ConnectionPointOut<>(this, triggerNode.getNameOut());
         this.items.add(new ConnectionLine<>(null, new TextInput("Alert Name", triggerNode.getNameOut().getValue()), this.alertName));
 //        this.outConnectionPoints.add(this.captureGroupsOut);
 //        this.outConnectionPoints.add(this.alertName);
         this.testOut = new ConnectionPointOut<>(this, triggerNode.getDebounceOut());
-        this.items.add(new ConnectionLine<>(new ConnectionPointIn<>(this, triggerNode.getDebounce()), new NumberInput("Test", triggerNode.getDebounceOut().getValue().intValue()), this.testOut));
+        this.items.add(new ConnectionLine<>(new ConnectionPointIn<>(this, triggerNode.getDebounce()), new NumberInput("Debounce", triggerNode.getDebounceOut().getValue().intValue()), this.testOut));
 //        this.outConnectionPoints.add(this.testOut);
         this.enabled = new ConnectionPointIn<>(this, triggerNode.getEnabled());
         BoolInput enabledInput = new BoolInput("Enabled", triggerNode.getEnabled().getValue());
         this.items.add(new ConnectionLine<>(this.enabled, enabledInput, null));
-
-        // TODO: disallow connecting to same node
-        this.enabledOut = new ConnectionPointOut<>(this, triggerNode.getEnabled().toOutput());
-        this.items.add(new ConnectionLine<>(null, new BoolInput("Enabled Out", triggerNode.getEnabled().getValue()), this.enabledOut));
-
 
         JButton testBtn = new JButton("TEST");
         testBtn.addActionListener((ev) -> graphPanel.trigger(triggerNode));

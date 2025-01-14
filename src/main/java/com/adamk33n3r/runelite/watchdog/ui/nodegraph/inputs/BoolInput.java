@@ -26,7 +26,7 @@ public class BoolInput extends AbstractInput<Boolean> {
     }
 
     @Override
-    public void onChange(Consumer<Boolean> onChange) {
+    public void registerOnChange(Consumer<Boolean> onChange) {
         this.checkbox.addItemListener((e) -> onChange.accept(this.checkbox.isSelected()));
     }
 

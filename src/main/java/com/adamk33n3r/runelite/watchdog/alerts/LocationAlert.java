@@ -6,7 +6,7 @@ import net.runelite.api.coords.WorldPoint;
 
 @Getter
 @Setter
-public class LocationAlert extends Alert {
+public class LocationAlert extends ContinuousAlert {
     private WorldPoint worldPoint = new WorldPoint(3223, 3219, 0);
     private int distance;
     private boolean repeat = false;

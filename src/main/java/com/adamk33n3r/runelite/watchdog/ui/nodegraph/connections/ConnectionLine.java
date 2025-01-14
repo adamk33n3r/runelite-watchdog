@@ -37,7 +37,7 @@ public class ConnectionLine<T> extends JPanel {
 
         if (this.out != null) {
             this.add(this.out, BorderLayout.EAST);
-            variable.onChange((newValue) -> {
+            variable.registerOnChange((newValue) -> {
                 this.out.getOutputVar().setValue(newValue);
             });
             this.out.getOutputVar().onConnectChange((connected) -> {

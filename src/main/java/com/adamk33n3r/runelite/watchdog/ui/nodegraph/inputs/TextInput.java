@@ -29,7 +29,7 @@ public class TextInput extends AbstractInput<String> {
     }
 
     @Override
-    public void onChange(Consumer<String> onChange) {
+    public void registerOnChange(Consumer<String> onChange) {
         this.textField.addFocusListener(new FocusListener() {
             @Override
             public void focusGained(FocusEvent e) {

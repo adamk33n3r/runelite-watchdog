@@ -96,6 +96,9 @@ public class NodePanel extends JPanel {
             int padding = 5 * (this.items.getComponentCount() - 1);
             Insets borderInsets = this.border.getBorderInsets(this);
             this.setBounds(this.getX(), this.getY(), PANEL_WIDTH + borderInsets.left + borderInsets.right, totalHeight + TITLE_HEIGHT + padding + 2 + borderInsets.top + borderInsets.bottom); // idk why it's +2
+            // Not sure why alert node panels need these but notification node panels don't
+            this.revalidate();
+            this.repaint();
         });
     }
 
