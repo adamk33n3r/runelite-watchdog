@@ -307,7 +307,7 @@ public class AlertManager {
     }
 
     public <T extends Alert> T createAlert(Class<T> alertClass) {
-        return WatchdogPlugin.getInstance().getInjector().getInstance(alertClass);
+        return this.plugin.getInjector().getInstance(alertClass);
     }
 
     public void addAlert(Alert alert, boolean overrideWithDefaults) {
@@ -425,7 +425,7 @@ public class AlertManager {
     }
 
     private void setUpAlert(Alert alert, boolean overrideWithDefaults) {
-        WatchdogPlugin.getInstance().getInjector().injectMembers(alert);
+        this.plugin.getInjector().injectMembers(alert);
         if (alert instanceof AlertGroup) {
             ((AlertGroup) alert).getAlerts().forEach(subAlert -> this.setUpAlert(subAlert, overrideWithDefaults));
         } else {
@@ -436,10 +436,10 @@ public class AlertManager {
                 if (notification instanceof TextToSpeech) {
                     TextToSpeech tts = (TextToSpeech) notification;
                     if (tts.getSource() == TTSSource.ELEVEN_LABS && tts.getElevenLabsVoiceId() != null) {
-                        ElevenLabs.getVoice(WatchdogPlugin.getInstance().getHttpClient(), tts.getElevenLabsVoiceId(), tts::setElevenLabsVoice);
+                        ElevenLabs.getVoice(this.plugin.getHttpClient(), tts.getElevenLabsVoiceId(), tts::setElevenLabsVoice);
                     }
                 }
-                WatchdogPlugin.getInstance().getInjector().injectMembers(notification);
+                this.plugin.getInjector().injectMembers(notification);
                 if (overrideWithDefaults) {
                     notification.setDefaults();
                 }

@@ -93,9 +93,6 @@ public class WatchdogPlugin extends Plugin {
     @Inject
     private ScreenMarkerUtil screenMarkerUtil;
 
-    @Inject
-    private Provider<ConfigPlugin> configPluginProvider;
-
     @Getter
     @Inject
     private WatchdogPanel panel;

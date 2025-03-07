@@ -7,8 +7,11 @@ import com.adamk33n3r.runelite.watchdog.notifications.Overlay;
 
 import net.runelite.api.Client;
 import net.runelite.client.account.SessionManager;
+import net.runelite.client.chat.ChatMessageManager;
 import net.runelite.client.config.ConfigManager;
+import net.runelite.client.config.RuneLiteConfig;
 import net.runelite.client.eventbus.EventBus;
+import net.runelite.client.game.ItemManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.ui.ClientUI;
 import net.runelite.client.ui.MultiplexingPluginPanel;
@@ -53,6 +56,16 @@ public class AlertManagerTest {
     SessionManager sessionManager;
     @Mock
     @Bind
+    RuneLiteConfig runeliteConfig;
+    @Mock
+    @Bind
+    ChatMessageManager chatMessageManager;
+    @Mock
+    @Bind
+    ItemManager itemManager;
+
+    @Mock
+    @Bind
     ConfigManager configManager;
     @Bind
     Gson clientGson = RuneLiteAPI.GSON;
@@ -88,11 +101,20 @@ public class AlertManagerTest {
     @Named("VERSION_PHASE")
     private final String PLUGIN_VERSION_PHASE = "";
 
+    @Bind
+    @Named("runelite.title")
+    private final String RUNELITE_TITLE = "RuneLite";
+
     @Inject
     AlertManager alertManager;
 
     @Bind
+    Provider<WatchdogMuxer> muxerProvider = () -> this.watchdogPanel.getMuxer();
+    @Bind
     Provider<MultiplexingPluginPanel> multiplexingPluginPanelProvider = () -> alertManager.getWatchdogPanel().getMuxer();
+    @Bind
+    @Mock
+    WatchdogPlugin watchdogPlugin;
 
     @Before
     public void before() throws NoSuchFieldException {
@@ -100,7 +122,7 @@ public class AlertManagerTest {
         Injector injector = Guice.createInjector(module);
         injector.injectMembers(this);
 
-        WatchdogPlugin watchdogPlugin = new WatchdogPlugin();
+        // can't mock the getInjector method because it's final
         FieldSetter.setField(watchdogPlugin, Plugin.class.getDeclaredField("injector"), injector);
     }
 
@@ -129,6 +151,5 @@ public class AlertManagerTest {
         Notification notification = alert.getNotifications().get(0);
         Assert.assertTrue(notification instanceof Overlay);
         Assert.assertNotNull(((Overlay) notification).getTextColor());
-
     }
 }
