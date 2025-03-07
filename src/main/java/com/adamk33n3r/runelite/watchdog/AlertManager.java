@@ -100,6 +100,7 @@ public class AlertManager {
             .registerSubtype(RequestFocus.class)
             .registerSubtype(NotificationEvent.class)
             .registerSubtype(ScreenMarker.class)
+            .registerSubtype(Dink.class)
             .registerSubtype(DismissOverlay.class)
             .registerSubtype(DismissScreenMarker.class);
         this.gson = this.clientGson.newBuilder()
