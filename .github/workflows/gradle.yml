@@ -18,7 +18,7 @@ on:
 jobs:
   build:
 
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     permissions:
       contents: read
 
@@ -32,7 +32,7 @@ jobs:
 
     - name: Create changelog
       run: |
-        git log $(git describe --tags --abbrev=0 @^)..@ --pretty=%B > CHANGELOG.md
+        iex "git log $(git describe --tags --abbrev=0 @^^)..@ --pretty=%B | Out-File -FilePath CHANGELOG.md -Encoding utf8"
 
     - name: Set up JDK 11
       uses: actions/setup-java@v4
@@ -46,10 +46,10 @@ jobs:
       uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
 
     - name: Build with Gradle Wrapper
-      run: ./gradlew build
+      run: .\gradlew.bat build
 
     - name: Build shadowJar
-      run: ./gradlew shadowJar
+      run: .\gradlew.bat shadowJar
 
     - name: Upload shadowJar
       uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4.6.1
