@@ -18,6 +18,7 @@ public enum NotificationType {
     OVERLAY("Overlay", "Create an overlay notification", Overlay.class),
     POPUP("Popup", "Create a popup notification (like collection log or league task)", Popup.class),
     SCREEN_MARKER("Screen Marker", "Show a screen marker", ScreenMarker.class),
+    DINK("Discord via Dink", "Tells Dink to send a custom notification to your webhook", Dink.class),
     DISMISS_OVERLAY("Dismiss Overlay", "Dismiss a sticky overlay by ID", DismissOverlay.class),
     DISMISS_SCREEN_MARKER("Dismiss Screen Marker", "Dismiss a sticky screen marker by ID", DismissScreenMarker.class),
     REQUEST_FOCUS("Request Focus", "Requests focus on the window", RequestFocus.class),

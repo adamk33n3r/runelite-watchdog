@@ -21,7 +21,9 @@ dependencies {
 
     testImplementation 'junit:junit:4.13.2'
     testImplementation 'org.mockito:mockito-core:3.4.0'
-    testImplementation 'com.google.inject.extensions:guice-testlib:4.1.0'
+    testImplementation('com.google.inject.extensions:guice-testlib:4.1.0') {
+        exclude group: "com.google.inject", module: "guice" // already provided by runelite client
+    }
     testImplementation group: 'net.runelite', name:'client', version: runeLiteVersion
     testImplementation group: 'net.runelite', name:'jshell', version: runeLiteVersion
 }
@@ -36,28 +38,14 @@ if (versionPropsFile.exists())
 def major = (versionProps['VERSION_MAJOR'] as String ?: '0').toInteger()
 def minor = (versionProps['VERSION_MINOR'] as String ?: '0').toInteger()
 def patch = (versionProps['VERSION_PATCH'] as String ?: '0').toInteger()
-def build = (versionProps['VERSION_BUILD'] as String ?: '0').toInteger()
 def phase = (versionProps['VERSION_PHASE'] as String ?: '')
 
 version = major+'.'+minor+'.'+patch
 if (!phase.empty)
     version = version+'-'+phase
-version = version+'+'+build
 
 sourceCompatibility = '1.8'
 targetCompatibility = '1.8'
-
-compileJava.doFirst {
-    def runTasks = gradle.startParameter.taskNames
-    if ("build" !in runTasks || "runelitePluginHubPackage" in runTasks) return
-    build += 1
-    versionProps['VERSION_BUILD'] = build.toString()
-    versionProps.store(versionPropsFile.newWriter(), null)
-    version = major+'.'+minor+'.'+patch
-    if (!phase.empty)
-        version = version+'-'+phase
-    version = version+'+'+build
-}
 
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'

@@ -5,104 +5,19 @@ import com.adamk33n3r.runelite.watchdog.alerts.ChatAlert;
 import com.adamk33n3r.runelite.watchdog.notifications.Notification;
 import com.adamk33n3r.runelite.watchdog.notifications.Overlay;
 
-import net.runelite.api.Client;
-import net.runelite.client.account.SessionManager;
-import net.runelite.client.config.ConfigManager;
-import net.runelite.client.eventbus.EventBus;
-import net.runelite.client.plugins.Plugin;
-import net.runelite.client.ui.ClientUI;
-import net.runelite.client.ui.MultiplexingPluginPanel;
-import net.runelite.http.api.RuneLiteAPI;
-
-import com.google.gson.Gson;
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import com.google.inject.testing.fieldbinder.Bind;
-import com.google.inject.testing.fieldbinder.BoundFieldModule;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.internal.util.reflection.FieldSetter;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import javax.inject.Inject;
-import javax.inject.Named;
-import javax.inject.Provider;
-import java.util.concurrent.ScheduledExecutorService;
 
 @RunWith(MockitoJUnitRunner.class)
-public class AlertManagerTest {
-    @Mock
-    @Bind
-    EventBus eventBus;
-
-    @Mock
-    @Bind
-    ScheduledExecutorService executor;
-    @Mock
-    @Bind
-    Client client;
-    @Mock
-    @Bind
-    ClientUI clientUI;
-    @Mock
-    @Bind
-    SessionManager sessionManager;
-    @Mock
-    @Bind
-    ConfigManager configManager;
-    @Bind
-    Gson clientGson = RuneLiteAPI.GSON;
-    @Bind
-    @Named("watchdog.pluginVersion")
-    private final String pluginVersion = "3.0.0-TEST";
-
-    @Mock
-    @Bind
-    WatchdogConfig watchdogConfig;
-
-    @Mock
-    @Bind
-    WatchdogPanel watchdogPanel;
-
-    @Bind
-    @Named("watchdog.helpURL")
-    private final String HELP_URL = "";
-
-    @Bind
-    @Named("watchdog.discordURL")
-    private final String DISCORD_URL = "";
-
-    @Bind
-    @Named("watchdog.kofiURL")
-    private final String KOFI_URL = "";
-
-    @Bind
-    @Named("watchdog.pluginVersionFull")
-    private final String PLUGIN_VERSION_FULL = "";
-
-    @Bind
-    @Named("VERSION_PHASE")
-    private final String PLUGIN_VERSION_PHASE = "";
+public class AlertManagerTest extends TestBase {
 
     @Inject
     AlertManager alertManager;
-
-    @Bind
-    Provider<MultiplexingPluginPanel> multiplexingPluginPanelProvider = () -> alertManager.getWatchdogPanel().getMuxer();
-
-    @Before
-    public void before() throws NoSuchFieldException {
-        BoundFieldModule module = BoundFieldModule.of(this);
-        Injector injector = Guice.createInjector(module);
-        injector.injectMembers(this);
-
-        WatchdogPlugin watchdogPlugin = new WatchdogPlugin();
-        FieldSetter.setField(watchdogPlugin, Plugin.class.getDeclaredField("injector"), injector);
-    }
 
     @Test
     public void test_import() {
@@ -111,9 +26,9 @@ public class AlertManagerTest {
             .thenReturn(json);
         Mockito.when(this.configManager.getConfiguration(WatchdogConfig.CONFIG_GROUP_NAME, WatchdogConfig.PLUGIN_VERSION))
             .thenReturn(this.pluginVersion);
-        Assert.assertEquals(alertManager.getAlerts().size(), 0);
+        Assert.assertEquals(0, alertManager.getAlerts().size());
         alertManager.loadAlerts();
-        Assert.assertEquals(alertManager.getAlerts().size(), 6);
+        Assert.assertEquals(6, alertManager.getAlerts().size());
     }
 
     @Test
@@ -129,6 +44,5 @@ public class AlertManagerTest {
         Notification notification = alert.getNotifications().get(0);
         Assert.assertTrue(notification instanceof Overlay);
         Assert.assertNotNull(((Overlay) notification).getTextColor());
-
     }
 }

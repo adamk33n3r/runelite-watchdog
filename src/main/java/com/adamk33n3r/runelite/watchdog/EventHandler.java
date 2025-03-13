@@ -52,6 +52,9 @@ public class EventHandler {
     @Inject
     private Provider<HistoryPanel> historyPanelProvider;
 
+    @Inject
+    private WatchdogPlugin plugin;
+
     private final Map<Alert, Instant> lastTriggered = new HashMap<>();
 
     private final Map<Skill, Integer> previousSkillLevelTable = new EnumMap<>(Skill.class);
@@ -73,7 +76,7 @@ public class EventHandler {
     @Subscribe
     public void onChatMessage(ChatMessage chatMessage) {
         // Don't process messages sent by this plugin
-        if (chatMessage.getName().equals(WatchdogPlugin.getInstance().getName())) {
+        if (chatMessage.getName().equals(this.plugin.getName())) {
             return;
         }
 
