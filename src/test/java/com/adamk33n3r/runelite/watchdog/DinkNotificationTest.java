@@ -43,7 +43,7 @@ public class DinkNotificationTest extends AlertTestBase {
         Mockito.when(testMessage.getMessage()).thenReturn("Test Message");
         Mockito.when(testMessage.getType()).thenReturn(ChatMessageType.GAMEMESSAGE);
         eventHandler.onChatMessage(testMessage);
-        Mockito.verify(eventBus).post(new PluginMessage("dink", "notify", Map.of(
+        Mockito.verify(eventBus, Mockito.timeout(100)).post(new PluginMessage("dink", "notify", Map.of(
             "text", dinkMessage,
             "title", alertName,
             "sourcePlugin", watchdogPlugin.getName(),
