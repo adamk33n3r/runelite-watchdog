@@ -102,8 +102,8 @@ jobs:
         uses: ncipollo/release-action@v1.16.0
         with:
           artifactErrorsFailBuild: true
-          artifacts: "release-artifacts/watchdog-*-all.jar"
-          bodyFile: "release-artifacts/CHANGELOG.md"
+          artifacts: "release-artifacts/watchdog-shadow/watchdog-*-all.jar"
+          bodyFile: "release-artifacts/watchdog-changelog/CHANGELOG.md"
           generateReleaseNotes: true
           name: Release ${{ github.ref_name }}
           tag: ${{ github.ref_name }}
