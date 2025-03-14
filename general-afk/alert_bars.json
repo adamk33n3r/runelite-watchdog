@@ -1,0 +1,10 @@
+{
+  "displayName": "Bars Gone",
+  "description": "Alert for when bars are gone. Useful for smithing.",
+  "compatibleVersion": "3.0.0",
+  "author": "Doak Steezy",
+  "category": "SKILLING",
+  "tags": [ "smithing" ],
+  "dependsOn": [ ],
+  "alert": {{"type":"InventoryAlert","inventoryAlertType":"ITEM","itemName":"(?:\\S+\\s)?\\S*bar","isRegexEnabled":true,"itemQuantity":1,"quantityComparator":"LESS_THAN","enabled":true,"name":"* Bars Gone","debounceTime":10000,"randomNotifications":false,"notifications":[{"type":"ScreenFlash","color":"#46FF0000","flashMode":"FLASH","flashDuration":0,"fireWhenFocused":true,"fireWhenAFK":false,"fireWhenAFKForSeconds":30,"delayMilliseconds":0},{"type":"TrayNotification","message":"Out of Bars","fireWhenFocused":true,"fireWhenAFK":true,"fireWhenAFKForSeconds":30,"delayMilliseconds":0},{"type":"NotificationEvent","message":"Out of Bars","fireWhenFocused":true,"fireWhenAFK":false,"fireWhenAFKForSeconds":30,"delayMilliseconds":0}]}}
+}
