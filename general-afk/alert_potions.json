@@ -1,0 +1,10 @@
+{
+  "displayName": "(unf) Potions Gone",
+  "description": "Alert for when unfinished potions are gone.",
+  "compatibleVersion": "3.0.0",
+  "author": "Doak Steezy",
+  "category": "SKILLING",
+  "tags": [ "herblore" ],
+  "dependsOn": [ ],
+  "alert": {"type":"InventoryAlert","inventoryAlertType":"ITEM","itemName":"(?:\\S+\\s)?\\S*potion \\(unf\\)","isRegexEnabled":true,"itemQuantity":1,"quantityComparator":"LESS_THAN","enabled":true,"name":"* potion (unf) Gone","debounceTime":0,"randomNotifications":false,"notifications":[{"type":"ScreenFlash","color":"#46FF0000","flashMode":"FLASH","flashDuration":0,"fireWhenFocused":true,"fireWhenAFK":false,"fireWhenAFKForSeconds":30,"delayMilliseconds":0},{"type":"TrayNotification","message":"Out of unfinished pots!","fireWhenFocused":true,"fireWhenAFK":false,"fireWhenAFKForSeconds":30,"delayMilliseconds":0},{"type":"NotificationEvent","message":"Out of unfinished pots!","fireWhenFocused":true,"fireWhenAFK":false,"fireWhenAFKForSeconds":30,"delayMilliseconds":0}]}
+}
