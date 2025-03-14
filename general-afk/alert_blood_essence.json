@@ -1,0 +1,10 @@
+{
+  "displayName": "Blood Essence Gone",
+  "description": "Alert for when you need to activate a new blood essence.",
+  "compatibleVersion": "3.0.0",
+  "author": "Doak Steezy",
+  "category": "SKILLING",
+  "tags": [ "runecraft" ],
+  "dependsOn": [ ],
+  "alert": {"type":"InventoryAlert","inventoryAlertType":"ITEM","itemName":"Blood essence (active)","isRegexEnabled":false,"itemQuantity":1,"quantityComparator":"LESS_THAN","enabled":true,"name":"Blood essence alert","debounceTime":0,"randomNotifications":false,"notifications":[{"type":"ScreenFlash","color":"#46FF0000","flashMode":"FLASH","flashDuration":0,"fireWhenFocused":true,"fireWhenAFK":false,"fireWhenAFKForSeconds":30,"delayMilliseconds":0},{"type":"GameMessage","message":"Activate new blood essence","fireWhenFocused":true,"fireWhenAFK":false,"fireWhenAFKForSeconds":30,"delayMilliseconds":0},{"type":"NotificationEvent","message":"Activate new blood essence","fireWhenFocused":true,"fireWhenAFK":false,"fireWhenAFKForSeconds":30,"delayMilliseconds":0}]}
+}
