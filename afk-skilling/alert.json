@@ -1,7 +1,7 @@
 {
   "displayName": "AFK Skilling Alerts",
   "description": "Alerts for various AFK skilling activities.",
-  "compatibleVersion": "3.0.0",
+  "compatibleVersion": "3.7.0",
   "author": "Doak Steezy",
   "category": "SKILLING",
   "tags": [ "smithing", "firemaking", "fletching", "runecraft", "crafting", "herblore" ],
