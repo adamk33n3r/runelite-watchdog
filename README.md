@@ -31,12 +31,30 @@ with any amount of unique notification types like
 - Screen Marker
 - Request Focus
 - RuneLite Notification (to trigger things like RL Tray Notifications)
+- Dink Notification
 
 _You can set defaults for the notifications in the plugin config_
 
 For more information on trigger and notification types, [see the wiki](https://github.com/adamk33n3r/runelite-watchdog/wiki).
 
-**_NOTE: Alerts will not fire in boss areas._**
+**_NOTE: Watchdog is disabled in the following areas:_**
+- Alchemical Hydra
+- Vardorvis
+- Leviathan
+- Whisperer
+- Sucellus
+- Vorkath
+- Inferno
+- Fight Cave
+- Colosseum
+- Kalphite Queen
+- COX
+- TOB
+- TOA
+- Yama
+
+_Updated 2025/05/14_
+
 
 ## Recommended RuneLite Notification Settings
 ![image](https://github.com/adamk33n3r/runelite-watchdog/assets/1350444/18eb10dd-9ddb-4248-9d5f-ddc335acc103)

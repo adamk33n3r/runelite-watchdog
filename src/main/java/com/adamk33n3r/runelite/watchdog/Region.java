@@ -52,6 +52,7 @@ public enum Region {
         15184, 15696 // Wardens
 //        14672 // Chest room
     ),
+    YAMA(6045)
 //    LUMBRIDGE_CASTLE(
 //        12850
 //    )
