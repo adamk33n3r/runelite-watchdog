@@ -30,13 +30,13 @@ public class LocationAlert extends Alert {
         if (this.worldPoint == null) {
             return false;
         }
-        if (this.cardinalOnly && !this.isCardinal(this.worldPoint, currentPoint)) {
+        if (this.cardinalOnly && !this.isCardinal(currentPoint)) {
             return false;
         }
         return this.worldPoint.distanceTo(currentPoint) <= this.distance;
     }
 
-    private boolean isCardinal(WorldPoint pointA, WorldPoint pointB) {
-        return pointA.getX() == pointB.getX() || pointA.getY() == pointB.getY();
+    private boolean isCardinal(WorldPoint otherPoint) {
+        return this.worldPoint.getX() == otherPoint.getX() || this.worldPoint.getY() == otherPoint.getY();
     }
 }
