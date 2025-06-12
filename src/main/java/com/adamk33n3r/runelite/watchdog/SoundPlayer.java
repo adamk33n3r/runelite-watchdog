@@ -121,7 +121,7 @@ public class SoundPlayer {
         log.debug(String.format("Now playing: %s", nextSound.getFile().getAbsolutePath()));
 
         if (nextSound.getFile().getName().endsWith(".mp3")) {
-            mp3Player.getPlayList().clear();
+            mp3Player.clearPlayList();
             mp3Player.add(nextSound.getFile());
             mp3Player.setVolume(nextSound.getGain() * 10);
             this.mp3IsPlaying = true;
