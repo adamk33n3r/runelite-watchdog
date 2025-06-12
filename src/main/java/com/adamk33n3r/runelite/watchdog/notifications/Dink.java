@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
+import net.runelite.api.Client;
+import net.runelite.client.callback.ClientThread;
 import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.events.PluginMessage;
 import okhttp3.HttpUrl;
@@ -28,6 +30,9 @@ public class Dink extends MessageNotification {
     @Inject
     private transient EventBus eventBus;
 
+    @Inject
+    private transient ClientThread clientThread;
+
     @Override
     protected void fireImpl(String[] triggerValues) {
         HashMap<String, Object> dinkData = new HashMap<>();
@@ -38,6 +43,11 @@ public class Dink extends MessageNotification {
         dinkData.put("imageRequested", this.includeScreenshot);
 
         log.debug("Sending dink notification with data: {}", dinkData);
-        this.eventBus.post(new PluginMessage("dink", "notify", dinkData));
+
+        // Workaround for https://github.com/pajlads/DinkPlugin/pull/701
+        // Tracked at https://github.com/pajlads/DinkPlugin/issues/758
+        this.clientThread.invoke(() -> {
+            this.eventBus.post(new PluginMessage("dink", "notify", dinkData));
+        });
     }
 }
