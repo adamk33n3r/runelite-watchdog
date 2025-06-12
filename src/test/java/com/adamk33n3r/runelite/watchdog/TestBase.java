@@ -6,6 +6,7 @@ import com.google.inject.Injector;
 import com.google.inject.testing.fieldbinder.Bind;
 import com.google.inject.testing.fieldbinder.BoundFieldModule;
 import net.runelite.api.Client;
+import net.runelite.client.callback.ClientThread;
 import net.runelite.client.chat.ChatMessageManager;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.config.RuneLiteConfig;
@@ -78,6 +79,9 @@ public abstract class TestBase {
     @Mock
     @Bind
     Client client;
+    @Mock
+    @Bind
+    ClientThread clientThread;
     @Mock
     @Bind
     ClientUI clientUI;
