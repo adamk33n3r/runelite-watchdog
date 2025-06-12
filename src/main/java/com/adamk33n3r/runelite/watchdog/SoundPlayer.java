@@ -130,7 +130,7 @@ public class SoundPlayer {
                 this.soundTimeout = null;
             }
             mp3Player.play();
-            // jaco.mp3 repeat functionality is broken, but we are using it to signal to ourselves to repeat on loop
+            // jaco.mp3 repeat functionality is broken as it only loops when skipping, but we are using it to signal to ourselves to repeat on loop
             mp3Player.setRepeat(true);
             setTimeout(() -> {
                 mp3Player.setRepeat(false);
