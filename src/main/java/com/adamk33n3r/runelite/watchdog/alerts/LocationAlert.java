@@ -2,7 +2,10 @@ package com.adamk33n3r.runelite.watchdog.alerts;
 
 import lombok.Getter;
 import lombok.Setter;
+import net.runelite.api.Client;
 import net.runelite.api.coords.WorldPoint;
+
+import javax.inject.Inject;
 
 @Getter
 @Setter
@@ -11,6 +14,9 @@ public class LocationAlert extends Alert {
     private int distance;
     private boolean repeat = false;
 //    private boolean showTileMarker;
+
+    @Inject
+    private transient Client client;
 
     public LocationAlert() {
         super("New Location Alert");

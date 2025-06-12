@@ -6,6 +6,7 @@ import com.adamk33n3r.runelite.watchdog.ui.panels.HistoryPanel;
 
 import lombok.AllArgsConstructor;
 import net.runelite.api.*;
+import net.runelite.api.coords.LocalPoint;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.*;
 import net.runelite.client.eventbus.EventBus;
@@ -368,7 +369,7 @@ public class EventHandler {
     @Subscribe
     private void onGameTick(GameTick gameTick) {
         // Location alerts
-        WorldPoint worldLocation = this.client.getLocalPlayer().getWorldLocation();
+        WorldPoint worldLocation = WorldPoint.fromLocalInstance(this.client, this.client.getLocalPlayer().getLocalLocation());
         this.alertManager.getAllEnabledAlertsOfType(LocationAlert.class)
             .filter(locationAlert -> locationAlert.shouldFire(worldLocation))
             .forEach(locationAlert -> {

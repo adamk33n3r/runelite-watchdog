@@ -6,6 +6,7 @@ import com.adamk33n3r.runelite.watchdog.ui.panels.AlertPanel;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
 
 import net.runelite.api.Client;
+import net.runelite.api.coords.WorldPoint;
 
 import javax.swing.JPanel;
 import java.awt.GridLayout;
@@ -56,7 +57,8 @@ public class LocationAlertPanel extends AlertPanel<LocationAlert> {
             .addSubPanelControl(pointPanel)
             .addButton("Set to Current", "Set world point to current position", (btn, mod) -> {
                 if (this.client.getLocalPlayer() != null) {
-                    this.alert.setWorldPoint(this.client.getLocalPlayer().getWorldLocation());
+                    WorldPoint worldPoint = WorldPoint.fromLocalInstance(this.client, this.client.getLocalPlayer().getLocalLocation());
+                    this.alert.setWorldPoint(worldPoint);
                     this.rebuild();
                 }
             })
