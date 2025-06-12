@@ -1,9 +1,9 @@
 package com.adamk33n3r.runelite.watchdog.notifications;
 
-import com.adamk33n3r.runelite.watchdog.PopupManager;
 import com.adamk33n3r.runelite.watchdog.Util;
 import com.adamk33n3r.runelite.watchdog.WatchdogConfig;
 import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
+import com.google.common.base.Strings;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,6 +20,7 @@ import static com.adamk33n3r.runelite.watchdog.WatchdogConfig.DEFAULT_NOTIFICATI
 @NoArgsConstructor
 @Accessors(chain = true)
 public class Popup extends MessageNotification {
+    private String title = "";
     private Color textColor = DEFAULT_NOTIFICATION_TEXT_COLOR;
 
     @Inject
@@ -30,9 +31,11 @@ public class Popup extends MessageNotification {
 
     @Override
     protected void fireImpl(String[] triggerValues) {
+        String titleString = Strings.isNullOrEmpty(this.title) ? this.getAlert().getName() : this.title;
+        String title = Util.processTriggerValues(titleString, triggerValues);
         String message = Util.processTriggerValues(this.message, triggerValues);
         WatchdogPlugin.getInstance().getPopupManager().getPopupQueue().offer(new PopupData(
-            this.getAlert().getName(),
+            title,
             message,
             this.getTextColor()
         ));

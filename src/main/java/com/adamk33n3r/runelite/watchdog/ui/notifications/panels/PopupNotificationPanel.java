@@ -7,10 +7,24 @@ import net.runelite.client.ui.components.ColorJButton;
 import net.runelite.client.ui.components.colorpicker.ColorPickerManager;
 
 import javax.swing.*;
+import java.awt.*;
 
 public class PopupNotificationPanel extends MessageNotificationPanel {
     public PopupNotificationPanel(Popup notification, NotificationsPanel parentPanel, ColorPickerManager colorPickerManager, Runnable onChangeListener, PanelUtils.OnRemove onRemove) {
         super(notification, true, parentPanel, onChangeListener, onRemove);
+
+        Component message = this.settings.getComponent(0);
+        this.settings.remove(message);
+
+        JTextArea title = PanelUtils.createTextArea(
+            "Title. Empty uses the alert's name.",
+            "The title of the popup. Leave empty to use the alert's name. Also supports formatting and capture groups.",
+            notification.getTitle(),
+            notification::setTitle
+        );
+
+        this.settings.add(title);
+        this.settings.add(message);
 
         ColorJButton textColorPicker = PanelUtils.createColorPicker(
             "Pick a color",
