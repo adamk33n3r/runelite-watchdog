@@ -13,6 +13,7 @@ public class LocationAlert extends Alert {
     private WorldPoint worldPoint = new WorldPoint(3223, 3219, 0);
     private int distance;
     private boolean repeat = false;
+    private boolean cardinalOnly = false;
 //    private boolean showTileMarker;
 
     @Inject
@@ -29,6 +30,13 @@ public class LocationAlert extends Alert {
         if (this.worldPoint == null) {
             return false;
         }
+        if (this.cardinalOnly && !this.isCardinal(this.worldPoint, currentPoint)) {
+            return false;
+        }
         return this.worldPoint.distanceTo(currentPoint) <= this.distance;
+    }
+
+    private boolean isCardinal(WorldPoint pointA, WorldPoint pointB) {
+        return pointA.getX() == pointB.getX() || pointA.getY() == pointB.getY();
     }
 }
