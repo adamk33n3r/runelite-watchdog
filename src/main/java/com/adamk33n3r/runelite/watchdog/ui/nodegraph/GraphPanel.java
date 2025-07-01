@@ -26,6 +26,8 @@ import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.components.colorpicker.ColorPickerManager;
 import net.runelite.client.util.ImageUtil;
 
+import com.google.inject.Injector;
+
 import javax.inject.Inject;
 import javax.swing.*;
 import java.awt.*;
@@ -50,6 +52,7 @@ public class GraphPanel extends JLayeredPane {
     private final Map<Component, Dimension> originalSizes = new HashMap<>();
     private Point popupLocation;
     private Graph graph;
+    private Injector injector;
 
     @Inject
     private ColorPickerManager colorPickerManager;
@@ -120,7 +123,8 @@ public class GraphPanel extends JLayeredPane {
     }
 
     public void setUpExample2() {
-        LocationAlert insideNMZ = new LocationAlert();
+        LocationAlert insideNMZ = this.injector.getInstance(LocationAlert.class);
+        insideNMZ.shouldFire();
         TriggerNode nmzTriggerNode = new ContinuousTriggerNode(insideNMZ);
         this.graph.add(nmzTriggerNode);
         AlertNodePanel nmzTriggerNodePanel = new AlertNodePanel(this, 15, 15, "Inside NMZ", Color.RED, nmzTriggerNode);
@@ -146,7 +150,8 @@ public class GraphPanel extends JLayeredPane {
         this.connect(statChangedTriggerNodePanel.getCaptureGroupsOut(), screenFlashNodePanel.getCaptureGroupsIn());
     }
 
-    public void init() {
+    public void init(Injector injector) {
+        this.injector = injector;
         this.setBackground(ColorScheme.DARKER_GRAY_COLOR);
         this.setOpaque(false);
         this.setPreferredSize(new Dimension(6000, 4000));

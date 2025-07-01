@@ -3,12 +3,16 @@ package com.adamk33n3r.runelite.watchdog.nodegraph;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.GraphPanel;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+
+import net.runelite.api.Client;
 import net.runelite.client.*;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.ui.laf.RuneLiteLAF;
 import okhttp3.OkHttpClient;
+import org.mockito.Mockito;
 
 import javax.swing.*;
+import java.applet.Applet;
 import java.awt.*;
 
 public class NodeGraphLauncher {
@@ -46,7 +50,7 @@ public class NodeGraphLauncher {
         });
 
         GraphPanel content = injector.getInstance(GraphPanel.class);
-        content.init();
+        content.init(injector);
 
 //        Graph content = new Graph();
         JScrollPane viewport = new JScrollPane(content);
@@ -57,13 +61,19 @@ public class NodeGraphLauncher {
         jFrame.revalidate();
     }
 
+    private static Applet getApplet() {return null;}
+
     private static Injector getInjector() {
         final OkHttpClient okHttpClient = new OkHttpClient.Builder().build();
         final RuntimeConfigLoader runtimeConfigLoader = new RuntimeConfigLoader(okHttpClient);
 
+//        Applet app = getApplet();
+//        if (app instanceof Client) {
+//            return null;
+//        }
         return Guice.createInjector(new RuneLiteModule(
             okHttpClient,
-            () -> null,
+            () -> Mockito.mock(Client.class),
             runtimeConfigLoader,
             true,
             false,

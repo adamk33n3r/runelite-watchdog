@@ -54,7 +54,7 @@ public class AlertNodePanel extends NodePanel {
         this.items.add(new ConnectionLine<>(new ConnectionPointIn<>(this, triggerNode.getDebounce()), new NumberInput("Debounce", triggerNode.getDebounceOut().getValue().intValue()), this.testOut));
 //        this.outConnectionPoints.add(this.testOut);
         this.enabled = new ConnectionPointIn<>(this, triggerNode.getEnabled());
-        BoolInput enabledInput = new BoolInput("Enabled", triggerNode.getEnabled().getValue());
+        BoolInput enabledInput = new BoolInput("Enabled", triggerNode.getEnabled());
         this.items.add(new ConnectionLine<>(this.enabled, enabledInput, null));
 
         JButton testBtn = new JButton("TEST");

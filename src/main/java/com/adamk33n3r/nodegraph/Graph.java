@@ -107,9 +107,13 @@ public class Graph {
             Node node = nodesToProcess.remove(0);
             if (node instanceof NotificationNode) {
                 NotificationNode notification = ((NotificationNode) node);
+                System.out.println("Notification node: " + notification.getNotification().getType().getName() + " is enabled: " + notification.getEnabled().getValue());
                 if (notification.getEnabled().getValue()) {
                     reachableNotifications.add(notification);
                 }
+                continue;
+            }
+            if (node instanceof TriggerNode && !((TriggerNode) node).getEnabled().getValue()) {
                 continue;
             }
             this.connections.stream()

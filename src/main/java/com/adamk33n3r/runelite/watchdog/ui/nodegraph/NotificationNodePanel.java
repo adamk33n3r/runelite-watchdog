@@ -45,7 +45,7 @@ public class NotificationNodePanel extends NodePanel {
         Notification notification = notificationNode.getNotification();
 
         this.enabledIn = new ConnectionPointIn<>(this, notificationNode.getEnabled());
-        this.items.add(new ConnectionLine<>(this.enabledIn, new BoolInput("Enabled", notificationNode.getEnabled().getValue()), null));
+        this.items.add(new ConnectionLine<>(this.enabledIn, new BoolInput("Enabled", notificationNode.getEnabled()), null));
         this.captureGroupsIn = new ConnectionPointIn<>(this, notificationNode.getCaptureGroups());
         this.items.add(new ConnectionLine<>(this.captureGroupsIn, new ViewInput<>("Capture Groups", notificationNode.getCaptureGroups().getValue()), null));
         this.alertNameIn = new ConnectionPointIn<>(this, notificationNode.getAlertName());

@@ -2,7 +2,12 @@ package com.adamk33n3r.runelite.watchdog.alerts;
 
 import lombok.Getter;
 import lombok.Setter;
+
+import net.runelite.api.Client;
+import net.runelite.api.Player;
 import net.runelite.api.coords.WorldPoint;
+
+import javax.inject.Inject;
 
 @Getter
 @Setter
@@ -12,6 +17,9 @@ public class LocationAlert extends ContinuousAlert {
     private boolean repeat = false;
 //    private boolean showTileMarker;
 
+    @Inject
+    private transient Client client;
+
     public LocationAlert() {
         super("New Location Alert");
     }
@@ -19,10 +27,25 @@ public class LocationAlert extends ContinuousAlert {
         super(name);
     }
 
-    public boolean shouldFire(WorldPoint currentPoint) {
+    @Override
+    public boolean shouldFire() {
         if (this.worldPoint == null) {
             return false;
         }
-        return this.worldPoint.distanceTo(currentPoint) <= this.distance;
+
+        Player localPlayer = this.client.getLocalPlayer();
+        if (localPlayer == null) {
+            return false;
+        }
+        WorldPoint worldLocation = localPlayer.getWorldLocation();
+        return this.shouldFire(worldLocation);
+    }
+
+    public boolean shouldFire(WorldPoint worldPoint) {
+        if (this.worldPoint == null) {
+            return false;
+        }
+
+        return this.worldPoint.distanceTo(worldPoint) <= this.distance;
     }
 }
