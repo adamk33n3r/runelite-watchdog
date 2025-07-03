@@ -369,7 +369,14 @@ public class EventHandler {
     @Subscribe
     private void onGameTick(GameTick gameTick) {
         // Location alerts
-        WorldPoint worldLocation = WorldPoint.fromLocalInstance(this.client, this.client.getLocalPlayer().getLocalLocation());
+        var world = this.client.getLocalPlayer().getWorldLocation();
+        var worldView = this.client.getLocalPlayer().getWorldView();
+        var localWorld = LocalPoint.fromWorld(worldView, world);
+        // Should never be null
+        if (localWorld == null) {
+            return;
+        }
+        var worldLocation = WorldPoint.fromLocalInstance(this.client, localWorld);
         this.alertManager.getAllEnabledAlertsOfType(LocationAlert.class)
             .filter(locationAlert -> locationAlert.shouldFire(worldLocation))
             .forEach(locationAlert -> {
