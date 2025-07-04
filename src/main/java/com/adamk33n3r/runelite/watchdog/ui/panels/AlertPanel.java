@@ -187,7 +187,7 @@ public abstract class AlertPanel<T extends Alert> extends PluginPanel {
     }
 
     public AlertPanel<T> addTextArea(String placeholder, String tooltip, String initialValue, Consumer<String> saveAction) {
-        JTextArea textArea = PanelUtils.createTextArea(placeholder, tooltip, initialValue, val -> {
+        FlatTextArea textArea = PanelUtils.createTextArea(placeholder, tooltip, initialValue, val -> {
             saveAction.accept(val);
             this.alertManager.saveAlerts();
         });

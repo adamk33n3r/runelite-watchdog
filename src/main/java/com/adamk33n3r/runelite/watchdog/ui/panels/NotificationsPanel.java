@@ -9,6 +9,7 @@ import com.adamk33n3r.runelite.watchdog.notifications.Popup;
 import com.adamk33n3r.runelite.watchdog.ui.Icons;
 import com.adamk33n3r.runelite.watchdog.ui.StretchedStackedLayout;
 import com.adamk33n3r.runelite.watchdog.ui.dropdownbutton.DropDownButtonFactory;
+import com.adamk33n3r.runelite.watchdog.ui.notifications.panels.PluginMessageNotificationPanel;
 import com.adamk33n3r.runelite.watchdog.ui.notifications.panels.*;
 
 import net.runelite.client.config.ConfigManager;
@@ -161,6 +162,8 @@ public class NotificationsPanel extends JPanel {
             notificationPanel = new ScreenMarkerNotificationPanel((ScreenMarker) notification, this, this.colorPickerManager, this.alertManager::saveAlerts, removeNotification);
         else if (notification instanceof Dink)
             notificationPanel = new DinkNotificationPanel((Dink) notification, this, this.configManager, this.alertManager::saveAlerts, removeNotification);
+        else if (notification instanceof PluginMessage)
+            notificationPanel = new PluginMessageNotificationPanel((PluginMessage) notification, this, this.alertManager::saveAlerts, removeNotification);
 
         if (notificationPanel != null)
             this.notificationContainer.add(notificationPanel);

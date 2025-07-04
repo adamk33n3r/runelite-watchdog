@@ -6,33 +6,30 @@ import lombok.Getter;
 
 import javax.swing.*;
 import javax.swing.text.Document;
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Insets;
+import java.awt.*;
 import java.awt.event.*;
 
 /**
  * This component is a JTextArea with a flat design look.
  */
-public class FlatTextArea extends JPanel
-{
-    @Getter
-    private final PlaceholderTextArea textArea;
+@Getter
+public class FlatTextArea extends JPanel {
+    protected final PlaceholderTextArea textArea;
 
     //the default background color, this needs to be stored for hover effects
-    @Getter
-    private Color backgroundColor = ColorScheme.DARKER_GRAY_COLOR;
+    protected Color backgroundColor = ColorScheme.DARKER_GRAY_COLOR;
 
     //the default hover background color, this needs to be stored for hover effects
-    @Getter
-    private Color hoverBackgroundColor;
+    protected Color hoverBackgroundColor;
 
     // the input can be blocked (no clicking, no editing, no hover effects)
-    @Getter
-    private boolean blocked;
+    protected boolean blocked;
 
-    public FlatTextArea(String placeholder)
-    {
+    public FlatTextArea(String placeholder) {
+        this(placeholder, false);
+    }
+
+    public FlatTextArea(String placeholder, boolean preventNewline) {
         this.setLayout(new BorderLayout());
 //        this.setBorder(new EmptyBorder(0, 10, 0, 0));
         this.setBackground(this.backgroundColor);
@@ -48,82 +45,89 @@ public class FlatTextArea extends JPanel
         this.textArea.setWrapStyleWord(true);
         this.textArea.setMargin(new Insets(4, 6, 5, 6));
 
-        add(textArea, BorderLayout.CENTER);
+        this.add(textArea, BorderLayout.CENTER);
 
-        textArea.addMouseListener(new MouseAdapter()
-        {
+        textArea.addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseEntered(MouseEvent mouseEvent)
-            {
-                if (blocked)
-                {
+            public void mouseEntered(MouseEvent mouseEvent) {
+                if (blocked) {
                     return;
                 }
 
-                if (hoverBackgroundColor != null)
-                {
+                if (hoverBackgroundColor != null) {
                     setBackground(hoverBackgroundColor, false);
                 }
             }
 
             @Override
-            public void mouseExited(MouseEvent mouseEvent)
-            {
+            public void mouseExited(MouseEvent mouseEvent) {
                 setBackground(backgroundColor);
             }
         });
+
+        this.setUpKeymaps(preventNewline);
     }
 
-    public FlatTextArea(String placeholder, boolean preventNewline) {
-        this(placeholder);
-        if (!preventNewline) {
-            return;
-        }
+    protected void setUpKeymaps(boolean preventNewline) {
+        this.setUpKeymaps(preventNewline, this.textArea);
+    }
+
+    protected void setUpKeymaps(boolean preventNewline, PlaceholderTextArea textArea) {
         KeyStroke enterKey = KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0);
-        InputMap inputMap = this.textArea.getInputMap(JComponent.WHEN_FOCUSED);
-        ActionMap actionMap = this.textArea.getActionMap();
-        inputMap.put(enterKey, enterKey.toString());
-        actionMap.put(enterKey.toString(), new AbstractAction() {
+        KeyStroke tabKey = KeyStroke.getKeyStroke(KeyEvent.VK_TAB, 0);
+        InputMap inputMap = textArea.getInputMap(JComponent.WHEN_FOCUSED);
+        ActionMap actionMap = textArea.getActionMap();
+        if (preventNewline) {
+            inputMap.put(enterKey, enterKey.toString());
+            actionMap.put(enterKey.toString(), new AbstractAction() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    JTextArea textArea = (JTextArea) e.getSource();
+                    textArea.getParent().getParent().requestFocusInWindow();
+                }
+            });
+        }
+        inputMap.put(tabKey, tabKey.toString());
+        actionMap.put(tabKey.toString(), new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                JTextArea textArea = (JTextArea)e.getSource();
-                textArea.getParent().getParent().requestFocusInWindow();
+                KeyboardFocusManager.getCurrentKeyboardFocusManager().focusNextComponent();
             }
         });
     }
 
     public String getText()
     {
-        return textArea.getText();
+        return this.textArea.getText();
     }
 
     public void setText(String text)
     {
-        textArea.setText(text);
+        this.textArea.setText(text);
     }
 
     @Override
     public void addKeyListener(KeyListener keyListener)
     {
-        textArea.addKeyListener(keyListener);
+        this.textArea.addKeyListener(keyListener);
     }
 
     @Override
     public void removeKeyListener(KeyListener keyListener)
     {
-        textArea.removeKeyListener(keyListener);
+        this.textArea.removeKeyListener(keyListener);
     }
 
     @Override
     public void setBackground(Color color)
     {
-        setBackground(color, true);
+        this.setBackground(color, true);
     }
 
     @Override
     public boolean requestFocusInWindow()
     {
-        return textArea.requestFocusInWindow();
+        return this.textArea.requestFocusInWindow();
     }
 
     public void setBackground(Color color, boolean saveColor)
@@ -154,17 +158,17 @@ public class FlatTextArea extends JPanel
     public void setEditable(boolean editable)
     {
         this.blocked = !editable;
-        textArea.setEditable(editable);
-        textArea.setFocusable(editable);
+        this.textArea.setEditable(editable);
+        this.textArea.setFocusable(editable);
         if (!editable)
         {
-            super.setBackground(backgroundColor);
+            super.setBackground(this.backgroundColor);
         }
     }
 
     public Document getDocument()
     {
-        return textArea.getDocument();
+        return this.textArea.getDocument();
     }
 
 }

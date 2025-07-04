@@ -101,6 +101,7 @@ public class AlertManager {
             .registerSubtype(NotificationEvent.class)
             .registerSubtype(ScreenMarker.class)
             .registerSubtype(Dink.class)
+            .registerSubtype(PluginMessage.class)
             .registerSubtype(DismissOverlay.class)
             .registerSubtype(DismissScreenMarker.class);
         this.gson = this.clientGson.newBuilder()

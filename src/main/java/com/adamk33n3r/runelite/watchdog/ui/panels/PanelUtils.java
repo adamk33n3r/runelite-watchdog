@@ -1,12 +1,10 @@
 package com.adamk33n3r.runelite.watchdog.ui.panels;
 
-import com.adamk33n3r.runelite.watchdog.Displayable;
-import com.adamk33n3r.runelite.watchdog.TriggerType;
-import com.adamk33n3r.runelite.watchdog.Util;
-import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
+import com.adamk33n3r.runelite.watchdog.*;
 import com.adamk33n3r.runelite.watchdog.alerts.Alert;
+import com.adamk33n3r.runelite.watchdog.ui.FlatTextArea;
+import com.adamk33n3r.runelite.watchdog.ui.FlatTextAreaNamespace;
 import com.adamk33n3r.runelite.watchdog.ui.Icons;
-import com.adamk33n3r.runelite.watchdog.ui.PlaceholderTextArea;
 import com.adamk33n3r.runelite.watchdog.ui.dropdownbutton.DropDownButtonFactory;
 
 import net.runelite.client.ui.ColorScheme;
@@ -24,11 +22,13 @@ import javax.annotation.Nullable;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileFilter;
+import javax.swing.text.AbstractDocument;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.Arrays;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.regex.Pattern;
@@ -178,20 +178,84 @@ public class PanelUtils {
         return checkbox;
     }
 
-
-    public static JTextArea createTextArea(String placeholder, String tooltip, String initialValue, Consumer<String> onChange) {
-        PlaceholderTextArea textArea = new PlaceholderTextArea(initialValue);
-        textArea.setPlaceholder(placeholder);
-        textArea.setToolTipText(tooltip);
-        textArea.setSelectedTextColor(Color.WHITE);
-        textArea.setSelectionColor(ColorScheme.BRAND_ORANGE_TRANSPARENT);
-        textArea.setLineWrap(true);
-        textArea.setWrapStyleWord(true);
-        textArea.setMargin(new Insets(4, 6, 5, 6));
-        textArea.addFocusListener(new FocusListener() {
+    public static FlatTextAreaNamespace createTextFieldNamespace(
+        String firstPlaceholder,
+        String firstTooltip,
+        String firstInitialValue,
+        String secondPlaceholder,
+        String secondTooltip,
+        String secondInitialValue,
+        BiConsumer<String, String> onChange
+    ) {
+        FlatTextAreaNamespace flatTextArea = new FlatTextAreaNamespace(firstPlaceholder, ":", secondPlaceholder, true);
+        flatTextArea.getPrefixTextArea().setToolTipText(firstTooltip);
+        flatTextArea.getTextArea().setToolTipText(secondTooltip);
+        flatTextArea.getPrefixTextArea().setText(firstInitialValue);
+        flatTextArea.getTextArea().setText(secondInitialValue);
+        ((AbstractDocument) flatTextArea.getDocument()).setDocumentFilter(new LengthLimitFilter(4096));
+        flatTextArea.getDocument().addDocumentListener((SimpleDocumentListener) ev -> {
+            onChange.accept(flatTextArea.getPrefixTextArea().getText(), flatTextArea.getTextArea().getText());
+        });
+        flatTextArea.getPrefixTextArea().addFocusListener(new FocusListener() {
             @Override
             public void focusGained(FocusEvent e) {
-                textArea.selectAll();
+                flatTextArea.getPrefixTextArea().selectAll();
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                onChange.accept(flatTextArea.getPrefixTextArea().getText(), flatTextArea.getTextArea().getText());
+            }
+        });
+        flatTextArea.getTextArea().addFocusListener(new FocusListener() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                flatTextArea.getTextArea().selectAll();
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                onChange.accept(flatTextArea.getPrefixTextArea().getText(), flatTextArea.getTextArea().getText());
+            }
+        });
+        return flatTextArea;
+    }
+
+    public static FlatTextArea createTextField(String placeholder, String tooltip, String initialValue, Consumer<String> onChange) {
+        FlatTextArea flatTextArea = new FlatTextArea(placeholder, true);
+        flatTextArea.setText(initialValue);
+        flatTextArea.getTextArea().setToolTipText(tooltip);
+        ((AbstractDocument) flatTextArea.getDocument()).setDocumentFilter(new LengthLimitFilter(4096));
+        flatTextArea.getDocument().addDocumentListener((SimpleDocumentListener) ev -> {
+            onChange.accept(flatTextArea.getText());
+        });
+        flatTextArea.getTextArea().addFocusListener(new FocusListener() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                flatTextArea.getTextArea().selectAll();
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                onChange.accept(flatTextArea.getText());
+            }
+        });
+        return flatTextArea;
+    }
+
+    public static FlatTextArea createTextArea(String placeholder, String tooltip, String initialValue, Consumer<String> onChange) {
+        FlatTextArea textArea = new FlatTextArea(placeholder, false);
+        textArea.setText(initialValue);
+        textArea.setToolTipText(tooltip);
+//        textArea.setSelectedTextColor(Color.WHITE);
+//        textArea.setSelectionColor(ColorScheme.BRAND_ORANGE_TRANSPARENT);
+//        textArea.setLineWrap(true);
+//        textArea.setWrapStyleWord(true);
+//        textArea.setMargin(new Insets(4, 6, 5, 6));
+        textArea.getTextArea().addFocusListener(new FocusListener() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                textArea.getTextArea().selectAll();
             }
 
             @Override
