@@ -1,6 +1,7 @@
 package com.adamk33n3r.runelite.watchdog.ui.panels;
 
 import com.adamk33n3r.runelite.watchdog.AlertManager;
+import com.adamk33n3r.runelite.watchdog.NotificationCategory;
 import com.adamk33n3r.runelite.watchdog.NotificationType;
 import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
 import com.adamk33n3r.runelite.watchdog.alerts.Alert;
@@ -28,6 +29,8 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionListener;
 import java.util.Arrays;
+import java.util.Comparator;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class NotificationsPanel extends JPanel {
@@ -66,12 +69,19 @@ public class NotificationsPanel extends JPanel {
             this.notificationContainer.revalidate();
             this.alertManager.saveAlerts();
         };
-        Arrays.stream(NotificationType.values()).sorted().forEach(nType -> {
+        Arrays.stream(NotificationCategory.values()).forEach(cat -> {
+            JMenu subMenu = new JMenu(cat.getName());
+            subMenu.setToolTipText(cat.getTooltip());
+            popupMenu.add(subMenu);
+            popupMenu.putClientProperty(cat.name(), subMenu);
+        });
+        Arrays.stream(NotificationType.values()).sorted(Comparator.comparing(NotificationType::getName)).forEach(nType -> {
             JMenuItem c = new JMenuItem(nType.getName());
             c.setToolTipText(nType.getTooltip());
             c.putClientProperty(NotificationType.class, nType);
             c.addActionListener(actionListener);
-            popupMenu.add(c);
+            JMenu subMenu = (JMenu) popupMenu.getClientProperty(nType.getCategory().name());
+            subMenu.add(c);
         });
         JButton addDropDownButton = DropDownButtonFactory.createDropDownButton(Icons.ADD, popupMenu);
         addDropDownButton.setPreferredSize(new Dimension(40, addDropDownButton.getPreferredSize().height));
