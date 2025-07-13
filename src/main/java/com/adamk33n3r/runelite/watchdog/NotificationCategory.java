@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public enum NotificationCategory {
+public enum NotificationCategory implements Displayable {
     AUDIO("Audio", "Sound, text to speech, etc"),
     TEXT("Text", "Game message, overhead, etc"), // Game message, overhead, tray
     OVERLAY("Overlay", "Screen marker, flash, popup, etc"), // Overlay, popup, screen flash, screen marker

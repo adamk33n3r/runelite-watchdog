@@ -109,6 +109,8 @@ public class TextToSpeechNotificationPanel extends NotificationPanel {
                 this.settings.add(voiceSelect);
                 break;
             case LEGACY:
+                JLabel deprecatedWarning = new JLabel("<html>The Legacy TTS API is deprecated and will likely be removed in the future.</html>");
+                this.settings.add(deprecatedWarning);
                 JSlider rateSlider = new JSlider(1, 5, notification.getRate());
                 rateSlider.setBackground(ColorScheme.MEDIUM_GRAY_COLOR);
                 rateSlider.addChangeListener(ev -> {
