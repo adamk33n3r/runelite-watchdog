@@ -156,7 +156,7 @@ public class EventHandler {
                     return false;
                 }
 
-                int targetLevel = statChanged.getLevel() + alert.getChangedAmount();
+                int targetLevel = alert.isRelative() ? statChanged.getLevel() + alert.getChangedAmount() : alert.getChangedAmount();
                 boolean currentIs = alert.getChangedComparator().compare(statChanged.getBoostedLevel(), targetLevel);
                 boolean prevWasNot = alert.getChangedComparator().converse().compare(previousLevel, targetLevel);
                 return currentIs && prevWasNot;
