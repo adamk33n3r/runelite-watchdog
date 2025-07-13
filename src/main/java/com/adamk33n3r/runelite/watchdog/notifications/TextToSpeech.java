@@ -90,6 +90,10 @@ public class TextToSpeech extends MessageNotification implements IAudioNotificat
             } else {
                 String request = String.format("https://ttsplugin.com?m=%s&r=%d&v=%d", encodedMessage, this.rate, this.legacyVoice.id);
                 URLConnection conn = new URL(request).openConnection();
+                if (conn.getContentLength() < 0) {
+                    log.error("Issue with tts plugin service, content length invalid");
+                    return;
+                }
                 byte[] bytes = new byte[conn.getContentLength()];
                 try (InputStream stream = conn.getInputStream()) {
                     for (int i = 0; i < conn.getContentLength(); i++) {

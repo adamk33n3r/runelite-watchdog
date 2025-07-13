@@ -25,6 +25,7 @@ public interface WatchdogConfig extends Config {
     String ENABLE_TTS = "enableTTS";
     String OVERRIDE_IMPORTS_WITH_DEFAULTS = "overrideImportsWithDefaults";
     String SIDE_PANEL_PRIORITY = "sidePanelPriority";
+    String ENABLE_NOTIFICATION_CATEGORIES = "enableNotificationCategories";
 
     // AFK Notification
     String DEFAULT_AFK_MODE = "defaultAFKMode";
@@ -128,6 +129,13 @@ public interface WatchdogConfig extends Config {
     )
     @Range(min = Integer.MIN_VALUE)
     default int sidePanelPriority() { return 1; }
+
+    @ConfigItem(
+        keyName = ENABLE_NOTIFICATION_CATEGORIES,
+        name = "Enable Notification Categories",
+        description = "Enables the notification categories in the side panel"
+    )
+    default boolean enableNotificationCategories() { return true; }
 
     //region AFK Notification
     @ConfigSection(

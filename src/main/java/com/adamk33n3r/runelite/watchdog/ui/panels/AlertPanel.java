@@ -304,8 +304,8 @@ public abstract class AlertPanel<T extends Alert> extends PluginPanel {
     }
 
     public AlertPanel<T> addNotifications() {
-        NotificationsPanel notificationPanel = new NotificationsPanel(this.alert);
-        WatchdogPlugin.getInstance().getInjector().injectMembers(notificationPanel);
+        NotificationsPanel notificationPanel = WatchdogPlugin.getInstance().getInjector().getInstance(NotificationsPanel.class);
+        notificationPanel.init(this.alert);
         notificationPanel.setBorder(new CompoundBorder(new EmptyBorder(0, 5, 0, 5), new HorizontalRuleBorder(10)));
         this.centerContainer.add(notificationPanel);
 

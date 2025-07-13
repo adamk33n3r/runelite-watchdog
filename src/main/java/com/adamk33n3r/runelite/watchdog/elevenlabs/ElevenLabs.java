@@ -6,10 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 
 import javax.annotation.Nonnull;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.Objects;
 import java.util.function.Consumer;
 
@@ -119,6 +116,8 @@ public class ElevenLabs {
 //                        WatchdogPlugin.getInstance().getSoundPlayer().play(tmpFile, 10);
                         callback.accept(rType.cast(tmpFile));
                     }
+                } catch (Exception e) {
+                    log.error("error while hitting eleven labs api");
                 }
             }
         });
