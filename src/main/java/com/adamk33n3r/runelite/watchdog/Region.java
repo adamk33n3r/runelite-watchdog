@@ -52,7 +52,8 @@ public enum Region {
         15184, 15696 // Wardens
 //        14672 // Chest room
     ),
-    YAMA(6045)
+    YAMA(6045),
+    DOOM_OF_MOKHAIOTL(5269, 13668, 14180),
 //    LUMBRIDGE_CASTLE(
 //        12850
 //    )

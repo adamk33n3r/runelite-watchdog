@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.GridLayout;
@@ -19,6 +20,9 @@ import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -46,7 +50,7 @@ public class ImportExportDialog extends JDialog {
 
         JPanel btnGroup = new JPanel(new GridLayout(1, 0, 25, 0));
         Function<Boolean, ActionListener> importAlertFn = append -> ev -> {
-            if (!append && JOptionPane.showConfirmDialog(this, "Are you sure you wish to overwrite your alerts?", "Confirm Overwrite?", JOptionPane.YES_NO_OPTION) != JOptionPane.YES_OPTION) {
+            if (!append && JOptionPane.showConfirmDialog(this, "Are you sure you wish to replace all of the alerts?", "Confirm Replace?", JOptionPane.YES_NO_OPTION) != JOptionPane.YES_OPTION) {
                 return;
             }
             String json = textArea.getText();
@@ -59,10 +63,10 @@ public class ImportExportDialog extends JDialog {
                 JOptionPane.showMessageDialog(this, "There was an error parsing the alert json", "Error parsing JSON", JOptionPane.ERROR_MESSAGE);
             }
         };
-        JButton importOverwriteBtn = new JButton("Import (Overwrite)");
+        JButton importOverwriteBtn = new JButton("Delete All & Import");
         importOverwriteBtn.addActionListener(importAlertFn.apply(false));
         btnGroup.add(importOverwriteBtn);
-        JButton importAppendBtn = new JButton("Import (Append)");
+        JButton importAppendBtn = new JButton("Import");
         importAppendBtn.addActionListener(importAlertFn.apply(true));
         btnGroup.add(importAppendBtn);
         JButton closeBtn = new JButton("Cancel");
@@ -120,6 +124,30 @@ public class ImportExportDialog extends JDialog {
             this.setVisible(false);
         });
         btnGroup.add(copyBtn);
+        JButton saveToFileBtn = new JButton("Save to File");
+        saveToFileBtn.addActionListener(ev -> {
+            JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setFileFilter(new FileNameExtensionFilter("JSON Files (*.json)", "json"));
+            int userSelection = fileChooser.showSaveDialog(this);
+            if (userSelection == JFileChooser.APPROVE_OPTION) {
+                File fileToSave = fileChooser.getSelectedFile();
+
+                if (!fileToSave.getName().contains(".")) {
+                    fileToSave = new File(fileToSave.getAbsolutePath() + ".json");
+                }
+
+                try {
+                    try (FileWriter fileWriter = new FileWriter(fileToSave)) {
+                        fileWriter.write(prettyPrint.isSelected() ? prettyExportString : exportString);
+                    }
+                } catch (IOException e) {
+                    log.error("Error writing file", e);
+                    JOptionPane.showMessageDialog(this, "There was an error saving the file", "Error saving file", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+            this.setVisible(false);
+        });
+        btnGroup.add(saveToFileBtn);
         JButton closeBtn = new JButton("Close");
         btnGroup.add(closeBtn);
         closeBtn.addActionListener(ev -> {
