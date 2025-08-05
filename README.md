@@ -22,7 +22,7 @@ with any amount of unique notification types like
 - Screen Flash
 - Custom Sound
 - In-Game Sound Effect
-- Text to Speech (Now supports using Eleven Labs)
+- Text to Speech (Eleven Labs API key needs Voices and TTS permissions)
 - Tray Notification
 - Overhead Text
 - Overlay
