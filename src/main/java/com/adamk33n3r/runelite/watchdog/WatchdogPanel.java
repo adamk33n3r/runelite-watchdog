@@ -21,6 +21,7 @@ import net.runelite.client.util.LinkBrowser;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
+import org.apache.commons.text.WordUtils;
 
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -30,6 +31,7 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.util.Arrays;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -108,9 +110,21 @@ public class WatchdogPanel extends PluginPanel {
         title.setForeground(Color.WHITE);
         if (WatchdogPlugin.getInstance().isInBannedArea()) {
             title.setForeground(Color.RED);
-            String tooltip = "You are in a banned area. Watchdog is disabled in the following areas:\n";
-            tooltip += Arrays.stream(Region.values()).map(Region::name).collect(Collectors.joining(", "));
-            title.setToolTipText(tooltip);
+            List<String> regions = Arrays.stream(Region.values())
+                .map(Region::toString)
+                .collect(Collectors.toList());
+            StringBuilder tooltip = new StringBuilder("You are in a banned area. Watchdog is disabled in the following areas:\n");
+            StringBuilder line = new StringBuilder();
+            for (String region : regions) {
+                if (line.length() + region.length() > 60) {
+                    tooltip.append(line).append("\n");
+                    line = new StringBuilder();
+                }
+                line.append(region).append(", ");
+            }
+            line.delete(line.length() - 2, line.length());
+            tooltip.append(line);
+            title.setToolTipText(tooltip.toString());
         } else {
             title.setForeground(Color.WHITE);
             boolean isPreRelease = !PLUGIN_VERSION_PHASE.equals("release") && !PLUGIN_VERSION_PHASE.isEmpty();

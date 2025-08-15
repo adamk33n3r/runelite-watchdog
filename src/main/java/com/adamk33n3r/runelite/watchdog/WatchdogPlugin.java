@@ -5,6 +5,7 @@ import com.adamk33n3r.runelite.watchdog.ui.notifications.screenmarker.ScreenMark
 import net.runelite.api.Client;
 import net.runelite.api.ItemID;
 import net.runelite.api.MessageNode;
+import net.runelite.api.WorldView;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.ChatMessage;
 import net.runelite.api.events.GameStateChanged;
@@ -19,7 +20,6 @@ import net.runelite.client.events.ProfileChanged;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
-import net.runelite.client.plugins.config.ConfigPlugin;
 import net.runelite.client.ui.ClientToolbar;
 import net.runelite.client.ui.NavigationButton;
 import net.runelite.client.ui.overlay.OverlayManager;
@@ -35,7 +35,6 @@ import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
 
 import javax.inject.Inject;
-import javax.inject.Provider;
 import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
 import java.util.Properties;
@@ -201,10 +200,8 @@ public class WatchdogPlugin extends Plugin {
     private void onGameTick(GameTick gameTick) {
         int regionID = WorldPoint.fromLocalInstance(this.client, this.client.getLocalPlayer().getLocalLocation()).getRegionID();
         boolean before = this.isInBannedArea;
-        this.isInBannedArea = Region.isBannedRegion(this.client.getLocalPlayer().getWorldView().isInstance(), regionID);
-//            || this.client.getVarbitValue(Varbits.IN_RAID) > 0
-//            || this.client.getVarbitValue(Varbits.TOA_RAID_LEVEL) > 0
-//            || this.client.getVarbitValue(Varbits.THEATRE_OF_BLOOD) > 0;
+        WorldView worldView = this.client.getLocalPlayer().getWorldView();
+        this.isInBannedArea = Region.isBannedRegion(regionID, worldView);
 
         // State changed so switch panel icon
         if (before != this.isInBannedArea) {

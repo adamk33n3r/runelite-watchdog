@@ -1,80 +1,151 @@
 package com.adamk33n3r.runelite.watchdog;
 
+import lombok.Builder;
+import lombok.Data;
+import net.runelite.api.WorldView;
+import org.apache.commons.text.WordUtils;
+
 import java.util.Arrays;
+import java.util.Set;
 
 // Use https://explv.github.io to find region ids
 public enum Region {
-    ALCHEMICAL_HYDRA(true, 5536),
-    VARDORVIS(4405),
-    LEVIATHAN(8291),
-    WHISPERER(10595),
-    SUCELLUS(12132),
-    VORKATH(9023),
-    INFERNO(9043),
-    FIGHT_CAVE(9551),
-    COLOSSEUM(7216),
-    KALPHITE_QUEEN(13972),
-    COX(
-        13136, // End of floor
-        13137, 13393, // Lobbies/Room transitions
-        13138, 13394, // Vasa/Tekton/Vespula Lizardmen/Skeletal Mystics/Guardian
-        13139, 13395, 13140, 13396, // Puzzle rooms/bosses
-        13141, 13397, // Rest room
-        13145, // New floor
-        13401, // New floor?
-        12889 // Olm
-    ),
-    TOB(
-//        12869, // Lobby
-        12613, // Maiden
-        13125, // Bloat
-        13122, // Nylocas
-        13123, 13379, // Sotetseg/maze
-        12612, // Xarpus
-        12611 // Verzik
-//        12867 // Loot room
+    ALCHEMICAL_HYDRA(RegionConfig
+        .builder()
+        .regionIDs(Set.of(5536))
+        .onlyInInstance()
+        .build()),
+    VARDORVIS(RegionConfig
+        .builder()
+        .regionIDs(Set.of(4405))
+        .build()),
+    LEVIATHAN(RegionConfig
+        .builder()
+        .regionIDs(Set.of(8291))
+        .build()),
+    WHISPERER(RegionConfig
+        .builder()
+        .regionIDs(Set.of(10595))
+        .build()),
+    SUCELLUS(RegionConfig
+        .builder()
+        .regionIDs(Set.of(12132))
+        .build()),
+    VORKATH(RegionConfig
+        .builder()
+        .regionIDs(Set.of(9023))
+        .build()),
+    INFERNO(RegionConfig
+        .builder()
+        .regionIDs(Set.of(9043))
+        .build()),
+    FIGHT_CAVE(RegionConfig
+        .builder()
+        .regionIDs(Set.of(9551))
+        .build()),
+    COLOSSEUM(RegionConfig
+        .builder()
+        .regionIDs(Set.of(7216))
+        .build()),
+    KALPHITE_QUEEN(RegionConfig
+        .builder()
+        .regionIDs(Set.of(13972))
+        .planes(Set.of(0))
+        .build()),
+    COX(RegionConfig
+        .builder()
+        .regionIDs(Set.of(
+            13136, // End of floor
+            13137, 13393, // Lobbies/Room transitions
+            13138, 13394, // Vasa/Tekton/Vespula Lizardmen/Skeletal Mystics/Guardian
+            13139, 13395, 13140, 13396, // Puzzle rooms/bosses
+            13141, 13397, // Rest room
+            13145, // New floor
+            13401, // New floor?
+            12889 // Olm
+        ))
+        .build()),
+    TOB(RegionConfig
+        .builder()
+        .regionIDs(Set.of(
+            // 12869, // Lobby
+            12613, // Maiden
+            13125, // Bloat
+            13122, // Nylocas
+            13123, 13379, // Sotetseg/maze
+            12612, // Xarpus
+            12611 // Verzik
+            // 12867 // Loot room
 
-//        // Outside
-//        14386,
-//        14642
-    ),
-    TOA(
-//        13454, // Lobby
-        14160, // Nexus Lobby
-        15698, // Crondis
-        15700, // Zebak
-        14162, // Scabaras
-        14164, // Kephri
-        15186, // Apmeken
-        15188, // Ba-Ba
-        14674, // Het
-        14676, // Akkha
-        15184, 15696 // Wardens
-//        14672 // Chest room
-    ),
-    YAMA(6045),
-    DOOM_OF_MOKHAIOTL(5269, 13668, 14180),
-//    LUMBRIDGE_CASTLE(
-//        12850
-//    )
+//            // Outside
+//            14386,
+//            14642
+        ))
+        .build()),
+    TOA(RegionConfig
+        .builder()
+        .regionIDs(Set.of(
+            // 13454, // Lobby
+            14160, // Nexus Lobby
+            15698, // Crondis
+            15700, // Zebak
+            14162, // Scabaras
+            14164, // Kephri
+            15186, // Apmeken
+            15188, // Ba-Ba
+            14674, // Het
+            14676, // Akkha
+            15184, 15696 // Wardens
+            // 14672 // Chest room
+        ))
+        .build()),
+    YAMA(RegionConfig
+        .builder()
+        .regionIDs(Set.of(6045))
+        .build()),
+    DOOM_OF_MOKHAIOTL(RegionConfig
+        .builder()
+        .regionIDs(Set.of(5269, 13668, 14180))
+        .build()),
+//    LUMBRIDGE_CASTLE(RegionConfig
+//        .builder()
+//        .regionIDs(Set.of(12850))
+//        .planes(Set.of(0, 2))
+//        .build()),
     ;
 
-    public final boolean onlyInInstance;
-    public final int[] regionIDs;
+    private final RegionConfig config;
 
-    Region(int... regionIDs) {
-        this(false, regionIDs);
+    Region(RegionConfig config) {
+        this.config = config;
     }
 
-    Region(boolean onlyInInstance, int... regionIDs) {
-        this.onlyInInstance = onlyInInstance;
-        this.regionIDs = regionIDs;
-    }
-
-    public static boolean isBannedRegion(boolean inInstance, int regionID) {
+    public static boolean isBannedRegion(int regionID, WorldView worldView) {
         return Arrays.stream(values())
-            .filter(r -> inInstance || !r.onlyInInstance)
-            .flatMapToInt(r -> Arrays.stream(r.regionIDs))
+            .filter(r -> worldView.isInstance() || !r.config.onlyInInstance)
+            .filter(r -> r.config.planes.isEmpty() || r.config.planes.contains(worldView.getPlane()))
+            .flatMap(r -> r.config.regionIDs.stream())
             .anyMatch(id -> id == regionID);
+    }
+
+    public String toString() {
+        return WordUtils.capitalizeFully(this.name().replaceAll("_", " "));
+    }
+
+    @Data
+    @Builder
+    private static class RegionConfig {
+        @Builder.Default
+        public final Set<Integer> regionIDs = Set.of();
+        @Builder.Default
+        public final Set<Integer> planes = Set.of();
+        public final boolean onlyInInstance;
+
+        public static class RegionConfigBuilder {
+            public RegionConfigBuilder onlyInInstance() {
+                this.onlyInInstance = true;
+                return this;
+            }
+        }
     }
 }
