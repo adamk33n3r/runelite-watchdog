@@ -35,7 +35,7 @@ public class TextToSpeech extends MessageNotification implements IAudioNotificat
     private int rate = 1;
     @SerializedName("voice")
     private Voice legacyVoice = Voice.GEORGE;
-    private TTSSource source = TTSSource.LEGACY;
+    private TTSSource source = TTSSource.ELEVEN_LABS;
     private String elevenLabsVoiceId;
     private transient com.adamk33n3r.runelite.watchdog.elevenlabs.Voice elevenLabsVoice;
 

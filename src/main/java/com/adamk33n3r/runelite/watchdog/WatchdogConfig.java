@@ -412,7 +412,7 @@ public interface WatchdogConfig extends Config {
         description = "The default source (Eleven Labs needs your own API Key)",
         section = ttsSection
     )
-    default TTSSource defaultTTSSource() { return TTSSource.LEGACY; }
+    default TTSSource defaultTTSSource() { return TTSSource.ELEVEN_LABS; }
 
     @ConfigItem(
         keyName = DEFAULT_TTS_VOICE,

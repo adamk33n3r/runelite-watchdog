@@ -64,13 +64,13 @@ public class EventHandler {
     private Map<String, Integer> previousItemsTable = new ConcurrentHashMap<>();
     private WorldPoint previousLocation = null;
 
-    private boolean ignoreNotificationFired = false;
+    private boolean firedByWatchdog = false;
 
     public synchronized void notify(String message) {
-        this.ignoreNotificationFired = true;
+        this.firedByWatchdog = true;
         // The event bus is synchronous
         this.eventBus.post(new NotificationFired(null, message, TrayIcon.MessageType.NONE));
-        this.ignoreNotificationFired = false;
+        this.firedByWatchdog = false;
     }
 
     //region Chat Message
@@ -111,12 +111,8 @@ public class EventHandler {
     //region Notification
     @Subscribe
     public void onNotificationFired(NotificationFired notificationFired) {
-        // This flag is set when we are firing our own events, so we don't cause an infinite loop/stack overflow
-        if (this.ignoreNotificationFired) {
-            return;
-        }
-
         this.alertManager.getAllEnabledAlertsOfType(NotificationFiredAlert.class)
+            .filter(notificationFiredAlert -> !this.firedByWatchdog || notificationFiredAlert.isAllowSelf())
             .forEach(notificationFiredAlert -> {
                 String[] groups = this.matchPattern(notificationFiredAlert, notificationFired.getMessage());
                 if (groups == null) return;

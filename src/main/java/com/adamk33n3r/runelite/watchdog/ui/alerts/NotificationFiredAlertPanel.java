@@ -16,6 +16,7 @@ public class NotificationFiredAlertPanel extends AlertPanel<NotificationFiredAle
                 this.alert.setPattern(selected);
                 this.rebuild();
             }))
+            .addCheckbox("Allow Watchdog Notifications", "Allow Watchdog notifications to trigger this alert. Be careful with this, can easily cause an infinite loop", this.alert.isAllowSelf(), this.alert::setAllowSelf)
             .addNotifications();
     }
 }

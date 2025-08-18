@@ -10,6 +10,7 @@ import lombok.experimental.Accessors;
 public class NotificationFiredAlert extends Alert implements RegexMatcher {
     private String message = "";
     private boolean regexEnabled = false;
+    private boolean allowSelf = false;
 
     @Override
     public String getPattern() {
