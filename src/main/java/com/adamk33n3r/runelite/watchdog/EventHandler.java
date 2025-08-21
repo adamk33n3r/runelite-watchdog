@@ -5,13 +5,16 @@ import com.adamk33n3r.runelite.watchdog.alerts.InventoryAlert.InventoryAlertType
 import com.adamk33n3r.runelite.watchdog.ui.panels.HistoryPanel;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import net.runelite.api.*;
 import net.runelite.api.coords.LocalPoint;
 import net.runelite.api.coords.WorldPoint;
+import net.runelite.api.gameval.InventoryID;
 import net.runelite.api.events.*;
 import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.NotificationFired;
+import net.runelite.client.events.PluginMessage;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.util.Text;
 
@@ -60,8 +63,8 @@ public class EventHandler {
 
     private final Map<Skill, Integer> previousSkillLevelTable = new EnumMap<>(Skill.class);
     private final Map<Skill, Integer> previousSkillXPTable = new EnumMap<>(Skill.class);
-    private final Map<Integer, String> itemNameCache = new ConcurrentHashMap<>();
-    private Map<String, Integer> previousItemsTable = new ConcurrentHashMap<>();
+    private final Map<Integer, ItemComposition> itemCompositionCache = new ConcurrentHashMap<>();
+    private Map<Integer, InventoryItemData> previousItemsTable = new ConcurrentHashMap<>();
     private WorldPoint previousLocation = null;
 
     private boolean firedByWatchdog = false;
@@ -121,6 +124,11 @@ public class EventHandler {
             });
     }
     //endregion
+
+    public void onPluginMessage(PluginMessage pluginMessage) {
+        if (pluginMessage.getNamespace().equals("watchdog")) {
+        }
+    }
 
     //region Stat Changed
     @Subscribe
@@ -198,21 +206,30 @@ public class EventHandler {
     @Subscribe
     private void onItemContainerChanged(ItemContainerChanged itemContainerChanged) {
         // Ignore everything but inventory
-        if (itemContainerChanged.getItemContainer().getId() != InventoryID.INVENTORY.getId())
+        if (itemContainerChanged.getItemContainer().getId() != InventoryID.INV)
             return;
         Item[] items = itemContainerChanged.getItemContainer().getItems();
-        long itemCount = Arrays.stream(items).filter(item -> item.getId() > -1).count();
-        Map<String, Integer> currentItems = new HashMap<>();
-        Map<String, Integer> allItems = new HashMap<>();
+        Map<Integer, InventoryItemData> currentItems = new HashMap<>();
         Arrays.stream(items)
+            .filter(item -> item.getId() > -1)
             .forEach(item -> {
-                String itemName = this.itemNameCache.computeIfAbsent(item.getId(), id -> this.itemManager.getItemComposition(id).getName());
-                currentItems.merge(itemName, item.getQuantity(), Integer::sum);
-                allItems.merge(itemName, item.getQuantity(), Integer::sum);
+                ItemComposition itemComposition = this.itemCompositionCache.computeIfAbsent(item.getId(), id -> this.itemManager.getItemComposition(id));
+                InventoryItemData inventoryItemData = InventoryItemData.builder()
+                    .itemComposition(itemComposition)
+                    .quantity(item.getQuantity())
+                    .build();
+                currentItems.merge(item.getId(), inventoryItemData, (orig, other) -> InventoryItemData.builder()
+                    .itemComposition(itemComposition)
+                    .quantity(orig.quantity + other.quantity)
+                    .build());
             });
-        this.previousItemsTable.keySet().forEach((item) -> allItems.putIfAbsent(item, 0));
         // Skip firing alerts if there are no previous items, since we just logged in. Even an empty inventory will have a map of -1 itemIds.
         if (!this.previousItemsTable.isEmpty()) {
+            Map<Integer, InventoryItemData> itemMap = new HashMap<>(currentItems);
+            this.previousItemsTable.forEach((itemID, data) -> itemMap.putIfAbsent(itemID, InventoryItemData.builder()
+                .itemComposition(data.itemComposition)
+                .build()));
+            long itemCount = Arrays.stream(items).filter(item -> item.getId() > -1).count();
             this.alertManager.getAllEnabledAlertsOfType(InventoryAlert.class)
                 .forEach(inventoryAlert -> {
                     InventoryAlertType alertType = inventoryAlert.getInventoryAlertType();
@@ -225,9 +242,9 @@ public class EventHandler {
                             break;
                         case ITEM:
                         case ITEM_CHANGE:
-                            Optional<MatchedItem> matchedItems = this.getMatchedItems(inventoryAlert, allItems);
+                            Optional<MatchedItem> matchedItems = this.getMatchedItems(inventoryAlert, itemMap);
                             matchedItems.ifPresent((matched) -> {
-                                int change = alertType == InventoryAlertType.ITEM ? 0 : matchedItems.get().previousQuantity;
+                                int change = alertType == InventoryAlertType.ITEM ? 0 : matched.previousQuantity;
                                 if (inventoryAlert.getQuantityComparator().compare(matched.currentQuantity - change, inventoryAlert.getItemQuantity())) {
                                     this.fireAlert(inventoryAlert, matchedItems.get().groups.toArray(new String[0]));
                                 }
@@ -239,15 +256,19 @@ public class EventHandler {
         this.previousItemsTable = currentItems;
     }
 
-    private Optional<MatchedItem> getMatchedItems(InventoryAlert inventoryAlert, Map<String, Integer> allItems) {
+    private Optional<MatchedItem> getMatchedItems(InventoryAlert inventoryAlert, Map<Integer, InventoryItemData> allItems) {
         return allItems.entrySet().stream()
-            .map(itemWithCount -> {
-                String[] groups = this.matchPattern(inventoryAlert, itemWithCount.getKey());
+            .filter(itemData -> inventoryAlert.getInventoryMatchType() == InventoryAlert.InventoryMatchType.BOTH
+                || (inventoryAlert.getInventoryMatchType() == InventoryAlert.InventoryMatchType.NOTED && itemData.getValue().isNoted())
+                || (inventoryAlert.getInventoryMatchType() == InventoryAlert.InventoryMatchType.UN_NOTED && !itemData.getValue().isNoted()))
+            .map(itemData -> {
+                String[] groups = this.matchPattern(inventoryAlert, itemData.getValue().itemComposition.getName());
                 if (groups == null) return null;
+                var prevItem = this.previousItemsTable.get(itemData.getKey());
                 return new MatchedItem(
-                    new ArrayList<>(List.of(groups)),
-                    this.previousItemsTable.getOrDefault(itemWithCount.getKey(), 0),
-                    itemWithCount.getValue()
+                    new ArrayList<>(List.of(groups)), // so that is mutable
+                    prevItem == null ? 0 : prevItem.quantity,
+                    itemData.getValue().quantity
                 );
             })
             .filter(Objects::nonNull)
@@ -429,8 +450,18 @@ public class EventHandler {
 
     @AllArgsConstructor
     private static class MatchedItem {
-        List<String> groups;
-        int previousQuantity;
-        int currentQuantity;
+        private List<String> groups;
+        private int previousQuantity;
+        private int currentQuantity;
+    }
+
+    @Builder
+    private static class InventoryItemData {
+        private ItemComposition itemComposition;
+        private int quantity;
+
+        public boolean isNoted() {
+            return itemComposition.getNote() != -1;
+        }
     }
 }

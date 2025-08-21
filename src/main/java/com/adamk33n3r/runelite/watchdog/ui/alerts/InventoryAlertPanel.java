@@ -15,7 +15,8 @@ public class InventoryAlertPanel extends AlertPanel<InventoryAlert> {
     protected void build() {
         boolean isItemChange = this.alert.getInventoryAlertType() == InventoryAlert.InventoryAlertType.ITEM_CHANGE;
         this.addAlertDefaults()
-            .addSelect("Type", "Type", InventoryAlert.InventoryAlertType.class, this.alert.getInventoryAlertType(), (val) -> {
+            .addSelect("Match", "Match on noted or un-noted", InventoryAlert.InventoryMatchType.class, this.alert.getInventoryMatchType(), this.alert::setInventoryMatchType)
+            .addSelect("Type", "Type of inventory alert", InventoryAlert.InventoryAlertType.class, this.alert.getInventoryAlertType(), (val) -> {
                 this.alert.setInventoryAlertType(val);
                 this.rebuild();
             })
