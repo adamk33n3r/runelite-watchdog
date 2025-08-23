@@ -224,7 +224,7 @@ public class PanelUtils {
     public static FlatTextArea createTextField(String placeholder, String tooltip, String initialValue, Consumer<String> onChange) {
         FlatTextArea flatTextArea = new FlatTextArea(placeholder, true);
         flatTextArea.setText(initialValue);
-        flatTextArea.getTextArea().setToolTipText(tooltip);
+        flatTextArea.setToolTipText(tooltip);
         ((AbstractDocument) flatTextArea.getDocument()).setDocumentFilter(new LengthLimitFilter(4096));
         flatTextArea.getDocument().addDocumentListener((SimpleDocumentListener) ev -> {
             onChange.accept(flatTextArea.getText());

@@ -11,6 +11,7 @@ public enum TriggerType {
     ALERT_GROUP("Alert Group", "Group alerts together", AlertGroup.class),
     GAME_MESSAGE("Game Message", "Game messages sent in chat", ChatAlert.class),
     PLAYER_CHAT_MESSAGE("Player Chat Message", "Player messages sent in chat", PlayerChatAlert.class),
+    OVERHEAD_TEXT("Overhead Text", "Overhead text", OverheadTextAlert.class),
     STAT_CHANGED("Stat Changed", "Stat changes like boosts or drains", StatChangedAlert.class),
     XP_DROP("XP Drop", "Get an xp drop", XPDropAlert.class),
     SOUND_FIRED("Sound Fired", "When a sound effect plays", SoundFiredAlert.class),

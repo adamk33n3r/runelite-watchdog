@@ -107,6 +107,11 @@ public class FlatTextArea extends JPanel {
     }
 
     @Override
+    public void setToolTipText(String tooltipText) {
+        this.textArea.setToolTipText(tooltipText);
+    }
+
+    @Override
     public void addKeyListener(KeyListener keyListener)
     {
         this.textArea.addKeyListener(keyListener);
