@@ -22,4 +22,8 @@ public class MessagePickerButton {
     public static JButton createPlayerChatPickerButton(Consumer<String> callback, Supplier<PlayerChatType> typeFilter) {
         return PanelUtils.createActionButton(Icons.PICKER, Icons.PICKER_HOVER, "Pick a message from chat", (btn, mod) -> WatchdogPlugin.getInstance().getPanel().pickMessage(callback, (msg) -> typeFilter.get().isOfType(msg.getType())));
     }
+
+    public static JButton createOverheadTextPickerButton(Consumer<String> callback) {
+        return PanelUtils.createActionButton(Icons.PICKER, Icons.PICKER_HOVER, "Pick a recent overhead text", (btn, mod) -> WatchdogPlugin.getInstance().getPanel().pickOverheadText(callback));
+    }
 }

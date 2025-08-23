@@ -13,6 +13,7 @@ import com.adamk33n3r.runelite.watchdog.ui.panels.ToolsPanel;
 
 import net.runelite.api.Client;
 import net.runelite.api.MessageNode;
+import net.runelite.api.events.OverheadTextChanged;
 import net.runelite.client.events.NotificationFired;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.PluginPanel;
@@ -245,6 +246,8 @@ public class WatchdogPanel extends PluginPanel {
             return new AlertGroupPanel(this, (AlertGroup) alert);
         } else if (alert instanceof LocationAlert) {
             return new LocationAlertPanel(this, (LocationAlert) alert, this.client);
+        } else if (alert instanceof OverheadTextAlert) {
+            return new OverheadTextAlertPanel(this, (OverheadTextAlert) alert);
         }
 
         return null;
@@ -283,6 +286,16 @@ public class WatchdogPanel extends PluginPanel {
             SwingUtilities.getWindowAncestor(this),
             WatchdogPlugin.getInstance().getNotificationsQueue().stream()
                 .map(NotificationFired::getMessage),
+            callback
+        );
+        messagePickerDialog.setVisible(true);
+    }
+
+    public void pickOverheadText(Consumer<String> callback) {
+        MessagePickerDialog messagePickerDialog = new MessagePickerDialog(
+            SwingUtilities.getWindowAncestor(this),
+            WatchdogPlugin.getInstance().getOverheadTextQueue().stream()
+                .map(OverheadTextChanged::getOverheadText),
             callback
         );
         messagePickerDialog.setVisible(true);

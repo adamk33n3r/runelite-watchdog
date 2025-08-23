@@ -10,6 +10,7 @@ import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.ChatMessage;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.GameTick;
+import net.runelite.api.events.OverheadTextChanged;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
@@ -114,6 +115,9 @@ public class WatchdogPlugin extends Plugin {
 
     @Getter
     private final Queue<MessageNode> messageQueue = EvictingQueue.create(200);
+
+    @Getter
+    private final Queue<OverheadTextChanged> overheadTextQueue = EvictingQueue.create(200);
 
     @Getter
     private final Queue<NotificationFired> notificationsQueue = EvictingQueue.create(20);
@@ -231,6 +235,10 @@ public class WatchdogPlugin extends Plugin {
     @Subscribe
     private void onChatMessage(ChatMessage chatMessage) {
         this.messageQueue.offer(chatMessage.getMessageNode());
+    }
+    @Subscribe
+    private void onOverheadTextChanged(OverheadTextChanged overheadTextChanged) {
+        this.overheadTextQueue.offer(overheadTextChanged);
     }
     @Subscribe
     private void onNotificationFired(NotificationFired notificationFired) {

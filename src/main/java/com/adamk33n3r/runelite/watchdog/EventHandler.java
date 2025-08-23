@@ -28,6 +28,8 @@ import java.awt.TrayIcon;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -384,6 +386,18 @@ public class EventHandler {
     //endregion
 
     @Subscribe
+    private void onOverheadTextChanged(OverheadTextChanged overheadTextChanged) {
+        this.alertManager.getAllEnabledAlertsOfType(OverheadTextAlert.class)
+            .filter(alert -> alert.getNpcName().isEmpty() || this.matchPattern(alert::getNpcName, alert::isNpcRegexEnabled, overheadTextChanged.getActor().getName()) != null)
+            .forEach(alert -> {
+                String[] groups = this.matchPattern(alert, overheadTextChanged.getOverheadText());
+                if (groups == null) return;
+
+                this.fireAlert(alert, groups);
+            });
+    }
+
+    @Subscribe
     private void onGameTick(GameTick gameTick) {
         // Location alerts
         var world = this.client.getLocalPlayer().getWorldLocation();
@@ -407,9 +421,13 @@ public class EventHandler {
         this.previousLocation = worldLocation;
     }
 
-    private String[] matchPattern(RegexMatcher regexMatcher, String input) {
-        String regex = regexMatcher.isRegexEnabled() ? regexMatcher.getPattern() : Util.createRegexFromGlob(regexMatcher.getPattern());
-        Matcher matcher = Pattern.compile(regex, regexMatcher.isRegexEnabled() ? 0 : Pattern.CASE_INSENSITIVE).matcher(input);
+    private String[] matchPattern(
+        Supplier<String> pattern,
+        Supplier<Boolean> regexEnabled,
+        String input
+    ) {
+        String regex = regexEnabled.get() ? pattern.get() : Util.createRegexFromGlob(pattern.get());
+        Matcher matcher = Pattern.compile(regex, regexEnabled.get() ? 0 : Pattern.CASE_INSENSITIVE).matcher(input);
         if (!matcher.matches()) return null;
 
         String[] groups = new String[matcher.groupCount()];
@@ -417,6 +435,10 @@ public class EventHandler {
             groups[i] = matcher.group(i+1);
         }
         return groups;
+    }
+
+    private String[] matchPattern(RegexMatcher regexMatcher, String input) {
+        return this.matchPattern(regexMatcher::getPattern, regexMatcher::isRegexEnabled, input);
     }
 
     private void fireAlert(Alert alert, String triggerValue) {

@@ -274,6 +274,26 @@ public abstract class AlertPanel<T extends Alert> extends PluginPanel {
     }
 
     public AlertPanel<T> addRegexMatcher(RegexMatcher regexMatcher, String placeholder, String tooltip, JComponent suffixAppend) {
+        return this.addRegexMatcher(
+            regexMatcher::getPattern,
+            regexMatcher::setPattern,
+            regexMatcher::isRegexEnabled,
+            regexMatcher::setRegexEnabled,
+            placeholder,
+            tooltip,
+            suffixAppend
+        );
+    }
+
+    public AlertPanel<T> addRegexMatcher(
+        Supplier<String> pattern,
+        Consumer<String> savePattern,
+        Supplier<Boolean> regexEnabled,
+        Consumer<Boolean> saveRegexEnabled,
+        String placeholder,
+        String tooltip,
+        JComponent suffixAppend
+    ) {
         JPanel btnGroup = new JPanel(new GridLayout(1, 0, 5, 5));
         JButton regex = PanelUtils.createToggleActionButton(
             Icons.REGEX_SELECTED,
@@ -282,9 +302,9 @@ public abstract class AlertPanel<T extends Alert> extends PluginPanel {
             Icons.REGEX_HOVER,
             "Disable regex",
             "Enable regex",
-            regexMatcher.isRegexEnabled(),
+            regexEnabled.get(),
             (btn, modifiers) -> {
-                regexMatcher.setRegexEnabled(btn.isSelected());
+                saveRegexEnabled.accept(btn.isSelected());
                 this.alertManager.saveAlerts();
             }
         );
@@ -293,10 +313,10 @@ public abstract class AlertPanel<T extends Alert> extends PluginPanel {
             btnGroup.add(suffixAppend);
         }
         return this.addInputGroupWithSuffix(
-            PanelUtils.createTextArea(placeholder, tooltip, regexMatcher.getPattern(), msg -> {
-                if (!PanelUtils.isPatternValid(this, msg, regexMatcher.isRegexEnabled()))
+            PanelUtils.createTextArea(placeholder, tooltip, pattern.get(), msg -> {
+                if (!PanelUtils.isPatternValid(this, msg, regexEnabled.get()))
                     return;
-                regexMatcher.setPattern(msg);
+                savePattern.accept(msg);
                 this.alertManager.saveAlerts();
             }),
             btnGroup

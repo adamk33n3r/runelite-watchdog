@@ -77,6 +77,7 @@ public class AlertManager {
             .recognizeSubtypes()
             .registerSubtype(ChatAlert.class)
             .registerSubtype(PlayerChatAlert.class)
+            .registerSubtype(OverheadTextAlert.class)
             .registerSubtype(NotificationFiredAlert.class)
             .registerSubtype(StatDrainAlert.class)
             .registerSubtype(StatChangedAlert.class)
