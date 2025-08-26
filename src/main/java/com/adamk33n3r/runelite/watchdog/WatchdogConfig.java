@@ -10,6 +10,8 @@ import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.util.ColorUtil;
 
 import java.awt.Color;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
 
 @ConfigGroup(WatchdogConfig.CONFIG_GROUP_NAME)
 public interface WatchdogConfig extends Config {
@@ -74,6 +76,12 @@ public interface WatchdogConfig extends Config {
 
     // Request Focus
     String DEFAULT_FORCE_FOCUS = "defaultForceFocus";
+
+    // Hotkeys
+    String CLEAR_ALL_HOTKEY = "clearAllHotkey";
+    String STOP_ALL_SOUNDS_HOTKEY = "stopAllSoundsHotkey";
+    String DISMISS_ALL_OVERLAYS_HOTKEY = "dismissAllOverlaysHotkey";
+    String DISMISS_ALL_SCREEN_MARKERS_HOTKEY = "dismissAllScreenMarkersHotkey";
 
     //region Hidden
     @ConfigItem(
@@ -464,5 +472,47 @@ public interface WatchdogConfig extends Config {
         section = requestFocusSection
     )
     default boolean defaultRequestFocusForce() { return false; }
+    //endregion
+
+    //region Hotkeys
+    @ConfigSection(
+        name = "Hotkeys",
+        description = "The hotkeys to use for various actions",
+        position = 9,
+        closedByDefault = true
+    )
+    String hotkeysSection = "hotkeysSection";
+
+    @ConfigItem(
+        keyName = CLEAR_ALL_HOTKEY,
+        name = "Clear All",
+        description = "The hotkey to clear all clearable alerts",
+        section = hotkeysSection
+    )
+    default Keybind clearAllHotkey() { return new Keybind(KeyEvent.VK_W, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK); }
+
+    @ConfigItem(
+        keyName = STOP_ALL_SOUNDS_HOTKEY,
+        name = "Stop All Queued Sounds",
+        description = "The hotkey to stop all queued sounds",
+        section = hotkeysSection
+    )
+    default Keybind stopAllQueuedSoundsHotkey() { return new Keybind(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK); }
+
+    @ConfigItem(
+        keyName = DISMISS_ALL_OVERLAYS_HOTKEY,
+        name = "Dismiss All Overlays",
+        description = "The hotkey to dismiss all overlays",
+        section = hotkeysSection
+    )
+    default Keybind dismissAllOverlaysHotkey() { return new Keybind(KeyEvent.VK_O, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK); }
+
+    @ConfigItem(
+        keyName = DISMISS_ALL_SCREEN_MARKERS_HOTKEY,
+        name = "Dismiss All Screen Markers",
+        description = "The hotkey to dismiss all screen markers",
+        section = hotkeysSection
+    )
+    default Keybind dismissAllScreenMarkersHotkey() { return new Keybind(KeyEvent.VK_M, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK); }
     //endregion
 }

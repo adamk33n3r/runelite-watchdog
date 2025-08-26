@@ -19,6 +19,7 @@ import net.runelite.client.events.NotificationFired;
 import net.runelite.client.events.OverlayMenuClicked;
 import net.runelite.client.events.ProfileChanged;
 import net.runelite.client.game.ItemManager;
+import net.runelite.client.input.KeyManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.ClientToolbar;
@@ -33,11 +34,13 @@ import com.google.inject.Provides;
 import com.google.inject.name.Names;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import net.runelite.client.util.HotkeyListener;
 import okhttp3.OkHttpClient;
 
 import javax.inject.Inject;
 import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
+import java.util.List;
 import java.util.Properties;
 import java.util.Queue;
 
@@ -71,6 +74,9 @@ public class WatchdogPlugin extends Plugin {
     @Getter
     @Inject
     private PopupManager popupManager;
+
+    @Inject
+    private KeyManager keyManager;
 
     @Inject
     private Client client;
@@ -125,6 +131,35 @@ public class WatchdogPlugin extends Plugin {
     @Getter
     private boolean isInBannedArea = false;
 
+    private final List<HotkeyListener> hotkeyListeners = List.of(
+        new HotkeyListener(() -> config.clearAllHotkey()) {
+            @Override
+            public void hotkeyPressed() {
+                soundPlayer.stop();
+                notificationOverlay.clear();
+                screenMarkerUtil.removeAllMarkers();
+            }
+        },
+        new HotkeyListener(() -> config.stopAllQueuedSoundsHotkey()) {
+            @Override
+            public void hotkeyPressed() {
+                soundPlayer.stop();
+            }
+        },
+        new HotkeyListener(() -> config.dismissAllOverlaysHotkey()) {
+            @Override
+            public void hotkeyPressed() {
+                notificationOverlay.clear();
+            }
+        },
+        new HotkeyListener(() -> config.dismissAllScreenMarkersHotkey()) {
+            @Override
+            public void hotkeyPressed() {
+                screenMarkerUtil.removeAllMarkers();
+            }
+        }
+    );
+
     public WatchdogPlugin() {
         instance = this;
     }
@@ -154,6 +189,10 @@ public class WatchdogPlugin extends Plugin {
         this.soundPlayer.startUp();
 
         ToolTipManager.sharedInstance().setDismissDelay(Integer.MAX_VALUE);
+
+        for (var hotkeyListener : this.hotkeyListeners) {
+            this.keyManager.registerKeyListener(hotkeyListener);
+        }
     }
 
     private void rebuildSidePanelButtons() {
@@ -193,6 +232,9 @@ public class WatchdogPlugin extends Plugin {
         this.overlayManager.remove(this.notificationOverlay);
         this.soundPlayer.shutDown();
         this.screenMarkerUtil.shutDown();
+        for (var hotkeyListener : this.hotkeyListeners) {
+            this.keyManager.unregisterKeyListener(hotkeyListener);
+        }
     }
 
     public void openConfiguration() {

@@ -54,7 +54,7 @@ public class ToolsPanel extends PluginPanel {
             this.muxer.get().pushState(this.historyPanelProvider.get());
         }));
 
-        tools.add(PanelUtils.createButton("Stop All Sounds", "Stop All Sounds", (btn, mods) -> {
+        tools.add(PanelUtils.createButton("Stop All Queued Sounds", "Stop All Queued Sounds", (btn, mods) -> {
             WatchdogPlugin.getInstance().getSoundPlayer().stop();
         }));
         tools.add(PanelUtils.createButton("Dismiss All Overlays", "Dismiss All Overlays", (btn, mods) -> {
