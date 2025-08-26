@@ -30,6 +30,7 @@ public abstract class AlertPanel<T extends Alert> extends PluginPanel {
     private final JPanel controlContainer;
     private final JPanel centerContainer;
     protected final WatchdogPanel watchdogPanel;
+    protected final WatchdogPlugin plugin;
     protected final MultiplexingPluginPanel muxer;
     protected final T alert;
 
@@ -41,7 +42,8 @@ public abstract class AlertPanel<T extends Alert> extends PluginPanel {
         this.watchdogPanel = watchdogPanel;
         this.muxer = watchdogPanel.getMuxer();
         this.alert = alert;
-        this.alertManager = WatchdogPlugin.getInstance().getAlertManager();
+        this.plugin = WatchdogPlugin.getInstance();
+        this.alertManager = plugin.getAlertManager();
 
         this.setLayout(new BorderLayout());
 
@@ -86,8 +88,7 @@ public abstract class AlertPanel<T extends Alert> extends PluginPanel {
                 (btn, modifiers) -> {
                     String[] triggerValues = {"1", "2", "3", "4", "5"};
                     this.watchdogPanel.getHistoryPanelProvider().get().addEntry(alert, triggerValues);
-                    new AlertProcessor(alert, triggerValues, true).start();
-//                    alert.getNotifications().forEach(notification -> notification.fireForced(triggerValues));
+                    this.plugin.processAlert(alert, triggerValues, true);
                 }
             );
             rightButtons.add(testAlert);

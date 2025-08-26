@@ -1,5 +1,6 @@
 package com.adamk33n3r.runelite.watchdog;
 
+import com.adamk33n3r.runelite.watchdog.alerts.Alert;
 import com.adamk33n3r.runelite.watchdog.ui.notifications.screenmarker.ScreenMarkerUtil;
 
 import net.runelite.api.Client;
@@ -40,6 +41,7 @@ import okhttp3.OkHttpClient;
 import javax.inject.Inject;
 import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.Queue;
@@ -128,6 +130,8 @@ public class WatchdogPlugin extends Plugin {
     @Getter
     private final Queue<NotificationFired> notificationsQueue = EvictingQueue.create(20);
 
+    private final List<AlertProcessor> alertProcessors = new ArrayList<>();
+
     @Getter
     private boolean isInBannedArea = false;
 
@@ -135,9 +139,16 @@ public class WatchdogPlugin extends Plugin {
         new HotkeyListener(() -> config.clearAllHotkey()) {
             @Override
             public void hotkeyPressed() {
+                stopAllAlerts();
                 soundPlayer.stop();
                 notificationOverlay.clear();
                 screenMarkerUtil.removeAllMarkers();
+            }
+        },
+        new HotkeyListener(() -> config.stopAllProcessingAlertsHotkey()) {
+            @Override
+            public void hotkeyPressed() {
+                stopAllAlerts();
             }
         },
         new HotkeyListener(() -> config.stopAllQueuedSoundsHotkey()) {
@@ -240,6 +251,20 @@ public class WatchdogPlugin extends Plugin {
     public void openConfiguration() {
         // We don't have access to the ConfigPlugin so let's just emulate an overlay click
         this.eventBus.post(new OverlayMenuClicked(new OverlayMenuEntry(RUNELITE_OVERLAY_CONFIG, null, null), this.notificationOverlay));
+    }
+
+    public void processAlert(Alert alert, String[] triggerValues, boolean forceFire) {
+        var alertProcessor = new AlertProcessor(alert, triggerValues, true, this.alertProcessors::remove);
+        this.alertProcessors.add(alertProcessor);
+        alertProcessor.start();
+    }
+
+    public void stopAllAlerts() {
+        for (var alertProcessor : alertProcessors) {
+            alertProcessor.interrupt();
+        }
+        // Just in case it doesn't call the onFinish callback
+        this.alertProcessors.clear();
     }
 
     @Subscribe

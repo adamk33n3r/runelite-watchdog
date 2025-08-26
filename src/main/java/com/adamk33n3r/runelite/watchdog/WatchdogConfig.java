@@ -79,6 +79,7 @@ public interface WatchdogConfig extends Config {
 
     // Hotkeys
     String CLEAR_ALL_HOTKEY = "clearAllHotkey";
+    String STOP_ALL_PROCESSING_ALERTS_HOTKEY = "stopAllProcessingAlertsHotkey";
     String STOP_ALL_SOUNDS_HOTKEY = "stopAllSoundsHotkey";
     String DISMISS_ALL_OVERLAYS_HOTKEY = "dismissAllOverlaysHotkey";
     String DISMISS_ALL_SCREEN_MARKERS_HOTKEY = "dismissAllScreenMarkersHotkey";
@@ -486,10 +487,18 @@ public interface WatchdogConfig extends Config {
     @ConfigItem(
         keyName = CLEAR_ALL_HOTKEY,
         name = "Clear All",
-        description = "The hotkey to clear all clearable alerts",
+        description = "The hotkey to clear all clearable alerts and notifications",
         section = hotkeysSection
     )
     default Keybind clearAllHotkey() { return new Keybind(KeyEvent.VK_W, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK); }
+
+    @ConfigItem(
+        keyName = STOP_ALL_PROCESSING_ALERTS_HOTKEY,
+        name = "Stop All Processing Alerts",
+        description = "The hotkey to stop all processing alerts",
+        section = hotkeysSection
+    )
+    default Keybind stopAllProcessingAlertsHotkey() { return Keybind.NOT_SET; }
 
     @ConfigItem(
         keyName = STOP_ALL_SOUNDS_HOTKEY,
@@ -497,7 +506,7 @@ public interface WatchdogConfig extends Config {
         description = "The hotkey to stop all queued sounds",
         section = hotkeysSection
     )
-    default Keybind stopAllQueuedSoundsHotkey() { return new Keybind(KeyEvent.VK_S, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK); }
+    default Keybind stopAllQueuedSoundsHotkey() { return Keybind.NOT_SET; }
 
     @ConfigItem(
         keyName = DISMISS_ALL_OVERLAYS_HOTKEY,
@@ -505,7 +514,7 @@ public interface WatchdogConfig extends Config {
         description = "The hotkey to dismiss all overlays",
         section = hotkeysSection
     )
-    default Keybind dismissAllOverlaysHotkey() { return new Keybind(KeyEvent.VK_O, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK); }
+    default Keybind dismissAllOverlaysHotkey() { return Keybind.NOT_SET; }
 
     @ConfigItem(
         keyName = DISMISS_ALL_SCREEN_MARKERS_HOTKEY,
@@ -513,6 +522,6 @@ public interface WatchdogConfig extends Config {
         description = "The hotkey to dismiss all screen markers",
         section = hotkeysSection
     )
-    default Keybind dismissAllScreenMarkersHotkey() { return new Keybind(KeyEvent.VK_M, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK); }
+    default Keybind dismissAllScreenMarkersHotkey() { return Keybind.NOT_SET; }
     //endregion
 }

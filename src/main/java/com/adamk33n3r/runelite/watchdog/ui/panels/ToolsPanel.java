@@ -54,6 +54,9 @@ public class ToolsPanel extends PluginPanel {
             this.muxer.get().pushState(this.historyPanelProvider.get());
         }));
 
+        tools.add(PanelUtils.createButton("Clear All Processing Alerts", "Clear All Processing Alerts", (btn, mods) -> {
+            WatchdogPlugin.getInstance().stopAllAlerts();
+        }));
         tools.add(PanelUtils.createButton("Stop All Queued Sounds", "Stop All Queued Sounds", (btn, mods) -> {
             WatchdogPlugin.getInstance().getSoundPlayer().stop();
         }));
