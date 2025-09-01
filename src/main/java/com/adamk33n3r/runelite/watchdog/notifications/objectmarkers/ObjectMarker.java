@@ -3,6 +3,7 @@ package com.adamk33n3r.runelite.watchdog.notifications.objectmarkers;
 import com.adamk33n3r.runelite.watchdog.WatchdogConfig;
 import com.adamk33n3r.runelite.watchdog.notifications.Notification;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import net.runelite.api.ObjectComposition;
@@ -15,6 +16,7 @@ import java.awt.*;
 @Getter
 @Setter
 @Accessors(chain = true)
+@NoArgsConstructor
 public class ObjectMarker extends Notification {
     static final int HF_HULL = 0x1;
     static final int HF_OUTLINE = 0x2;
@@ -36,8 +38,6 @@ public class ObjectMarker extends Notification {
     private int outlineFeather;
 
     @Inject
-    private transient ClientThread clientThread;
-    @Inject
     private transient ObjectMarkerManager objectMarkerManager;
 
     private transient TileObject tileObject;
@@ -51,10 +51,10 @@ public class ObjectMarker extends Notification {
 
     @Override
     protected void fireImpl(String[] triggerValues) {
-        this.clientThread.invoke(() -> {
-            this.objectMarkerManager.hideObjectMarker(this);
-            this.objectMarkerManager.showObjectMarker(this);
-        });
+        if (this.objectPoint == null) {
+            return;
+        }
+        this.objectMarkerManager.showObjectMarker(this);
     }
 
     @Override

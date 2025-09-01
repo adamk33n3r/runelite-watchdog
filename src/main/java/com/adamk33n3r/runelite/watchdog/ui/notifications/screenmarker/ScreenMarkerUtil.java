@@ -18,6 +18,7 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Singleton
 public class ScreenMarkerUtil {
@@ -173,8 +174,8 @@ public class ScreenMarkerUtil {
     }
 
     public void removeScreenMarkerById(String id) {
-        this.screenMarkers.removeIf(overlay -> overlay.getMarker().getId().equals(id));
-        this.overlayManager.removeIf(overlay -> overlay instanceof ScreenMarkerOverlay && ((ScreenMarkerOverlay) overlay).getMarker().getId().equals(id));
+        this.screenMarkers.removeIf(overlay -> Objects.equals(overlay.getMarker().getId(), id));
+        this.overlayManager.removeIf(overlay -> overlay instanceof ScreenMarkerOverlay && Objects.equals(((ScreenMarkerOverlay) overlay).getMarker().getId(), id));
     }
 
     public void removeAllMarkers() {

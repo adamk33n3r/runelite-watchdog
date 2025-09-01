@@ -177,7 +177,7 @@ public class WatchdogPlugin extends Plugin {
                 screenMarkerUtil.removeAllMarkers();
             }
         },
-        new HotkeyListener(() -> config.dismissAllScreenMarkersHotkey()) {
+        new HotkeyListener(() -> config.dismissAllObjectMarkersHotkey()) {
             @Override
             public void hotkeyPressed() {
                 objectMarkerManager.removeAllMarkers();

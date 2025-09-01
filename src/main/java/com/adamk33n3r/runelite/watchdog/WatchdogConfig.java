@@ -510,6 +510,7 @@ public interface WatchdogConfig extends Config {
         section = markersSection,
         position = 1
     )
+    @Alpha
     default Color defaultScreenMarkerBorderColor() { return Color.GREEN; }
 
     @ConfigItem(
@@ -519,6 +520,7 @@ public interface WatchdogConfig extends Config {
         section = markersSection,
         position = 2
     )
+    @Alpha
     default Color defaultScreenMarkerFillColor() { return null; }
 
     @ConfigItem(
@@ -556,6 +558,7 @@ public interface WatchdogConfig extends Config {
         section = markersSection,
         position = 6
     )
+    @Alpha
     default Color defaultObjectMarkerBorderColor() { return Color.YELLOW; }
 
     @ConfigItem(
@@ -565,6 +568,7 @@ public interface WatchdogConfig extends Config {
         section = markersSection,
         position = 7
     )
+    @Alpha
     default Color defaultObjectMarkerFillColor() { return null; }
 
     @ConfigItem(
@@ -610,7 +614,6 @@ public interface WatchdogConfig extends Config {
         section = markersSection,
         position = 12
     )
-    @Range()
     default double defaultObjectMarkerBorderThickness() { return 2.0d; }
 
     @ConfigItem(

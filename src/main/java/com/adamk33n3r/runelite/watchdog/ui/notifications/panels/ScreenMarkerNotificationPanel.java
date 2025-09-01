@@ -144,16 +144,16 @@ public class ScreenMarkerNotificationPanel extends NotificationPanel {
         sub.setBackground(ColorScheme.DARKER_GRAY_COLOR);
         this.settings.add(sub);
 
-        FlatTextArea stickyId = new FlatTextArea("ID to use with Dismiss Screen Marker...", true);
-        stickyId.setText(notification.getId());
-        ((AbstractDocument) stickyId.getDocument()).setDocumentFilter(new LengthLimitFilter(200));
-        stickyId.getDocument().addDocumentListener((SimpleDocumentListener) ev -> {
-            notification.setId(stickyId.getText());
+        FlatTextArea stickyIdField = new FlatTextArea("ID to use with Dismiss Screen Marker...", true);
+        stickyIdField.setText(notification.getId());
+        ((AbstractDocument) stickyIdField.getDocument()).setDocumentFilter(new LengthLimitFilter(200));
+        stickyIdField.getDocument().addDocumentListener((SimpleDocumentListener) ev -> {
+            notification.setId(stickyIdField.getText());
         });
-        stickyId.getTextArea().addFocusListener(new FocusListener() {
+        stickyIdField.getTextArea().addFocusListener(new FocusListener() {
             @Override
             public void focusGained(FocusEvent e) {
-                stickyId.getTextArea().selectAll();
+                stickyIdField.getTextArea().selectAll();
             }
 
             @Override
@@ -161,7 +161,7 @@ public class ScreenMarkerNotificationPanel extends NotificationPanel {
                 onChangeListener.run();
             }
         });
-        this.stickyId = stickyId;
+        this.stickyId = stickyIdField;
 
         if (notification.isSticky()) {
             this.settings.add(this.stickyId);

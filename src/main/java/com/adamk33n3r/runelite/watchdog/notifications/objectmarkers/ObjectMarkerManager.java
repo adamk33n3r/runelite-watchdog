@@ -61,35 +61,41 @@ public class ObjectMarkerManager {
     }
 
     public void showObjectMarker(ObjectMarker objectMarker) {
-        log.debug("showObjectMarker: {}", objectMarker);
-        ObjectPoint objectPoint = objectMarker.getObjectPoint();
-        TileObject tileObject = this.tileObjectsLoaded.stream().filter(obj -> {
-            WorldPoint worldPoint = WorldPoint.fromLocalInstance(this.client, obj.getLocalLocation());
-            return objectIdEquals(obj, objectPoint.getId()) &&
-                worldPoint.getRegionX() == objectPoint.getRegionX() &&
-                worldPoint.getRegionY() == objectPoint.getRegionY() &&
-                worldPoint.getPlane() == objectPoint.getZ();
-        }).findFirst().orElse(null);
-        if (tileObject == null) {
-            log.debug("ObjectMarker {} could not find tile object", objectMarker);
-            return;
-        }
-        objectMarker.setTileObject(tileObject);
-        objectMarker.setComposition(this.client.getObjectDefinition(objectPoint.getId()));
-        this.objects.add(new ObjectMarkerData(objectMarker));
-        log.debug("showObjectMarker: {}", this.objects.size());
+        this.clientThread.invokeLater(() -> {
+            log.debug("showObjectMarker: {}", objectMarker);
+            ObjectPoint objectPoint = objectMarker.getObjectPoint();
+            if (objectPoint == null) {
+                log.debug("ObjectMarker {} has no ObjectPoint; ignoring show.", objectMarker);
+                return;
+            }
+            TileObject tileObject = this.tileObjectsLoaded.stream().filter(obj -> {
+                WorldPoint worldPoint = WorldPoint.fromLocalInstance(this.client, obj.getLocalLocation());
+                return objectIdEquals(obj, objectPoint.getId()) &&
+                    worldPoint.getRegionX() == objectPoint.getRegionX() &&
+                    worldPoint.getRegionY() == objectPoint.getRegionY() &&
+                    worldPoint.getPlane() == objectPoint.getPlane();
+            }).findFirst().orElse(null);
+            if (tileObject == null) {
+                log.debug("ObjectMarker {} could not find tile object", objectMarker);
+                return;
+            }
+            objectMarker.setTileObject(tileObject);
+            objectMarker.setComposition(this.client.getObjectDefinition(objectPoint.getId()));
+            this.objects.add(new ObjectMarkerData(objectMarker));
+        });
     }
 
     public void hideObjectMarker(ObjectMarker objectMarker) {
-        this.objects.removeIf(objData -> objData.getMarker() == objectMarker);
+        System.out.println("hiding object marker");
+        this.clientThread.invokeLater(() -> this.objects.removeIf(objData -> objData.getMarker() == objectMarker));
     }
 
     public void hideObjectMarkerById(String id) {
-        this.objects.removeIf(objData -> objData.getMarker().getId().equals(id));
+        this.clientThread.invokeLater(() -> this.objects.removeIf(objData -> Objects.equals(objData.getMarker().getId(), id)));
     }
 
     public void removeAllMarkers() {
-        this.objects.clear();
+        this.clientThread.invokeLater(this.objects::clear);
     }
     
     @Subscribe
@@ -183,9 +189,12 @@ public class ObjectMarkerManager {
     {
         Scene scene = client.getTopLevelWorldView().getScene();
         Tile[][][] tiles = scene.getTiles();
+        final int size = Constants.SCENE_SIZE;
+        if (x < 0 || y < 0 || x >= size || y >= size) {
+            return null;
+        }
         final Tile tile = tiles[z][x][y];
-        if (tile == null)
-        {
+        if (tile == null) {
             return null;
         }
 
@@ -269,17 +278,8 @@ public class ObjectMarkerManager {
             worldPoint.getPlane()));
 
         objects.removeIf(o -> o.getMarker().getTileObject() == tileObject);
-//        objects.add(new ColorTileObject(tileObject,
-//            client.getObjectDefinition(tileObject.getId()),
-//            name,
-//            this.editingObjectMarker.getBorderColor(),
-//            this.editingObjectMarker.getFillColor(),
-//            this.editingObjectMarker.getBorderWidth(),
-//            this.editingObjectMarker.getOutlineFeather(),
-//            (byte) 0));
         this.editingObjectMarker.setTileObject(tileObject);
         this.editingObjectMarker.setComposition(objectComposition);
-//        this.objects.add(new ObjectMarkerData(this.editingObjectMarker));
     }
 
     private static Predicate<ObjectMarker> findObjectPredicate(ObjectComposition objectComposition, TileObject object, WorldPoint worldPoint)
@@ -293,7 +293,7 @@ public class ObjectMarkerManager {
             return ((op.getId() == -1 || op.getId() == object.getId()) || op.getName().equals(objectComposition.getName()))
                 && op.getRegionX() == worldPoint.getRegionX()
                 && op.getRegionY() == worldPoint.getRegionY()
-                && op.getZ() == worldPoint.getPlane();
+                && op.getPlane() == worldPoint.getPlane();
         };
     }
 

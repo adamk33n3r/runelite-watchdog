@@ -283,10 +283,12 @@ public class PanelUtils {
     public static JSpinner createSpinnerDouble(double initialValue, double min, double max, double step, Consumer<Double> onChange) {
         double value = Math.min(Math.max(min, initialValue), max);
         JSpinner spinner = new JSpinner(new SpinnerNumberModel(value, min, max, step));
+        JSpinner.NumberEditor editor = new JSpinner.NumberEditor(spinner, "#0.##");
+        spinner.setEditor(editor);
         spinner.addChangeListener(e -> {
             onChange.accept((Double) spinner.getValue());
         });
-        JFormattedTextField spinnerText = (JFormattedTextField) spinner.getEditor().getComponent(0);
+        JFormattedTextField spinnerText = editor.getTextField();
         spinnerText.setSelectedTextColor(Color.WHITE);
         spinnerText.setSelectionColor(ColorScheme.BRAND_ORANGE_TRANSPARENT);
 

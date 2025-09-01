@@ -27,17 +27,17 @@ public class ObjectMarkerNotificationPanel extends NotificationPanel {
         super(notification, parentPanel, onChangeListener, onRemove);
 
         this.setMarkerButton = PanelUtils.createButton("Set Marker", "Set Marker", (btn, modifiers) -> {
-            ObjectMarkerManager screenMarkerUtil = WatchdogPlugin.getInstance().getObjectMarkerManager();
+            ObjectMarkerManager objectMarkerManager = WatchdogPlugin.getInstance().getObjectMarkerManager();
             // Done
-            if (screenMarkerUtil.isInObjectMarkerMode()) {
+            if (objectMarkerManager.isInObjectMarkerMode()) {
                 this.setMarkerButton.setText("Set Marker");
                 this.setMarkerButton.setToolTipText("Set Marker");
-                screenMarkerUtil.turnOffObjectMarkerMode();
+                objectMarkerManager.turnOffObjectMarkerMode();
             // Start
             } else {
                 this.setMarkerButton.setText("Finish");
                 this.setMarkerButton.setToolTipText("Finish");
-                screenMarkerUtil.turnOnObjectMarkerMode(notification);
+                objectMarkerManager.turnOnObjectMarkerMode(notification);
             }
         });
         this.settings.add(this.setMarkerButton);
@@ -98,7 +98,7 @@ public class ObjectMarkerNotificationPanel extends NotificationPanel {
         JSpinner thickness = PanelUtils.createSpinnerDouble(
             notification.getBorderWidth(),
             0,
-            Integer.MAX_VALUE,
+            200,
             0.1d,
             val -> {
                 notification.setBorderWidth(val);
@@ -119,7 +119,6 @@ public class ObjectMarkerNotificationPanel extends NotificationPanel {
 
         JCheckBox sticky = PanelUtils.createCheckbox("Sticky", "Set the notification to not expire", notification.isSticky(), val -> {
             notification.setSticky(val);
-            System.out.println("sticky: " + val);
             if (val) {
                 stickySub.remove(this.displayTime);
                 stickySub.add(this.stickyId);
@@ -139,7 +138,7 @@ public class ObjectMarkerNotificationPanel extends NotificationPanel {
         });
         this.displayTime = PanelUtils.createIconComponent(Icons.CLOCK, "Time to display the marker in seconds.", displayTime);
 
-        FlatTextArea stickyId = new FlatTextArea("ID to use with Dismiss Overlay...", true);
+        FlatTextArea stickyId = new FlatTextArea("ID to use with Dismiss Object Marker...", true);
         stickyId.setText(notification.getId());
         ((AbstractDocument) stickyId.getDocument()).setDocumentFilter(new LengthLimitFilter(200));
         stickyId.getDocument().addDocumentListener((SimpleDocumentListener) ev -> {
