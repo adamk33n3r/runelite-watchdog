@@ -72,7 +72,7 @@ public abstract class NotificationPanel extends JPanel {
         NotificationType notificationType = notification.getType();
         JLabel nameLabel = new JLabel(notificationType.getName());
         nameLabel.setToolTipText(notificationType.getTooltip());
-        nameWrapper.add(nameLabel, BorderLayout.WEST);
+        nameWrapper.add(nameLabel, BorderLayout.CENTER);
 
         MouseDragEventForwarder mouseDragEventForwarder = new MouseDragEventForwarder(this.parentPanel.getNotificationContainer());
         nameWrapper.addMouseListener(mouseDragEventForwarder);

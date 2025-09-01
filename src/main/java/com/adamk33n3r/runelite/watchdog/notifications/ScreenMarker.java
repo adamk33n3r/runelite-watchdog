@@ -34,6 +34,7 @@ public class ScreenMarker extends Notification {
             true,
             false
         );
+        this.setDefaults();
     }
 
     public ScreenMarker setScreenMarkerProperties(String name, Color color, Color fill, int borderThickness) {
@@ -49,5 +50,16 @@ public class ScreenMarker extends Notification {
     @Override
     protected void fireImpl(String[] triggerValues) {
         WatchdogPlugin.getInstance().getScreenMarkerUtil().addScreenMarker(this);
+    }
+
+    @Override
+    public void setDefaults() {
+        super.setDefaults();
+
+        this.screenMarker.setColor(this.watchdogConfig.defaultScreenMarkerBorderColor());
+        this.screenMarker.setFill(this.watchdogConfig.defaultScreenMarkerFillColor());
+        this.screenMarker.setBorderThickness(this.watchdogConfig.defaultScreenMarkerBorderThickness());
+        this.displayTime = this.watchdogConfig.defaultScreenMarkerDisplayTime();
+        this.sticky = this.watchdogConfig.defaultScreenMarkerSticky();
     }
 }

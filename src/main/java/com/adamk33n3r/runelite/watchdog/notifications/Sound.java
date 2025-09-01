@@ -23,8 +23,7 @@ public class Sound extends AudioNotification {
     @Inject
     public Sound(WatchdogConfig config) {
         super(config);
-        this.gain = config.defaultSoundVolume();
-        this.path = config.defaultSoundPath();
+        this.setDefaults();
     }
 
     @Override
@@ -37,5 +36,6 @@ public class Sound extends AudioNotification {
     public void setDefaults() {
         super.setDefaults();
         this.setGain(this.watchdogConfig.defaultSoundVolume());
+        this.setPath(this.watchdogConfig.defaultSoundPath());
     }
 }

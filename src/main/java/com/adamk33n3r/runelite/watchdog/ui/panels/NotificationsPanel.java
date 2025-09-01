@@ -4,6 +4,7 @@ import com.adamk33n3r.runelite.watchdog.*;
 import com.adamk33n3r.runelite.watchdog.alerts.Alert;
 import com.adamk33n3r.runelite.watchdog.notifications.*;
 import com.adamk33n3r.runelite.watchdog.notifications.Popup;
+import com.adamk33n3r.runelite.watchdog.notifications.objectmarkers.ObjectMarker;
 import com.adamk33n3r.runelite.watchdog.ui.Icons;
 import com.adamk33n3r.runelite.watchdog.ui.StretchedStackedLayout;
 import com.adamk33n3r.runelite.watchdog.ui.dropdownbutton.DropDownButtonFactory;
@@ -168,8 +169,12 @@ public class NotificationsPanel extends JPanel {
             notificationPanel = new DismissOverlayNotificationPanel((DismissOverlay) notification, this, this.alertManager::saveAlerts, removeNotification);
         else if (notification instanceof DismissScreenMarker)
             notificationPanel = new DismissScreenMarkerNotificationPanel((DismissScreenMarker) notification, this, this.alertManager::saveAlerts, removeNotification);
+        else if (notification instanceof DismissObjectMarker)
+            notificationPanel = new DismissObjectMarkerNotificationPanel((DismissObjectMarker) notification, this, this.alertManager::saveAlerts, removeNotification);
         else if (notification instanceof ScreenMarker)
             notificationPanel = new ScreenMarkerNotificationPanel((ScreenMarker) notification, this, this.colorPickerManager, this.alertManager::saveAlerts, removeNotification);
+        else if (notification instanceof ObjectMarker)
+            notificationPanel = new ObjectMarkerNotificationPanel((ObjectMarker) notification, this, this.colorPickerManager, this.alertManager::saveAlerts, removeNotification);
         else if (notification instanceof Dink)
             notificationPanel = new DinkNotificationPanel((Dink) notification, this, this.configManager, this.alertManager::saveAlerts, removeNotification);
         else if (notification instanceof PluginMessage)

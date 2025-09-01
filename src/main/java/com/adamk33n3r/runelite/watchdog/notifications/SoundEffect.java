@@ -3,6 +3,7 @@ package com.adamk33n3r.runelite.watchdog.notifications;
 import com.adamk33n3r.runelite.watchdog.Util;
 import com.adamk33n3r.runelite.watchdog.WatchdogConfig;
 
+import lombok.NoArgsConstructor;
 import net.runelite.api.Client;
 import net.runelite.api.SoundEffectVolume;
 import net.runelite.client.callback.ClientThread;
@@ -16,6 +17,7 @@ import javax.inject.Inject;
 @Getter
 @Setter
 @Accessors(chain = true)
+@NoArgsConstructor
 public class SoundEffect extends AudioNotification {
     private int soundID;
 
@@ -25,15 +27,10 @@ public class SoundEffect extends AudioNotification {
     @Inject
     private transient ClientThread clientThread;
 
-    public SoundEffect() {
-        this.gain = 8;
-    }
-
     @Inject
     public SoundEffect(WatchdogConfig config) {
         super(config);
-        this.gain = config.defaultSoundEffectVolume();
-        this.soundID = config.defaultSoundEffectID();
+        this.setDefaults();
     }
 
     @Override

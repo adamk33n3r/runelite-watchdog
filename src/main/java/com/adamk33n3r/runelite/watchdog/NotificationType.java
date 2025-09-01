@@ -2,6 +2,7 @@ package com.adamk33n3r.runelite.watchdog;
 
 import com.adamk33n3r.runelite.watchdog.notifications.*;
 
+import com.adamk33n3r.runelite.watchdog.notifications.objectmarkers.ObjectMarker;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -18,10 +19,12 @@ public enum NotificationType {
     OVERLAY("Overlay", "Create an overlay notification", NotificationCategory.OVERLAY, Overlay.class),
     POPUP("Popup", "Create a popup notification (like collection log or league task)", NotificationCategory.OVERLAY, Popup.class),
     SCREEN_MARKER("Screen Marker", "Show a screen marker", NotificationCategory.OVERLAY, ScreenMarker.class),
+    OBJECT_MARKER("Object Marker", "Show an object marker", NotificationCategory.OVERLAY, ObjectMarker.class),
     DINK("Dink", "Tell Dink to send a custom notification to your webhook", NotificationCategory.ADVANCED, Dink.class),
     PLUGIN_MESSAGE("Plugin Message", "Send a message to another plugin", NotificationCategory.ADVANCED, PluginMessage.class),
     DISMISS_OVERLAY("Dismiss Overlay", "Dismiss a sticky overlay by ID", NotificationCategory.ADVANCED, DismissOverlay.class),
     DISMISS_SCREEN_MARKER("Dismiss Screen Marker", "Dismiss a sticky screen marker by ID", NotificationCategory.ADVANCED, DismissScreenMarker.class),
+    DISMISS_OBJECT_MARKER("Dismiss Object Marker", "Dismiss a sticky object marker by ID", NotificationCategory.ADVANCED, DismissObjectMarker.class),
     REQUEST_FOCUS("Request Focus", "Requests focus on the window", NotificationCategory.ADVANCED, RequestFocus.class),
     NOTIFICATION_EVENT("Notification Event", "Fire a NotificationFired event so that other plugins may hook into it e.g. RL Tray Notifications", NotificationCategory.ADVANCED, NotificationEvent.class),
     ;

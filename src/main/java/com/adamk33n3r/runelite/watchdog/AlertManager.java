@@ -6,6 +6,7 @@ import com.adamk33n3r.runelite.watchdog.hub.AlertHubCategory;
 import com.adamk33n3r.runelite.watchdog.notifications.*;
 import com.adamk33n3r.runelite.watchdog.notifications.tts.TTSSource;
 import com.adamk33n3r.runelite.watchdog.notifications.tts.Voice;
+import com.adamk33n3r.runelite.watchdog.notifications.objectmarkers.ObjectMarker;
 import com.adamk33n3r.runelite.watchdog.ui.ComparableNumber;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
 
@@ -101,8 +102,10 @@ public class AlertManager {
             .registerSubtype(RequestFocus.class)
             .registerSubtype(NotificationEvent.class)
             .registerSubtype(ScreenMarker.class)
+            .registerSubtype(ObjectMarker.class)
             .registerSubtype(Dink.class)
             .registerSubtype(PluginMessage.class)
+            .registerSubtype(DismissObjectMarker.class)
             .registerSubtype(DismissOverlay.class)
             .registerSubtype(DismissScreenMarker.class);
         this.gson = this.clientGson.newBuilder()

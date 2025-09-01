@@ -78,6 +78,7 @@ public abstract class Icons {
     public static final ImageIcon TIMER_REMOVE = new ImageIcon(ImageUtil.loadImageResource(Icons.class, "mdi_timer-remove-outline.png"));
     public static final ImageIcon TIMER_REMOVE_HOVER = new ImageIcon(ImageUtil.luminanceOffset(TIMER_REMOVE.getImage(), -80));
     public static final ImageIcon BORDER_OUTSIDE = new ImageIcon(ImageUtil.luminanceOffset(ImageUtil.loadImageResource(Icons.class, "mdi_border-outside.png"), -80));
+    public static final ImageIcon FEATHER = new ImageIcon(ImageUtil.luminanceOffset(ImageUtil.loadImageResource(Icons.class, "mdi_feather.png"), -80));
     public static final ImageIcon DICE_MULTIPLE = new ImageIcon(ImageUtil.loadImageResource(Icons.class, "mdi_dice-multiple.png"));
     public static final ImageIcon DICE_MULTIPLE_HOVER = new ImageIcon(ImageUtil.luminanceOffset(DICE_MULTIPLE.getImage(), -80));
     public static final ImageIcon DICE_MULTIPLE_OFF = new ImageIcon(ImageUtil.luminanceOffset(ImageUtil.loadImageResource(Icons.class, "mdi_dice-multiple-outline.png"), -80));

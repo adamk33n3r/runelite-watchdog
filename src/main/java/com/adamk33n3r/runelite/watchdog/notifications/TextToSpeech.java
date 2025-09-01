@@ -42,10 +42,7 @@ public class TextToSpeech extends MessageNotification implements IAudioNotificat
     @Inject
     public TextToSpeech(WatchdogConfig config) {
         super(config);
-        this.gain = config.defaultTTSVolume();
-        this.rate = config.defaultTTSRate();
-        this.legacyVoice = config.defaultTTSVoice();
-        this.source = config.defaultTTSSource();
+        this.setDefaults();
     }
 
     @Override

@@ -33,7 +33,7 @@ public class Overhead extends MessageNotification {
     @Inject
     public Overhead(WatchdogConfig config) {
         super(config);
-        this.displayTime = config.defaultOverHeadDisplayTime();
+        this.setDefaults();
     }
 
     @Override

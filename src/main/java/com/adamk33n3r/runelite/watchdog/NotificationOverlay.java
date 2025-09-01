@@ -21,6 +21,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
 
@@ -118,7 +119,7 @@ public class NotificationOverlay extends OverlayPanel {
 
     public void clearById(String id) {
         List<OverlayNotificationData> stickiesToDismiss = this.overlayNotificationQueue.stream()
-            .filter(notif -> notif.overlayNotification.isSticky() && notif.overlayNotification.getId().equals(id))
+            .filter(notif -> notif.overlayNotification.isSticky() && Objects.equals(notif.overlayNotification.getId(), id))
             .collect(Collectors.toList());
         this.overlayNotificationQueue.removeAll(stickiesToDismiss);
     }
