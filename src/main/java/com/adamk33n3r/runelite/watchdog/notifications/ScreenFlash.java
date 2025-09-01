@@ -31,9 +31,7 @@ public class ScreenFlash extends Notification {
     @Inject
     public ScreenFlash(WatchdogConfig config) {
         super(config);
-        this.color = config.defaultScreenFlashColor();
-        this.flashMode = config.defaultScreenFlashMode();
-        this.flashDuration = config.defaultScreenFlashDuration();
+        this.setDefaults();
     }
 
     @Override

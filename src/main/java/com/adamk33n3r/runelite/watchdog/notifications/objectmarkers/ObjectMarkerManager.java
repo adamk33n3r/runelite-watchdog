@@ -1,0 +1,306 @@
+package com.adamk33n3r.runelite.watchdog.notifications.objectmarkers;
+
+import com.adamk33n3r.runelite.watchdog.WatchdogConfig;
+import com.google.common.base.Strings;
+import com.google.gson.Gson;
+import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
+import net.runelite.api.*;
+import net.runelite.api.coords.WorldPoint;
+import net.runelite.api.events.*;
+import net.runelite.client.callback.ClientThread;
+import net.runelite.client.config.ConfigManager;
+import net.runelite.client.eventbus.Subscribe;
+import net.runelite.client.ui.components.colorpicker.ColorPickerManager;
+
+import javax.annotation.Nullable;
+import javax.inject.Inject;
+import javax.inject.Singleton;
+import java.util.*;
+import java.util.List;
+import java.util.function.Predicate;
+
+@Slf4j
+@Singleton
+public class ObjectMarkerManager {
+    private static final String MARK = "Mark object";
+
+    @Inject
+    private Client client;
+    @Inject
+    private ClientThread clientThread;
+    @Inject
+    private ColorPickerManager colorPickerManager;
+    @Inject
+    private WatchdogConfig config;
+    @Inject
+    private Gson gson;
+    @Inject
+    private ConfigManager configManager;
+
+    @Getter
+    private boolean isInObjectMarkerMode = false;
+    @Getter
+    private ObjectMarker editingObjectMarker;
+    @Getter
+    private final List<ObjectMarkerData> objects = new ArrayList<>();
+    private final List<TileObject> tileObjectsLoaded = new ArrayList<>();
+
+    public void turnOnObjectMarkerMode(ObjectMarker objectMarker) {
+        this.isInObjectMarkerMode = true;
+        this.editingObjectMarker = objectMarker;
+        if (objectMarker.getObjectPoint() == null) {
+            objectMarker.setObjectPoint(new ObjectPoint());
+        }
+    }
+
+    public void turnOffObjectMarkerMode() {
+        this.hideObjectMarker(this.editingObjectMarker);
+        this.isInObjectMarkerMode = false;
+        this.editingObjectMarker = null;
+    }
+
+    public void showObjectMarker(ObjectMarker objectMarker) {
+        log.debug("showObjectMarker: {}", objectMarker);
+        ObjectPoint objectPoint = objectMarker.getObjectPoint();
+        TileObject tileObject = this.tileObjectsLoaded.stream().filter(obj -> {
+            WorldPoint worldPoint = WorldPoint.fromLocalInstance(this.client, obj.getLocalLocation());
+            return objectIdEquals(obj, objectPoint.getId()) &&
+                worldPoint.getRegionX() == objectPoint.getRegionX() &&
+                worldPoint.getRegionY() == objectPoint.getRegionY() &&
+                worldPoint.getPlane() == objectPoint.getZ();
+        }).findFirst().orElse(null);
+        if (tileObject == null) {
+            log.debug("ObjectMarker {} could not find tile object", objectMarker);
+            return;
+        }
+        objectMarker.setTileObject(tileObject);
+        objectMarker.setComposition(this.client.getObjectDefinition(objectPoint.getId()));
+        this.objects.add(new ObjectMarkerData(objectMarker));
+        log.debug("showObjectMarker: {}", this.objects.size());
+    }
+
+    public void hideObjectMarker(ObjectMarker objectMarker) {
+        this.objects.removeIf(objData -> objData.getMarker() == objectMarker);
+    }
+
+    public void hideObjectMarkerById(String id) {
+        this.objects.removeIf(objData -> objData.getMarker().getId().equals(id));
+    }
+
+    public void removeAllMarkers() {
+        this.objects.clear();
+    }
+    
+    @Subscribe
+    private void onMenuEntryAdded(MenuEntryAdded event) {
+        if (!this.isInObjectMarkerMode) {
+            return;
+        }
+        if (event.getType() != MenuAction.EXAMINE_OBJECT.getId()) {
+            return;
+        }
+
+        final TileObject tileObject = findTileObject(client.getTopLevelWorldView().getPlane(), event.getActionParam0(), event.getActionParam1(), event.getIdentifier());
+        if (tileObject == null)
+        {
+            return;
+        }
+
+        client.getMenu().createMenuEntry(-1)
+            .setOption(MARK)
+            .setTarget(event.getTarget())
+            .setParam0(event.getActionParam0())
+            .setParam1(event.getActionParam1())
+            .setIdentifier(event.getIdentifier())
+            .setType(MenuAction.RUNELITE_HIGH_PRIORITY)
+            .onClick(this::markObject);
+    }
+
+    @Subscribe
+    private void onWallObjectSpawned(WallObjectSpawned event) {
+        this.tileObjectsLoaded.add(event.getWallObject());
+    }
+
+    @Subscribe
+    private void onWallObjectDespawned(WallObjectDespawned event) {
+        this.tileObjectsLoaded.remove(event.getWallObject());
+    }
+
+    @Subscribe
+    private void onGameObjectSpawned(GameObjectSpawned event) {
+        this.tileObjectsLoaded.add(event.getGameObject());
+    }
+
+    @Subscribe
+    private void onGameObjectDespawned(GameObjectDespawned event) {
+        this.tileObjectsLoaded.remove(event.getGameObject());
+    }
+
+    @Subscribe
+    private void onDecorativeObjectSpawned(DecorativeObjectSpawned event) {
+        this.tileObjectsLoaded.add(event.getDecorativeObject());
+    }
+
+    @Subscribe
+    private void onDecorativeObjectDespawned(DecorativeObjectDespawned event) {
+        this.tileObjectsLoaded.remove(event.getDecorativeObject());
+    }
+
+    @Subscribe
+    private void onGroundObjectSpawned(GroundObjectSpawned event) {
+        this.tileObjectsLoaded.add(event.getGroundObject());
+    }
+
+    @Subscribe
+    private void onGroundObjectDespawned(GroundObjectDespawned event) {
+        this.tileObjectsLoaded.remove(event.getGroundObject());
+    }
+
+    private void markObject(MenuEntry entry)
+    {
+        TileObject object = findTileObject(client.getTopLevelWorldView().getPlane(), entry.getParam0(), entry.getParam1(), entry.getIdentifier());
+        if (object == null)
+        {
+            return;
+        }
+
+        // object.getId() is always the base object id, getObjectComposition transforms it to
+        // the correct object we see
+        ObjectComposition objectDefinition = getObjectComposition(object.getId());
+        String name = objectDefinition.getName();
+        // Name is probably never "null" - however prevent adding it if it is, as it will
+        // become ambiguous as objects with no name are assigned name "null"
+        if (Strings.isNullOrEmpty(name) || name.equals("null"))
+        {
+            return;
+        }
+
+        markObject(objectDefinition, name, object);
+    }
+
+    private TileObject findTileObject(int z, int x, int y, int id)
+    {
+        Scene scene = client.getTopLevelWorldView().getScene();
+        Tile[][][] tiles = scene.getTiles();
+        final Tile tile = tiles[z][x][y];
+        if (tile == null)
+        {
+            return null;
+        }
+
+        final GameObject[] tileGameObjects = tile.getGameObjects();
+        final DecorativeObject tileDecorativeObject = tile.getDecorativeObject();
+        final WallObject tileWallObject = tile.getWallObject();
+        final GroundObject groundObject = tile.getGroundObject();
+
+        if (objectIdEquals(tileWallObject, id))
+        {
+            return tileWallObject;
+        }
+
+        if (objectIdEquals(tileDecorativeObject, id))
+        {
+            return tileDecorativeObject;
+        }
+
+        if (objectIdEquals(groundObject, id))
+        {
+            return groundObject;
+        }
+
+        for (GameObject object : tileGameObjects)
+        {
+            if (objectIdEquals(object, id))
+            {
+                return object;
+            }
+        }
+
+        return null;
+    }
+
+    private boolean objectIdEquals(TileObject tileObject, int id)
+    {
+        if (tileObject == null)
+        {
+            return false;
+        }
+
+        if (tileObject.getId() == id)
+        {
+            return true;
+        }
+
+        // Menu action EXAMINE_OBJECT sends the transformed object id, not the base id, unlike
+        // all of the GAME_OBJECT_OPTION actions, so check the id against the impostor ids
+        final ObjectComposition comp = client.getObjectDefinition(tileObject.getId());
+
+        if (comp.getImpostorIds() != null)
+        {
+            for (int impostorId : comp.getImpostorIds())
+            {
+                if (impostorId == id)
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /** mark or unmark an object
+     *
+     * @param objectComposition transformed composition of object based on vars
+     * @param name name of objectComposition
+     * @param tileObject tile object, for multilocs object.getId() is the base id
+     */
+    private void markObject(ObjectComposition objectComposition, String name, final TileObject tileObject)
+    {
+        final WorldPoint worldPoint = WorldPoint.fromLocalInstance(client, tileObject.getLocalLocation());
+        final int regionId = worldPoint.getRegionID();
+        this.editingObjectMarker.setObjectPoint(new ObjectPoint(
+            tileObject.getId(),
+            name,
+            regionId,
+            worldPoint.getRegionX(),
+            worldPoint.getRegionY(),
+            worldPoint.getPlane()));
+
+        objects.removeIf(o -> o.getMarker().getTileObject() == tileObject);
+//        objects.add(new ColorTileObject(tileObject,
+//            client.getObjectDefinition(tileObject.getId()),
+//            name,
+//            this.editingObjectMarker.getBorderColor(),
+//            this.editingObjectMarker.getFillColor(),
+//            this.editingObjectMarker.getBorderWidth(),
+//            this.editingObjectMarker.getOutlineFeather(),
+//            (byte) 0));
+        this.editingObjectMarker.setTileObject(tileObject);
+        this.editingObjectMarker.setComposition(objectComposition);
+//        this.objects.add(new ObjectMarkerData(this.editingObjectMarker));
+    }
+
+    private static Predicate<ObjectMarker> findObjectPredicate(ObjectComposition objectComposition, TileObject object, WorldPoint worldPoint)
+    {
+        // Find the ObjectPoint for the given composition, object, and world point. There are two cases:
+        // 1) object is a multiloc, the name may have changed since marking - match from base id
+        // 2) not a multiloc, but an object has spawned with an identical name and a different
+        //    id as what was originally marked
+        return om -> {
+            var op = om.getObjectPoint();
+            return ((op.getId() == -1 || op.getId() == object.getId()) || op.getName().equals(objectComposition.getName()))
+                && op.getRegionX() == worldPoint.getRegionX()
+                && op.getRegionY() == worldPoint.getRegionY()
+                && op.getZ() == worldPoint.getPlane();
+        };
+    }
+
+    @Nullable
+    private ObjectComposition getObjectComposition(int id)
+    {
+        ObjectComposition objectComposition = client.getObjectDefinition(id);
+        return objectComposition.getImpostorIds() == null ? objectComposition : objectComposition.getImpostor();
+    }
+}

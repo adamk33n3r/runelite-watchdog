@@ -280,6 +280,19 @@ public class PanelUtils {
         return spinner;
     }
 
+    public static JSpinner createSpinnerDouble(double initialValue, double min, double max, double step, Consumer<Double> onChange) {
+        double value = Math.min(Math.max(min, initialValue), max);
+        JSpinner spinner = new JSpinner(new SpinnerNumberModel(value, min, max, step));
+        spinner.addChangeListener(e -> {
+            onChange.accept((Double) spinner.getValue());
+        });
+        JFormattedTextField spinnerText = (JFormattedTextField) spinner.getEditor().getComponent(0);
+        spinnerText.setSelectedTextColor(Color.WHITE);
+        spinnerText.setSelectionColor(ColorScheme.BRAND_ORANGE_TRANSPARENT);
+
+        return spinner;
+    }
+
     public static ColorJButton createColorPicker(String placeholder, String tooltip, String windowTitle, Component parentComponent, Color initialValue, ColorPickerManager colorPickerManager, boolean showAlpha, Consumer<Color> onChange) {
         ColorJButton colorPickerBtn = new ColorJButton(placeholder, Color.BLACK);
         if (initialValue != null) {

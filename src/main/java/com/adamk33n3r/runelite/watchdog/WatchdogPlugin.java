@@ -1,17 +1,16 @@
 package com.adamk33n3r.runelite.watchdog;
 
 import com.adamk33n3r.runelite.watchdog.alerts.Alert;
+import com.adamk33n3r.runelite.watchdog.notifications.objectmarkers.ObjectMarkerManager;
+import com.adamk33n3r.runelite.watchdog.notifications.objectmarkers.ObjectMarkerOverlay;
 import com.adamk33n3r.runelite.watchdog.ui.notifications.screenmarker.ScreenMarkerUtil;
 
 import net.runelite.api.Client;
-import net.runelite.api.ItemID;
 import net.runelite.api.MessageNode;
 import net.runelite.api.WorldView;
 import net.runelite.api.coords.WorldPoint;
-import net.runelite.api.events.ChatMessage;
-import net.runelite.api.events.GameStateChanged;
-import net.runelite.api.events.GameTick;
-import net.runelite.api.events.OverheadTextChanged;
+import net.runelite.api.events.*;
+import net.runelite.api.gameval.ItemID;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
@@ -71,6 +70,10 @@ public class WatchdogPlugin extends Plugin {
 
     @Getter
     @Inject
+    private ObjectMarkerManager objectMarkerManager;
+
+    @Getter
+    @Inject
     private AlertManager alertManager;
 
     @Getter
@@ -96,6 +99,10 @@ public class WatchdogPlugin extends Plugin {
     @Getter
     @Inject
     private NotificationOverlay notificationOverlay;
+
+    @Getter
+    @Inject
+    private ObjectMarkerOverlay objectMarkerOverlay;
 
     @Getter
     @Inject
@@ -143,6 +150,7 @@ public class WatchdogPlugin extends Plugin {
                 soundPlayer.stop();
                 notificationOverlay.clear();
                 screenMarkerUtil.removeAllMarkers();
+                objectMarkerManager.removeAllMarkers();
             }
         },
         new HotkeyListener(() -> config.stopAllProcessingAlertsHotkey()) {
@@ -168,6 +176,12 @@ public class WatchdogPlugin extends Plugin {
             public void hotkeyPressed() {
                 screenMarkerUtil.removeAllMarkers();
             }
+        },
+        new HotkeyListener(() -> config.dismissAllScreenMarkersHotkey()) {
+            @Override
+            public void hotkeyPressed() {
+                objectMarkerManager.removeAllMarkers();
+            }
         }
     );
 
@@ -185,15 +199,17 @@ public class WatchdogPlugin extends Plugin {
     @Override
     protected void startUp() throws Exception {
         this.eventBus.register(this.eventHandler);
+        this.eventBus.register(this.objectMarkerManager);
 
         this.overlayManager.add(this.flashOverlay);
         this.overlayManager.add(this.notificationOverlay);
+        this.overlayManager.add(this.objectMarkerOverlay);
         this.screenMarkerUtil.startUp();
 
         this.alertManager.loadAlerts();
 
-        this.icon = this.itemManager.getImage(ItemID.BELL_BAUBLE);
-        this.iconDisabled = this.itemManager.getImage(ItemID.BELL_BAUBLE_6848);
+        this.icon = this.itemManager.getImage(ItemID.WIN05_BELLBAUBLE_UNPAINTED);
+        this.iconDisabled = this.itemManager.getImage(ItemID.WIN05_BELLBAUBLE_RED);
 
         this.rebuildSidePanelButtons();
 
@@ -237,10 +253,12 @@ public class WatchdogPlugin extends Plugin {
     @Override
     protected void shutDown() throws Exception {
         this.eventBus.unregister(this.eventHandler);
+        this.eventBus.unregister(this.objectMarkerManager);
         this.clientToolbar.removeNavigation(this.navButton);
         this.clientToolbar.removeNavigation(this.navButtonDisabled);
         this.overlayManager.remove(this.flashOverlay);
         this.overlayManager.remove(this.notificationOverlay);
+        this.overlayManager.remove(this.objectMarkerOverlay);
         this.soundPlayer.shutDown();
         this.screenMarkerUtil.shutDown();
         for (var hotkeyListener : this.hotkeyListeners) {

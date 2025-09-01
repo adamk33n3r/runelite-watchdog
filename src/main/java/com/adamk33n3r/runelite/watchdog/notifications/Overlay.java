@@ -30,11 +30,7 @@ public class Overlay extends MessageNotification {
     @Inject
     public Overlay(WatchdogConfig config) {
         super(config);
-        this.color = config.defaultOverlayColor();
-        this.textColor = config.defaultOverlayTextColor();
-        this.sticky = config.defaultOverlaySticky();
-        this.timeToLive = config.defaultOverlayTTL();
-        this.imagePath = config.defaultOverlayImagePath();
+        this.setDefaults();
     }
 
     @Override

@@ -66,6 +66,9 @@ public class ToolsPanel extends PluginPanel {
         tools.add(PanelUtils.createButton("Dismiss All Screen Markers", "Dismiss All Screen Markers", (btn, mods) -> {
             WatchdogPlugin.getInstance().getScreenMarkerUtil().removeAllMarkers();
         }));
+        tools.add(PanelUtils.createButton("Dismiss All Object Markers", "Dismiss All Object Markers", (btn, mods) -> {
+            WatchdogPlugin.getInstance().getObjectMarkerManager().removeAllMarkers();
+        }));
         this.add(tools);
     }
 }

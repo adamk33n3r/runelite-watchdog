@@ -41,6 +41,27 @@ public class ScreenMarkerNotificationPanel extends NotificationPanel {
 
         net.runelite.client.plugins.screenmarkers.ScreenMarker screenMarker = notification.getScreenMarker();
 
+        this.setMarkerButton = PanelUtils.createButton("Set Marker", "Set Marker", (btn, modifiers) -> {
+            ScreenMarkerUtil screenMarkerUtil = WatchdogPlugin.getInstance().getScreenMarkerUtil();
+            // Done
+            if (screenMarkerUtil.isCreatingScreenMarker()) {
+                this.screenMarkerOverlay = screenMarkerUtil.finishCreation(false);
+                this.setMarkerButton.setText("Set Marker");
+                this.setMarkerButton.setToolTipText("Set Marker");
+                // Start
+            } else {
+                if (this.screenMarkerOverlay != null) {
+                    screenMarkerUtil.deleteMarker(this.screenMarkerOverlay);
+                }
+                screenMarkerUtil.setMouseListenerEnabled(true);
+                screenMarkerUtil.setCreatingScreenMarker(true);
+                screenMarkerUtil.setCurrentMarker(notification);
+                this.setMarkerButton.setText("Finish");
+                this.setMarkerButton.setToolTipText("Finish");
+            }
+        });
+        this.settings.add(this.setMarkerButton);
+
         FlatTextArea markerLabel = new FlatTextArea("Optional marker label...", true);
         markerLabel.setText(screenMarker.getName());
         ((AbstractDocument) markerLabel.getDocument()).setDocumentFilter(new LengthLimitFilter(200));
@@ -87,27 +108,6 @@ public class ScreenMarkerNotificationPanel extends NotificationPanel {
                 onChangeListener.run();
             }));
 
-        this.setMarkerButton = PanelUtils.createButton("Set Marker", "Set Marker", (btn, modifiers) -> {
-            ScreenMarkerUtil screenMarkerUtil = WatchdogPlugin.getInstance().getScreenMarkerUtil();
-            // Done
-            if (screenMarkerUtil.isCreatingScreenMarker()) {
-                this.screenMarkerOverlay = screenMarkerUtil.finishCreation(false);
-                this.setMarkerButton.setText("Set Marker");
-                this.setMarkerButton.setToolTipText("Set Marker");
-                // Start
-            } else {
-                if (this.screenMarkerOverlay != null) {
-                    screenMarkerUtil.deleteMarker(this.screenMarkerOverlay);
-                }
-                screenMarkerUtil.setMouseListenerEnabled(true);
-                screenMarkerUtil.setCreatingScreenMarker(true);
-                screenMarkerUtil.setCurrentMarker(notification);
-                this.setMarkerButton.setText("Finish");
-                this.setMarkerButton.setToolTipText("Finish");
-            }
-        });
-        this.settings.add(this.setMarkerButton);
-
         JSpinner thickness = PanelUtils.createSpinner(
             screenMarker.getBorderThickness(),
             0,
@@ -144,7 +144,7 @@ public class ScreenMarkerNotificationPanel extends NotificationPanel {
         sub.setBackground(ColorScheme.DARKER_GRAY_COLOR);
         this.settings.add(sub);
 
-        FlatTextArea stickyId = new FlatTextArea("ID to use with Dismiss Overlay...", true);
+        FlatTextArea stickyId = new FlatTextArea("ID to use with Dismiss Screen Marker...", true);
         stickyId.setText(notification.getId());
         ((AbstractDocument) stickyId.getDocument()).setDocumentFilter(new LengthLimitFilter(200));
         stickyId.getDocument().addDocumentListener((SimpleDocumentListener) ev -> {
