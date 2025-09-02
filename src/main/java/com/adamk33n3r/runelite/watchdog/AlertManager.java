@@ -30,6 +30,7 @@ import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -456,8 +457,8 @@ public class AlertManager {
     private void handleUpgrades() {
         Version currentVersion = new Version(this.pluginVersion);
         Version configVersion = new Version(this.configManager.getConfiguration(WatchdogConfig.CONFIG_GROUP_NAME, WatchdogConfig.PLUGIN_VERSION));
-        log.debug("currentVersion: " + currentVersion);
-        log.debug("configVersion: " + configVersion);
+        log.debug("currentVersion: {}", currentVersion);
+        log.debug("configVersion: {}", configVersion);
         if (currentVersion.compareTo(configVersion) > 0) {
             log.debug("Checking if data migration needed");
             // Changed Stat Drain to Stat Change in v2.4.0, so need to swap sign of drainAmount and move to new alert
@@ -518,8 +519,72 @@ public class AlertManager {
                     });
             }
 
+            if (configVersion.compareTo(new Version("3.14.0")) < 0) {
+                log.debug("Need to migrate pattern matchers from matches to find");
+                this.getAllAlerts()
+                    .filter(alert -> alert instanceof RegexMatcher)
+                    .map(alert -> (RegexMatcher) alert)
+                    .forEach(alert -> {
+                        String prevPattern = alert.getPattern();
+                        if (!prevPattern.isEmpty()) {
+                            upgrade_3_14_0_patterns(
+                                alert::getPattern,
+                                alert::isRegexEnabled,
+                                alert::setPattern,
+                                alert::setRegexEnabled
+                            );
+                            log.debug("Migrating alert {} from {} to {}", ((Alert) alert).getName(), prevPattern, alert.getPattern());
+                        }
+
+                        if (alert instanceof OverheadTextAlert) {
+                            var overHeadTextAlert = (OverheadTextAlert) alert;
+                            if (overHeadTextAlert.getNpcName().isEmpty()) {
+                                return;
+                            }
+                            upgrade_3_14_0_patterns(
+                                overHeadTextAlert::getNpcName,
+                                overHeadTextAlert::isNpcRegexEnabled,
+                                overHeadTextAlert::setNpcName,
+                                overHeadTextAlert::setNpcRegexEnabled
+                            );
+                        }
+                    });
+            }
+
             this.configManager.setConfiguration(WatchdogConfig.CONFIG_GROUP_NAME, WatchdogConfig.PLUGIN_VERSION, currentVersion.getVersion());
             this.saveAlerts();
         }
     }
+
+    private void upgrade_3_14_0_patterns(
+        Supplier<String> patternSupplier,
+        Supplier<Boolean> regexEnabledSupplier,
+        Consumer<String> patternSave,
+        Consumer<Boolean> regexEnabledSave
+    ) {
+        String pattern = patternSupplier.get();
+        // If the pattern is not a regex, and it doesn't start with * or end with *
+        // then convert it to a regex and proceed with the conversion
+        if (!regexEnabledSupplier.get()) {
+            if (!pattern.startsWith("*") || !pattern.endsWith("*")) {
+                pattern = Util.createRegexFromGlob(pattern);
+                regexEnabledSave.accept(true);
+            } else if (pattern.length() > 1) {
+                pattern = pattern.substring(1, pattern.length() - 1);
+            }
+        }
+
+        if (regexEnabledSupplier.get()) {
+            // if the beginning of the pattern is not a ^ then add one
+            if (!pattern.startsWith("^")) {
+                pattern = "^" + pattern;
+            }
+            // if the end of the pattern is not a $ then add one
+            if (!pattern.endsWith("$")) {
+                pattern = pattern + "$";
+            }
+        }
+
+        patternSave.accept(pattern);
+    };
 }

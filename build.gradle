@@ -83,4 +83,7 @@ tasks.register("shadowJar", Jar) {
     archiveClassifier = "shadow"
     archiveFileName = rootProject.name + "-" + project.version + "-all.jar"
     destinationDirectory = file('jars')
+    doLast {
+        println("file://"+destinationDirectory.get().asFile.toURI().rawPath)
+    }
 }
