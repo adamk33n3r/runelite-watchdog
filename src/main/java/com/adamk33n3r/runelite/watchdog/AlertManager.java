@@ -526,16 +526,21 @@ public class AlertManager {
                     .map(alert -> (RegexMatcher) alert)
                     .forEach(alert -> {
                         String prevPattern = alert.getPattern();
-                        upgrade_3_14_0_patterns(
-                            alert::getPattern,
-                            alert::isRegexEnabled,
-                            alert::setPattern,
-                            alert::setRegexEnabled
-                        );
-                        log.debug("Migrating alert {} from {} to {}", ((Alert) alert).getName(), prevPattern, alert.getPattern());
+                        if (!prevPattern.isEmpty()) {
+                            upgrade_3_14_0_patterns(
+                                alert::getPattern,
+                                alert::isRegexEnabled,
+                                alert::setPattern,
+                                alert::setRegexEnabled
+                            );
+                            log.debug("Migrating alert {} from {} to {}", ((Alert) alert).getName(), prevPattern, alert.getPattern());
+                        }
 
                         if (alert instanceof OverheadTextAlert) {
                             var overHeadTextAlert = (OverheadTextAlert) alert;
+                            if (overHeadTextAlert.getNpcName().isEmpty()) {
+                                return;
+                            }
                             upgrade_3_14_0_patterns(
                                 overHeadTextAlert::getNpcName,
                                 overHeadTextAlert::isNpcRegexEnabled,
