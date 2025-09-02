@@ -428,7 +428,7 @@ public class EventHandler {
     ) {
         String regex = regexEnabled.get() ? pattern.get() : Util.createRegexFromGlob(pattern.get());
         Matcher matcher = Pattern.compile(regex, regexEnabled.get() ? 0 : Pattern.CASE_INSENSITIVE).matcher(input);
-        if (!matcher.matches()) return null;
+        if (!matcher.find()) return null;
 
         String[] groups = new String[matcher.groupCount()];
         for (int i = 0; i < matcher.groupCount(); i++) {

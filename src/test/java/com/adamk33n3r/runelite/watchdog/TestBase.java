@@ -27,7 +27,7 @@ import java.util.concurrent.ScheduledExecutorService;
 public abstract class TestBase {
     @Bind
     @Named("watchdog.pluginVersion")
-    final String pluginVersion = "3.0.0-TEST";
+    final String pluginVersion = "3.14.0-TEST";
     @Bind
     @Named("watchdog.helpURL")
     private final String HELP_URL = "";
