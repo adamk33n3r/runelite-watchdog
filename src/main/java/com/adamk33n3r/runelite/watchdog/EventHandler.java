@@ -86,7 +86,7 @@ public class EventHandler {
             return;
         }
 
-        log.debug("{}: {}", chatMessage.getType().name(), chatMessage.getMessage());
+        log.debug("{} | {}: {}", chatMessage.getType().name(), chatMessage.getName(), chatMessage.getMessage());
         String unformattedMessage = Text.removeFormattingTags(chatMessage.getMessage());
 
         // Send player messages to a different handler
@@ -94,7 +94,12 @@ public class EventHandler {
             this.alertManager.getAllEnabledAlertsOfType(PlayerChatAlert.class)
                 .filter(chatAlert -> chatAlert.getPlayerChatType() == PlayerChatType.ANY || chatAlert.getPlayerChatType().isOfType(chatMessage.getType()))
                 .forEach(chatAlert -> {
-                    String[] groups = this.matchPattern(chatAlert, unformattedMessage);
+                    var message = unformattedMessage;
+                    if (chatAlert.isPrependSender()) {
+                        var playerName = Text.sanitize(Text.removeFormattingTags(chatMessage.getName()));
+                        message = String.format("%s: %s", playerName, message);
+                    }
+                    String[] groups = this.matchPattern(chatAlert, message);
                     if (groups == null) return;
 
                     this.fireAlert(chatAlert, groups);
