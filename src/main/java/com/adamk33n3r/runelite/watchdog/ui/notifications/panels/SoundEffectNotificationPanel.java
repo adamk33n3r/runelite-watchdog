@@ -19,7 +19,8 @@ public class SoundEffectNotificationPanel extends NotificationPanel {
 
         JRichTextPane richTextPane = new JRichTextPane();
         richTextPane.setContentType("text/html");
-        richTextPane.setText("<html>Go to <a href='" + WatchdogProperties.getProperties().getProperty("watchdog.wikiPage.soundIDs") + "'>this wiki page</a> to get a list<br>of sound ids</html>");
+        richTextPane.setText("<html>Go to <a href='" + WatchdogProperties.getProperties().getProperty("watchdog.wikiPage.soundIDs") +
+            "'>this wiki page</a> to get a list<br>of sound ids. Volume slider is only in effect if the sound is muted in game. Otherwise, it will use the game setting.</html>");
         this.settings.add(richTextPane);
         JSpinner soundID = PanelUtils.createSpinner(soundEffect.getSoundID(), 0, 99999, 1, (val) -> {
             soundEffect.setSoundID(val);
