@@ -45,6 +45,7 @@ public interface WatchdogConfig extends Config {
     String DEFAULT_OVERLAY_COLOR = "defaultOverlayColor";
     String DEFAULT_OVERLAY_TTL = "defaultOverlayTTL";
     String DEFAULT_OVERLAY_IMAGE_PATH = "defaultOverlayImagePath";
+    String DEFAULT_OVERLAY_RESIZE_IMAGE = "defaultOverlayResizeImage";
 
     // Popup
     String DEFAULT_POPUP_TEXT_COLOR = "defaultPopupTextColor";
@@ -292,6 +293,15 @@ public interface WatchdogConfig extends Config {
         position = 7
     )
     default String defaultOverlayImagePath() { return ""; }
+
+    @ConfigItem(
+        keyName = DEFAULT_OVERLAY_RESIZE_IMAGE,
+        name = "Default Resize Image",
+        description = "Whether to resize the image to a standard size",
+        section = overlaySection,
+        position = 8
+    )
+    default boolean defaultOverlayResizeImage() { return true; }
     //endregion
 
     //region Popup

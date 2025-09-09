@@ -53,7 +53,10 @@ public class NotificationOverlay extends OverlayPanel {
             this.overlayNotification = overlayNotification;
             if (overlayNotification.getImagePath() != null && !overlayNotification.getImagePath().isEmpty()) {
                 try {
-                    this.image = ImageUtil.resizeImage(ImageIO.read(new File(overlayNotification.getImagePath())), 128, 128, true);
+                    this.image = ImageIO.read(new File(overlayNotification.getImagePath()));
+                    if (overlayNotification.isResizeImage()) {
+                        this.image = ImageUtil.resizeImage(this.image, 128, 128, true);
+                    }
                 } catch(IOException e) {
                     log.error("Failed to load image", e);
                 }

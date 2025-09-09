@@ -8,6 +8,7 @@ import com.adamk33n3r.runelite.watchdog.ui.Icons;
 import com.adamk33n3r.runelite.watchdog.ui.panels.NotificationsPanel;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
 
+import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.components.ColorJButton;
 import net.runelite.client.ui.components.colorpicker.ColorPickerManager;
 
@@ -16,6 +17,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.text.AbstractDocument;
+import java.awt.*;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 
@@ -62,7 +64,15 @@ public class OverlayNotificationPanel extends MessageNotificationPanel {
             onChangeListener.run();
         }, notification.getImagePath(), "Image Files", "png", "jpg"));
 
-        JCheckBox sticky = PanelUtils.createCheckbox("Sticky", "Set the notification to not expire", notification.isSticky(), val -> {
+        JPanel checkboxes = new JPanel(new GridLayout(1, 2, 5, 5));
+        checkboxes.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+        var resizeImageCheckbox = PanelUtils.createCheckbox("Resize Image", "Resize the image to a standard size", notification.isResizeImage(), val -> {
+            notification.setResizeImage(val);
+            onChangeListener.run();
+        });
+        checkboxes.add(resizeImageCheckbox);
+
+        var stickyCheckbox = PanelUtils.createCheckbox("Sticky", "Set the notification to not expire", notification.isSticky(), val -> {
             notification.setSticky(val);
             if (val) {
                 this.settings.remove(this.displayTime);
@@ -74,7 +84,8 @@ public class OverlayNotificationPanel extends MessageNotificationPanel {
             this.revalidate();
             onChangeListener.run();
         });
-        this.settings.add(sticky);
+        checkboxes.add(stickyCheckbox);
+        this.settings.add(checkboxes);
 
         JSpinner displayTime = PanelUtils.createSpinner(notification.getTimeToLive(), 1, 999, 1, val -> {
             notification.setTimeToLive(val);

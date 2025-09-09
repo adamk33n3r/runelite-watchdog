@@ -26,6 +26,7 @@ public class Overlay extends MessageNotification {
     private int timeToLive = 5;
     private String imagePath;
     private String id;
+    private boolean resizeImage = true;
 
     @Inject
     public Overlay(WatchdogConfig config) {
@@ -47,5 +48,6 @@ public class Overlay extends MessageNotification {
         this.setSticky(this.watchdogConfig.defaultOverlaySticky());
         this.setTimeToLive(this.watchdogConfig.defaultOverlayTTL());
         this.setImagePath(this.watchdogConfig.defaultOverlayImagePath());
+        this.setResizeImage(this.watchdogConfig.defaultOverlayResizeImage());
     }
 }
