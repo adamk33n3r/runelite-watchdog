@@ -28,7 +28,6 @@ import java.awt.TrayIcon;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -294,34 +293,34 @@ public class EventHandler {
     @Subscribe
     private void onItemSpawned(ItemSpawned itemSpawned) {
         ItemComposition comp = this.itemManager.getItemComposition(itemSpawned.getItem().getId());
-        this.onSpawned(comp.getName(), itemSpawned.getTile().getWorldLocation(), SPAWNED, ITEM);
+        this.onSpawned(comp.getName(), comp.getId(), itemSpawned.getTile().getWorldLocation(), SPAWNED, ITEM);
     }
     @Subscribe
     private void onItemDespawned(ItemDespawned itemDespawned) {
         ItemComposition comp = this.itemManager.getItemComposition(itemDespawned.getItem().getId());
-        this.onSpawned(comp.getName(), itemDespawned.getTile().getWorldLocation(), DESPAWNED, ITEM);
+        this.onSpawned(comp.getName(), comp.getId(), itemDespawned.getTile().getWorldLocation(), DESPAWNED, ITEM);
     }
     @Subscribe
     private void onNpcSpawned(NpcSpawned npcSpawned) {
-        this.onActorSpawned(npcSpawned.getNpc(), NPC);
+        this.onActorSpawned(npcSpawned.getNpc(), npcSpawned.getNpc().getId(), NPC);
     }
     @Subscribe
     private void onNpcDespawned(NpcDespawned npcDespawned) {
-        this.onActorDespawned(npcDespawned.getNpc(), NPC);
+        this.onActorDespawned(npcDespawned.getNpc(), npcDespawned.getNpc().getId(), NPC);
     }
     @Subscribe
     private void onPlayerSpawned(PlayerSpawned playerSpawned) {
-        this.onActorSpawned(playerSpawned.getPlayer(), PLAYER);
+        this.onActorSpawned(playerSpawned.getPlayer(), -1, PLAYER);
     }
     @Subscribe
     private void onPlayerDespawned(PlayerDespawned playerDespawned) {
-        this.onActorDespawned(playerDespawned.getPlayer(), PLAYER);
+        this.onActorDespawned(playerDespawned.getPlayer(), -1, PLAYER);
     }
-    private void onActorSpawned(Actor actor, SpawnedAlert.SpawnedType type) {
-        this.onSpawned(actor.getName(), actor.getWorldLocation(), SPAWNED, type);
+    private void onActorSpawned(Actor actor, int id, SpawnedAlert.SpawnedType type) {
+        this.onSpawned(actor.getName(), id, actor.getWorldLocation(), SPAWNED, type);
     }
-    private void onActorDespawned(Actor actor, SpawnedAlert.SpawnedType type) {
-        this.onSpawned(actor.getName(), actor.getWorldLocation(), DESPAWNED, type);
+    private void onActorDespawned(Actor actor, int id, SpawnedAlert.SpawnedType type) {
+        this.onSpawned(actor.getName(), id, actor.getWorldLocation(), DESPAWNED, type);
     }
 
     @Subscribe
@@ -371,10 +370,10 @@ public class EventHandler {
             WorldPoint playerLocation = this.client.getLocalPlayer().getWorldLocation();
             location = Util.getClosestTile(playerLocation, (GameObject) tileObject);
         }
-        this.onSpawned(impostor.getName(), location, mode, type);
+        this.onSpawned(impostor.getName(), impostor.getId(), location, mode, type);
     }
 
-    private void onSpawned(String name, WorldPoint location, SpawnedAlert.SpawnedDespawned mode, SpawnedAlert.SpawnedType type) {
+    private void onSpawned(String name, int id, WorldPoint location, SpawnedAlert.SpawnedDespawned mode, SpawnedAlert.SpawnedType type) {
         String unformattedName = Text.removeFormattingTags(name);
         int distanceToObject = location.distanceTo(this.client.getLocalPlayer().getWorldLocation());
         this.alertManager.getAllEnabledAlertsOfType(SpawnedAlert.class)
@@ -382,10 +381,17 @@ public class EventHandler {
             .filter(spawnedAlert -> spawnedAlert.getSpawnedType() == type)
             .filter(spawnedAlert -> spawnedAlert.getDistance() == -1 || spawnedAlert.getDistanceComparator().compare(distanceToObject, spawnedAlert.getDistance()))
             .forEach(spawnedAlert -> {
-                String[] groups = this.matchPattern(spawnedAlert, unformattedName);
-                if (groups == null) return;
+                try {
+                    int parsedID = Integer.parseInt(spawnedAlert.getPattern());
+                    if (id == parsedID) {
+                        this.fireAlert(spawnedAlert, new String[] { spawnedAlert.getPattern() });
+                    }
+                } catch (NumberFormatException ignored) {
+                    String[] groups = this.matchPattern(spawnedAlert, unformattedName);
+                    if (groups == null) return;
 
-                this.fireAlert(spawnedAlert, groups);
+                    this.fireAlert(spawnedAlert, groups);
+                }
             });
     }
     //endregion
