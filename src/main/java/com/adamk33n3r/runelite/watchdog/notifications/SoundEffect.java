@@ -36,7 +36,10 @@ public class SoundEffect extends AudioNotification {
     @Override
     protected void fireImpl(String[] triggerValues) {
         this.clientThread.invokeLater(() -> {
-            this.client.playSoundEffect(this.soundID, Util.scale(this.gain, 0, 10, SoundEffectVolume.MUTED, SoundEffectVolume.HIGH));
+            var userVolume = this.client.getPreferences().getSoundEffectVolume();
+            this.client.getPreferences().setSoundEffectVolume(Util.scale(this.gain, 0, 10, SoundEffectVolume.MUTED, SoundEffectVolume.HIGH));
+            this.client.playSoundEffect(this.soundID, 0);
+            this.client.getPreferences().setSoundEffectVolume(userVolume);
         });
     }
 
