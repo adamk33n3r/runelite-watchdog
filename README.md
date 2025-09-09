@@ -9,6 +9,7 @@
 Create custom alerts triggered by
 - Game Messages (supports glob pattern or regex)
 - Player Chat Messages (supports glob pattern or regex)
+- Overhead Text (supports glob pattern or regex)
 - Stat Drain/Change
 - Sound Fired (trigger on a sound effect playing)
 - Notifications (supports glob pattern or regex. allows you to hook into existing notifications, even if you have the alerts off in Runelite. For example low prayer, idle, tempoross, etc) 
@@ -27,11 +28,12 @@ with any amount of unique notification types like
 - Overhead Text
 - Overlay
 - Popup
-- Dismiss Overlay
 - Screen Marker
+- Object Marker
 - Request Focus
-- RuneLite Notification (to trigger things like RL Tray Notifications)
 - Dink Notification
+- Plugin Message
+- RuneLite Notification (to trigger things like RL Tray Notifications)
 
 _You can set defaults for the notifications in the plugin config_
 
@@ -52,8 +54,9 @@ For more information on trigger and notification types, [see the wiki](https://g
 - TOB
 - TOA
 - Yama
+- Delve Boss (Doom of Mokhaiotl)
 
-_Updated 2025/05/14_
+_Updated 2025/07/25_
 
 
 ## Recommended RuneLite Notification Settings
