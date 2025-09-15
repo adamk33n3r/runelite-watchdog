@@ -70,7 +70,6 @@ public class AlertManagerTest extends TestBase {
         alertManager.getAlerts().forEach(alert -> {
             Assert.assertTrue(alert instanceof RegexMatcher);
             String pattern = ((RegexMatcher) alert).getPattern();
-            System.out.println(pattern);
             // Test the specific case where the glob is wrapped in * on both sides
             if (alert instanceof PlayerChatAlert) {
                 Assert.assertEquals("and", ((PlayerChatAlert) alert).getPattern());

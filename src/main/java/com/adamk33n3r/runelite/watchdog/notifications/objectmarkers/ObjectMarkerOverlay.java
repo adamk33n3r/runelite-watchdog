@@ -72,7 +72,6 @@ public class ObjectMarkerOverlay extends Overlay
 
         for (ObjectMarkerData objData : objects) {
             if (!objData.getMarker().isSticky() && objData.isExpired()) {
-                System.out.println("object marker expired, hiding");
                 this.objectMarkerManager.hideObjectMarker(objData.getMarker());
                 continue;
             }

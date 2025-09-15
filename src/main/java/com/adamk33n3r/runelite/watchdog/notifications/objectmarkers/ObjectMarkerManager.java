@@ -86,7 +86,6 @@ public class ObjectMarkerManager {
     }
 
     public void hideObjectMarker(ObjectMarker objectMarker) {
-        System.out.println("hiding object marker");
         this.clientThread.invokeLater(() -> this.objects.removeIf(objData -> objData.getMarker() == objectMarker));
     }
 
