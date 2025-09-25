@@ -123,6 +123,13 @@ public class ObjectMarkerManager {
     }
 
     @Subscribe
+    private void onGameStateChanged(GameStateChanged event) {
+        if (event.getGameState() == GameState.LOADING) {
+            this.tileObjectsLoaded.clear();
+        }
+    }
+
+    @Subscribe
     private void onWallObjectSpawned(WallObjectSpawned event) {
         this.tileObjectsLoaded.add(event.getWallObject());
     }
