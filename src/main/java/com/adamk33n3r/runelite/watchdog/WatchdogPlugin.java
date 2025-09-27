@@ -272,7 +272,7 @@ public class WatchdogPlugin extends Plugin {
     }
 
     public void processAlert(Alert alert, String[] triggerValues, boolean forceFire) {
-        var alertProcessor = new AlertProcessor(alert, triggerValues, true, this.alertProcessors::remove);
+        var alertProcessor = new AlertProcessor(alert, triggerValues, forceFire, this.alertProcessors::remove);
         this.alertProcessors.add(alertProcessor);
         alertProcessor.start();
     }
