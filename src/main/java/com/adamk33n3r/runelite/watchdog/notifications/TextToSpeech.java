@@ -75,7 +75,7 @@ public class TextToSpeech extends MessageNotification implements IAudioNotificat
                         log.error("Could not move tmp file to cache, playing from tmp", e);
                         WatchdogPlugin.getInstance().getSoundPlayer().play(file, this.gain);
                     }
-                });
+                }, log::error);
                 return;
             }
 

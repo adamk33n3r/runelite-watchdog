@@ -120,4 +120,12 @@ public class GlobTest {
         assertEquals(".*drop.*", regex);
         assertTrue("Valuable drop: (5,001 coins)".matches(regex));
     }
+
+    @Test
+    public void test_glob_groups() throws Exception {
+        String regex = Util.createRegexFromGlob("{You're assigned to kill,Your new task is to kill} aberrant spectres");
+        assertEquals("(You're assigned to kill|Your new task is to kill) aberrant spectres", regex);
+        assertTrue("You're assigned to kill aberrant spectres".matches(regex));
+        assertTrue("Your new task is to kill aberrant spectres".matches(regex));
+    }
 }

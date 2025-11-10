@@ -442,7 +442,7 @@ public class AlertManager {
                 if (notification instanceof TextToSpeech) {
                     TextToSpeech tts = (TextToSpeech) notification;
                     if (tts.getSource() == TTSSource.ELEVEN_LABS && tts.getElevenLabsVoiceId() != null) {
-                        ElevenLabs.getVoice(this.plugin.getHttpClient(), tts.getElevenLabsVoiceId(), tts::setElevenLabsVoice);
+                        ElevenLabs.getVoice(this.plugin.getHttpClient(), tts.getElevenLabsVoiceId(), tts::setElevenLabsVoice, log::error);
                     }
                 }
                 this.plugin.getInjector().injectMembers(notification);
