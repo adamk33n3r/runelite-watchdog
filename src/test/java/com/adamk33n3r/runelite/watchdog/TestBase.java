@@ -6,8 +6,11 @@ import com.google.inject.Injector;
 import com.google.inject.testing.fieldbinder.Bind;
 import com.google.inject.testing.fieldbinder.BoundFieldModule;
 import net.runelite.api.Client;
+import net.runelite.client.account.AccountClient;
+import net.runelite.client.account.SessionManager;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.chat.ChatMessageManager;
+import net.runelite.client.config.ChatColorConfig;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.config.RuneLiteConfig;
 import net.runelite.client.game.ItemManager;
@@ -22,6 +25,7 @@ import org.mockito.internal.util.reflection.FieldSetter;
 
 import javax.inject.Named;
 import javax.inject.Provider;
+import java.io.File;
 import java.util.concurrent.ScheduledExecutorService;
 
 public abstract class TestBase {
@@ -46,6 +50,27 @@ public abstract class TestBase {
     @Bind
     @Named("runelite.title")
     private final String RUNELITE_TITLE = "RuneLite";
+    @Bind
+    @Mock
+    @Named("sessionfile")
+    private final File SESSION_FILE = null;
+    @Bind
+    @Named("safeMode")
+    private final Boolean SAFE_MODE = false;
+    @Bind
+    @Named("profile")
+    private final String PROFILE = "";
+    @Bind
+    @Named("runelite.oauth.redirect")
+    private final String OAUTH_REDIRECT = "";
+
+
+    @Bind
+    @Named("runelite.api.base")
+    okhttp3.HttpUrl API_BASE = okhttp3.HttpUrl.get("https://api.runelite.net");
+    @Bind
+    @Named("runelite.static.base")
+    okhttp3.HttpUrl STATIC_BASE = okhttp3.HttpUrl.get("https://static.runelite.net");
 
     @Bind
     @Spy
@@ -64,7 +89,9 @@ public abstract class TestBase {
     @Bind
     Provider<MultiplexingPluginPanel> multiplexingPluginPanelProvider = () -> alertManager.getWatchdogPanel().getMuxer();
 
-
+    @Bind
+    @Mock
+    ChatColorConfig chatColorConfig;
     @Bind
     Gson clientGson = RuneLiteAPI.GSON;
     @Mock
@@ -73,6 +100,9 @@ public abstract class TestBase {
     @Mock
     @Bind
     RuneLiteConfig runeliteConfig;
+    @Mock
+    @Bind
+    SessionManager sessionManager;
     @Mock
     @Bind
     ConfigManager configManager;

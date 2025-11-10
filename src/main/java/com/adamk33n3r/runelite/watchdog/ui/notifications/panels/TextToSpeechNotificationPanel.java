@@ -14,6 +14,7 @@ import com.adamk33n3r.runelite.watchdog.ui.notifications.VolumeSlider;
 import com.adamk33n3r.runelite.watchdog.ui.panels.NotificationsPanel;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
 
+import lombok.extern.slf4j.Slf4j;
 import net.runelite.client.ui.ColorScheme;
 
 import javax.swing.*;
@@ -22,6 +23,7 @@ import java.awt.Font;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 
+@Slf4j
 public class TextToSpeechNotificationPanel extends NotificationPanel {
     public TextToSpeechNotificationPanel(TextToSpeech notification, NotificationsPanel parentPanel, Runnable onChangeListener, PanelUtils.OnRemove onRemove) {
         super(notification, parentPanel, onChangeListener, onRemove);
@@ -105,7 +107,7 @@ public class TextToSpeechNotificationPanel extends NotificationPanel {
                             }
                         });
                     });
-                });
+                }, log::error);
                 this.settings.add(voiceSelect);
                 break;
             case LEGACY:

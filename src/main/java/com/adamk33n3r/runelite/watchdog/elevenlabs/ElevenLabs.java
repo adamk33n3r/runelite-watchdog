@@ -16,7 +16,7 @@ import static net.runelite.http.api.RuneLiteAPI.JSON;
 public class ElevenLabs {
     private static final String BASE_URL = "https://api.elevenlabs.io/";
 
-    public static void getVoice(OkHttpClient client, String voiceID, Consumer<Voice> callback) {
+    public static void getVoice(OkHttpClient client, String voiceID, Consumer<Voice> callback, Consumer<String> errorCallback) {
         if (voiceID == null) {
             return;
         }
@@ -25,25 +25,24 @@ public class ElevenLabs {
             .addHeader("accept", "application/json")
             .addHeader("xi-api-key", WatchdogPlugin.getInstance().getConfig().elevenLabsAPIKey())
             .build();
-        makeRequest(client, request, Voice.class, callback);
+        makeRequest(client, request, Voice.class, callback, errorCallback);
     }
 
-    public static void getVoices(OkHttpClient client, Consumer<Voices> callback) {
+    public static void getVoices(OkHttpClient client, Consumer<Voices> callback, Consumer<String> errorCallback) {
         Request request = new Request.Builder()
             .url(BASE_URL + "v1/voices")
             .addHeader("accept", "application/json")
             .addHeader("xi-api-key", WatchdogPlugin.getInstance().getConfig().elevenLabsAPIKey())
             .build();
-        makeRequest(client, request, Voices.class, callback);
+        makeRequest(client, request, Voices.class, callback, errorCallback);
     }
 
-    public static void generateTTS(OkHttpClient client, Voice voice, String message, Consumer<File> callback) {
+    public static void generateTTS(OkHttpClient client, Voice voice, String message, Consumer<File> callback, Consumer<String> errorCallback) {
 //        String body = WatchdogPlugin.getInstance().getAlertManager().getGson().toJson("");
         Request request = new Request.Builder()
             .url(BASE_URL + "v1/text-to-speech/" + voice.getVoiceId())
             .post(RequestBody.create(JSON, "{\n" +
                 "  \"text\": \""+message+"\",\n" +
-                "  \"model_id\": \"eleven_monolingual_v1\",\n" +
                 "  \"voice_settings\": {\n" +
                 "    \"stability\": 0.5,\n" +
                 "    \"similarity_boost\": 0.5,\n" +
@@ -53,11 +52,11 @@ public class ElevenLabs {
                 "}"))
             .addHeader("xi-api-key", WatchdogPlugin.getInstance().getConfig().elevenLabsAPIKey())
             .build();
-        makeRequest(client, request, File.class, callback);
+        makeRequest(client, request, File.class, callback, errorCallback);
 //        download(client, "U4OFqla1WHSBijg88mGB", callback);
     }
 
-    public static void download(OkHttpClient client, String id, Consumer<File> callback) {
+    public static void download(OkHttpClient client, String id, Consumer<File> callback, Consumer<String> errorCallback) {
         Request request = new Request.Builder()
             .url(BASE_URL + "v1/history/download")
             .post(RequestBody.create(JSON, "{\n" +
@@ -67,10 +66,10 @@ public class ElevenLabs {
                 "}"))
             .addHeader("xi-api-key", WatchdogPlugin.getInstance().getConfig().elevenLabsAPIKey())
             .build();
-        makeRequest(client, request, File.class, callback);
+        makeRequest(client, request, File.class, callback, errorCallback);
     }
 
-    private static <T> void makeRequest(OkHttpClient client, Request request, Class<T> rType, Consumer<T> callback) {
+    private static <T> void makeRequest(OkHttpClient client, Request request, Class<T> rType, Consumer<T> callback, Consumer<String> errorCallback) {
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(@Nonnull Call call, @Nonnull IOException e) {
@@ -82,11 +81,13 @@ public class ElevenLabs {
                 try (ResponseBody responseBody = response.body()) {
                     if (!response.isSuccessful()) {
                         log.error("Unexpected error code: {}", response);
+                        errorCallback.accept(response.message() + ": " + (responseBody != null ? responseBody.string() : "no body"));
                         return;
                     }
 
                     if (responseBody == null) {
                         log.error("Response body is null: {}", response);
+                        errorCallback.accept("Response body is null");
                         return;
                     }
 
