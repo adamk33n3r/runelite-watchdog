@@ -7,8 +7,6 @@ import com.adamk33n3r.runelite.watchdog.ui.panels.NotificationsPanel;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
 import net.runelite.client.ui.ColorScheme;
 
-import java.awt.*;
-
 public class PluginMessageNotificationPanel extends NotificationPanel {
     public PluginMessageNotificationPanel(PluginMessage notification, NotificationsPanel parentPanel, Runnable onChangeListener, PanelUtils.OnRemove onRemove) {
         super(notification, parentPanel, onChangeListener, onRemove);

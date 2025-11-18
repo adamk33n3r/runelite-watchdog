@@ -114,7 +114,7 @@ public enum Region {
 //        .build()),
     ;
 
-    private final RegionConfig config;
+    final RegionConfig config;
 
     Region(RegionConfig config) {
         this.config = config;
@@ -134,7 +134,7 @@ public enum Region {
 
     @Data
     @Builder
-    private static class RegionConfig {
+    static class RegionConfig {
         @Builder.Default
         public final Set<Integer> regionIDs = Set.of();
         @Builder.Default

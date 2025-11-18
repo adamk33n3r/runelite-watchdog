@@ -177,6 +177,8 @@ public class NotificationsPanel extends JPanel {
             notificationPanel = new ObjectMarkerNotificationPanel((ObjectMarker) notification, this, this.colorPickerManager, this.alertManager::saveAlerts, removeNotification);
         else if (notification instanceof Dink)
             notificationPanel = new DinkNotificationPanel((Dink) notification, this, this.configManager, this.alertManager::saveAlerts, removeNotification);
+        else if (notification instanceof ShortestPath)
+            notificationPanel = new ShortestPathNotificationPanel((ShortestPath) notification, this, this.configManager, this.alertManager::saveAlerts, removeNotification);
         else if (notification instanceof PluginMessage)
             notificationPanel = new PluginMessageNotificationPanel((PluginMessage) notification, this, this.alertManager::saveAlerts, removeNotification);
 
