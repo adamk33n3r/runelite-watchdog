@@ -69,14 +69,17 @@ public class ObjectMarkerManager {
                 return;
             }
             TileObject tileObject = this.tileObjectsLoaded.stream().filter(obj -> {
-                WorldPoint worldPoint = WorldPoint.fromLocalInstance(this.client, obj.getLocalLocation());
+                // Not sure why this was happening, might be fixed by the onWorldViewUnloaded event
+                if (this.client.getWorldView(obj.getLocalLocation().getWorldView()) == null) {
+                    return false;
+                }
+                WorldPoint worldPoint = WorldPoint.fromLocalInstance(this.client, obj.getLocalLocation(), obj.getPlane());
                 return objectIdEquals(obj, objectPoint.getId()) &&
                     worldPoint.getRegionX() == objectPoint.getRegionX() &&
                     worldPoint.getRegionY() == objectPoint.getRegionY() &&
                     worldPoint.getPlane() == objectPoint.getPlane();
             }).findFirst().orElse(null);
             if (tileObject == null) {
-                log.debug("ObjectMarker {} could not find tile object", objectMarker);
                 return;
             }
             objectMarker.setTileObject(tileObject);
@@ -106,7 +109,13 @@ public class ObjectMarkerManager {
             return;
         }
 
-        final TileObject tileObject = findTileObject(client.getTopLevelWorldView().getPlane(), event.getActionParam0(), event.getActionParam1(), event.getIdentifier());
+        int worldId = event.getMenuEntry().getWorldViewId();
+        WorldView wv = client.getWorldView(worldId);
+        if (wv == null) {
+            return;
+        }
+
+        final TileObject tileObject = findTileObject(wv, event.getActionParam0(), event.getActionParam1(), event.getIdentifier());
         if (tileObject == null)
         {
             return;
@@ -115,6 +124,7 @@ public class ObjectMarkerManager {
         client.getMenu().createMenuEntry(-1)
             .setOption(MARK)
             .setTarget(event.getTarget())
+            .setWorldViewId(worldId)
             .setParam0(event.getActionParam0())
             .setParam1(event.getActionParam1())
             .setIdentifier(event.getIdentifier())
@@ -130,6 +140,12 @@ public class ObjectMarkerManager {
     }
 
     @Subscribe
+    private void onWorldViewUnloaded(WorldViewUnloaded event) {
+        WorldView wv = event.getWorldView();
+        this.tileObjectsLoaded.removeIf(o -> o.getWorldView() == wv);
+    }
+
+    @Subscribe
     private void onWallObjectSpawned(WallObjectSpawned event) {
         this.tileObjectsLoaded.add(event.getWallObject());
     }
@@ -141,6 +157,8 @@ public class ObjectMarkerManager {
 
     @Subscribe
     private void onGameObjectSpawned(GameObjectSpawned event) {
+        ObjectComposition objectDefinition = getObjectComposition(event.getGameObject().getId());
+        String name = objectDefinition.getName();
         this.tileObjectsLoaded.add(event.getGameObject());
     }
 
@@ -171,7 +189,12 @@ public class ObjectMarkerManager {
 
     private void markObject(MenuEntry entry)
     {
-        TileObject object = findTileObject(client.getTopLevelWorldView().getPlane(), entry.getParam0(), entry.getParam1(), entry.getIdentifier());
+        WorldView wv = client.getWorldView(entry.getWorldViewId());
+        if (wv == null) {
+            return;
+        }
+
+        TileObject object = findTileObject(wv, entry.getParam0(), entry.getParam1(), entry.getIdentifier());
         if (object == null)
         {
             return;
@@ -191,15 +214,12 @@ public class ObjectMarkerManager {
         markObject(objectDefinition, name, object);
     }
 
-    private TileObject findTileObject(int z, int x, int y, int id)
+    private TileObject findTileObject(WorldView wv, int x, int y, int id)
     {
-        Scene scene = client.getTopLevelWorldView().getScene();
+        int level = wv.getPlane();
+        Scene scene = wv.getScene();
         Tile[][][] tiles = scene.getTiles();
-        final int size = Constants.SCENE_SIZE;
-        if (x < 0 || y < 0 || x >= size || y >= size) {
-            return null;
-        }
-        final Tile tile = tiles[z][x][y];
+        final Tile tile = tiles[level][x][y];
         if (tile == null) {
             return null;
         }

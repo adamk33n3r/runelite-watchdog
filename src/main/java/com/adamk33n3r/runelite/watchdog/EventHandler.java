@@ -20,6 +20,7 @@ import net.runelite.client.util.Text;
 
 import lombok.extern.slf4j.Slf4j;
 
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
@@ -373,7 +374,10 @@ public class EventHandler {
         this.onSpawned(impostor.getName(), impostor.getId(), location, mode, type);
     }
 
-    private void onSpawned(String name, int id, WorldPoint location, SpawnedAlert.SpawnedDespawned mode, SpawnedAlert.SpawnedType type) {
+    private void onSpawned(@Nullable String name, int id, WorldPoint location, SpawnedAlert.SpawnedDespawned mode, SpawnedAlert.SpawnedType type) {
+        if (name == null) {
+            return;
+        }
         String unformattedName = Text.removeFormattingTags(name);
         int distanceToObject = location.distanceTo(this.client.getLocalPlayer().getWorldLocation());
         this.alertManager.getAllEnabledAlertsOfType(SpawnedAlert.class)

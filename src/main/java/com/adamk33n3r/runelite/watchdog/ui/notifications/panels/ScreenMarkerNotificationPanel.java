@@ -1,7 +1,5 @@
 package com.adamk33n3r.runelite.watchdog.ui.notifications.panels;
 
-import com.adamk33n3r.runelite.watchdog.LengthLimitFilter;
-import com.adamk33n3r.runelite.watchdog.SimpleDocumentListener;
 import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
 import com.adamk33n3r.runelite.watchdog.notifications.ScreenMarker;
 import com.adamk33n3r.runelite.watchdog.ui.FlatTextArea;
@@ -15,10 +13,7 @@ import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.components.colorpicker.ColorPickerManager;
 
 import javax.swing.*;
-import javax.swing.text.AbstractDocument;
 import java.awt.GridLayout;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
 
 public class ScreenMarkerNotificationPanel extends NotificationPanel {
     private ScreenMarkerOverlay screenMarkerOverlay;
@@ -62,24 +57,16 @@ public class ScreenMarkerNotificationPanel extends NotificationPanel {
         });
         this.settings.add(this.setMarkerButton);
 
-        FlatTextArea markerLabel = new FlatTextArea("Optional marker label...", true);
-        markerLabel.setText(screenMarker.getName());
-        ((AbstractDocument) markerLabel.getDocument()).setDocumentFilter(new LengthLimitFilter(200));
-        markerLabel.getDocument().addDocumentListener((SimpleDocumentListener) ev -> {
-            screenMarker.setName(markerLabel.getText());
-            screenMarker.setLabelled(!markerLabel.getText().isEmpty());
-        });
-        markerLabel.getTextArea().addFocusListener(new FocusListener() {
-            @Override
-            public void focusGained(FocusEvent e) {
-                markerLabel.getTextArea().selectAll();
-            }
-
-            @Override
-            public void focusLost(FocusEvent e) {
+        FlatTextArea markerLabel = PanelUtils.createTextField(
+            "Optional marker label...",
+            "",
+            screenMarker.getName(),
+            val -> {
+                screenMarker.setName(val);
+                screenMarker.setLabelled(!val.isEmpty());
                 onChangeListener.run();
             }
-        });
+        );
         this.settings.add(markerLabel);
 
         this.settings.add(PanelUtils.createColorPicker(
@@ -144,24 +131,15 @@ public class ScreenMarkerNotificationPanel extends NotificationPanel {
         sub.setBackground(ColorScheme.DARKER_GRAY_COLOR);
         this.settings.add(sub);
 
-        FlatTextArea stickyIdField = new FlatTextArea("ID to use with Dismiss Screen Marker...", true);
-        stickyIdField.setText(notification.getId());
-        ((AbstractDocument) stickyIdField.getDocument()).setDocumentFilter(new LengthLimitFilter(200));
-        stickyIdField.getDocument().addDocumentListener((SimpleDocumentListener) ev -> {
-            notification.setId(stickyIdField.getText());
-        });
-        stickyIdField.getTextArea().addFocusListener(new FocusListener() {
-            @Override
-            public void focusGained(FocusEvent e) {
-                stickyIdField.getTextArea().selectAll();
-            }
-
-            @Override
-            public void focusLost(FocusEvent e) {
+        this.stickyId = PanelUtils.createTextField(
+            "ID to use with Dismiss Screen Marker...",
+            "",
+            notification.getId(),
+            val -> {
+                notification.setId(val);
                 onChangeListener.run();
             }
-        });
-        this.stickyId = stickyIdField;
+        );
 
         if (notification.isSticky()) {
             this.settings.add(this.stickyId);

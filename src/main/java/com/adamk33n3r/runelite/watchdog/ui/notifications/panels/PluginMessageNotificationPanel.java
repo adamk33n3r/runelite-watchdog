@@ -7,12 +7,14 @@ import com.adamk33n3r.runelite.watchdog.ui.panels.NotificationsPanel;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
 import net.runelite.client.ui.ColorScheme;
 
+
 public class PluginMessageNotificationPanel extends NotificationPanel {
     public PluginMessageNotificationPanel(PluginMessage notification, NotificationsPanel parentPanel, Runnable onChangeListener, PanelUtils.OnRemove onRemove) {
         super(notification, parentPanel, onChangeListener, onRemove);
 
         this.rebuild();
     }
+
     private void rebuild() {
         this.settings.removeAll();
 
@@ -22,6 +24,7 @@ public class PluginMessageNotificationPanel extends NotificationPanel {
             "Namespace",
             "The namespace of the plugin message. Usually the name of the plugin.",
             notification.getNamespace(),
+            ":",
             "Method",
             "The method or action of the plugin message.",
             notification.getName(),

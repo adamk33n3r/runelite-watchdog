@@ -8,7 +8,6 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 import net.runelite.api.ObjectComposition;
 import net.runelite.api.TileObject;
-import net.runelite.client.callback.ClientThread;
 
 import javax.inject.Inject;
 import java.awt.*;

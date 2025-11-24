@@ -1,37 +1,23 @@
 package com.adamk33n3r.runelite.watchdog.ui.notifications.panels;
 
-import com.adamk33n3r.runelite.watchdog.LengthLimitFilter;
-import com.adamk33n3r.runelite.watchdog.SimpleDocumentListener;
 import com.adamk33n3r.runelite.watchdog.notifications.DismissObjectMarker;
 import com.adamk33n3r.runelite.watchdog.ui.FlatTextArea;
 import com.adamk33n3r.runelite.watchdog.ui.panels.NotificationsPanel;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
 
-import javax.swing.text.AbstractDocument;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
-
 public class DismissObjectMarkerNotificationPanel extends NotificationPanel {
     public DismissObjectMarkerNotificationPanel(DismissObjectMarker notification, NotificationsPanel parentPanel, Runnable onChangeListener, PanelUtils.OnRemove onRemove) {
         super(notification, parentPanel, onChangeListener, onRemove);
 
-        FlatTextArea flatTextArea = new FlatTextArea("Enter the ID of the object marker...", true);
-        flatTextArea.setText(notification.getDismissId());
-        ((AbstractDocument) flatTextArea.getDocument()).setDocumentFilter(new LengthLimitFilter(200));
-        flatTextArea.getDocument().addDocumentListener((SimpleDocumentListener) ev -> {
-            notification.setDismissId(flatTextArea.getText());
-        });
-        flatTextArea.getTextArea().addFocusListener(new FocusListener() {
-            @Override
-            public void focusGained(FocusEvent e) {
-                flatTextArea.getTextArea().selectAll();
-            }
-
-            @Override
-            public void focusLost(FocusEvent e) {
+        FlatTextArea flatTextArea = PanelUtils.createTextField(
+            "Enter the ID of the object marker...",
+            "This is set in the Object Marker notification when set to Sticky.",
+            notification.getDismissId(),
+            val -> {
+                notification.setDismissId(val);
                 onChangeListener.run();
             }
-        });
+        );
         this.settings.add(flatTextArea);
     }
 }

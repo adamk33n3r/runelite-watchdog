@@ -12,6 +12,7 @@ import com.adamk33n3r.runelite.watchdog.ui.notifications.panels.PluginMessageNot
 import com.adamk33n3r.runelite.watchdog.ui.notifications.panels.*;
 
 import net.runelite.client.config.ConfigManager;
+import net.runelite.client.plugins.PluginManager;
 import net.runelite.client.ui.DynamicGridLayout;
 import net.runelite.client.ui.components.DragAndDropReorderPane;
 import net.runelite.client.ui.components.colorpicker.ColorPickerManager;
@@ -38,6 +39,9 @@ public class NotificationsPanel extends JPanel {
 
     @Inject
     private ConfigManager configManager;
+
+    @Inject
+    private PluginManager pluginManager;
 
     @Inject
     private WatchdogConfig config;
@@ -181,6 +185,10 @@ public class NotificationsPanel extends JPanel {
             notificationPanel = new ShortestPathNotificationPanel((ShortestPath) notification, this, this.configManager, this.alertManager::saveAlerts, removeNotification);
         else if (notification instanceof PluginMessage)
             notificationPanel = new PluginMessageNotificationPanel((PluginMessage) notification, this, this.alertManager::saveAlerts, removeNotification);
+        else if (notification instanceof PluginConfigChange)
+            notificationPanel = new PluginConfigChangeNotificationPanel((PluginConfigChange) notification, this, this.alertManager::saveAlerts, removeNotification);
+        else if (notification instanceof PluginToggle)
+            notificationPanel = new PluginToggleNotificationPanel((PluginToggle) notification, this, this.pluginManager, this.alertManager::saveAlerts, removeNotification);
 
         if (notificationPanel != null)
             this.notificationContainer.add(notificationPanel);

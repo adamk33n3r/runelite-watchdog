@@ -41,17 +41,14 @@ import static com.adamk33n3r.runelite.watchdog.notifications.objectmarkers.Objec
 
 public class ObjectMarkerOverlay extends Overlay
 {
-    private final Client client;
     private final ObjectMarkerManager objectMarkerManager;
     private final ModelOutlineRenderer modelOutlineRenderer;
 
     @Inject
     private ObjectMarkerOverlay(
-        Client client,
         ObjectMarkerManager objectMarkerManager,
         ModelOutlineRenderer modelOutlineRenderer
     ) {
-        this.client = client;
         this.objectMarkerManager = objectMarkerManager;
         this.modelOutlineRenderer = modelOutlineRenderer;
         setPosition(OverlayPosition.DYNAMIC);
@@ -84,7 +81,11 @@ public class ObjectMarkerOverlay extends Overlay
         ObjectMarker obj = objData.getMarker();
         Stroke stroke = new BasicStroke((float) obj.getBorderWidth());
         TileObject object = obj.getTileObject();
-        if (object == null || object.getPlane() != client.getTopLevelWorldView().getPlane())
+        if (object == null) {
+            return;
+        }
+        WorldView wv = object.getWorldView();
+        if (wv == null || object.getPlane() != wv.getPlane())
         {
             return;
         }

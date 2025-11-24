@@ -182,12 +182,13 @@ public class PanelUtils {
         String firstPlaceholder,
         String firstTooltip,
         String firstInitialValue,
+        String splitter,
         String secondPlaceholder,
         String secondTooltip,
         String secondInitialValue,
         BiConsumer<String, String> onChange
     ) {
-        FlatTextAreaNamespace flatTextArea = new FlatTextAreaNamespace(firstPlaceholder, ":", secondPlaceholder, true);
+        FlatTextAreaNamespace flatTextArea = new FlatTextAreaNamespace(firstPlaceholder, splitter, secondPlaceholder, true);
         flatTextArea.getPrefixTextArea().setToolTipText(firstTooltip);
         flatTextArea.getTextArea().setToolTipText(secondTooltip);
         flatTextArea.getPrefixTextArea().setText(firstInitialValue);
@@ -225,7 +226,7 @@ public class PanelUtils {
         FlatTextArea flatTextArea = new FlatTextArea(placeholder, true);
         flatTextArea.setText(initialValue);
         flatTextArea.setToolTipText(tooltip);
-        ((AbstractDocument) flatTextArea.getDocument()).setDocumentFilter(new LengthLimitFilter(4096));
+        ((AbstractDocument) flatTextArea.getDocument()).setDocumentFilter(new LengthLimitFilter(200));
         flatTextArea.getDocument().addDocumentListener((SimpleDocumentListener) ev -> {
             onChange.accept(flatTextArea.getText());
         });
@@ -240,6 +241,7 @@ public class PanelUtils {
                 onChange.accept(flatTextArea.getText());
             }
         });
+        flatTextArea.setHoverBackgroundColor(ColorScheme.DARK_GRAY_HOVER_COLOR);
         return flatTextArea;
     }
 
@@ -263,7 +265,7 @@ public class PanelUtils {
                 onChange.accept(textArea.getText());
             }
         });
-
+        textArea.setHoverBackgroundColor(ColorScheme.DARK_GRAY_HOVER_COLOR);
         return textArea;
     }
 
@@ -350,12 +352,12 @@ public class PanelUtils {
         return select;
     }
 
-    public static <T> JComboBox<T> createSelect(T[] items, T initialValue, @Nullable Function<T, String> onRender, Consumer<T> onChange) {
+    public static <T> JComboBox<T> createSelect(T[] items, T initialValue, @Nullable Function<T, String> onRender, String placeholder, Consumer<T> onChange) {
         JComboBox<T> select = new JComboBox<>(items);
         select.setSelectedItem(initialValue);
         select.setRenderer((list, value, index, isSelected, cellHasFocus) -> {
             if (onRender != null) {
-                String title = value == null ? "Loading..." : onRender.apply(value);
+                String title = value == null ? placeholder : onRender.apply(value);
                 return new DefaultListCellRenderer().getListCellRendererComponent(list, title, index, isSelected, cellHasFocus);
             }
 

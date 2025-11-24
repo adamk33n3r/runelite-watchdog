@@ -1,7 +1,6 @@
 package com.adamk33n3r.runelite.watchdog.ui.notifications.panels;
 
 import com.adamk33n3r.runelite.watchdog.LengthLimitFilter;
-import com.adamk33n3r.runelite.watchdog.SimpleDocumentListener;
 import com.adamk33n3r.runelite.watchdog.notifications.Dink;
 import com.adamk33n3r.runelite.watchdog.ui.FlatTextArea;
 import com.adamk33n3r.runelite.watchdog.ui.panels.NotificationsPanel;
@@ -11,8 +10,6 @@ import net.runelite.client.config.ConfigManager;
 import javax.swing.*;
 import javax.swing.text.AbstractDocument;
 import java.awt.*;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
 
 public class DinkNotificationPanel extends NotificationPanel {
     private final ConfigManager configManager;
@@ -45,23 +42,16 @@ public class DinkNotificationPanel extends NotificationPanel {
             return;
         }
 
-        FlatTextArea flatTextArea = new FlatTextArea("Enter your message...", true);
-        flatTextArea.setText(notification.getMessage());
-        ((AbstractDocument) flatTextArea.getDocument()).setDocumentFilter(new LengthLimitFilter(4096));
-        flatTextArea.getDocument().addDocumentListener((SimpleDocumentListener) ev -> {
-            notification.setMessage(flatTextArea.getText());
-        });
-        flatTextArea.getTextArea().addFocusListener(new FocusListener() {
-            @Override
-            public void focusGained(FocusEvent e) {
-                flatTextArea.getTextArea().selectAll();
-            }
-
-            @Override
-            public void focusLost(FocusEvent e) {
+        FlatTextArea flatTextArea = PanelUtils.createTextField(
+            "Enter your message...",
+            "",
+            notification.getMessage(),
+            val -> {
+                notification.setMessage(val);
                 onChangeListener.run();
             }
-        });
+        );
+        ((AbstractDocument) flatTextArea.getDocument()).setDocumentFilter(new LengthLimitFilter(4096));
         this.settings.add(flatTextArea);
 
         JCheckBox includeScreenshot = PanelUtils.createCheckbox("Include Screenshot", "Whether or not to include a screenshot in the discord message", notification.isIncludeScreenshot(), (selected) -> {
