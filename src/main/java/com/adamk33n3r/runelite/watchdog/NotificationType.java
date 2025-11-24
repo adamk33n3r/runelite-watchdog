@@ -23,7 +23,6 @@ public enum NotificationType {
     DINK("Dink", "Tell Dink to send a custom notification to your webhook", NotificationCategory.ADVANCED, Dink.class),
     SHORTEST_PATH("Shortest Path", "Sets the Shortest Path plugin's path", NotificationCategory.ADVANCED, ShortestPath.class),
     PLUGIN_MESSAGE("Plugin Message", "Send a message to another plugin", NotificationCategory.ADVANCED, PluginMessage.class),
-    PLUGIN_CONFIG_CHANGE("Plugin Config Change", "Change a plugin's config", NotificationCategory.ADVANCED, PluginConfigChange.class),
     PLUGIN_TOGGLE("Plugin Toggle", "Toggle a plugin's enabled state", NotificationCategory.ADVANCED, PluginToggle.class),
     DISMISS_OVERLAY("Dismiss Overlay", "Dismiss a sticky overlay by ID", NotificationCategory.ADVANCED, DismissOverlay.class),
     DISMISS_SCREEN_MARKER("Dismiss Screen Marker", "Dismiss a sticky screen marker by ID", NotificationCategory.ADVANCED, DismissScreenMarker.class),

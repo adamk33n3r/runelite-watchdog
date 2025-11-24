@@ -107,7 +107,6 @@ public class AlertManager {
             .registerSubtype(Dink.class)
             .registerSubtype(ShortestPath.class)
             .registerSubtype(PluginMessage.class)
-            .registerSubtype(PluginConfigChange.class)
             .registerSubtype(PluginToggle.class)
             .registerSubtype(DismissObjectMarker.class)
             .registerSubtype(DismissOverlay.class)
