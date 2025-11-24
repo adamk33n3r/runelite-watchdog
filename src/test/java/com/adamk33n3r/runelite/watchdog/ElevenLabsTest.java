@@ -9,6 +9,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import java.io.IOException;
+import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -20,7 +22,18 @@ public class ElevenLabsTest extends TestBase {
     public static void setup() {
         apiKey = System.getenv(ENV_VAR_NAME);
         if (apiKey == null) {
-            System.err.println("API Key environment variable '" + ENV_VAR_NAME + "' is not set.");
+            System.err.println("API Key environment variable '" + ENV_VAR_NAME + "' is not set. Trying to load from test.properties");
+            Properties properties = new Properties();
+            try {
+                properties.load(ElevenLabsTest.class.getResourceAsStream("/test.properties"));
+                apiKey = properties.getProperty(ENV_VAR_NAME);
+                if (apiKey == null) {
+                    System.err.println("API Key property '" + ENV_VAR_NAME + "' is not set.");
+                    throw new RuntimeException("API Key property '" + ENV_VAR_NAME + "' is not set.");
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
