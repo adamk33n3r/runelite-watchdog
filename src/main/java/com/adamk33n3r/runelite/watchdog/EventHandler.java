@@ -423,7 +423,7 @@ public class EventHandler {
             return;
         }
         var worldLocation = WorldPoint.fromLocalInstance(this.client, localWorld);
-//        log.debug("local: {} | world: {} | localWorld: {} | newWorld: {}", this.client.getLocalPlayer().getLocalLocation(), world, localWorld, worldLocation);
+//        log.debug("local: {} | world: {} | localWorld: {} | newWorld: {} - {}", this.client.getLocalPlayer().getLocalLocation(), world, localWorld, worldLocation, worldLocation.getRegionID());
         this.alertManager.getAllEnabledAlertsOfType(LocationAlert.class)
             .filter(locationAlert -> locationAlert.shouldFire(worldLocation))
             .forEach(locationAlert -> {

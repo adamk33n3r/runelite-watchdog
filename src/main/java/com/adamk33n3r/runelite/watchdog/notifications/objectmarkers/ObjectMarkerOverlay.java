@@ -59,7 +59,7 @@ public class ObjectMarkerOverlay extends Overlay
     @Override
     public Dimension render(Graphics2D graphics) {
         if (this.objectMarkerManager.isInObjectMarkerMode() && this.objectMarkerManager.getEditingObjectMarker() != null) {
-            renderObject(graphics, new ObjectMarkerData(this.objectMarkerManager.getEditingObjectMarker(), true));
+            renderObject(graphics, this.objectMarkerManager.getEditingObjectMarker());
         }
 
         var objects = this.objectMarkerManager.getObjects();
@@ -72,13 +72,12 @@ public class ObjectMarkerOverlay extends Overlay
                 this.objectMarkerManager.hideObjectMarker(objData.getMarker());
                 continue;
             }
-            renderObject(graphics, objData);
+            renderObject(graphics, objData.getMarker());
         }
         return null;
     }
 
-    private void renderObject(Graphics2D graphics, ObjectMarkerData objData) {
-        ObjectMarker obj = objData.getMarker();
+    private void renderObject(Graphics2D graphics, ObjectMarker obj) {
         Stroke stroke = new BasicStroke((float) obj.getBorderWidth());
         TileObject object = obj.getTileObject();
         if (object == null) {

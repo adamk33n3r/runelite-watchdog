@@ -133,13 +133,6 @@ public class ObjectMarkerManager {
     }
 
     @Subscribe
-    private void onGameStateChanged(GameStateChanged event) {
-        if (event.getGameState() == GameState.LOADING) {
-            this.tileObjectsLoaded.clear();
-        }
-    }
-
-    @Subscribe
     private void onWorldViewUnloaded(WorldViewUnloaded event) {
         WorldView wv = event.getWorldView();
         this.tileObjectsLoaded.removeIf(o -> o.getWorldView() == wv);
@@ -157,8 +150,6 @@ public class ObjectMarkerManager {
 
     @Subscribe
     private void onGameObjectSpawned(GameObjectSpawned event) {
-        ObjectComposition objectDefinition = getObjectComposition(event.getGameObject().getId());
-        String name = objectDefinition.getName();
         this.tileObjectsLoaded.add(event.getGameObject());
     }
 
@@ -199,6 +190,7 @@ public class ObjectMarkerManager {
         {
             return;
         }
+        log.debug("markObject: {} {} {} {} {}", object.getX(), object.getY(), object.getPlane(), object.getId(), object.getWorldView().getId());
 
         // object.getId() is always the base object id, getObjectComposition transforms it to
         // the correct object we see
