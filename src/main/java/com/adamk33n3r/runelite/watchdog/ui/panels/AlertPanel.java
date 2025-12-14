@@ -124,6 +124,7 @@ public abstract class AlertPanel<T extends Alert> extends PluginPanel {
             "Back",
             (btn, modifiers) -> {
                 WatchdogPlugin.getInstance().getScreenMarkerUtil().finishCreation(true);
+                WatchdogPlugin.getInstance().getObjectMarkerManager().turnOffObjectMarkerMode();
                 this.alertManager.saveAlerts();
                 this.muxer.popState();
 

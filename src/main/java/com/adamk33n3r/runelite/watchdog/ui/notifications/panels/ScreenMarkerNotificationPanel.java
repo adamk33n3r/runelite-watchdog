@@ -13,7 +13,7 @@ import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.components.colorpicker.ColorPickerManager;
 
 import javax.swing.*;
-import java.awt.GridLayout;
+import java.awt.*;
 
 public class ScreenMarkerNotificationPanel extends NotificationPanel {
     private ScreenMarkerOverlay screenMarkerOverlay;
@@ -106,33 +106,31 @@ public class ScreenMarkerNotificationPanel extends NotificationPanel {
             }
         );
 
-        JCheckBox sticky = PanelUtils.createCheckbox("Sticky", "Set the notification to not expire", notification.isSticky(), val -> {
-            notification.setSticky(val);
-            if (val) {
-                this.settings.remove(this.displayTime);
-                this.settings.add(this.stickyId);
-            } else {
-                this.settings.remove(this.stickyId);
-                this.settings.add(this.displayTime);
-            }
-            this.revalidate();
-            onChangeListener.run();
-        });
-
+        JPanel borderThickness = PanelUtils.createIconComponent(Icons.BORDER_OUTSIDE, "Border thickness", thickness);
+        this.settings.add(borderThickness);
         JSpinner displayTime = PanelUtils.createSpinner(notification.getDisplayTime(), 0, 99, 1, val -> {
             notification.setDisplayTime(val);
             onChangeListener.run();
         });
-        JPanel borderThickness = PanelUtils.createIconComponent(Icons.BORDER_OUTSIDE, "Border thickness", thickness);
+        displayTime.setEnabled(!notification.isSticky());
         this.displayTime = PanelUtils.createIconComponent(Icons.CLOCK, "Time to display the marker in seconds.", displayTime);
-        JPanel sub = new JPanel(new GridLayout(1, 2, 3, 3));
-        sub.add(borderThickness);
-        sub.add(sticky);
+        JCheckBox sticky = PanelUtils.createCheckbox("Sticky", "Set the notification to not expire", notification.isSticky(), val -> {
+            notification.setSticky(val);
+            displayTime.setEnabled(!val);
+            this.revalidate();
+            onChangeListener.run();
+        });
+
+        this.settings.add(this.displayTime);
+        JPanel sub = new JPanel(new BorderLayout(3, 3));
         sub.setBackground(ColorScheme.DARKER_GRAY_COLOR);
         this.settings.add(sub);
 
+        sub.add(sticky, BorderLayout.EAST);
+        sub.add(this.displayTime);
+
         this.stickyId = PanelUtils.createTextField(
-            "ID to use with Dismiss Screen Marker...",
+            "ID for Dismiss Screen Marker...",
             "",
             notification.getId(),
             val -> {
@@ -141,10 +139,6 @@ public class ScreenMarkerNotificationPanel extends NotificationPanel {
             }
         );
 
-        if (notification.isSticky()) {
-            this.settings.add(this.stickyId);
-        } else {
-            this.settings.add(this.displayTime);
-        }
+        this.settings.add(this.stickyId);
     }
 }

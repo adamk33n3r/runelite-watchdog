@@ -23,13 +23,13 @@ public class ObjectMarkerNotificationPanel extends NotificationPanel {
         this.setMarkerButton = PanelUtils.createButton("Set Marker", "Set Marker", (btn, modifiers) -> {
             ObjectMarkerManager objectMarkerManager = WatchdogPlugin.getInstance().getObjectMarkerManager();
             // Done
-            if (objectMarkerManager.isInObjectMarkerMode()) {
+            if (objectMarkerManager.isInObjectMarkerMode() && this.setMarkerButton.getText().equals("Finish")) {
                 this.setMarkerButton.setText("Set Marker");
                 this.setMarkerButton.setToolTipText("Set Marker");
                 objectMarkerManager.turnOffObjectMarkerMode();
                 onChangeListener.run();
             // Start
-            } else {
+            } else if (!objectMarkerManager.isInObjectMarkerMode() && this.setMarkerButton.getText().equals("Set Marker")) {
                 this.setMarkerButton.setText("Finish");
                 this.setMarkerButton.setToolTipText("Finish");
                 objectMarkerManager.turnOnObjectMarkerMode(notification);
@@ -108,33 +108,28 @@ public class ObjectMarkerNotificationPanel extends NotificationPanel {
         sub.setBackground(ColorScheme.DARKER_GRAY_COLOR);
         this.settings.add(sub);
 
-        JPanel stickySub = new JPanel(new GridLayout(1, 2, 3, 3));
+        JPanel stickySub = new JPanel(new BorderLayout(3, 3));
         stickySub.setBackground(ColorScheme.DARKER_GRAY_COLOR);
         this.settings.add(stickySub);
-
-        JCheckBox sticky = PanelUtils.createCheckbox("Sticky", "Set the notification to not expire", notification.isSticky(), val -> {
-            notification.setSticky(val);
-            if (val) {
-                stickySub.remove(this.displayTime);
-                stickySub.add(this.stickyId);
-            } else {
-                stickySub.remove(this.stickyId);
-                stickySub.add(this.displayTime);
-            }
-            stickySub.revalidate();
-            stickySub.repaint();
-            onChangeListener.run();
-        });
-        stickySub.add(sticky);
 
         JSpinner displayTime = PanelUtils.createSpinner(notification.getDisplayTime(), 0, 99, 1, val -> {
             notification.setDisplayTime(val);
             onChangeListener.run();
         });
+        displayTime.setEnabled(!notification.isSticky());
         this.displayTime = PanelUtils.createIconComponent(Icons.CLOCK, "Time to display the marker in seconds.", displayTime);
+        JCheckBox sticky = PanelUtils.createCheckbox("Sticky", "Set the notification to not expire", notification.isSticky(), val -> {
+            notification.setSticky(val);
+            displayTime.setEnabled(!val);
+            stickySub.revalidate();
+            stickySub.repaint();
+            onChangeListener.run();
+        });
+        stickySub.add(sticky, BorderLayout.EAST);
+        stickySub.add(this.displayTime);
 
         this.stickyId = PanelUtils.createTextArea(
-            "ID to use with Dismiss Object Marker...",
+            "ID for Dismiss Object Marker...",
             "",
             notification.getId(),
             val -> {
@@ -143,10 +138,6 @@ public class ObjectMarkerNotificationPanel extends NotificationPanel {
             }
         );
 
-        if (notification.isSticky()) {
-            stickySub.add(this.stickyId);
-        } else {
-            stickySub.add(this.displayTime);
-        }
+        this.settings.add(this.stickyId);
     }
 }

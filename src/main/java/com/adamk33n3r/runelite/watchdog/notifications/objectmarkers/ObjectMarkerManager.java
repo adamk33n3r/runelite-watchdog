@@ -47,53 +47,64 @@ public class ObjectMarkerManager {
     private final List<TileObject> tileObjectsLoaded = new ArrayList<>();
 
     public void turnOnObjectMarkerMode(ObjectMarker objectMarker) {
-        this.isInObjectMarkerMode = true;
-        this.editingObjectMarker = objectMarker;
-        if (objectMarker.getObjectPoint() == null) {
-            objectMarker.setObjectPoint(new ObjectPoint());
-        }
+        this.clientThread.invoke(() -> {
+            this.isInObjectMarkerMode = true;
+            this.editingObjectMarker = objectMarker;
+            this.setTileObjectAndComposition(objectMarker);
+            if (objectMarker.getObjectPoint() == null) {
+                objectMarker.setObjectPoint(new ObjectPoint());
+            }
+        });
     }
 
     public void turnOffObjectMarkerMode() {
-        this.hideObjectMarker(this.editingObjectMarker);
         this.isInObjectMarkerMode = false;
         this.editingObjectMarker = null;
     }
 
     public void showObjectMarker(ObjectMarker objectMarker) {
-        this.clientThread.invokeLater(() -> {
+        this.clientThread.invoke(() -> {
             log.debug("showObjectMarker: {}", objectMarker);
-            ObjectPoint objectPoint = objectMarker.getObjectPoint();
-            if (objectPoint == null) {
-                log.debug("ObjectMarker {} has no ObjectPoint; ignoring show.", objectMarker);
-                return;
-            }
-            TileObject tileObject = this.tileObjectsLoaded.stream().filter(obj -> {
-                // Not sure why this was happening, might be fixed by the onWorldViewUnloaded event
-                if (this.client.getWorldView(obj.getLocalLocation().getWorldView()) == null) {
-                    return false;
-                }
-                WorldPoint worldPoint = WorldPoint.fromLocalInstance(this.client, obj.getLocalLocation(), obj.getPlane());
-                return objectIdEquals(obj, objectPoint.getId()) &&
-                    worldPoint.getRegionX() == objectPoint.getRegionX() &&
-                    worldPoint.getRegionY() == objectPoint.getRegionY() &&
-                    worldPoint.getPlane() == objectPoint.getPlane();
-            }).findFirst().orElse(null);
-            if (tileObject == null) {
-                return;
-            }
-            objectMarker.setTileObject(tileObject);
-            objectMarker.setComposition(this.client.getObjectDefinition(objectPoint.getId()));
+            this.setTileObjectAndComposition(objectMarker);
             this.objects.add(new ObjectMarkerData(objectMarker));
         });
     }
 
+    private void setTileObjectAndComposition(ObjectMarker objectMarker) {
+        ObjectPoint objectPoint = objectMarker.getObjectPoint();
+        if (objectPoint == null) {
+            log.debug("ObjectMarker {} has no ObjectPoint; ignoring show.", objectMarker);
+            return;
+        }
+        TileObject tileObject = this.tileObjectsLoaded.stream().filter(obj -> {
+            // Not sure why this was happening, might be fixed by the onWorldViewUnloaded event
+            if (this.client.getWorldView(obj.getLocalLocation().getWorldView()) == null) {
+                return false;
+            }
+            WorldPoint worldPoint = WorldPoint.fromLocalInstance(this.client, obj.getLocalLocation(), obj.getPlane());
+            return objectIdEquals(obj, objectPoint.getId()) &&
+                worldPoint.getRegionX() == objectPoint.getRegionX() &&
+                worldPoint.getRegionY() == objectPoint.getRegionY() &&
+                worldPoint.getPlane() == objectPoint.getPlane();
+        }).findFirst().orElse(null);
+        if (tileObject == null) {
+            return;
+        }
+        objectMarker.setTileObject(tileObject);
+        objectMarker.setComposition(this.client.getObjectDefinition(objectPoint.getId()));
+    }
+
     public void hideObjectMarker(ObjectMarker objectMarker) {
-        this.clientThread.invokeLater(() -> this.objects.removeIf(objData -> objData.getMarker() == objectMarker));
+        // Do NOT return from this method lol, if it tries to delete but fails it will defer until it can
+        this.clientThread.invokeLater(() -> {
+            this.objects.removeIf(objData -> objData.getMarker() == objectMarker);
+        });
     }
 
     public void hideObjectMarkerById(String id) {
-        this.clientThread.invokeLater(() -> this.objects.removeIf(objData -> Objects.equals(objData.getMarker().getId(), id)));
+        this.clientThread.invokeLater(() -> {
+            this.objects.removeIf(objData -> Objects.equals(objData.getMarker().getId(), id));
+        });
     }
 
     public void removeAllMarkers() {

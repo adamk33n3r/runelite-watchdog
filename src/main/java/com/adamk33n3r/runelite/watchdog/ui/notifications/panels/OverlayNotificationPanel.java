@@ -51,43 +51,44 @@ public class OverlayNotificationPanel extends MessageNotificationPanel {
         );
         this.settings.add(colorPicker);
 
-        this.settings.add(PanelUtils.createFileChooser(null, "Path to the image file", ev -> {
+        JPanel fileSub = new JPanel(new BorderLayout(3, 3));
+        fileSub.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+        this.settings.add(fileSub);
+        fileSub.add(PanelUtils.createFileChooser(null, "Path to the image file", ev -> {
             JFileChooser fileChooser = (JFileChooser) ev.getSource();
             notification.setImagePath(fileChooser.getSelectedFile().getAbsolutePath());
             onChangeListener.run();
         }, notification.getImagePath(), "Image Files", "png", "jpg"));
 
-        JPanel checkboxes = new JPanel(new GridLayout(1, 2, 5, 5));
-        checkboxes.setBackground(ColorScheme.DARKER_GRAY_COLOR);
-        var resizeImageCheckbox = PanelUtils.createCheckbox("Resize Image", "Resize the image to a standard size", notification.isResizeImage(), val -> {
+        var resizeImageCheckbox = PanelUtils.createCheckbox("Resize", "Resize the image to a standard size", notification.isResizeImage(), val -> {
             notification.setResizeImage(val);
             onChangeListener.run();
         });
-        checkboxes.add(resizeImageCheckbox);
+        fileSub.add(resizeImageCheckbox, BorderLayout.EAST);
 
-        var stickyCheckbox = PanelUtils.createCheckbox("Sticky", "Set the notification to not expire", notification.isSticky(), val -> {
-            notification.setSticky(val);
-            if (val) {
-                this.settings.remove(this.displayTime);
-                this.settings.add(this.stickyId);
-            } else {
-                this.settings.remove(this.stickyId);
-                this.settings.add(this.displayTime);
-            }
-            this.revalidate();
-            onChangeListener.run();
-        });
-        checkboxes.add(stickyCheckbox);
-        this.settings.add(checkboxes);
+        JPanel sub = new JPanel(new BorderLayout(3, 3));
+        sub.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+        this.settings.add(sub);
 
         JSpinner displayTime = PanelUtils.createSpinner(notification.getTimeToLive(), 1, 999, 1, val -> {
             notification.setTimeToLive(val);
             onChangeListener.run();
         });
+        displayTime.setEnabled(!notification.isSticky());
         this.displayTime = PanelUtils.createIconComponent(Icons.CLOCK, "Time to display in seconds", displayTime);
 
+        var stickyCheckbox = PanelUtils.createCheckbox("Sticky", "Set the notification to not expire", notification.isSticky(), val -> {
+            notification.setSticky(val);
+            displayTime.setEnabled(!val);
+            this.revalidate();
+            onChangeListener.run();
+        });
+
+        sub.add(this.displayTime);
+        sub.add(stickyCheckbox, BorderLayout.EAST);
+
         this.stickyId = PanelUtils.createTextField(
-            "ID to use with Dismiss Overlay...",
+            "ID for Dismiss Overlay...",
             "",
             notification.getId(),
             val -> {
@@ -96,10 +97,6 @@ public class OverlayNotificationPanel extends MessageNotificationPanel {
             }
         );
 
-        if (notification.isSticky()) {
-            this.settings.add(this.stickyId);
-        } else {
-            this.settings.add(this.displayTime);
-        }
+        this.settings.add(this.stickyId);
     }
 }
