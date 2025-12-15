@@ -193,7 +193,11 @@ public class PanelUtils {
         flatTextArea.getTextArea().setToolTipText(secondTooltip);
         flatTextArea.getPrefixTextArea().setText(firstInitialValue);
         flatTextArea.getTextArea().setText(secondInitialValue);
+        ((AbstractDocument) flatTextArea.getPrefixTextArea().getDocument()).setDocumentFilter(new LengthLimitFilter(4096));
         ((AbstractDocument) flatTextArea.getDocument()).setDocumentFilter(new LengthLimitFilter(4096));
+        flatTextArea.getPrefixTextArea().getDocument().addDocumentListener((SimpleDocumentListener) ev -> {
+            onChange.accept(flatTextArea.getPrefixTextArea().getText(), flatTextArea.getTextArea().getText());
+        });
         flatTextArea.getDocument().addDocumentListener((SimpleDocumentListener) ev -> {
             onChange.accept(flatTextArea.getPrefixTextArea().getText(), flatTextArea.getTextArea().getText());
         });
@@ -219,6 +223,8 @@ public class PanelUtils {
                 onChange.accept(flatTextArea.getPrefixTextArea().getText(), flatTextArea.getTextArea().getText());
             }
         });
+        addPasteMenu(flatTextArea.getPrefixTextArea());
+        addPasteMenu(flatTextArea.getTextArea());
         return flatTextArea;
     }
 
@@ -242,6 +248,7 @@ public class PanelUtils {
             }
         });
         flatTextArea.setHoverBackgroundColor(ColorScheme.DARK_GRAY_HOVER_COLOR);
+        addPasteMenu(flatTextArea.getTextArea());
         return flatTextArea;
     }
 
@@ -266,6 +273,7 @@ public class PanelUtils {
             }
         });
         textArea.setHoverBackgroundColor(ColorScheme.DARK_GRAY_HOVER_COLOR);
+        addPasteMenu(textArea.getTextArea());
         return textArea;
     }
 
@@ -416,5 +424,13 @@ public class PanelUtils {
         addDropDownButton.setPreferredSize(new Dimension(40, addDropDownButton.getPreferredSize().height));
         addDropDownButton.setToolTipText("Create New Alert");
         return addDropDownButton;
+    }
+
+    public static void addPasteMenu(JTextArea textArea) {
+        JPopupMenu popupMenu = new JPopupMenu();
+        JMenuItem pasteItem = new JMenuItem("Paste (Ctrl+V)");
+        pasteItem.addActionListener(e -> textArea.paste());
+        popupMenu.add(pasteItem);
+        textArea.setComponentPopupMenu(popupMenu);
     }
 }

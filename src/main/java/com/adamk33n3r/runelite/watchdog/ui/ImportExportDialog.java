@@ -5,8 +5,6 @@ import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
 import com.adamk33n3r.runelite.watchdog.alerts.Alert;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
 
-import net.runelite.client.config.RuneLiteConfig;
-
 import com.google.gson.Gson;
 import lombok.extern.slf4j.Slf4j;
 
@@ -45,6 +43,8 @@ public class ImportExportDialog extends JDialog {
 
         JTextArea textArea = new JTextArea();
         textArea.setLineWrap(true);
+        PanelUtils.addPasteMenu(textArea);
+
         JScrollPane scrollPane = new JScrollPane(textArea);
         wrapper.add(scrollPane, BorderLayout.CENTER);
 
@@ -59,7 +59,7 @@ public class ImportExportDialog extends JDialog {
                     this.setVisible(false);
                 }
             } catch (Exception ex) {
-                log.error("Error parsing json: " + ex);
+                log.error("Error parsing json", ex);
                 JOptionPane.showMessageDialog(this, "There was an error parsing the alert json", "Error parsing JSON", JOptionPane.ERROR_MESSAGE);
             }
         };
@@ -82,17 +82,17 @@ public class ImportExportDialog extends JDialog {
         Gson gson = WatchdogPlugin.getInstance().getAlertManager().getGson();
         String json = gson.toJson(alert);
         String pretty = gson.newBuilder().setPrettyPrinting().create().toJson(alert);
-        this.show(parent, json, pretty);
+        this.showExport(parent, json, pretty);
     }
 
     public ImportExportDialog(Component parent, List<Alert> alerts) {
         Gson gson = WatchdogPlugin.getInstance().getAlertManager().getGson();
         String json = gson.toJson(alerts);
         String pretty = gson.newBuilder().setPrettyPrinting().create().toJson(alerts);
-        this.show(parent, json, pretty);
+        this.showExport(parent, json, pretty);
     }
 
-    public void show(Component parent, String exportString, String prettyExportString) {
+    private void showExport(Component parent, String exportString, String prettyExportString) {
         this.setTitle("Export");
         this.setSize(500, 250);
         this.setLocationRelativeTo(parent);
