@@ -32,8 +32,9 @@ public abstract class Icons {
     public static final ImageIcon IMPORT = new ImageIcon(ImageUtil.loadImageResource(Icons.class, "mdi_import.png"));
     public static final ImageIcon IMPORT_HOVER = new ImageIcon(ImageUtil.alphaOffset(IMPORT.getImage(), -120));
     public static final ImageIcon DELETE = new ImageIcon(ImageUtil.loadImageResource(Icons.class, "mdi_delete.png"));
-    public static final ImageIcon DELETE_HOVER = new ImageIcon(ImageUtil.luminanceOffset(DELETE.getImage(), -80));
+    public static final ImageIcon DELETE_HOVER = new ImageIcon(ImageUtil.luminanceOffset(DELETE.getImage(), -120));
     public static final ImageIcon DOWNLOAD = new ImageIcon(ImageUtil.loadImageResource(Icons.class, "mdi_download.png"));
+    public static final ImageIcon DOWNLOAD_HOVER = new ImageIcon(ImageUtil.luminanceOffset(DOWNLOAD.getImage(), -120));
 
     public static final ImageIcon CLONE = new ImageIcon(ImageUtil.loadImageResource(Icons.class, "mdi_content-duplicate.png"));
     public static final ImageIcon CLONE_HOVER = new ImageIcon(ImageUtil.alphaOffset(CLONE.getImage(), -120));

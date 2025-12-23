@@ -54,8 +54,10 @@ class ScreenMarkerRenderable implements RenderableEntity
         int height = size.height;
 
         //draw the fill
-        graphics.setColor(fill);
-        graphics.fillRect(thickness, thickness, width - thickness * 2, height - thickness * 2);
+        if (fill != null) {
+            graphics.setColor(fill);
+            graphics.fillRect(thickness, thickness, width - thickness * 2, height - thickness * 2);
+        }
 
         //because the stroke is centered on the rectangle we draw, we need to translate where we draw the rectangle
         //this is to ensure that the rectangle we draw is our preferred size

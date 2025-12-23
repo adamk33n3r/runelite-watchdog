@@ -11,6 +11,7 @@ import net.runelite.api.coords.LocalPoint;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.gameval.InventoryID;
 import net.runelite.api.events.*;
+import net.runelite.api.gameval.VarbitID;
 import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.NotificationFired;
@@ -29,6 +30,7 @@ import java.awt.TrayIcon;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -294,12 +296,16 @@ public class EventHandler {
     @Subscribe
     private void onItemSpawned(ItemSpawned itemSpawned) {
         ItemComposition comp = this.itemManager.getItemComposition(itemSpawned.getItem().getId());
-        this.onSpawned(comp.getName(), comp.getId(), itemSpawned.getTile().getWorldLocation(), SPAWNED, ITEM);
+        final int accountType = this.client.getVarbitValue(VarbitID.IRONMAN);
+        this.onSpawned(comp.getName(), comp.getId(), itemSpawned.getTile().getWorldLocation(), SPAWNED, ITEM, spawnedAlert ->
+            Util.shouldTriggerItem(spawnedAlert.getItemOwnershipFilterMode(), itemSpawned.getItem().getOwnership(), accountType));
     }
     @Subscribe
     private void onItemDespawned(ItemDespawned itemDespawned) {
         ItemComposition comp = this.itemManager.getItemComposition(itemDespawned.getItem().getId());
-        this.onSpawned(comp.getName(), comp.getId(), itemDespawned.getTile().getWorldLocation(), DESPAWNED, ITEM);
+        final int accountType = this.client.getVarbitValue(VarbitID.IRONMAN);
+        this.onSpawned(comp.getName(), comp.getId(), itemDespawned.getTile().getWorldLocation(), DESPAWNED, ITEM, spawnedAlert ->
+            Util.shouldTriggerItem(spawnedAlert.getItemOwnershipFilterMode(), itemDespawned.getItem().getOwnership(), accountType));
     }
     @Subscribe
     private void onNpcSpawned(NpcSpawned npcSpawned) {
@@ -375,6 +381,10 @@ public class EventHandler {
     }
 
     private void onSpawned(@Nullable String name, int id, WorldPoint location, SpawnedAlert.SpawnedDespawned mode, SpawnedAlert.SpawnedType type) {
+        this.onSpawned(name, id, location, mode, type, spawnedAlert -> true);
+    }
+
+    private void onSpawned(@Nullable String name, int id, WorldPoint location, SpawnedAlert.SpawnedDespawned mode, SpawnedAlert.SpawnedType type, Predicate<SpawnedAlert> additionalFilter) {
         if (name == null) {
             return;
         }
@@ -384,6 +394,7 @@ public class EventHandler {
             .filter(spawnedAlert -> spawnedAlert.getSpawnedDespawned() == mode)
             .filter(spawnedAlert -> spawnedAlert.getSpawnedType() == type)
             .filter(spawnedAlert -> spawnedAlert.getDistance() == -1 || spawnedAlert.getDistanceComparator().compare(distanceToObject, spawnedAlert.getDistance()))
+            .filter(additionalFilter)
             .forEach(spawnedAlert -> {
                 try {
                     int parsedID = Integer.parseInt(spawnedAlert.getPattern());

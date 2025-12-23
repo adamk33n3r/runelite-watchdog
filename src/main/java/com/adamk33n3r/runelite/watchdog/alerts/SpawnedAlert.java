@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import net.runelite.client.plugins.grounditems.config.OwnershipFilterMode;
 
 @Getter
 @Setter
@@ -14,6 +15,7 @@ import lombok.experimental.Accessors;
 public class SpawnedAlert extends Alert implements RegexMatcher {
     private SpawnedDespawned spawnedDespawned = SpawnedDespawned.SPAWNED;
     private SpawnedType spawnedType = SpawnedType.ITEM;
+    private OwnershipFilterMode itemOwnershipFilterMode = OwnershipFilterMode.TAKEABLE;
     private String spawnedName = "";
     private boolean regexEnabled = false;
     private int distance = -1;

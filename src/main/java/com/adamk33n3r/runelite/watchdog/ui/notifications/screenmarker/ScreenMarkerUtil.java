@@ -5,6 +5,7 @@ import com.adamk33n3r.runelite.watchdog.notifications.ScreenMarker;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.input.MouseManager;
 import net.runelite.client.ui.components.colorpicker.ColorPickerManager;
+import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayManager;
 
 import com.google.gson.Gson;
@@ -79,6 +80,28 @@ public class ScreenMarkerUtil {
         } else {
             this.mouseManager.unregisterMouseListener(this.mouseListener);
         }
+    }
+
+    public void startCreation(ScreenMarker screenMarker) {
+        setMouseListenerEnabled(true);
+        setCreatingScreenMarker(true);
+        setCurrentMarker(screenMarker);
+//        startLocation = location;
+        var tmpOverlay = new ScreenMarkerOverlay(screenMarker);
+        var size = loadOverlaySize(tmpOverlay);
+        var location = loadOverlayLocation(tmpOverlay);
+        overlay.setPreferredLocation(location);
+        overlay.setPreferredSize(size);
+    }
+
+    private Point loadOverlayLocation(Overlay overlay) {
+        String key = overlay.getName() + "_preferredLocation";
+        return this.configManager.getConfiguration("runelite", key, Point.class);
+    }
+
+    private Dimension loadOverlaySize(Overlay overlay) {
+        String key = overlay.getName() + "_preferredSize";
+        return this.configManager.getConfiguration("runelite", key, Dimension.class);
     }
 
     public void startCreation(Point location)

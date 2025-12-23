@@ -1,17 +1,28 @@
 package com.adamk33n3r.runelite.watchdog;
 
+import com.adamk33n3r.runelite.watchdog.alerts.Alert;
 import net.runelite.api.GameObject;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.client.config.RuneLiteConfig;
+import net.runelite.client.plugins.grounditems.config.OwnershipFilterMode;
 import net.runelite.client.util.Text;
 
 import com.google.common.base.Splitter;
 
 import javax.swing.*;
 import java.awt.Color;
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStreamReader;
 import java.text.Normalizer;
+import java.util.Base64;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
+
+import static net.runelite.api.TileItem.*;
 
 public class Util {
     public static <T> T defaultArg(T thing, T defaultValue) {
@@ -191,5 +202,70 @@ public class Util {
         if (runeLiteConfig.gameAlwaysOnTop() && dialog.isAlwaysOnTopSupported()) {
             dialog.setAlwaysOnTop(true);
         }
+    }
+
+    /**
+     * All      -> none | self | other | group<br>
+     * Drops    -> self | group<br>
+     * Takeable -> none | self | group | (if a main then other)<br>
+     * <br>
+     * Taken from GroundItemsPlugin
+     */
+    public static boolean shouldTriggerItem(OwnershipFilterMode filterMode, int ownership, int accountType) {
+        switch (filterMode) {
+            case DROPS:
+                return ownership == OWNERSHIP_SELF || ownership == OWNERSHIP_GROUP;
+            case TAKEABLE:
+                return ownership != OWNERSHIP_OTHER || accountType == 0; // Mains can always take items
+            default:
+                return true;
+        }
+    }
+
+    /**
+     * Compresses the given alert string.
+     * @param alertJSON expects a string
+     * @return the compressed string
+     */
+    public static String compressAlerts(String alertJSON) {
+        try {
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            GZIPOutputStream gzipOutputStream = new GZIPOutputStream(byteArrayOutputStream);
+            gzipOutputStream.write(alertJSON.getBytes());
+            gzipOutputStream.close();
+            byteArrayOutputStream.close();
+            return Base64.getEncoder().encodeToString(byteArrayOutputStream.toByteArray());
+        } catch (Exception e) {
+            return alertJSON;
+        }
+    }
+
+    /**
+     * Decompresses the given compressed alert string.
+     * @param compressedAlerts expects a base64 encoded string
+     * @return the decompressed string
+     */
+    public static String decompressAlerts(String compressedAlerts) {
+        try {
+            byte[] bytes = Base64.getDecoder().decode(compressedAlerts);
+            ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
+            GZIPInputStream gzipInputStream = new GZIPInputStream(byteArrayInputStream);
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(gzipInputStream));
+            StringBuilder stringBuilder = new StringBuilder();
+            String line;
+            while ((line = bufferedReader.readLine()) != null) {
+                stringBuilder.append(line);
+            }
+            gzipInputStream.close();
+            byteArrayInputStream.close();
+            return stringBuilder.toString();
+        } catch (Exception e) {
+            return compressedAlerts;
+        }
+    }
+
+    public static boolean isCompressed(String compressedAlerts) {
+        byte[] bytes = Base64.getDecoder().decode(compressedAlerts);
+        return (bytes[0] == (byte) (GZIPInputStream.GZIP_MAGIC)) && (bytes[1] == (byte) (GZIPInputStream.GZIP_MAGIC >> 8));
     }
 }

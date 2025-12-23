@@ -45,12 +45,11 @@ public class ScreenMarkerNotificationPanel extends NotificationPanel {
                 this.setMarkerButton.setToolTipText("Set Marker");
                 // Start
             } else {
+                // Call this first so that it can get the location and size before we delete it
+                screenMarkerUtil.startCreation(notification);
                 if (this.screenMarkerOverlay != null) {
                     screenMarkerUtil.deleteMarker(this.screenMarkerOverlay);
                 }
-                screenMarkerUtil.setMouseListenerEnabled(true);
-                screenMarkerUtil.setCreatingScreenMarker(true);
-                screenMarkerUtil.setCurrentMarker(notification);
                 this.setMarkerButton.setText("Finish");
                 this.setMarkerButton.setToolTipText("Finish");
             }
