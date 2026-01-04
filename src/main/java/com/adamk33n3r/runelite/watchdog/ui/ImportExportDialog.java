@@ -42,7 +42,7 @@ public class ImportExportDialog extends JDialog {
         JPanel wrapper = this.createWrapper();
         this.add(wrapper);
 
-        wrapper.add(new JLabel("Paste the Alert JSON here"), BorderLayout.NORTH);
+        wrapper.add(new JLabel("Paste the Alert here"), BorderLayout.NORTH);
 
         JTextArea textArea = new JTextArea();
         textArea.setLineWrap(true);
@@ -117,7 +117,7 @@ public class ImportExportDialog extends JDialog {
         JPanel wrapper = this.createWrapper();
         this.add(wrapper);
         JPanel top = new JPanel(new BorderLayout());
-        top.add(new JLabel("Exported Alert JSON"), BorderLayout.WEST);
+        top.add(new JLabel("Exported Alert"), BorderLayout.WEST);
         JCheckBox prettyPrint = PanelUtils.createCheckbox("Pretty Print", "Pretty Print", false, (selected) -> {
             textArea.setText(selected ? prettyExportString : exportString);
             textArea.setCaretPosition(0);

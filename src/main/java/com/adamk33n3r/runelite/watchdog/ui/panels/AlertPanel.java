@@ -252,16 +252,31 @@ public abstract class AlertPanel<T extends Alert> extends PluginPanel {
     }
 
     public AlertPanel<T> addAlertDefaults() {
-        return this.addTextField("Enter the alert name...", "Name of Alert", this.alert.getName(), this.alert::setName)
-            .addSpinner(
-                "Debounce Time (ms)",
+        JSpinner spinner = PanelUtils.createSpinner(
+            this.alert.getDebounceTime(),
+            0,
+            8640000, // 6 hours - max time a player can be logged in
+            100,
+            val -> {
+                this.alert.setDebounceTime(val);
+                this.alertManager.saveAlerts();
+            }
+        );
+        JCheckBox checkbox = PanelUtils.createCheckbox("Reset", "Reset the debounce time every time this alert is triggered", this.alert.isDebounceResetTime(), val -> {
+            this.alert.setDebounceResetTime(val);
+            this.alertManager.saveAlerts();
+        });
+        JPanel sub = new JPanel(new BorderLayout(5, 5));
+        sub.add(spinner);
+        sub.add(checkbox, BorderLayout.EAST);
+        return this
+            .addTextField("Enter the alert name...", "Name of Alert", this.alert.getName(), this.alert::setName)
+            .addSubPanelControl(PanelUtils.createLabeledComponent(
+                "Debounce (ms)",
                 "How long to wait before allowing this alert to trigger again in milliseconds",
-                this.alert.getDebounceTime(),
-                this.alert::setDebounceTime,
-                0,
-                8640000, // 6 hours - max time a player can be logged in
-                100
-            );
+                sub
+            )
+        );
     }
 
     public AlertPanel<T> addIf(Consumer<AlertPanel<T>> panel, Supplier<Boolean> ifFunc) {

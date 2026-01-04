@@ -486,14 +486,23 @@ public class EventHandler {
             .max(Comparator.comparingInt(Alert::getDebounceTime))
             .orElse(alert);
 
-        // If the alert hasn't been fired yet, or has been enough time, set the last trigger time to now and fire.
-        if (!this.lastTriggered.containsKey(alertToDebounceWith) || Instant.now().compareTo(this.lastTriggered.get(alertToDebounceWith).plusMillis(alertToDebounceWith.getDebounceTime())) >= 0) {
-            SwingUtilities.invokeLater(() -> {
-                this.historyPanelProvider.get().addEntry(alert, triggerValues);
-            });
-            this.lastTriggered.put(alertToDebounceWith, Instant.now());
-            this.plugin.processAlert(alert, triggerValues, false);
+        // now < (lastTriggered + debounceTime) ? -1
+        // now > (lastTriggered + debounceTime) ? 1
+        boolean isPastDebounceTime = !this.lastTriggered.containsKey(alertToDebounceWith) ||
+            Instant.now().compareTo(this.lastTriggered.get(alertToDebounceWith).plusMillis(alertToDebounceWith.getDebounceTime())) >= 0;
+        if (!isPastDebounceTime) {
+            if (alertToDebounceWith.isDebounceResetTime()) {
+                this.lastTriggered.put(alertToDebounceWith, Instant.now());
+            }
+            return;
         }
+
+        // If the alert hasn't been fired yet, or has been enough time, set the last trigger time to now and fire.
+        SwingUtilities.invokeLater(() -> {
+            this.historyPanelProvider.get().addEntry(alert, triggerValues);
+        });
+        this.lastTriggered.put(alertToDebounceWith, Instant.now());
+        this.plugin.processAlert(alert, triggerValues, false);
     }
 
     @AllArgsConstructor
