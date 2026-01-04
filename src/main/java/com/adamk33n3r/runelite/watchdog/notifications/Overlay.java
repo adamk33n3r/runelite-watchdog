@@ -24,6 +24,7 @@ public class Overlay extends MessageNotification {
     private Color textColor = DEFAULT_NOTIFICATION_TEXT_COLOR;
     private boolean sticky = false;
     private int timeToLive = 5;
+    private boolean countDown = false;
     private String imagePath;
     private String id;
     private boolean resizeImage = true;

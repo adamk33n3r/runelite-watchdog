@@ -84,7 +84,11 @@ public class NotificationOverlay extends OverlayPanel {
             }
             if (config.overlayShowTime()) {
                 this.getChildren().add(WrappedTitleComponent.builder()
-                    .text(formatDuration(ChronoUnit.MILLIS.between(this.timeStarted, Instant.now()), "m'm' s's' 'ago'"))
+                    .text(
+                        this.overlayNotification.isCountDown() && !this.overlayNotification.isSticky() ?
+                        formatDuration(ChronoUnit.MILLIS.between(Instant.now(), this.timeStarted.plusSeconds(this.overlayNotification.getTimeToLive() + 1)), "m'm' s's' 'to go'") :
+                        formatDuration(ChronoUnit.MILLIS.between(this.timeStarted, Instant.now()), "m'm' s's' 'ago'")
+                    )
                     .color(this.overlayNotification.getTextColor())
                     .preferredSize(this.getPreferredSize())
                     .build());

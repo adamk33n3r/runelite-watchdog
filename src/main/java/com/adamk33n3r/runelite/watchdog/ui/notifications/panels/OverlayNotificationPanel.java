@@ -77,15 +77,23 @@ public class OverlayNotificationPanel extends MessageNotificationPanel {
         displayTime.setEnabled(!notification.isSticky());
         this.displayTime = PanelUtils.createIconComponent(Icons.CLOCK, "Time to display in seconds", displayTime);
 
-        var stickyCheckbox = PanelUtils.createCheckbox("Sticky", "Set the notification to not expire", notification.isSticky(), val -> {
-            notification.setSticky(val);
-            displayTime.setEnabled(!val);
+        var countDownCheckbox = PanelUtils.createCheckbox("Countdown", "Count down to 0 instead of up to time", notification.isCountDown(), val -> {
+            notification.setCountDown(val);
             this.revalidate();
             onChangeListener.run();
         });
 
         sub.add(this.displayTime);
-        sub.add(stickyCheckbox, BorderLayout.EAST);
+        sub.add(countDownCheckbox, BorderLayout.EAST);
+
+        var stickyCheckbox = PanelUtils.createCheckbox("Sticky", "Set the notification to not expire", notification.isSticky(), val -> {
+            notification.setSticky(val);
+            displayTime.setEnabled(!val);
+            countDownCheckbox.setEnabled(!val);
+            this.revalidate();
+            onChangeListener.run();
+        });
+        this.settings.add(stickyCheckbox);
 
         this.stickyId = PanelUtils.createTextField(
             "ID for Dismiss Overlay...",
