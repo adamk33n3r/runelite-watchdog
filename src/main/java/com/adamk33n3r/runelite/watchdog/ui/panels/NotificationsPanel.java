@@ -140,6 +140,8 @@ public class NotificationsPanel extends JPanel {
 
     private void addPanel(Notification notification) {
         PanelUtils.OnRemove removeNotification = (removedPanel) -> {
+            WatchdogPlugin.getInstance().getScreenMarkerUtil().finishCreation(true);
+            WatchdogPlugin.getInstance().getObjectMarkerManager().turnOffObjectMarkerMode();
             this.alert.getNotifications().remove(notification);
             this.notificationContainer.remove(removedPanel);
             this.notificationContainer.revalidate();
