@@ -370,6 +370,9 @@ public class AlertManager {
         this.importAlerts(json, this.alerts, false, false, false);
         this.createStarterAlertsIfEmpty();
         this.handleUpgrades();
+        if (this.watchdogConfig.disableAllAlertsOnStartup()) {
+            this.getAllAlertsFrom(this.alerts.stream(), true).forEach(alert -> alert.setEnabled(false));
+        }
     }
 
     public boolean importAlerts(String json, List<Alert> alerts, boolean append, boolean checkRegex, boolean overrideWithDefaults) throws JsonSyntaxException {
