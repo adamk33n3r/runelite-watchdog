@@ -2,6 +2,7 @@ package com.adamk33n3r.runelite.watchdog.ui.panels;
 
 import com.adamk33n3r.runelite.watchdog.*;
 import com.adamk33n3r.runelite.watchdog.alerts.Alert;
+import com.adamk33n3r.runelite.watchdog.alerts.RegexMatcher;
 import com.adamk33n3r.runelite.watchdog.ui.FlatTextArea;
 import com.adamk33n3r.runelite.watchdog.ui.FlatTextAreaNamespace;
 import com.adamk33n3r.runelite.watchdog.ui.Icons;
@@ -28,9 +29,12 @@ import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 import java.util.stream.Collectors;
@@ -432,5 +436,68 @@ public class PanelUtils {
         pasteItem.addActionListener(e -> textArea.paste());
         popupMenu.add(pasteItem);
         textArea.setComponentPopupMenu(popupMenu);
+    }
+
+    public static JPanel createInputGroupWithSuffix(JComponent mainComponent, JComponent suffix) {
+        return createInputGroup(mainComponent, null, Collections.singletonList(suffix));
+    }
+
+    public static JPanel createInputGroup(JComponent mainComponent, java.util.List<JComponent> prefixes, List<JComponent> suffixes) {
+        return new InputGroup(mainComponent)
+            .addPrefixes(prefixes)
+            .addSuffixes(suffixes);
+    }
+
+    public static JPanel createRegexMatcher(RegexMatcher regexMatcher, String placeholder, String tooltip) {
+        return createRegexMatcher(regexMatcher, placeholder, tooltip, null);
+    }
+
+    public static JPanel createRegexMatcher(RegexMatcher regexMatcher, String placeholder, String tooltip, JComponent suffixAppend) {
+        return createRegexMatcher(
+            regexMatcher::getPattern,
+            regexMatcher::setPattern,
+            regexMatcher::isRegexEnabled,
+            regexMatcher::setRegexEnabled,
+            placeholder,
+            tooltip,
+            suffixAppend
+        );
+    }
+
+    public static JPanel createRegexMatcher(
+        Supplier<String> pattern,
+        Consumer<String> savePattern,
+        Supplier<Boolean> regexEnabled,
+        Consumer<Boolean> saveRegexEnabled,
+        String placeholder,
+        String tooltip,
+        JComponent suffixAppend
+    ) {
+        JPanel btnGroup = new JPanel(new GridLayout(1, 0, 5, 5));
+        btnGroup.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+        JButton regex = PanelUtils.createToggleActionButton(
+            Icons.REGEX_SELECTED,
+            Icons.REGEX_SELECTED_HOVER,
+            Icons.REGEX,
+            Icons.REGEX_HOVER,
+            "Disable regex",
+            "Enable regex",
+            regexEnabled.get(),
+            (btn, modifiers) -> {
+                saveRegexEnabled.accept(btn.isSelected());
+            }
+        );
+        btnGroup.add(regex);
+        if (suffixAppend != null) {
+            btnGroup.add(suffixAppend);
+        }
+        return createInputGroupWithSuffix(
+            createTextArea(placeholder, tooltip, pattern.get(), msg -> {
+                if (!isPatternValid(SwingUtilities.getWindowAncestor(btnGroup), msg, regexEnabled.get()))
+                    return;
+                savePattern.accept(msg);
+            }),
+            btnGroup
+        );
     }
 }

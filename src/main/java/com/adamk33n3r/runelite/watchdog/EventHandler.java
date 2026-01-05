@@ -101,7 +101,7 @@ public class EventHandler {
                         var playerName = Text.sanitize(Text.removeFormattingTags(chatMessage.getName()));
                         message = String.format("%s: %s", playerName, message);
                     }
-                    String[] groups = this.matchPattern(chatAlert, message);
+                    String[] groups = Util.matchPattern(chatAlert, message);
                     if (groups == null) return;
 
                     this.fireAlert(chatAlert, groups);
@@ -112,7 +112,7 @@ public class EventHandler {
         this.alertManager.getAllEnabledAlertsOfType(ChatAlert.class)
             .filter(chatAlert -> chatAlert.getGameMessageType() == GameMessageType.ANY || chatAlert.getGameMessageType().isOfType(chatMessage.getType()))
             .forEach(gameAlert -> {
-                String[] groups = this.matchPattern(gameAlert, unformattedMessage);
+                String[] groups = Util.matchPattern(gameAlert, unformattedMessage);
                 if (groups == null) return;
 
                 this.fireAlert(gameAlert, groups);
@@ -126,7 +126,7 @@ public class EventHandler {
         this.alertManager.getAllEnabledAlertsOfType(NotificationFiredAlert.class)
             .filter(notificationFiredAlert -> !this.firedByWatchdog || notificationFiredAlert.isAllowSelf())
             .forEach(notificationFiredAlert -> {
-                String[] groups = this.matchPattern(notificationFiredAlert, notificationFired.getMessage());
+                String[] groups = Util.matchPattern(notificationFiredAlert, notificationFired.getMessage());
                 if (groups == null) return;
 
                 this.fireAlert(notificationFiredAlert, groups);
@@ -271,7 +271,7 @@ public class EventHandler {
                 || (inventoryAlert.getInventoryMatchType() == InventoryAlert.InventoryMatchType.NOTED && itemData.getValue().isNoted())
                 || (inventoryAlert.getInventoryMatchType() == InventoryAlert.InventoryMatchType.UN_NOTED && !itemData.getValue().isNoted()))
             .map(itemData -> {
-                String[] groups = this.matchPattern(inventoryAlert, itemData.getValue().itemComposition.getName());
+                String[] groups = Util.matchPattern(inventoryAlert, itemData.getValue().itemComposition.getName());
                 if (groups == null) return null;
                 var prevItem = this.previousItemsTable.get(itemData.getKey());
                 return new MatchedItem(
@@ -402,7 +402,7 @@ public class EventHandler {
                         this.fireAlert(spawnedAlert, new String[] { spawnedAlert.getPattern() });
                     }
                 } catch (NumberFormatException ignored) {
-                    String[] groups = this.matchPattern(spawnedAlert, unformattedName);
+                    String[] groups = Util.matchPattern(spawnedAlert, unformattedName);
                     if (groups == null) return;
 
                     this.fireAlert(spawnedAlert, groups);
@@ -414,9 +414,9 @@ public class EventHandler {
     @Subscribe
     private void onOverheadTextChanged(OverheadTextChanged overheadTextChanged) {
         this.alertManager.getAllEnabledAlertsOfType(OverheadTextAlert.class)
-            .filter(alert -> alert.getNpcName().isEmpty() || this.matchPattern(alert::getNpcName, alert::isNpcRegexEnabled, overheadTextChanged.getActor().getName()) != null)
+            .filter(alert -> alert.getNpcName().isEmpty() || Util.matchPattern(alert::getNpcName, alert::isNpcRegexEnabled, overheadTextChanged.getActor().getName()) != null)
             .forEach(alert -> {
-                String[] groups = this.matchPattern(alert, overheadTextChanged.getOverheadText());
+                String[] groups = Util.matchPattern(alert, overheadTextChanged.getOverheadText());
                 if (groups == null) return;
 
                 this.fireAlert(alert, groups);
@@ -445,26 +445,6 @@ public class EventHandler {
                 this.fireAlert(locationAlert, new String[] { String.valueOf(worldLocation.getX()), String.valueOf(worldLocation.getY()) });
             });
         this.previousLocation = worldLocation;
-    }
-
-    private String[] matchPattern(
-        Supplier<String> pattern,
-        Supplier<Boolean> regexEnabled,
-        String input
-    ) {
-        String regex = regexEnabled.get() ? pattern.get() : Util.createRegexFromGlob(pattern.get());
-        Matcher matcher = Pattern.compile(regex, regexEnabled.get() ? 0 : Pattern.CASE_INSENSITIVE).matcher(input);
-        if (!matcher.find()) return null;
-
-        String[] groups = new String[matcher.groupCount()];
-        for (int i = 0; i < matcher.groupCount(); i++) {
-            groups[i] = matcher.group(i+1);
-        }
-        return groups;
-    }
-
-    private String[] matchPattern(RegexMatcher regexMatcher, String input) {
-        return this.matchPattern(regexMatcher::getPattern, regexMatcher::isRegexEnabled, input);
     }
 
     private void fireAlert(Alert alert, String triggerValue) {

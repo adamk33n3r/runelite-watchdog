@@ -11,6 +11,7 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class ChatAlert extends Alert implements RegexMatcher {
     private String message = "";
+    @Accessors(chain = false)
     private boolean regexEnabled = false;
     private GameMessageType gameMessageType = GameMessageType.ANY;
 

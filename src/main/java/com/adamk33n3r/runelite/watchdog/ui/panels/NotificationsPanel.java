@@ -189,6 +189,8 @@ public class NotificationsPanel extends JPanel {
             notificationPanel = new PluginMessageNotificationPanel((PluginMessage) notification, this, this.alertManager::saveAlerts, removeNotification);
         else if (notification instanceof PluginToggle)
             notificationPanel = new PluginToggleNotificationPanel((PluginToggle) notification, this, this.pluginManager, this.alertManager::saveAlerts, removeNotification);
+        else if (notification instanceof AlertToggle)
+            notificationPanel = new AlertToggleNotificationPanel((AlertToggle) notification, this, this.alertManager::saveAlerts, removeNotification);
 
         if (notificationPanel != null)
             this.notificationContainer.add(notificationPanel);

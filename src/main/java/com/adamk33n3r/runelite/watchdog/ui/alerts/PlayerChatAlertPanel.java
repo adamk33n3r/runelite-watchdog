@@ -17,8 +17,8 @@ public class PlayerChatAlertPanel extends AlertPanel<PlayerChatAlert> {
                 this.alert.setPattern(selected);
                 this.rebuild();
             }, this.alert::getPlayerChatType))
-            .addCheckbox("Prepend Sender", "Prepend the sender's name to the message in the form of '{name}: {message}'", this.alert.isPrependSender(), this.alert::setPrependSender)
             .addSelect("Chat Type", "The type of message", PlayerChatType.class, this.alert.getPlayerChatType(), this.alert::setPlayerChatType)
+            .addCheckbox("Prepend Sender", "Prepend the sender's name to the message in the form of '{name}: {message}'. Affects pattern matching", this.alert.isPrependSender(), this.alert::setPrependSender)
             .addNotifications();
     }
 }

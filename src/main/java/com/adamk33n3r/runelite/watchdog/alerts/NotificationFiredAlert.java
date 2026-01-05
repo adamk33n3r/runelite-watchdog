@@ -9,6 +9,7 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 public class NotificationFiredAlert extends Alert implements RegexMatcher {
     private String message = "";
+    @Accessors(chain = false)
     private boolean regexEnabled = false;
     private boolean allowSelf = false;
 

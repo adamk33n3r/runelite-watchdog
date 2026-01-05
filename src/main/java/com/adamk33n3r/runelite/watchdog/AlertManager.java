@@ -108,6 +108,7 @@ public class AlertManager {
             .registerSubtype(ShortestPath.class)
             .registerSubtype(PluginMessage.class)
             .registerSubtype(PluginToggle.class)
+            .registerSubtype(AlertToggle.class)
             .registerSubtype(DismissObjectMarker.class)
             .registerSubtype(DismissOverlay.class)
             .registerSubtype(DismissScreenMarker.class);

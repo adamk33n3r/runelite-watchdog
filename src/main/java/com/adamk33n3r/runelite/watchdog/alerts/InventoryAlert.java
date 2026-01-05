@@ -13,6 +13,7 @@ import lombok.experimental.Accessors;
 public class InventoryAlert extends Alert implements RegexMatcher {
     private InventoryAlertType inventoryAlertType = InventoryAlertType.FULL;
     private String itemName = "";
+    @Accessors(chain = false)
     private boolean isRegexEnabled = false;
     private InventoryMatchType inventoryMatchType = InventoryMatchType.BOTH;
     private int itemQuantity = 1;

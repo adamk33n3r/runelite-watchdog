@@ -1,6 +1,6 @@
 package com.adamk33n3r.runelite.watchdog;
 
-import com.adamk33n3r.runelite.watchdog.alerts.Alert;
+import com.adamk33n3r.runelite.watchdog.alerts.RegexMatcher;
 import net.runelite.api.GameObject;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.client.config.RuneLiteConfig;
@@ -18,6 +18,9 @@ import java.io.InputStreamReader;
 import java.text.Normalizer;
 import java.util.Base64;
 import java.util.List;
+import java.util.function.Supplier;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
@@ -121,6 +124,33 @@ public class Util {
             }
         }
         return sb.toString();
+    }
+
+    /**
+     * Match a pattern against an input string
+     * @param pattern the pattern to match
+     * @param regexEnabled whether the pattern is a regex
+     * @param input the input string
+     * @return the groups of the pattern, or null if no match
+     */
+    public static String[] matchPattern(
+        Supplier<String> pattern,
+        Supplier<Boolean> regexEnabled,
+        String input
+    ) {
+        String regex = regexEnabled.get() ? pattern.get() : Util.createRegexFromGlob(pattern.get());
+        Matcher matcher = Pattern.compile(regex, regexEnabled.get() ? 0 : Pattern.CASE_INSENSITIVE).matcher(input);
+        if (!matcher.find()) return null;
+
+        String[] groups = new String[matcher.groupCount()];
+        for (int i = 0; i < matcher.groupCount(); i++) {
+            groups[i] = matcher.group(i+1);
+        }
+        return groups;
+    }
+
+    public static String[] matchPattern(RegexMatcher regexMatcher, String input) {
+        return matchPattern(regexMatcher::getPattern, regexMatcher::isRegexEnabled, input);
     }
 
     public static String splitCamelCase(String s) {

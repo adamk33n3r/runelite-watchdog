@@ -17,6 +17,7 @@ public class SpawnedAlert extends Alert implements RegexMatcher {
     private SpawnedType spawnedType = SpawnedType.ITEM;
     private OwnershipFilterMode itemOwnershipFilterMode = OwnershipFilterMode.TAKEABLE;
     private String spawnedName = "";
+    @Accessors(chain = false)
     private boolean regexEnabled = false;
     private int distance = -1;
     private ComparableNumber.Comparator distanceComparator = ComparableNumber.Comparator.LESS_THAN_OR_EQUALS;

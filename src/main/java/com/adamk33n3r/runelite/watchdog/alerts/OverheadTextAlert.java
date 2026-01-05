@@ -8,6 +8,7 @@ import lombok.experimental.Accessors;
 @Setter
 @Accessors(chain = true)
 public class OverheadTextAlert extends Alert implements RegexMatcher {
+    @Accessors(chain = false)
     private boolean regexEnabled = false;
     private String message = "";
     private boolean npcRegexEnabled = false;

@@ -31,7 +31,7 @@ public class PluginToggleNotificationPanel extends NotificationPanel {
             onChangeListener.run();
             this.rebuild();
         });
-        JPanel mode = PanelUtils.createLabeledComponent("Mode", "The toggle mode plugin", modeSelect);
+        JPanel mode = PanelUtils.createLabeledComponent("Mode", "The toggle mode", modeSelect);
         mode.setBorder(null);
         mode.setBackground(ColorScheme.DARKER_GRAY_COLOR);
         this.settings.add(mode);

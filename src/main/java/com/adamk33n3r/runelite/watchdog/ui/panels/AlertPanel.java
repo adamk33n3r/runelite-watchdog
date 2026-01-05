@@ -311,33 +311,9 @@ public abstract class AlertPanel<T extends Alert> extends PluginPanel {
         String tooltip,
         JComponent suffixAppend
     ) {
-        JPanel btnGroup = new JPanel(new GridLayout(1, 0, 5, 5));
-        JButton regex = PanelUtils.createToggleActionButton(
-            Icons.REGEX_SELECTED,
-            Icons.REGEX_SELECTED_HOVER,
-            Icons.REGEX,
-            Icons.REGEX_HOVER,
-            "Disable regex",
-            "Enable regex",
-            regexEnabled.get(),
-            (btn, modifiers) -> {
-                saveRegexEnabled.accept(btn.isSelected());
-                this.alertManager.saveAlerts();
-            }
-        );
-        btnGroup.add(regex);
-        if (suffixAppend != null) {
-            btnGroup.add(suffixAppend);
-        }
-        return this.addInputGroupWithSuffix(
-            PanelUtils.createTextArea(placeholder, tooltip, pattern.get(), msg -> {
-                if (!PanelUtils.isPatternValid(this, msg, regexEnabled.get()))
-                    return;
-                savePattern.accept(msg);
-                this.alertManager.saveAlerts();
-            }),
-            btnGroup
-        );
+        var regexMatcher = PanelUtils.createRegexMatcher(pattern, savePattern, regexEnabled, saveRegexEnabled, placeholder, tooltip, suffixAppend);
+        this.controlContainer.add(regexMatcher);
+        return this;
     }
 
     public AlertPanel<T> addNotifications() {
