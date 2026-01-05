@@ -18,7 +18,7 @@ Create custom alerts triggered by
 - XP Drop
 - Location
 
-with any amount of unique notification types like
+with any amount of unique action types like
 - Game Message
 - Screen Flash
 - Custom Sound
@@ -35,9 +35,9 @@ with any amount of unique notification types like
 - Plugin Message
 - RuneLite Notification (to trigger things like RL Tray Notifications)
 
-_You can set defaults for the notifications in the plugin config_
+_You can set defaults for the actions in the plugin config_
 
-For more information on trigger and notification types, [see the wiki](https://github.com/adamk33n3r/runelite-watchdog/wiki).
+For more information on trigger and action types, [see the wiki](https://github.com/adamk33n3r/runelite-watchdog/wiki).
 
 **_NOTE: Watchdog is disabled in the following areas:_**
 - Alchemical Hydra

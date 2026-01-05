@@ -99,18 +99,18 @@ public class NotificationsPanel extends JPanel {
         });
         JButton addDropDownButton = DropDownButtonFactory.createDropDownButton(Icons.ADD, popupMenu);
         addDropDownButton.setPreferredSize(new Dimension(40, addDropDownButton.getPreferredSize().height));
-        addDropDownButton.setToolTipText("Create New Notification");
+        addDropDownButton.setToolTipText("Create New Action");
         JPanel headerPanel = new JPanel(new BorderLayout());
         JPanel leftPanel = new JPanel(new DynamicGridLayout(1, 0, 5, 5));
         headerPanel.add(leftPanel, BorderLayout.WEST);
-        leftPanel.add(new JLabel("Notifications"));
+        leftPanel.add(new JLabel("Actions"));
         JButton randomBtn = PanelUtils.createToggleActionButton(
             Icons.DICE_MULTIPLE,
             Icons.DICE_MULTIPLE_HOVER,
             Icons.DICE_MULTIPLE_OFF,
             Icons.DICE_MULTIPLE_OFF_HOVER,
-            "Fire all notifications in sequence",
-            "Fire a random notification",
+            "Fire all actions in sequence",
+            "Fire a random action",
             alert.isRandomNotifications(),
             (btn, mods) -> {
                 alert.setRandomNotifications(!alert.isRandomNotifications());

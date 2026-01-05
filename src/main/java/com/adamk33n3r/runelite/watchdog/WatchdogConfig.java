@@ -160,16 +160,17 @@ public interface WatchdogConfig extends Config {
 
     @ConfigItem(
         keyName = ENABLE_NOTIFICATION_CATEGORIES,
-        name = "Enable Notification Categories",
-        description = "Enables the notification categories in the side panel"
+        name = "Enable Action Categories",
+        description = "Enables the action categories in the side panel"
     )
     default boolean enableNotificationCategories() { return true; }
 
     //region AFK Notification
     @ConfigSection(
-        name = "AFK Notification",
-        description = "The options that control the afk notification settings",
-        position = 0
+        name = "AFK Settings",
+        description = "The options that control the afk settings",
+        position = 0,
+        closedByDefault = true
     )
     String afkNotificationSection = "afkNotificationSection";
 

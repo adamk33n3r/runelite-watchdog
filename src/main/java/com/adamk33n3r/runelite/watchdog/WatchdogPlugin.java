@@ -51,7 +51,7 @@ import static net.runelite.api.MenuAction.RUNELITE_OVERLAY_CONFIG;
 @PluginDescriptor(
     name = "Watchdog",
     description = "Create custom alerts for different events like messages, stats, or built-in notifications",
-    tags = {"alert", "notification","custom","advanced","overlay","sound","drop","afk","tracker","reminder","notify","notifier","helper","timer","message"}
+    tags = {"alert","notification","custom","advanced","overlay","sound","drop","afk","tracker","reminder","notify","notifier","helper","timer","message","action"}
 )
 public class WatchdogPlugin extends Plugin {
     @Getter
