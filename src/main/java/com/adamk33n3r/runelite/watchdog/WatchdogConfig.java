@@ -28,6 +28,7 @@ public interface WatchdogConfig extends Config {
     String OVERRIDE_IMPORTS_WITH_DEFAULTS = "overrideImportsWithDefaults";
     String SIDE_PANEL_PRIORITY = "sidePanelPriority";
     String ENABLE_NOTIFICATION_CATEGORIES = "enableNotificationCategories";
+    String DISABLE_ALL_ALERTS_ON_STARTUP = "disableAllAlertsOnStartup";
 
     // AFK Notification
     String DEFAULT_AFK_MODE = "defaultAFKMode";
@@ -164,6 +165,13 @@ public interface WatchdogConfig extends Config {
         description = "Enables the action categories in the side panel"
     )
     default boolean enableNotificationCategories() { return true; }
+
+    @ConfigItem(
+        keyName = DISABLE_ALL_ALERTS_ON_STARTUP,
+        name = "Disable All Alerts on Startup",
+        description = "Disables all alerts on startup"
+    )
+    default boolean disableAllAlertsOnStartup() { return false; }
 
     //region AFK Notification
     @ConfigSection(
