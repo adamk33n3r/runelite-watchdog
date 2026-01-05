@@ -69,6 +69,9 @@ public class ToolsPanel extends PluginPanel {
         tools.add(PanelUtils.createButton("Dismiss All Object Markers", "Dismiss All Object Markers", (btn, mods) -> {
             WatchdogPlugin.getInstance().getObjectMarkerManager().removeAllMarkers();
         }));
+        tools.add(PanelUtils.createButton("Reload All Alerts from Profile", "This will reload all alerts from disk", (btn, mods) -> {
+            WatchdogPlugin.getInstance().getAlertManager().loadAlerts();
+        }));
         this.add(tools);
     }
 }

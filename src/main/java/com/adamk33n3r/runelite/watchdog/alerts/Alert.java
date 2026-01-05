@@ -27,7 +27,7 @@ public abstract class Alert {
 
     @Nullable
     private transient AlertGroup parent;
-    public AlertGroup getParent() {
+    public @Nullable AlertGroup getParent() {
         if (this.parent == null) {
             this.parent = WatchdogPlugin.getInstance()
                 .getAlertManager()
