@@ -295,7 +295,11 @@ public class Util {
     }
 
     public static boolean isCompressed(String compressedAlerts) {
-        byte[] bytes = Base64.getDecoder().decode(compressedAlerts);
-        return (bytes[0] == (byte) (GZIPInputStream.GZIP_MAGIC)) && (bytes[1] == (byte) (GZIPInputStream.GZIP_MAGIC >> 8));
+        try {
+            byte[] bytes = Base64.getDecoder().decode(compressedAlerts);
+            return (bytes[0] == (byte) (GZIPInputStream.GZIP_MAGIC)) && (bytes[1] == (byte) (GZIPInputStream.GZIP_MAGIC >> 8));
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
     }
 }

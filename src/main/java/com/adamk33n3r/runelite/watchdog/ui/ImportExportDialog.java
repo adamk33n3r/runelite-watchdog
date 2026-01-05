@@ -1,5 +1,6 @@
 package com.adamk33n3r.runelite.watchdog.ui;
 
+import com.adamk33n3r.runelite.watchdog.FileNameMultiExtensionFilter;
 import com.adamk33n3r.runelite.watchdog.OverwriteCheckFileChooser;
 import com.adamk33n3r.runelite.watchdog.Util;
 import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
@@ -11,7 +12,6 @@ import lombok.extern.slf4j.Slf4j;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.GridLayout;
@@ -19,14 +19,13 @@ import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionListener;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.util.Base64;
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.zip.GZIPInputStream;
 
 @Slf4j
 public class ImportExportDialog extends JDialog {
@@ -39,12 +38,45 @@ public class ImportExportDialog extends JDialog {
         this.setUndecorated(true);
         Util.syncAlwaysOnTop(this);
 
+        JTextArea textArea = new JTextArea();
+
         JPanel wrapper = this.createWrapper();
         this.add(wrapper);
 
-        wrapper.add(new JLabel("Paste the Alert here"), BorderLayout.NORTH);
+        JPanel top = new JPanel(new BorderLayout());
+        wrapper.add(top, BorderLayout.NORTH);
+        top.add(new JLabel("Paste the Alert here"), BorderLayout.WEST);
+        JButton openFile = new JButton("Open File");
+        openFile.addActionListener((ev) -> {
+            JFileChooser fileChooser = new JFileChooser();
+            fileChooser.setFileFilter(new FileNameMultiExtensionFilter("JSON Files (*.json,*.json.gz)", "json", "json.gz"));
+            int userSelection = fileChooser.showOpenDialog(this);
+            if (userSelection == JFileChooser.APPROVE_OPTION) {
+                File fileToOpen = fileChooser.getSelectedFile();
+                try {
+                    if (fileToOpen.getName().endsWith(".gz")) {
+                        try (var in = new GZIPInputStream(new FileInputStream(fileToOpen))) {
+                            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(in));
+                            StringBuilder stringBuilder = new StringBuilder();
+                            String line;
+                            while ((line = bufferedReader.readLine()) != null) {
+                                stringBuilder.append(line);
+                            }
+                            textArea.setText(stringBuilder.toString());
+                        }
+                    } else {
+                        try (var fr = new FileReader(fileToOpen); var reader = new BufferedReader(fr)) {
+                            textArea.setText(reader.lines().collect(Collectors.joining("\n")));
+                        }
+                    }
+                } catch (IOException e) {
+                    log.error("Error reading file", e);
+                    JOptionPane.showMessageDialog(this, "There was an error reading the file", "Error reading file", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+        top.add(openFile, BorderLayout.EAST);
 
-        JTextArea textArea = new JTextArea();
         textArea.setLineWrap(true);
         PanelUtils.addPasteMenu(textArea);
 
@@ -83,6 +115,7 @@ public class ImportExportDialog extends JDialog {
         });
         btnGroup.add(closeBtn);
         wrapper.add(btnGroup, BorderLayout.SOUTH);
+        SwingUtilities.invokeLater(textArea::requestFocusInWindow);
     }
 
     // Export
