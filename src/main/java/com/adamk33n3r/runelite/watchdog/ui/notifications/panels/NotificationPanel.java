@@ -69,8 +69,7 @@ public abstract class NotificationPanel extends JPanel {
         nameLabel.addMouseListener(mouseDragEventForwarder);
         nameLabel.addMouseMotionListener(mouseDragEventForwarder);
 
-        final ToggleButton toggleButton;
-        toggleButton = new ToggleButton();
+        final ToggleButton toggleButton = new ToggleButton("Disable Action", "Enable Action");
         toggleButton.setSelected(notification.isEnabled());
         toggleButton.addItemListener(i -> {
             notification.setEnabled(toggleButton.isSelected());
