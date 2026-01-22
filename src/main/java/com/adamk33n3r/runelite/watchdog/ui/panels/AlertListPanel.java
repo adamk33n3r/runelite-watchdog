@@ -86,10 +86,7 @@ public class AlertListPanel extends JPanel {
         selectModeToggle.setSelected(this.selectMode);
         selectModeToggle.addItemListener((i) -> {
             this.selectMode = selectModeToggle.isSelected();
-            // Unselect all alerts when leaving select mode
-            if (!this.selectMode) {
-                this.alertListItems.forEach((ali) -> ali.setSelected(false));
-            }
+            this.alertListItems.clear();
             this.rebuild();
         });
         toggleGroup.add(selectModeToggle);
@@ -194,6 +191,11 @@ public class AlertListPanel extends JPanel {
                 this.alertListItems.add(alertListItem);
                 this.dragAndDropReorderPane.add(alertListItem);
             });
+
+        if (!this.filterText.isEmpty()) {
+            searchBar.setText(this.filterText);
+            this.filter(this.filterText);
+        }
     }
 
     private void filter(String text) {
