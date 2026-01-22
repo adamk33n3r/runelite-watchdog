@@ -31,6 +31,9 @@ public abstract class Notification implements INotification {
     protected transient WatchdogConfig watchdogConfig;
 
     @Getter @Setter
+    private boolean enabled = true;
+
+    @Getter @Setter
     private boolean fireWhenFocused = true;
 
     @Getter @Setter
@@ -64,7 +67,7 @@ public abstract class Notification implements INotification {
     }
 
     public boolean shouldFire() {
-        if (WatchdogPlugin.getInstance().isInBannedArea()) {
+        if (!this.enabled || WatchdogPlugin.getInstance().isInBannedArea()) {
             return false;
         }
 
