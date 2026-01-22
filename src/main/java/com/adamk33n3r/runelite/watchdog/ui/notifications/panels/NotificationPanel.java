@@ -4,6 +4,7 @@ import com.adamk33n3r.runelite.watchdog.NotificationType;
 import com.adamk33n3r.runelite.watchdog.notifications.Notification;
 import com.adamk33n3r.runelite.watchdog.ui.Icons;
 import com.adamk33n3r.runelite.watchdog.ui.StretchedStackedLayout;
+import com.adamk33n3r.runelite.watchdog.ui.ToggleButton;
 import com.adamk33n3r.runelite.watchdog.ui.panels.NotificationsPanel;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
 
@@ -23,18 +24,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public abstract class NotificationPanel extends JPanel {
-    // worldhopper - arrow down
-    // screenmarker - border color icon - pencil
-    // screenmarker/timetracking - delete icon - X
-    // timetracking - notify - bell
-    // timetracking - reset - circle arrow - used for in-focus?
-    // timetracking - start - right chevron
-    // loottracker - back arrow
-    // loottracker - collapsed/expanded
-    // info - import cloud
-    // info - github
-    // config - edit/back
-
     @Getter
     protected Notification notification;
     private final NotificationsPanel parentPanel;
@@ -80,8 +69,17 @@ public abstract class NotificationPanel extends JPanel {
         nameLabel.addMouseListener(mouseDragEventForwarder);
         nameLabel.addMouseMotionListener(mouseDragEventForwarder);
 
+        final ToggleButton toggleButton;
+        toggleButton = new ToggleButton();
+        toggleButton.setSelected(notification.isEnabled());
+        toggleButton.addItemListener(i -> {
+            notification.setEnabled(toggleButton.isSelected());
+            onChangeListener.run();
+        });
+        nameWrapper.add(toggleButton, BorderLayout.WEST);
+
         // Right buttons
-        JPanel rightActions = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
+        JPanel rightActions = new JPanel(new FlowLayout(FlowLayout.RIGHT, 3, 0));
         rightActions.setBorder(new EmptyBorder(4, 0, 0, 0));
         rightActions.setBackground(ColorScheme.DARKER_GRAY_COLOR);
         nameWrapper.add(rightActions, BorderLayout.EAST);
