@@ -42,6 +42,7 @@ public class InventoryAlert extends Alert implements RegexMatcher {
     public enum InventoryAlertType implements Displayable {
         EMPTY("Empty", "Triggers on an empty inventory"),
         FULL("Full", "Triggers on a full inventory"),
+        SLOTS("Slots", "Triggers when a number of slots are filled"),
         ITEM("Item Count", "Triggers when an item hits a certain count"),
         ITEM_CHANGE("Item Change", "Triggers when an item is added or removed")
         ;

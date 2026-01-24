@@ -249,6 +249,11 @@ public class EventHandler {
                         case EMPTY:
                             if (itemCount == 0) this.fireAlert(inventoryAlert, alertType.getName());
                             break;
+                        case SLOTS:
+                            if (inventoryAlert.getQuantityComparator().compare((int) itemCount, inventoryAlert.getItemQuantity())){
+                                this.fireAlert(inventoryAlert, alertType.getName());
+                            }
+                            break;
                         case ITEM:
                         case ITEM_CHANGE:
                             Optional<MatchedItem> matchedItems = this.getMatchedItems(inventoryAlert, itemMap);

@@ -13,20 +13,28 @@ public class InventoryAlertPanel extends AlertPanel<InventoryAlert> {
 
     @Override
     protected void build() {
-        boolean isItemChange = this.alert.getInventoryAlertType() == InventoryAlert.InventoryAlertType.ITEM_CHANGE;
+        InventoryAlert.InventoryAlertType alertType = this.alert.getInventoryAlertType();
+        boolean isItemChange = alertType == InventoryAlert.InventoryAlertType.ITEM_CHANGE;
         this.addAlertDefaults()
             .addSelect("Match", "Match on noted or un-noted", InventoryAlert.InventoryMatchType.class, this.alert.getInventoryMatchType(), this.alert::setInventoryMatchType)
-            .addSelect("Type", "Type of inventory alert", InventoryAlert.InventoryAlertType.class, this.alert.getInventoryAlertType(), (val) -> {
+            .addSelect("Type", "Type of inventory alert", InventoryAlert.InventoryAlertType.class, alertType, (val) -> {
                 this.alert.setInventoryAlertType(val);
                 this.rebuild();
             })
             .addIf(
-                panel -> panel.addRegexMatcher(this.alert, "Enter the name of the item to trigger on...", "The name to trigger on. Supports glob (*)")
+                panel -> panel
+                    .addRegexMatcher(this.alert, "Enter the name of the item to trigger on...", "The name to trigger on. Supports glob (*)")
                     .addSubPanelControl(PanelUtils.createLabeledComponent(
                         isItemChange ? "Change" : "Quantity",
                         isItemChange ? "The quantity change of the item (in one tick) to trigger on. Negative for loss, positive for gain, 0 for no change" : "The quantity of item to trigger on",
                         new ComparableNumber(this.alert.getItemQuantity(), this.alert::setItemQuantity, isItemChange ? Integer.MIN_VALUE : 0, Integer.MAX_VALUE, 1, this.alert.getQuantityComparator(), this.alert::setQuantityComparator))),
-                () -> this.alert.getInventoryAlertType() == InventoryAlert.InventoryAlertType.ITEM || isItemChange
+                () -> alertType == InventoryAlert.InventoryAlertType.ITEM || isItemChange
+            )
+            .addIf(
+                panel -> panel
+                    .addSubPanelControl(PanelUtils.createLabeledComponent("Quantity", "The quantity to trigger on",
+                        new ComparableNumber(this.alert.getItemQuantity(), this.alert::setItemQuantity, isItemChange ? Integer.MIN_VALUE : 0, Integer.MAX_VALUE, 1, this.alert.getQuantityComparator(), this.alert::setQuantityComparator))),
+                () -> alertType == InventoryAlert.InventoryAlertType.SLOTS
             )
             .addNotifications();
     }
