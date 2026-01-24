@@ -290,6 +290,10 @@ public class AlertManager {
         return this.getAllAlertsFrom(this.alerts.stream(), false);
     }
 
+    public Stream<Alert> getAllAlertsAndGroups() {
+        return this.getAllAlertsFrom(this.alerts.stream(), true);
+    }
+
     public <T extends Alert> Stream<T> getAllAlertsOfType(Class<T> type) {
         return this.getAllAlerts()
             .filter(type::isInstance)

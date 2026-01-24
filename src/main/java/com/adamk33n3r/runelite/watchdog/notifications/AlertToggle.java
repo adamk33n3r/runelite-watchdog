@@ -30,7 +30,7 @@ public class AlertToggle extends Notification implements RegexMatcher {
 
     @Override
     protected void fireImpl(String[] triggerValues) {
-        this.alertManager.getAllAlerts()
+        this.alertManager.getAllAlertsAndGroups()
             .filter(alert -> Util.matchPattern(this, alert.getName()) != null)
             .forEach(alert -> {
                 alert.setEnabled(this.mode == ToggleMode.ENABLE || (this.mode == ToggleMode.TOGGLE && !alert.isEnabled()));
