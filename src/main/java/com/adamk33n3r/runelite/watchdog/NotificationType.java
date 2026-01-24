@@ -21,6 +21,7 @@ public enum NotificationType {
     SCREEN_MARKER("Screen Marker", "Show a screen marker", NotificationCategory.OVERLAY, ScreenMarker.class),
     OBJECT_MARKER("Object Marker", "Show an object marker", NotificationCategory.OVERLAY, ObjectMarker.class),
     DINK("Dink", "Tell Dink to send a custom notification to your webhook", NotificationCategory.ADVANCED, Dink.class),
+    COUNTER("Counter", "Increment a counter", NotificationCategory.ADVANCED, Counter.class),
     SHORTEST_PATH("Shortest Path", "Sets the Shortest Path plugin's path", NotificationCategory.ADVANCED, ShortestPath.class),
     ALERT_TOGGLE("Alert Toggle", "Toggle an alert's enabled state", NotificationCategory.ADVANCED, AlertToggle.class),
     PLUGIN_MESSAGE("Plugin Message", "Send a message to another plugin", NotificationCategory.ADVANCED, PluginMessage.class),

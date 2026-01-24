@@ -105,6 +105,7 @@ public class AlertManager {
             .registerSubtype(ScreenMarker.class)
             .registerSubtype(ObjectMarker.class)
             .registerSubtype(Dink.class)
+            .registerSubtype(Counter.class)
             .registerSubtype(ShortestPath.class)
             .registerSubtype(PluginMessage.class)
             .registerSubtype(PluginToggle.class)
