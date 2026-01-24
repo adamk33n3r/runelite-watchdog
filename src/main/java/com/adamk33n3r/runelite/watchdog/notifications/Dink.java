@@ -7,17 +7,15 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import lombok.extern.slf4j.Slf4j;
-import net.runelite.api.Client;
-import net.runelite.client.callback.ClientThread;
 import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.events.PluginMessage;
 import okhttp3.HttpUrl;
-import org.apache.commons.lang3.StringUtils;
 
-import javax.annotation.Nullable;
 import javax.inject.Inject;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Getter
@@ -26,12 +24,10 @@ import java.util.List;
 @Accessors(chain = true)
 public class Dink extends MessageNotification {
     private boolean includeScreenshot = false;
+    private String urls = null;
 
     @Inject
     private transient EventBus eventBus;
-
-    @Inject
-    private transient ClientThread clientThread;
 
     @Override
     protected void fireImpl(String[] triggerValues) {
@@ -41,13 +37,13 @@ public class Dink extends MessageNotification {
         dinkData.put("sourcePlugin", WatchdogPlugin.getInstance().getName());
         dinkData.put("title", this.getAlert().getName());
         dinkData.put("imageRequested", this.includeScreenshot);
+        if (urls != null && !urls.isEmpty()) {
+            List<HttpUrl> httpUrls = Arrays.stream(urls.split(";")).map(HttpUrl::parse).collect(Collectors.toList());
+            dinkData.put("urls", httpUrls);
+        }
 
         log.debug("Sending dink notification with data: {}", dinkData);
 
-        // Workaround for https://github.com/pajlads/DinkPlugin/pull/701
-        // Tracked at https://github.com/pajlads/DinkPlugin/issues/758
-        this.clientThread.invoke(() -> {
-            this.eventBus.post(new PluginMessage("dink", "notify", dinkData));
-        });
+        this.eventBus.post(new PluginMessage("dink", "notify", dinkData));
     }
 }

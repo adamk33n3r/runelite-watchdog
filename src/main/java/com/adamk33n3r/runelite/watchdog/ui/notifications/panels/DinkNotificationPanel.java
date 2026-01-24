@@ -42,17 +42,32 @@ public class DinkNotificationPanel extends NotificationPanel {
             return;
         }
 
-        FlatTextArea flatTextArea = PanelUtils.createTextField(
+        FlatTextArea message = PanelUtils.createTextField(
             "Enter your message...",
-            "",
+            "Message to send with Dink",
             notification.getMessage(),
             val -> {
                 notification.setMessage(val);
                 onChangeListener.run();
             }
         );
-        ((AbstractDocument) flatTextArea.getDocument()).setDocumentFilter(new LengthLimitFilter(4096));
-        this.settings.add(flatTextArea);
+        ((AbstractDocument) message.getDocument()).setDocumentFilter(new LengthLimitFilter(4096));
+        this.settings.add(message);
+
+        FlatTextArea urls = PanelUtils.createTextField(
+            "Custom urls (optional)...",
+            "Semicolon separated list of urls to send with Dink",
+            notification.getUrls(),
+            val -> {
+                notification.setUrls(val);
+                if (val == null || val.isEmpty()) {
+                    notification.setUrls(null);
+                }
+                onChangeListener.run();
+            }
+        );
+        ((AbstractDocument) urls.getDocument()).setDocumentFilter(new LengthLimitFilter(4096));
+        this.settings.add(urls);
 
         JCheckBox includeScreenshot = PanelUtils.createCheckbox("Include Screenshot", "Whether or not to include a screenshot in the discord message", notification.isIncludeScreenshot(), (selected) -> {
             notification.setIncludeScreenshot(selected);
