@@ -25,7 +25,8 @@ public class StatChangedAlertPanel extends AlertPanel<StatChangedAlert> {
                 this.rebuild();
             })
             .addSubPanelControl(this.alert.getChangedMode() == StatChangedMode.RELATIVE ?
-                this.createRelativeLevelPanel() :
+                this.createRelativeLevelPanel() : this.alert.getChangedMode() == StatChangedMode.PERCENTAGE ?
+                this.createPercentageLevelPanel() :
                 this.createAbsoluteLevelPanel())
             .addNotifications();
     }
@@ -42,5 +43,12 @@ public class StatChangedAlertPanel extends AlertPanel<StatChangedAlert> {
             "Level",
             "The level to trigger the alert.",
             new ComparableNumber(this.alert.getChangedAmount(), this.alert::setChangedAmount, 0, 99, 1, this.alert.getChangedComparator(), this.alert::setChangedComparator));
+    }
+
+    private JPanel createPercentageLevelPanel() {
+        return PanelUtils.createLabeledComponent(
+            "Percentage",
+            "The percentage of your level (rounded down) to trigger the alert.",
+            new ComparableNumber(this.alert.getChangedAmount(), this.alert::setChangedAmount, 0, 100, 1, this.alert.getChangedComparator(), this.alert::setChangedComparator));
     }
 }

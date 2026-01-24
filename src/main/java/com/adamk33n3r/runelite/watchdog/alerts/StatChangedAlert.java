@@ -21,12 +21,4 @@ public class StatChangedAlert extends Alert {
     public StatChangedAlert(String name) {
         super(name);
     }
-
-    public boolean isRelative() {
-        return this.changedMode == StatChangedMode.RELATIVE;
-    }
-
-    public boolean isAbsolute() {
-        return this.changedMode == StatChangedMode.ABSOLUTE;
-    }
 }

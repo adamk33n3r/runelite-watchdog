@@ -169,7 +169,21 @@ public class EventHandler {
                     return false;
                 }
 
-                int targetLevel = alert.isRelative() ? statChanged.getLevel() + alert.getChangedAmount() : alert.getChangedAmount();
+                int targetLevel;
+                switch (alert.getChangedMode()) {
+                    case RELATIVE:
+                        targetLevel = statChanged.getLevel() + alert.getChangedAmount();
+                        break;
+                    case ABSOLUTE:
+                        targetLevel = alert.getChangedAmount();
+                        break;
+                    case PERCENTAGE:
+                        targetLevel = (statChanged.getLevel() * alert.getChangedAmount()) / 100;
+                        break;
+                    default:
+                        targetLevel = statChanged.getLevel();
+                        break;
+                }
                 boolean currentIs = alert.getChangedComparator().compare(statChanged.getBoostedLevel(), targetLevel);
                 boolean prevWasNot = alert.getChangedComparator().converse().compare(previousLevel, targetLevel);
                 return currentIs && prevWasNot;
