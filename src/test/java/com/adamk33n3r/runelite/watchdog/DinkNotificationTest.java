@@ -43,9 +43,6 @@ public class DinkNotificationTest extends AlertTestBase {
         Mockito.when(testMessage.getName()).thenReturn("Test");
         Mockito.when(testMessage.getMessage()).thenReturn("Test Message");
         Mockito.when(testMessage.getType()).thenReturn(ChatMessageType.GAMEMESSAGE);
-        Mockito.when(client.isClientThread()).thenReturn(true);
-        Mockito.doCallRealMethod().when(clientThread).invoke(Mockito.any(Runnable.class));
-        Mockito.doCallRealMethod().when(clientThread).invoke(Mockito.any(BooleanSupplier.class));
         eventHandler.onChatMessage(testMessage);
         Mockito.verify(eventBus, Mockito.timeout(100)).post(new PluginMessage("dink", "notify", Map.of(
             "text", dinkMessage,
