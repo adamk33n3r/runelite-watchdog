@@ -107,6 +107,10 @@ public enum Region {
         .builder()
         .regionIDs(Set.of(5269, 13668, 14180))
         .build()),
+    NIGHTMARE(RegionConfig
+        .builder()
+        .regionIDs(Set.of(15515))
+        .build()),
 //    LUMBRIDGE_CASTLE(RegionConfig
 //        .builder()
 //        .regionIDs(Set.of(12850))
