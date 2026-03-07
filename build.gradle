@@ -44,10 +44,10 @@ version = major+'.'+minor+'.'+patch
 if (!phase.empty)
     version = version+'-'+phase
 
-sourceCompatibility = '10'
-targetCompatibility = '10'
+sourceCompatibility = '11'
+targetCompatibility = '11'
 
-tasks.withType(JavaCompile) {
+tasks.withType(JavaCompile).configureEach {
     options.encoding = 'UTF-8'
     options.release.set(11)
 }

@@ -9,3 +9,4 @@ nb-configuration.xml
 nbproject/
 jars/
 test.properties
+.claude/settings.local.json
