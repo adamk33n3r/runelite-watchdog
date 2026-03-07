@@ -1,6 +1,8 @@
 package com.adamk33n3r.runelite.watchdog;
 
 import com.adamk33n3r.runelite.watchdog.alerts.Alert;
+import com.adamk33n3r.runelite.watchdog.alerts.AlertGroup;
+import com.adamk33n3r.runelite.watchdog.alerts.AlertMode;
 import com.adamk33n3r.runelite.watchdog.notifications.objectmarkers.ObjectMarkerManager;
 import com.adamk33n3r.runelite.watchdog.notifications.objectmarkers.ObjectMarkerOverlay;
 import com.adamk33n3r.runelite.watchdog.ui.notifications.screenmarker.ScreenMarkerUtil;
@@ -44,6 +46,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.Queue;
+import java.util.stream.Collectors;
 
 import static net.runelite.api.MenuAction.RUNELITE_OVERLAY_CONFIG;
 
@@ -272,9 +275,24 @@ public class WatchdogPlugin extends Plugin {
     }
 
     public void processAlert(Alert alert, String[] triggerValues, boolean forceFire) {
+        if (alert.getAlertMode() == AlertMode.RESTART) {
+            this.stopAlertProcessors(alert);
+        }
         var alertProcessor = new AlertProcessor(alert, triggerValues, forceFire, this.alertProcessors::remove);
         this.alertProcessors.add(alertProcessor);
         alertProcessor.start();
+    }
+
+    public void stopAlertProcessors(Alert alert) {
+        if (alert instanceof AlertGroup) {
+            log.debug("alert group, cancelling all sub-alerts");
+            ((AlertGroup) alert).getAlerts().forEach(this::stopAlertProcessors);
+        } else {
+            log.debug("alert not group, cancelling only this alert: {}", alert.getName());
+            this.alertProcessors.stream()
+                .filter(ap -> ap.getAlert() == alert)
+                .forEach(AlertProcessor::interrupt);
+        }
     }
 
     public void stopAllAlerts() {

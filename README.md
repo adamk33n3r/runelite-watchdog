@@ -55,6 +55,7 @@ For more information on trigger and action types, [see the wiki](https://github.
 - TOA
 - Yama
 - Delve Boss (Doom of Mokhaiotl)
+- Nightmare
 
 _Updated 2025/07/25_
 

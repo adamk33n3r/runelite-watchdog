@@ -3,6 +3,7 @@ package com.adamk33n3r.runelite.watchdog.ui.panels;
 import com.adamk33n3r.runelite.watchdog.*;
 import com.adamk33n3r.runelite.watchdog.alerts.Alert;
 import com.adamk33n3r.runelite.watchdog.alerts.AlertGroup;
+import com.adamk33n3r.runelite.watchdog.alerts.AlertMode;
 import com.adamk33n3r.runelite.watchdog.alerts.RegexMatcher;
 import com.adamk33n3r.runelite.watchdog.ui.*;
 
@@ -112,6 +113,9 @@ public abstract class AlertPanel<T extends Alert> extends PluginPanel {
         toggleButton.setSelected(alert.isEnabled());
         toggleButton.addItemListener(i -> {
             alert.setEnabled(toggleButton.isSelected());
+            if (!toggleButton.isSelected()) {
+                this.plugin.stopAlertProcessors(alert);
+            }
             this.alertManager.saveAlerts();
         });
         rightButtons.add(toggleButton);
@@ -271,6 +275,8 @@ public abstract class AlertPanel<T extends Alert> extends PluginPanel {
         sub.add(checkbox, BorderLayout.EAST);
         return this
             .addTextField("Enter the alert name...", "Name of Alert", this.alert.getName(), this.alert::setName)
+            .addSelect("Alert Mode", "How to handle re-triggering when this alert is already running",
+                AlertMode.class, this.alert.getAlertMode(), this.alert::setAlertMode)
             .addSubPanelControl(PanelUtils.createLabeledComponent(
                 "Debounce (ms)",
                 "How long to wait before allowing this alert to trigger again in milliseconds",

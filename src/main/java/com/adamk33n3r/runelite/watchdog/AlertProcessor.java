@@ -2,6 +2,7 @@ package com.adamk33n3r.runelite.watchdog;
 
 import com.adamk33n3r.runelite.watchdog.alerts.Alert;
 import com.adamk33n3r.runelite.watchdog.notifications.Notification;
+import lombok.Getter;
 
 import java.util.LinkedList;
 import java.util.Queue;
@@ -9,6 +10,8 @@ import java.util.Random;
 import java.util.function.Consumer;
 
 public class AlertProcessor extends Thread {
+    @Getter
+    private final Alert alert;
     private final String[] triggerValues;
     private final boolean forceFire;
     private final Consumer<AlertProcessor> onFinish;
@@ -23,6 +26,7 @@ public class AlertProcessor extends Thread {
     }
 
     public AlertProcessor(Alert alert, String[] triggerValues, boolean forceFire, Consumer<AlertProcessor> onFinish) {
+        this.alert = alert;
         this.triggerValues = triggerValues;
         this.forceFire = forceFire;
         this.onFinish = onFinish;
