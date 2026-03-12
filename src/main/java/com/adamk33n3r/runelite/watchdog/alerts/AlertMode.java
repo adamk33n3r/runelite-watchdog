@@ -7,7 +7,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum AlertMode implements Displayable {
-    QUEUE("Queue", "Allow multiple instances to run simultaneously"),
+    MULTI("Multi", "Allow multiple instances to run simultaneously"),
     RESTART("Restart", "Cancel any running instances before starting a new one"),
     ;
 

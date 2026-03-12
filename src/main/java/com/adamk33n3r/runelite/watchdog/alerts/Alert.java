@@ -24,7 +24,7 @@ public abstract class Alert {
     private int debounceTime;
     private boolean debounceResetTime = false;
     private boolean randomNotifications = false;
-    private AlertMode alertMode = AlertMode.QUEUE;
+    private AlertMode alertMode = AlertMode.MULTI;
 
     @Nullable
     private transient AlertGroup parent;
