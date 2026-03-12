@@ -275,8 +275,9 @@ public abstract class AlertPanel<T extends Alert> extends PluginPanel {
         sub.add(checkbox, BorderLayout.EAST);
         return this
             .addTextField("Enter the alert name...", "Name of Alert", this.alert.getName(), this.alert::setName)
-            .addSelect("Alert Mode", "How to handle re-triggering when this alert is already running",
-                AlertMode.class, this.alert.getAlertMode(), this.alert::setAlertMode)
+            .addIf((panel) -> panel.addSelect("Alert Mode", "How to handle re-triggering when this alert is already running",
+                    AlertMode.class, this.alert.getAlertMode(), this.alert::setAlertMode)
+            , () -> !(this.alert instanceof AlertGroup))
             .addSubPanelControl(PanelUtils.createLabeledComponent(
                 "Debounce (ms)",
                 "How long to wait before allowing this alert to trigger again in milliseconds",
