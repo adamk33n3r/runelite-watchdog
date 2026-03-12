@@ -5,6 +5,7 @@ import com.adamk33n3r.runelite.watchdog.notifications.ScreenMarker;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.input.MouseManager;
 import net.runelite.client.ui.components.colorpicker.ColorPickerManager;
+import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayManager;
 
 import com.google.gson.Gson;
@@ -18,6 +19,7 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Singleton
 public class ScreenMarkerUtil {
@@ -78,6 +80,28 @@ public class ScreenMarkerUtil {
         } else {
             this.mouseManager.unregisterMouseListener(this.mouseListener);
         }
+    }
+
+    public void startCreation(ScreenMarker screenMarker) {
+        setMouseListenerEnabled(true);
+        setCreatingScreenMarker(true);
+        setCurrentMarker(screenMarker);
+//        startLocation = location;
+        var tmpOverlay = new ScreenMarkerOverlay(screenMarker);
+        var size = loadOverlaySize(tmpOverlay);
+        var location = loadOverlayLocation(tmpOverlay);
+        overlay.setPreferredLocation(location);
+        overlay.setPreferredSize(size);
+    }
+
+    private Point loadOverlayLocation(Overlay overlay) {
+        String key = overlay.getName() + "_preferredLocation";
+        return this.configManager.getConfiguration("runelite", key, Point.class);
+    }
+
+    private Dimension loadOverlaySize(Overlay overlay) {
+        String key = overlay.getName() + "_preferredSize";
+        return this.configManager.getConfiguration("runelite", key, Dimension.class);
     }
 
     public void startCreation(Point location)
@@ -173,8 +197,8 @@ public class ScreenMarkerUtil {
     }
 
     public void removeScreenMarkerById(String id) {
-        this.screenMarkers.removeIf(overlay -> overlay.getMarker().getId().equals(id));
-        this.overlayManager.removeIf(overlay -> overlay instanceof ScreenMarkerOverlay && ((ScreenMarkerOverlay) overlay).getMarker().getId().equals(id));
+        this.screenMarkers.removeIf(overlay -> Objects.equals(overlay.getMarker().getId(), id));
+        this.overlayManager.removeIf(overlay -> overlay instanceof ScreenMarkerOverlay && Objects.equals(((ScreenMarkerOverlay) overlay).getMarker().getId(), id));
     }
 
     public void removeAllMarkers() {

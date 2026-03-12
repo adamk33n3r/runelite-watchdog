@@ -3,6 +3,7 @@ package com.adamk33n3r.runelite.watchdog.ui.panels;
 import com.adamk33n3r.runelite.watchdog.*;
 import com.adamk33n3r.runelite.watchdog.alerts.Alert;
 import com.adamk33n3r.runelite.watchdog.alerts.AlertGroup;
+import com.adamk33n3r.runelite.watchdog.alerts.AlertMode;
 import com.adamk33n3r.runelite.watchdog.alerts.RegexMatcher;
 import com.adamk33n3r.runelite.watchdog.ui.*;
 
@@ -30,6 +31,7 @@ public abstract class AlertPanel<T extends Alert> extends PluginPanel {
     private final JPanel controlContainer;
     private final JPanel centerContainer;
     protected final WatchdogPanel watchdogPanel;
+    protected final WatchdogPlugin plugin;
     protected final MultiplexingPluginPanel muxer;
     protected final T alert;
 
@@ -41,7 +43,8 @@ public abstract class AlertPanel<T extends Alert> extends PluginPanel {
         this.watchdogPanel = watchdogPanel;
         this.muxer = watchdogPanel.getMuxer();
         this.alert = alert;
-        this.alertManager = WatchdogPlugin.getInstance().getAlertManager();
+        this.plugin = WatchdogPlugin.getInstance();
+        this.alertManager = plugin.getAlertManager();
 
         this.setLayout(new BorderLayout());
 
@@ -86,8 +89,7 @@ public abstract class AlertPanel<T extends Alert> extends PluginPanel {
                 (btn, modifiers) -> {
                     String[] triggerValues = {"1", "2", "3", "4", "5"};
                     this.watchdogPanel.getHistoryPanelProvider().get().addEntry(alert, triggerValues);
-                    new AlertProcessor(alert, triggerValues, true).start();
-//                    alert.getNotifications().forEach(notification -> notification.fireForced(triggerValues));
+                    this.plugin.processAlert(alert, triggerValues, true);
                 }
             );
             rightButtons.add(testAlert);
@@ -111,6 +113,9 @@ public abstract class AlertPanel<T extends Alert> extends PluginPanel {
         toggleButton.setSelected(alert.isEnabled());
         toggleButton.addItemListener(i -> {
             alert.setEnabled(toggleButton.isSelected());
+            if (!toggleButton.isSelected()) {
+                this.plugin.stopAlertProcessors(alert);
+            }
             this.alertManager.saveAlerts();
         });
         rightButtons.add(toggleButton);
@@ -123,6 +128,7 @@ public abstract class AlertPanel<T extends Alert> extends PluginPanel {
             "Back",
             (btn, modifiers) -> {
                 WatchdogPlugin.getInstance().getScreenMarkerUtil().finishCreation(true);
+                WatchdogPlugin.getInstance().getObjectMarkerManager().turnOffObjectMarkerMode();
                 this.alertManager.saveAlerts();
                 this.muxer.popState();
 
@@ -187,7 +193,7 @@ public abstract class AlertPanel<T extends Alert> extends PluginPanel {
     }
 
     public AlertPanel<T> addTextArea(String placeholder, String tooltip, String initialValue, Consumer<String> saveAction) {
-        JTextArea textArea = PanelUtils.createTextArea(placeholder, tooltip, initialValue, val -> {
+        FlatTextArea textArea = PanelUtils.createTextArea(placeholder, tooltip, initialValue, val -> {
             saveAction.accept(val);
             this.alertManager.saveAlerts();
         });
@@ -239,16 +245,34 @@ public abstract class AlertPanel<T extends Alert> extends PluginPanel {
     }
 
     public AlertPanel<T> addAlertDefaults() {
-        return this.addTextField("Enter the alert name...", "Name of Alert", this.alert.getName(), this.alert::setName)
-            .addSpinner(
-                "Debounce Time (ms)",
+        JSpinner spinner = PanelUtils.createSpinner(
+            this.alert.getDebounceTime(),
+            0,
+            8640000, // 6 hours - max time a player can be logged in
+            100,
+            val -> {
+                this.alert.setDebounceTime(val);
+                this.alertManager.saveAlerts();
+            }
+        );
+        JCheckBox checkbox = PanelUtils.createCheckbox("Reset", "Reset the debounce time every time this alert is triggered", this.alert.isDebounceResetTime(), val -> {
+            this.alert.setDebounceResetTime(val);
+            this.alertManager.saveAlerts();
+        });
+        JPanel sub = new JPanel(new BorderLayout(5, 5));
+        sub.add(spinner);
+        sub.add(checkbox, BorderLayout.EAST);
+        return this
+            .addTextField("Enter the alert name...", "Name of Alert", this.alert.getName(), this.alert::setName)
+            .addIf((panel) -> panel.addSelect("Alert Mode", "How to handle re-triggering when this alert is already running",
+                    AlertMode.class, this.alert.getAlertMode(), this.alert::setAlertMode)
+            , () -> !(this.alert instanceof AlertGroup))
+            .addSubPanelControl(PanelUtils.createLabeledComponent(
+                "Debounce (ms)",
                 "How long to wait before allowing this alert to trigger again in milliseconds",
-                this.alert.getDebounceTime(),
-                this.alert::setDebounceTime,
-                0,
-                8640000, // 6 hours - max time a player can be logged in
-                100
-            );
+                sub
+            )
+        );
     }
 
     public AlertPanel<T> addIf(Consumer<AlertPanel<T>> panel, Supplier<Boolean> ifFunc) {
@@ -263,38 +287,34 @@ public abstract class AlertPanel<T extends Alert> extends PluginPanel {
     }
 
     public AlertPanel<T> addRegexMatcher(RegexMatcher regexMatcher, String placeholder, String tooltip, JComponent suffixAppend) {
-        JPanel btnGroup = new JPanel(new GridLayout(1, 0, 5, 5));
-        JButton regex = PanelUtils.createToggleActionButton(
-            Icons.REGEX_SELECTED,
-            Icons.REGEX_SELECTED_HOVER,
-            Icons.REGEX,
-            Icons.REGEX_HOVER,
-            "Disable regex",
-            "Enable regex",
-            regexMatcher.isRegexEnabled(),
-            (btn, modifiers) -> {
-                regexMatcher.setRegexEnabled(btn.isSelected());
-                this.alertManager.saveAlerts();
-            }
-        );
-        btnGroup.add(regex);
-        if (suffixAppend != null) {
-            btnGroup.add(suffixAppend);
-        }
-        return this.addInputGroupWithSuffix(
-            PanelUtils.createTextArea(placeholder, tooltip, regexMatcher.getPattern(), msg -> {
-                if (!PanelUtils.isPatternValid(this, msg, regexMatcher.isRegexEnabled()))
-                    return;
-                regexMatcher.setPattern(msg);
-                this.alertManager.saveAlerts();
-            }),
-            btnGroup
+        return this.addRegexMatcher(
+            regexMatcher::getPattern,
+            regexMatcher::setPattern,
+            regexMatcher::isRegexEnabled,
+            regexMatcher::setRegexEnabled,
+            placeholder,
+            tooltip,
+            suffixAppend
         );
     }
 
+    public AlertPanel<T> addRegexMatcher(
+        Supplier<String> pattern,
+        Consumer<String> savePattern,
+        Supplier<Boolean> regexEnabled,
+        Consumer<Boolean> saveRegexEnabled,
+        String placeholder,
+        String tooltip,
+        JComponent suffixAppend
+    ) {
+        var regexMatcher = PanelUtils.createRegexMatcher(pattern, savePattern, regexEnabled, saveRegexEnabled, placeholder, tooltip, suffixAppend);
+        this.controlContainer.add(regexMatcher);
+        return this;
+    }
+
     public AlertPanel<T> addNotifications() {
-        NotificationsPanel notificationPanel = new NotificationsPanel(this.alert);
-        WatchdogPlugin.getInstance().getInjector().injectMembers(notificationPanel);
+        NotificationsPanel notificationPanel = WatchdogPlugin.getInstance().getInjector().getInstance(NotificationsPanel.class);
+        notificationPanel.init(this.alert);
         notificationPanel.setBorder(new CompoundBorder(new EmptyBorder(0, 5, 0, 5), new HorizontalRuleBorder(10)));
         this.centerContainer.add(notificationPanel);
 

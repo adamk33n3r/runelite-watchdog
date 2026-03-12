@@ -35,17 +35,14 @@ public class TextToSpeech extends MessageNotification implements IAudioNotificat
     private int rate = 1;
     @SerializedName("voice")
     private Voice legacyVoice = Voice.GEORGE;
-    private TTSSource source = TTSSource.LEGACY;
+    private TTSSource source = TTSSource.ELEVEN_LABS;
     private String elevenLabsVoiceId;
     private transient com.adamk33n3r.runelite.watchdog.elevenlabs.Voice elevenLabsVoice;
 
     @Inject
     public TextToSpeech(WatchdogConfig config) {
         super(config);
-        this.gain = config.defaultTTSVolume();
-        this.rate = config.defaultTTSRate();
-        this.legacyVoice = config.defaultTTSVoice();
-        this.source = config.defaultTTSSource();
+        this.setDefaults();
     }
 
     @Override
@@ -78,7 +75,7 @@ public class TextToSpeech extends MessageNotification implements IAudioNotificat
                         log.error("Could not move tmp file to cache, playing from tmp", e);
                         WatchdogPlugin.getInstance().getSoundPlayer().play(file, this.gain);
                     }
-                });
+                }, log::error);
                 return;
             }
 
@@ -90,6 +87,10 @@ public class TextToSpeech extends MessageNotification implements IAudioNotificat
             } else {
                 String request = String.format("https://ttsplugin.com?m=%s&r=%d&v=%d", encodedMessage, this.rate, this.legacyVoice.id);
                 URLConnection conn = new URL(request).openConnection();
+                if (conn.getContentLength() < 0) {
+                    log.error("Issue with tts plugin service, content length invalid");
+                    return;
+                }
                 byte[] bytes = new byte[conn.getContentLength()];
                 try (InputStream stream = conn.getInputStream()) {
                     for (int i = 0; i < conn.getContentLength(); i++) {

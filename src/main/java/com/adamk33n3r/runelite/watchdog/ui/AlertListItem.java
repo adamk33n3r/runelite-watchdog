@@ -2,6 +2,7 @@ package com.adamk33n3r.runelite.watchdog.ui;
 
 import com.adamk33n3r.runelite.watchdog.AlertManager;
 import com.adamk33n3r.runelite.watchdog.WatchdogPanel;
+import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
 import com.adamk33n3r.runelite.watchdog.alerts.Alert;
 import com.adamk33n3r.runelite.watchdog.alerts.AlertGroup;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
@@ -96,6 +97,9 @@ public class AlertListItem extends JPanel {
             toggleButton.setSelected(this.alert.isEnabled());
             toggleButton.addItemListener(i -> {
                 this.alert.setEnabled(toggleButton.isSelected());
+                if (!toggleButton.isSelected()) {
+                    WatchdogPlugin.getInstance().stopAlertProcessors(this.alert);
+                }
                 this.alertManager.saveAlerts();
             });
         }

@@ -54,7 +54,10 @@ public class ToolsPanel extends PluginPanel {
             this.muxer.get().pushState(this.historyPanelProvider.get());
         }));
 
-        tools.add(PanelUtils.createButton("Stop All Sounds", "Stop All Sounds", (btn, mods) -> {
+        tools.add(PanelUtils.createButton("Clear All Processing Alerts", "Clear All Processing Alerts", (btn, mods) -> {
+            WatchdogPlugin.getInstance().stopAllAlerts();
+        }));
+        tools.add(PanelUtils.createButton("Stop All Queued Sounds", "Stop All Queued Sounds", (btn, mods) -> {
             WatchdogPlugin.getInstance().getSoundPlayer().stop();
         }));
         tools.add(PanelUtils.createButton("Dismiss All Overlays", "Dismiss All Overlays", (btn, mods) -> {
@@ -62,6 +65,12 @@ public class ToolsPanel extends PluginPanel {
         }));
         tools.add(PanelUtils.createButton("Dismiss All Screen Markers", "Dismiss All Screen Markers", (btn, mods) -> {
             WatchdogPlugin.getInstance().getScreenMarkerUtil().removeAllMarkers();
+        }));
+        tools.add(PanelUtils.createButton("Dismiss All Object Markers", "Dismiss All Object Markers", (btn, mods) -> {
+            WatchdogPlugin.getInstance().getObjectMarkerManager().removeAllMarkers();
+        }));
+        tools.add(PanelUtils.createButton("Reload All Alerts from Profile", "This will reload all alerts from disk", (btn, mods) -> {
+            WatchdogPlugin.getInstance().getAlertManager().loadAlerts();
         }));
         this.add(tools);
     }

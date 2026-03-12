@@ -1,8 +1,6 @@
 package com.adamk33n3r.runelite.watchdog.ui;
 
 import com.adamk33n3r.runelite.watchdog.Util;
-import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
-import net.runelite.client.config.RuneLiteConfig;
 import net.runelite.client.util.Text;
 
 import javax.swing.*;

@@ -22,11 +22,13 @@ public abstract class Alert {
     private boolean enabled = true;
     private String name;
     private int debounceTime;
+    private boolean debounceResetTime = false;
     private boolean randomNotifications = false;
+    private AlertMode alertMode = AlertMode.MULTI;
 
     @Nullable
     private transient AlertGroup parent;
-    public AlertGroup getParent() {
+    public @Nullable AlertGroup getParent() {
         if (this.parent == null) {
             this.parent = WatchdogPlugin.getInstance()
                 .getAlertManager()

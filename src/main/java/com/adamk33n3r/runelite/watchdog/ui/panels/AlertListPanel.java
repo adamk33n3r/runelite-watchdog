@@ -12,7 +12,6 @@ import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.DynamicGridLayout;
 import net.runelite.client.ui.components.DragAndDropReorderPane;
 
-import com.google.common.base.Splitter;
 import lombok.Getter;
 
 import javax.annotation.Nullable;
@@ -30,7 +29,6 @@ import java.util.stream.Collectors;
 
 public class AlertListPanel extends JPanel {
     private String filterText = "";
-    private static final Splitter SPLITTER = Splitter.on(" ").trimResults().omitEmptyStrings();
     private final List<AlertListItem> alertListItems = new ArrayList<>();
     private final DragAndDropReorderPane dragAndDropReorderPane = new DragAndDropReorderPane();
     @Getter
@@ -88,10 +86,7 @@ public class AlertListPanel extends JPanel {
         selectModeToggle.setSelected(this.selectMode);
         selectModeToggle.addItemListener((i) -> {
             this.selectMode = selectModeToggle.isSelected();
-            // Unselect all alerts when leaving select mode
-            if (!this.selectMode) {
-                this.alertListItems.forEach((ali) -> ali.setSelected(false));
-            }
+            this.alertListItems.clear();
             this.rebuild();
         });
         toggleGroup.add(selectModeToggle);
@@ -125,6 +120,7 @@ public class AlertListPanel extends JPanel {
                 .filter(AlertListItem::isSelected)
                 .forEach((ali) -> {
                     this.alertManager.removeAlert(ali.getAlert(), false);
+                    ali.getAlert().setParent(group);
                     group.getAlerts().add(ali.getAlert());
                 });
             WatchdogPlugin.getInstance().getPanel().openAlert(group);
@@ -142,6 +138,7 @@ public class AlertListPanel extends JPanel {
                     .filter(AlertListItem::isSelected)
                     .forEach((ali) -> {
                         this.alertManager.removeAlert(ali.getAlert(), false);
+                        ali.getAlert().setParent(alertGroupParent);
                         if (alertGroupParent == null) {
                             this.alertManager.addAlert(ali.getAlert(), false);
                         } else {
@@ -149,6 +146,13 @@ public class AlertListPanel extends JPanel {
                         }
                     });
                 WatchdogPlugin.getInstance().getPanel().getMuxer().popState();
+                if (alertGroupParent == null) {
+                    WatchdogPlugin.getInstance().getPanel().rebuild();
+                } else {
+                    // pop and reopen in order to rebuild the list
+                    WatchdogPlugin.getInstance().getPanel().getMuxer().popState();
+                    WatchdogPlugin.getInstance().getPanel().openAlert(alertGroupParent);
+                }
             })).setEnabled(this.selectMode);
         }
         multiSelectActions.add(PanelUtils.createActionButton(Icons.EXPORT, Icons.EXPORT_HOVER, "Export selected Alerts", (btn, modifiers) -> {
@@ -187,6 +191,11 @@ public class AlertListPanel extends JPanel {
                 this.alertListItems.add(alertListItem);
                 this.dragAndDropReorderPane.add(alertListItem);
             });
+
+        if (!this.filterText.isEmpty()) {
+            searchBar.setText(this.filterText);
+            this.filter(this.filterText);
+        }
     }
 
     private void filter(String text) {

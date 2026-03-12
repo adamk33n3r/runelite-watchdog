@@ -15,6 +15,7 @@ public class LocationAlert extends ContinuousAlert {
     private WorldPoint worldPoint = new WorldPoint(3223, 3219, 0);
     private int distance;
     private boolean repeat = false;
+    private boolean cardinalOnly = false;
 //    private boolean showTileMarker;
 
     @Inject
@@ -41,11 +42,17 @@ public class LocationAlert extends ContinuousAlert {
         return this.shouldFire(worldLocation);
     }
 
-    public boolean shouldFire(WorldPoint worldPoint) {
+    public boolean shouldFire(WorldPoint currentPoint) {
         if (this.worldPoint == null) {
             return false;
         }
+        if (this.cardinalOnly && !this.isCardinal(currentPoint)) {
+            return false;
+        }
+        return this.worldPoint.distanceTo(currentPoint) <= this.distance;
+    }
 
-        return this.worldPoint.distanceTo(worldPoint) <= this.distance;
+    private boolean isCardinal(WorldPoint otherPoint) {
+        return this.worldPoint.getX() == otherPoint.getX() || this.worldPoint.getY() == otherPoint.getY();
     }
 }

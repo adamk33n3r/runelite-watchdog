@@ -1,14 +1,18 @@
 package com.adamk33n3r.runelite.watchdog;
 
+import com.adamk33n3r.runelite.watchdog.alerts.Alert;
+import com.adamk33n3r.runelite.watchdog.alerts.AlertGroup;
+import com.adamk33n3r.runelite.watchdog.alerts.AlertMode;
+import com.adamk33n3r.runelite.watchdog.notifications.objectmarkers.ObjectMarkerManager;
+import com.adamk33n3r.runelite.watchdog.notifications.objectmarkers.ObjectMarkerOverlay;
 import com.adamk33n3r.runelite.watchdog.ui.notifications.screenmarker.ScreenMarkerUtil;
 
 import net.runelite.api.Client;
-import net.runelite.api.ItemID;
 import net.runelite.api.MessageNode;
+import net.runelite.api.WorldView;
 import net.runelite.api.coords.WorldPoint;
-import net.runelite.api.events.ChatMessage;
-import net.runelite.api.events.GameStateChanged;
-import net.runelite.api.events.GameTick;
+import net.runelite.api.events.*;
+import net.runelite.api.gameval.ItemID;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
@@ -17,9 +21,9 @@ import net.runelite.client.events.NotificationFired;
 import net.runelite.client.events.OverlayMenuClicked;
 import net.runelite.client.events.ProfileChanged;
 import net.runelite.client.game.ItemManager;
+import net.runelite.client.input.KeyManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
-import net.runelite.client.plugins.config.ConfigPlugin;
 import net.runelite.client.ui.ClientToolbar;
 import net.runelite.client.ui.NavigationButton;
 import net.runelite.client.ui.overlay.OverlayManager;
@@ -32,14 +36,17 @@ import com.google.inject.Provides;
 import com.google.inject.name.Names;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import net.runelite.client.util.HotkeyListener;
 import okhttp3.OkHttpClient;
 
 import javax.inject.Inject;
-import javax.inject.Provider;
 import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 import java.util.Queue;
+import java.util.stream.Collectors;
 
 import static net.runelite.api.MenuAction.RUNELITE_OVERLAY_CONFIG;
 
@@ -47,7 +54,7 @@ import static net.runelite.api.MenuAction.RUNELITE_OVERLAY_CONFIG;
 @PluginDescriptor(
     name = "Watchdog",
     description = "Create custom alerts for different events like messages, stats, or built-in notifications",
-    tags = {"alert", "notification","custom","advanced","overlay","sound","drop","afk","tracker","reminder","notify","notifier","helper","timer","message"}
+    tags = {"alert","notification","custom","advanced","overlay","sound","drop","afk","tracker","reminder","notify","notifier","helper","timer","message","action"}
 )
 public class WatchdogPlugin extends Plugin {
     @Getter
@@ -66,11 +73,18 @@ public class WatchdogPlugin extends Plugin {
 
     @Getter
     @Inject
+    private ObjectMarkerManager objectMarkerManager;
+
+    @Getter
+    @Inject
     private AlertManager alertManager;
 
     @Getter
     @Inject
     private PopupManager popupManager;
+
+    @Inject
+    private KeyManager keyManager;
 
     @Inject
     private Client client;
@@ -91,10 +105,11 @@ public class WatchdogPlugin extends Plugin {
 
     @Getter
     @Inject
-    private ScreenMarkerUtil screenMarkerUtil;
+    private ObjectMarkerOverlay objectMarkerOverlay;
 
+    @Getter
     @Inject
-    private Provider<ConfigPlugin> configPluginProvider;
+    private ScreenMarkerUtil screenMarkerUtil;
 
     @Getter
     @Inject
@@ -120,10 +135,58 @@ public class WatchdogPlugin extends Plugin {
     private final Queue<MessageNode> messageQueue = EvictingQueue.create(200);
 
     @Getter
+    private final Queue<OverheadTextChanged> overheadTextQueue = EvictingQueue.create(200);
+
+    @Getter
     private final Queue<NotificationFired> notificationsQueue = EvictingQueue.create(20);
+
+    private final List<AlertProcessor> alertProcessors = new ArrayList<>();
 
     @Getter
     private boolean isInBannedArea = false;
+
+    private final List<HotkeyListener> hotkeyListeners = List.of(
+        new HotkeyListener(() -> config.clearAllHotkey()) {
+            @Override
+            public void hotkeyPressed() {
+                stopAllAlerts();
+                soundPlayer.stop();
+                notificationOverlay.clear();
+                screenMarkerUtil.removeAllMarkers();
+                objectMarkerManager.removeAllMarkers();
+            }
+        },
+        new HotkeyListener(() -> config.stopAllProcessingAlertsHotkey()) {
+            @Override
+            public void hotkeyPressed() {
+                stopAllAlerts();
+            }
+        },
+        new HotkeyListener(() -> config.stopAllQueuedSoundsHotkey()) {
+            @Override
+            public void hotkeyPressed() {
+                soundPlayer.stop();
+            }
+        },
+        new HotkeyListener(() -> config.dismissAllOverlaysHotkey()) {
+            @Override
+            public void hotkeyPressed() {
+                notificationOverlay.clear();
+            }
+        },
+        new HotkeyListener(() -> config.dismissAllScreenMarkersHotkey()) {
+            @Override
+            public void hotkeyPressed() {
+                screenMarkerUtil.removeAllMarkers();
+            }
+        },
+        new HotkeyListener(() -> config.dismissAllObjectMarkersHotkey()) {
+            @Override
+            public void hotkeyPressed() {
+                objectMarkerManager.removeAllMarkers();
+            }
+        }
+    );
 
     public WatchdogPlugin() {
         instance = this;
@@ -139,21 +202,27 @@ public class WatchdogPlugin extends Plugin {
     @Override
     protected void startUp() throws Exception {
         this.eventBus.register(this.eventHandler);
+        this.eventBus.register(this.objectMarkerManager);
 
         this.overlayManager.add(this.flashOverlay);
         this.overlayManager.add(this.notificationOverlay);
+        this.overlayManager.add(this.objectMarkerOverlay);
         this.screenMarkerUtil.startUp();
 
         this.alertManager.loadAlerts();
 
-        this.icon = this.itemManager.getImage(ItemID.BELL_BAUBLE);
-        this.iconDisabled = this.itemManager.getImage(ItemID.BELL_BAUBLE_6848);
+        this.icon = this.itemManager.getImage(ItemID.WIN05_BELLBAUBLE_UNPAINTED);
+        this.iconDisabled = this.itemManager.getImage(ItemID.WIN05_BELLBAUBLE_RED);
 
         this.rebuildSidePanelButtons();
 
         this.soundPlayer.startUp();
 
         ToolTipManager.sharedInstance().setDismissDelay(Integer.MAX_VALUE);
+
+        for (var hotkeyListener : this.hotkeyListeners) {
+            this.keyManager.registerKeyListener(hotkeyListener);
+        }
     }
 
     private void rebuildSidePanelButtons() {
@@ -187,12 +256,17 @@ public class WatchdogPlugin extends Plugin {
     @Override
     protected void shutDown() throws Exception {
         this.eventBus.unregister(this.eventHandler);
+        this.eventBus.unregister(this.objectMarkerManager);
         this.clientToolbar.removeNavigation(this.navButton);
         this.clientToolbar.removeNavigation(this.navButtonDisabled);
         this.overlayManager.remove(this.flashOverlay);
         this.overlayManager.remove(this.notificationOverlay);
+        this.overlayManager.remove(this.objectMarkerOverlay);
         this.soundPlayer.shutDown();
         this.screenMarkerUtil.shutDown();
+        for (var hotkeyListener : this.hotkeyListeners) {
+            this.keyManager.unregisterKeyListener(hotkeyListener);
+        }
     }
 
     public void openConfiguration() {
@@ -200,14 +274,41 @@ public class WatchdogPlugin extends Plugin {
         this.eventBus.post(new OverlayMenuClicked(new OverlayMenuEntry(RUNELITE_OVERLAY_CONFIG, null, null), this.notificationOverlay));
     }
 
+    public void processAlert(Alert alert, String[] triggerValues, boolean forceFire) {
+        if (alert.getAlertMode() == AlertMode.RESTART) {
+            this.stopAlertProcessors(alert);
+        }
+        var alertProcessor = new AlertProcessor(alert, triggerValues, forceFire, this.alertProcessors::remove);
+        this.alertProcessors.add(alertProcessor);
+        alertProcessor.start();
+    }
+
+    public void stopAlertProcessors(Alert alert) {
+        if (alert instanceof AlertGroup) {
+            log.debug("alert group, cancelling all sub-alerts");
+            ((AlertGroup) alert).getAlerts().forEach(this::stopAlertProcessors);
+        } else {
+            log.debug("alert not group, cancelling only this alert: {}", alert.getName());
+            this.alertProcessors.stream()
+                .filter(ap -> ap.getAlert() == alert)
+                .forEach(AlertProcessor::interrupt);
+        }
+    }
+
+    public void stopAllAlerts() {
+        for (var alertProcessor : alertProcessors) {
+            alertProcessor.interrupt();
+        }
+        // Just in case it doesn't call the onFinish callback
+        this.alertProcessors.clear();
+    }
+
     @Subscribe
     private void onGameTick(GameTick gameTick) {
         int regionID = WorldPoint.fromLocalInstance(this.client, this.client.getLocalPlayer().getLocalLocation()).getRegionID();
         boolean before = this.isInBannedArea;
-        this.isInBannedArea = Region.isBannedRegion(this.client.getLocalPlayer().getWorldView().isInstance(), regionID);
-//            || this.client.getVarbitValue(Varbits.IN_RAID) > 0
-//            || this.client.getVarbitValue(Varbits.TOA_RAID_LEVEL) > 0
-//            || this.client.getVarbitValue(Varbits.THEATRE_OF_BLOOD) > 0;
+        WorldView worldView = this.client.getLocalPlayer().getWorldView();
+        this.isInBannedArea = Region.isBannedRegion(regionID, worldView);
 
         // State changed so switch panel icon
         if (before != this.isInBannedArea) {
@@ -237,6 +338,10 @@ public class WatchdogPlugin extends Plugin {
     @Subscribe
     private void onChatMessage(ChatMessage chatMessage) {
         this.messageQueue.offer(chatMessage.getMessageNode());
+    }
+    @Subscribe
+    private void onOverheadTextChanged(OverheadTextChanged overheadTextChanged) {
+        this.overheadTextQueue.offer(overheadTextChanged);
     }
     @Subscribe
     private void onNotificationFired(NotificationFired notificationFired) {

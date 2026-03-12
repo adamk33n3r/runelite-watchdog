@@ -21,6 +21,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
 
@@ -52,7 +53,10 @@ public class NotificationOverlay extends OverlayPanel {
             this.overlayNotification = overlayNotification;
             if (overlayNotification.getImagePath() != null && !overlayNotification.getImagePath().isEmpty()) {
                 try {
-                    this.image = ImageUtil.resizeImage(ImageIO.read(new File(overlayNotification.getImagePath())), 128, 128, true);
+                    this.image = ImageIO.read(new File(overlayNotification.getImagePath()));
+                    if (overlayNotification.isResizeImage()) {
+                        this.image = ImageUtil.resizeImage(this.image, 128, 128, true);
+                    }
                 } catch(IOException e) {
                     log.error("Failed to load image", e);
                 }
@@ -80,7 +84,11 @@ public class NotificationOverlay extends OverlayPanel {
             }
             if (config.overlayShowTime()) {
                 this.getChildren().add(WrappedTitleComponent.builder()
-                    .text(formatDuration(ChronoUnit.MILLIS.between(this.timeStarted, Instant.now()), "m'm' s's' 'ago'"))
+                    .text(
+                        this.overlayNotification.isCountDown() && !this.overlayNotification.isSticky() ?
+                        formatDuration(ChronoUnit.MILLIS.between(Instant.now(), this.timeStarted.plusSeconds(this.overlayNotification.getTimeToLive() + 1)), "m'm' s's' 'to go'") :
+                        formatDuration(ChronoUnit.MILLIS.between(this.timeStarted, Instant.now()), "m'm' s's' 'ago'")
+                    )
                     .color(this.overlayNotification.getTextColor())
                     .preferredSize(this.getPreferredSize())
                     .build());
@@ -118,7 +126,7 @@ public class NotificationOverlay extends OverlayPanel {
 
     public void clearById(String id) {
         List<OverlayNotificationData> stickiesToDismiss = this.overlayNotificationQueue.stream()
-            .filter(notif -> notif.overlayNotification.isSticky() && notif.overlayNotification.getId().equals(id))
+            .filter(notif -> notif.overlayNotification.isSticky() && Objects.equals(notif.overlayNotification.getId(), id))
             .collect(Collectors.toList());
         this.overlayNotificationQueue.removeAll(stickiesToDismiss);
     }

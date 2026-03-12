@@ -19,7 +19,8 @@ public class AlertGroup extends Alert {
 
     public AlertGroup(String name) {
         super(name);
-        // So that we don't serialize the empty array
+        // So that we don't serialize these
         this.setNotifications(null);
+        this.setAlertMode(null);
     }
 }

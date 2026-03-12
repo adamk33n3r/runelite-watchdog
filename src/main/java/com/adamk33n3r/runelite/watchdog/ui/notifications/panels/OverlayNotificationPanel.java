@@ -1,23 +1,18 @@
 package com.adamk33n3r.runelite.watchdog.ui.notifications.panels;
 
-import com.adamk33n3r.runelite.watchdog.LengthLimitFilter;
-import com.adamk33n3r.runelite.watchdog.SimpleDocumentListener;
 import com.adamk33n3r.runelite.watchdog.notifications.Overlay;
-import com.adamk33n3r.runelite.watchdog.ui.FlatTextArea;
 import com.adamk33n3r.runelite.watchdog.ui.Icons;
 import com.adamk33n3r.runelite.watchdog.ui.panels.NotificationsPanel;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
 
+import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.components.ColorJButton;
 import net.runelite.client.ui.components.colorpicker.ColorPickerManager;
 
-import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
-import javax.swing.text.AbstractDocument;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
+import java.awt.*;
 
 public class OverlayNotificationPanel extends MessageNotificationPanel {
     private JPanel displayTime;
@@ -56,55 +51,60 @@ public class OverlayNotificationPanel extends MessageNotificationPanel {
         );
         this.settings.add(colorPicker);
 
-        this.settings.add(PanelUtils.createFileChooser(null, "Path to the image file", ev -> {
+        JPanel fileSub = new JPanel(new BorderLayout(3, 3));
+        fileSub.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+        this.settings.add(fileSub);
+        fileSub.add(PanelUtils.createFileChooser(null, "Path to the image file", ev -> {
             JFileChooser fileChooser = (JFileChooser) ev.getSource();
             notification.setImagePath(fileChooser.getSelectedFile().getAbsolutePath());
             onChangeListener.run();
         }, notification.getImagePath(), "Image Files", "png", "jpg"));
 
-        JCheckBox sticky = PanelUtils.createCheckbox("Sticky", "Set the notification to not expire", notification.isSticky(), val -> {
-            notification.setSticky(val);
-            if (val) {
-                this.settings.remove(this.displayTime);
-                this.settings.add(this.stickyId);
-            } else {
-                this.settings.remove(this.stickyId);
-                this.settings.add(this.displayTime);
-            }
-            this.revalidate();
+        var resizeImageCheckbox = PanelUtils.createCheckbox("Resize", "Resize the image to a standard size", notification.isResizeImage(), val -> {
+            notification.setResizeImage(val);
             onChangeListener.run();
         });
-        this.settings.add(sticky);
+        fileSub.add(resizeImageCheckbox, BorderLayout.EAST);
+
+        JPanel sub = new JPanel(new BorderLayout(3, 3));
+        sub.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+        this.settings.add(sub);
 
         JSpinner displayTime = PanelUtils.createSpinner(notification.getTimeToLive(), 1, 999, 1, val -> {
             notification.setTimeToLive(val);
             onChangeListener.run();
         });
+        displayTime.setEnabled(!notification.isSticky());
         this.displayTime = PanelUtils.createIconComponent(Icons.CLOCK, "Time to display in seconds", displayTime);
 
-        FlatTextArea flatTextArea = new FlatTextArea("ID to use with Dismiss Overlay...", true);
-        flatTextArea.setText(notification.getId());
-        ((AbstractDocument) flatTextArea.getDocument()).setDocumentFilter(new LengthLimitFilter(200));
-        flatTextArea.getDocument().addDocumentListener((SimpleDocumentListener) ev -> {
-            notification.setId(flatTextArea.getText());
+        var countDownCheckbox = PanelUtils.createCheckbox("Countdown", "Count down to 0 instead of up to time", notification.isCountDown(), val -> {
+            notification.setCountDown(val);
+            this.revalidate();
+            onChangeListener.run();
         });
-        flatTextArea.getTextArea().addFocusListener(new FocusListener() {
-            @Override
-            public void focusGained(FocusEvent e) {
-                flatTextArea.getTextArea().selectAll();
-            }
 
-            @Override
-            public void focusLost(FocusEvent e) {
+        sub.add(this.displayTime);
+        sub.add(countDownCheckbox, BorderLayout.EAST);
+
+        var stickyCheckbox = PanelUtils.createCheckbox("Sticky", "Set the notification to not expire", notification.isSticky(), val -> {
+            notification.setSticky(val);
+            displayTime.setEnabled(!val);
+            countDownCheckbox.setEnabled(!val);
+            this.revalidate();
+            onChangeListener.run();
+        });
+        this.settings.add(stickyCheckbox);
+
+        this.stickyId = PanelUtils.createTextField(
+            "ID for Dismiss Overlay...",
+            "",
+            notification.getId(),
+            val -> {
+                notification.setId(val);
                 onChangeListener.run();
             }
-        });
-        this.stickyId = flatTextArea;
+        );
 
-        if (notification.isSticky()) {
-            this.settings.add(this.stickyId);
-        } else {
-            this.settings.add(this.displayTime);
-        }
+        this.settings.add(this.stickyId);
     }
 }

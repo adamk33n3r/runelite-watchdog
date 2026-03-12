@@ -26,8 +26,7 @@ public class WatchdogProperties {
                 properties.getProperty("VERSION_PATCH"));
             properties.put("watchdog.pluginVersion", pluginVersion);
             String phase = properties.getProperty("VERSION_PHASE");
-            String build = properties.getProperty("VERSION_BUILD");
-            String pluginVersionFull = String.format("%s-%s+%s", pluginVersion, phase, build);
+            String pluginVersionFull = String.format("%s-%s", pluginVersion, phase);
             properties.put("watchdog.pluginVersionFull", pluginVersionFull);
         } catch (IOException ex) {
             throw new RuntimeException(ex);

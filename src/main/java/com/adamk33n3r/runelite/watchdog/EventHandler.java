@@ -5,17 +5,23 @@ import com.adamk33n3r.runelite.watchdog.alerts.InventoryAlert.InventoryAlertType
 import com.adamk33n3r.runelite.watchdog.ui.panels.HistoryPanel;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import net.runelite.api.*;
+import net.runelite.api.coords.LocalPoint;
 import net.runelite.api.coords.WorldPoint;
+import net.runelite.api.gameval.InventoryID;
 import net.runelite.api.events.*;
+import net.runelite.api.gameval.VarbitID;
 import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.NotificationFired;
+import net.runelite.client.events.PluginMessage;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.util.Text;
 
 import lombok.extern.slf4j.Slf4j;
 
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Provider;
 import javax.inject.Singleton;
@@ -24,6 +30,8 @@ import java.awt.TrayIcon;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -52,32 +60,35 @@ public class EventHandler {
     @Inject
     private Provider<HistoryPanel> historyPanelProvider;
 
+    @Inject
+    private WatchdogPlugin plugin;
+
     private final Map<Alert, Instant> lastTriggered = new HashMap<>();
 
     private final Map<Skill, Integer> previousSkillLevelTable = new EnumMap<>(Skill.class);
     private final Map<Skill, Integer> previousSkillXPTable = new EnumMap<>(Skill.class);
-    private final Map<Integer, String> itemNameCache = new ConcurrentHashMap<>();
-    private Map<String, Integer> previousItemsTable = new ConcurrentHashMap<>();
+    private final Map<Integer, ItemComposition> itemCompositionCache = new ConcurrentHashMap<>();
+    private Map<Integer, InventoryItemData> previousItemsTable = new ConcurrentHashMap<>();
     private WorldPoint previousLocation = null;
 
-    private boolean ignoreNotificationFired = false;
+    private boolean firedByWatchdog = false;
 
     public synchronized void notify(String message) {
-        this.ignoreNotificationFired = true;
+        this.firedByWatchdog = true;
         // The event bus is synchronous
         this.eventBus.post(new NotificationFired(null, message, TrayIcon.MessageType.NONE));
-        this.ignoreNotificationFired = false;
+        this.firedByWatchdog = false;
     }
 
     //region Chat Message
     @Subscribe
     public void onChatMessage(ChatMessage chatMessage) {
         // Don't process messages sent by this plugin
-        if (chatMessage.getName().equals(WatchdogPlugin.getInstance().getName())) {
+        if (chatMessage.getName().equals(this.plugin.getName())) {
             return;
         }
 
-        log.debug("{}: {}", chatMessage.getType().name(), chatMessage.getMessage());
+        log.debug("{} | {}: {}", chatMessage.getType().name(), chatMessage.getName(), chatMessage.getMessage());
         String unformattedMessage = Text.removeFormattingTags(chatMessage.getMessage());
 
         // Send player messages to a different handler
@@ -85,7 +96,12 @@ public class EventHandler {
             this.alertManager.getAllEnabledAlertsOfType(PlayerChatAlert.class)
                 .filter(chatAlert -> chatAlert.getPlayerChatType() == PlayerChatType.ANY || chatAlert.getPlayerChatType().isOfType(chatMessage.getType()))
                 .forEach(chatAlert -> {
-                    String[] groups = this.matchPattern(chatAlert, unformattedMessage);
+                    var message = unformattedMessage;
+                    if (chatAlert.isPrependSender()) {
+                        var playerName = Text.sanitize(Text.removeFormattingTags(chatMessage.getName()));
+                        message = String.format("%s: %s", playerName, message);
+                    }
+                    String[] groups = Util.matchPattern(chatAlert, message);
                     if (groups == null) return;
 
                     this.fireAlert(chatAlert, groups);
@@ -96,7 +112,7 @@ public class EventHandler {
         this.alertManager.getAllEnabledAlertsOfType(ChatAlert.class)
             .filter(chatAlert -> chatAlert.getGameMessageType() == GameMessageType.ANY || chatAlert.getGameMessageType().isOfType(chatMessage.getType()))
             .forEach(gameAlert -> {
-                String[] groups = this.matchPattern(gameAlert, unformattedMessage);
+                String[] groups = Util.matchPattern(gameAlert, unformattedMessage);
                 if (groups == null) return;
 
                 this.fireAlert(gameAlert, groups);
@@ -107,20 +123,21 @@ public class EventHandler {
     //region Notification
     @Subscribe
     public void onNotificationFired(NotificationFired notificationFired) {
-        // This flag is set when we are firing our own events, so we don't cause an infinite loop/stack overflow
-        if (this.ignoreNotificationFired) {
-            return;
-        }
-
         this.alertManager.getAllEnabledAlertsOfType(NotificationFiredAlert.class)
+            .filter(notificationFiredAlert -> !this.firedByWatchdog || notificationFiredAlert.isAllowSelf())
             .forEach(notificationFiredAlert -> {
-                String[] groups = this.matchPattern(notificationFiredAlert, notificationFired.getMessage());
+                String[] groups = Util.matchPattern(notificationFiredAlert, notificationFired.getMessage());
                 if (groups == null) return;
 
                 this.fireAlert(notificationFiredAlert, groups);
             });
     }
     //endregion
+
+    public void onPluginMessage(PluginMessage pluginMessage) {
+        if (pluginMessage.getNamespace().equals("watchdog")) {
+        }
+    }
 
     //region Stat Changed
     @Subscribe
@@ -152,7 +169,21 @@ public class EventHandler {
                     return false;
                 }
 
-                int targetLevel = statChanged.getLevel() + alert.getChangedAmount();
+                int targetLevel;
+                switch (alert.getChangedMode()) {
+                    case RELATIVE:
+                        targetLevel = statChanged.getLevel() + alert.getChangedAmount();
+                        break;
+                    case ABSOLUTE:
+                        targetLevel = alert.getChangedAmount();
+                        break;
+                    case PERCENTAGE:
+                        targetLevel = (statChanged.getLevel() * alert.getChangedAmount()) / 100;
+                        break;
+                    default:
+                        targetLevel = statChanged.getLevel();
+                        break;
+                }
                 boolean currentIs = alert.getChangedComparator().compare(statChanged.getBoostedLevel(), targetLevel);
                 boolean prevWasNot = alert.getChangedComparator().converse().compare(previousLevel, targetLevel);
                 return currentIs && prevWasNot;
@@ -198,21 +229,30 @@ public class EventHandler {
     @Subscribe
     private void onItemContainerChanged(ItemContainerChanged itemContainerChanged) {
         // Ignore everything but inventory
-        if (itemContainerChanged.getItemContainer().getId() != InventoryID.INVENTORY.getId())
+        if (itemContainerChanged.getItemContainer().getId() != InventoryID.INV)
             return;
         Item[] items = itemContainerChanged.getItemContainer().getItems();
-        long itemCount = Arrays.stream(items).filter(item -> item.getId() > -1).count();
-        Map<String, Integer> currentItems = new HashMap<>();
-        Map<String, Integer> allItems = new HashMap<>();
+        Map<Integer, InventoryItemData> currentItems = new HashMap<>();
         Arrays.stream(items)
+            .filter(item -> item.getId() > -1)
             .forEach(item -> {
-                String itemName = this.itemNameCache.computeIfAbsent(item.getId(), id -> this.itemManager.getItemComposition(id).getName());
-                currentItems.merge(itemName, item.getQuantity(), Integer::sum);
-                allItems.merge(itemName, item.getQuantity(), Integer::sum);
+                ItemComposition itemComposition = this.itemCompositionCache.computeIfAbsent(item.getId(), id -> this.itemManager.getItemComposition(id));
+                InventoryItemData inventoryItemData = InventoryItemData.builder()
+                    .itemComposition(itemComposition)
+                    .quantity(item.getQuantity())
+                    .build();
+                currentItems.merge(item.getId(), inventoryItemData, (orig, other) -> InventoryItemData.builder()
+                    .itemComposition(itemComposition)
+                    .quantity(orig.quantity + other.quantity)
+                    .build());
             });
-        this.previousItemsTable.keySet().forEach((item) -> allItems.putIfAbsent(item, 0));
         // Skip firing alerts if there are no previous items, since we just logged in. Even an empty inventory will have a map of -1 itemIds.
         if (!this.previousItemsTable.isEmpty()) {
+            Map<Integer, InventoryItemData> itemMap = new HashMap<>(currentItems);
+            this.previousItemsTable.forEach((itemID, data) -> itemMap.putIfAbsent(itemID, InventoryItemData.builder()
+                .itemComposition(data.itemComposition)
+                .build()));
+            long itemCount = Arrays.stream(items).filter(item -> item.getId() > -1).count();
             this.alertManager.getAllEnabledAlertsOfType(InventoryAlert.class)
                 .forEach(inventoryAlert -> {
                     InventoryAlertType alertType = inventoryAlert.getInventoryAlertType();
@@ -223,11 +263,16 @@ public class EventHandler {
                         case EMPTY:
                             if (itemCount == 0) this.fireAlert(inventoryAlert, alertType.getName());
                             break;
+                        case SLOTS:
+                            if (inventoryAlert.getQuantityComparator().compare((int) itemCount, inventoryAlert.getItemQuantity())){
+                                this.fireAlert(inventoryAlert, alertType.getName());
+                            }
+                            break;
                         case ITEM:
                         case ITEM_CHANGE:
-                            Optional<MatchedItem> matchedItems = this.getMatchedItems(inventoryAlert, allItems);
+                            Optional<MatchedItem> matchedItems = this.getMatchedItems(inventoryAlert, itemMap);
                             matchedItems.ifPresent((matched) -> {
-                                int change = alertType == InventoryAlertType.ITEM ? 0 : matchedItems.get().previousQuantity;
+                                int change = alertType == InventoryAlertType.ITEM ? 0 : matched.previousQuantity;
                                 if (inventoryAlert.getQuantityComparator().compare(matched.currentQuantity - change, inventoryAlert.getItemQuantity())) {
                                     this.fireAlert(inventoryAlert, matchedItems.get().groups.toArray(new String[0]));
                                 }
@@ -239,15 +284,19 @@ public class EventHandler {
         this.previousItemsTable = currentItems;
     }
 
-    private Optional<MatchedItem> getMatchedItems(InventoryAlert inventoryAlert, Map<String, Integer> allItems) {
+    private Optional<MatchedItem> getMatchedItems(InventoryAlert inventoryAlert, Map<Integer, InventoryItemData> allItems) {
         return allItems.entrySet().stream()
-            .map(itemWithCount -> {
-                String[] groups = this.matchPattern(inventoryAlert, itemWithCount.getKey());
+            .filter(itemData -> inventoryAlert.getInventoryMatchType() == InventoryAlert.InventoryMatchType.BOTH
+                || (inventoryAlert.getInventoryMatchType() == InventoryAlert.InventoryMatchType.NOTED && itemData.getValue().isNoted())
+                || (inventoryAlert.getInventoryMatchType() == InventoryAlert.InventoryMatchType.UN_NOTED && !itemData.getValue().isNoted()))
+            .map(itemData -> {
+                String[] groups = Util.matchPattern(inventoryAlert, itemData.getValue().itemComposition.getName());
                 if (groups == null) return null;
+                var prevItem = this.previousItemsTable.get(itemData.getKey());
                 return new MatchedItem(
-                    new ArrayList<>(List.of(groups)),
-                    this.previousItemsTable.getOrDefault(itemWithCount.getKey(), 0),
-                    itemWithCount.getValue()
+                    new ArrayList<>(List.of(groups)), // so that is mutable
+                    prevItem == null ? 0 : prevItem.quantity,
+                    itemData.getValue().quantity
                 );
             })
             .filter(Objects::nonNull)
@@ -266,34 +315,38 @@ public class EventHandler {
     @Subscribe
     private void onItemSpawned(ItemSpawned itemSpawned) {
         ItemComposition comp = this.itemManager.getItemComposition(itemSpawned.getItem().getId());
-        this.onSpawned(comp.getName(), itemSpawned.getTile().getWorldLocation(), SPAWNED, ITEM);
+        final int accountType = this.client.getVarbitValue(VarbitID.IRONMAN);
+        this.onSpawned(comp.getName(), comp.getId(), itemSpawned.getTile().getWorldLocation(), SPAWNED, ITEM, spawnedAlert ->
+            Util.shouldTriggerItem(spawnedAlert.getItemOwnershipFilterMode(), itemSpawned.getItem().getOwnership(), accountType));
     }
     @Subscribe
     private void onItemDespawned(ItemDespawned itemDespawned) {
         ItemComposition comp = this.itemManager.getItemComposition(itemDespawned.getItem().getId());
-        this.onSpawned(comp.getName(), itemDespawned.getTile().getWorldLocation(), DESPAWNED, ITEM);
+        final int accountType = this.client.getVarbitValue(VarbitID.IRONMAN);
+        this.onSpawned(comp.getName(), comp.getId(), itemDespawned.getTile().getWorldLocation(), DESPAWNED, ITEM, spawnedAlert ->
+            Util.shouldTriggerItem(spawnedAlert.getItemOwnershipFilterMode(), itemDespawned.getItem().getOwnership(), accountType));
     }
     @Subscribe
     private void onNpcSpawned(NpcSpawned npcSpawned) {
-        this.onActorSpawned(npcSpawned.getNpc(), NPC);
+        this.onActorSpawned(npcSpawned.getNpc(), npcSpawned.getNpc().getId(), NPC);
     }
     @Subscribe
     private void onNpcDespawned(NpcDespawned npcDespawned) {
-        this.onActorDespawned(npcDespawned.getNpc(), NPC);
+        this.onActorDespawned(npcDespawned.getNpc(), npcDespawned.getNpc().getId(), NPC);
     }
     @Subscribe
     private void onPlayerSpawned(PlayerSpawned playerSpawned) {
-        this.onActorSpawned(playerSpawned.getPlayer(), PLAYER);
+        this.onActorSpawned(playerSpawned.getPlayer(), -1, PLAYER);
     }
     @Subscribe
     private void onPlayerDespawned(PlayerDespawned playerDespawned) {
-        this.onActorDespawned(playerDespawned.getPlayer(), PLAYER);
+        this.onActorDespawned(playerDespawned.getPlayer(), -1, PLAYER);
     }
-    private void onActorSpawned(Actor actor, SpawnedAlert.SpawnedType type) {
-        this.onSpawned(actor.getName(), actor.getWorldLocation(), SPAWNED, type);
+    private void onActorSpawned(Actor actor, int id, SpawnedAlert.SpawnedType type) {
+        this.onSpawned(actor.getName(), id, actor.getWorldLocation(), SPAWNED, type);
     }
-    private void onActorDespawned(Actor actor, SpawnedAlert.SpawnedType type) {
-        this.onSpawned(actor.getName(), actor.getWorldLocation(), DESPAWNED, type);
+    private void onActorDespawned(Actor actor, int id, SpawnedAlert.SpawnedType type) {
+        this.onSpawned(actor.getName(), id, actor.getWorldLocation(), DESPAWNED, type);
     }
 
     @Subscribe
@@ -343,29 +396,64 @@ public class EventHandler {
             WorldPoint playerLocation = this.client.getLocalPlayer().getWorldLocation();
             location = Util.getClosestTile(playerLocation, (GameObject) tileObject);
         }
-        this.onSpawned(impostor.getName(), location, mode, type);
+        this.onSpawned(impostor.getName(), impostor.getId(), location, mode, type);
     }
 
-    private void onSpawned(String name, WorldPoint location, SpawnedAlert.SpawnedDespawned mode, SpawnedAlert.SpawnedType type) {
+    private void onSpawned(@Nullable String name, int id, WorldPoint location, SpawnedAlert.SpawnedDespawned mode, SpawnedAlert.SpawnedType type) {
+        this.onSpawned(name, id, location, mode, type, spawnedAlert -> true);
+    }
+
+    private void onSpawned(@Nullable String name, int id, WorldPoint location, SpawnedAlert.SpawnedDespawned mode, SpawnedAlert.SpawnedType type, Predicate<SpawnedAlert> additionalFilter) {
+        if (name == null) {
+            return;
+        }
         String unformattedName = Text.removeFormattingTags(name);
         int distanceToObject = location.distanceTo(this.client.getLocalPlayer().getWorldLocation());
         this.alertManager.getAllEnabledAlertsOfType(SpawnedAlert.class)
             .filter(spawnedAlert -> spawnedAlert.getSpawnedDespawned() == mode)
             .filter(spawnedAlert -> spawnedAlert.getSpawnedType() == type)
             .filter(spawnedAlert -> spawnedAlert.getDistance() == -1 || spawnedAlert.getDistanceComparator().compare(distanceToObject, spawnedAlert.getDistance()))
+            .filter(additionalFilter)
             .forEach(spawnedAlert -> {
-                String[] groups = this.matchPattern(spawnedAlert, unformattedName);
-                if (groups == null) return;
+                try {
+                    int parsedID = Integer.parseInt(spawnedAlert.getPattern());
+                    if (id == parsedID) {
+                        this.fireAlert(spawnedAlert, new String[] { spawnedAlert.getPattern() });
+                    }
+                } catch (NumberFormatException ignored) {
+                    String[] groups = Util.matchPattern(spawnedAlert, unformattedName);
+                    if (groups == null) return;
 
-                this.fireAlert(spawnedAlert, groups);
+                    this.fireAlert(spawnedAlert, groups);
+                }
             });
     }
     //endregion
 
     @Subscribe
+    private void onOverheadTextChanged(OverheadTextChanged overheadTextChanged) {
+        this.alertManager.getAllEnabledAlertsOfType(OverheadTextAlert.class)
+            .filter(alert -> alert.getNpcName().isEmpty() || Util.matchPattern(alert::getNpcName, alert::isNpcRegexEnabled, overheadTextChanged.getActor().getName()) != null)
+            .forEach(alert -> {
+                String[] groups = Util.matchPattern(alert, overheadTextChanged.getOverheadText());
+                if (groups == null) return;
+
+                this.fireAlert(alert, groups);
+            });
+    }
+
+    @Subscribe
     private void onGameTick(GameTick gameTick) {
         // Location alerts
-        WorldPoint worldLocation = this.client.getLocalPlayer().getWorldLocation();
+        var world = this.client.getLocalPlayer().getWorldLocation();
+        var worldView = this.client.getLocalPlayer().getWorldView();
+        var localWorld = LocalPoint.fromWorld(worldView, world);
+        // Should never be null
+        if (localWorld == null) {
+            return;
+        }
+        var worldLocation = WorldPoint.fromLocalInstance(this.client, localWorld);
+//        log.debug("local: {} | world: {} | localWorld: {} | newWorld: {} - {}", this.client.getLocalPlayer().getLocalLocation(), world, localWorld, worldLocation, worldLocation.getRegionID());
         this.alertManager.getAllEnabledAlertsOfType(LocationAlert.class)
             .filter(locationAlert -> locationAlert.shouldFire(worldLocation))
             .forEach(locationAlert -> {
@@ -376,18 +464,6 @@ public class EventHandler {
                 this.fireAlert(locationAlert, new String[] { String.valueOf(worldLocation.getX()), String.valueOf(worldLocation.getY()) });
             });
         this.previousLocation = worldLocation;
-    }
-
-    private String[] matchPattern(RegexMatcher regexMatcher, String input) {
-        String regex = regexMatcher.isRegexEnabled() ? regexMatcher.getPattern() : Util.createRegexFromGlob(regexMatcher.getPattern());
-        Matcher matcher = Pattern.compile(regex, regexMatcher.isRegexEnabled() ? 0 : Pattern.CASE_INSENSITIVE).matcher(input);
-        if (!matcher.matches()) return null;
-
-        String[] groups = new String[matcher.groupCount()];
-        for (int i = 0; i < matcher.groupCount(); i++) {
-            groups[i] = matcher.group(i+1);
-        }
-        return groups;
     }
 
     private void fireAlert(Alert alert, String triggerValue) {
@@ -409,20 +485,39 @@ public class EventHandler {
             .max(Comparator.comparingInt(Alert::getDebounceTime))
             .orElse(alert);
 
-        // If the alert hasn't been fired yet, or has been enough time, set the last trigger time to now and fire.
-        if (!this.lastTriggered.containsKey(alertToDebounceWith) || Instant.now().compareTo(this.lastTriggered.get(alertToDebounceWith).plusMillis(alertToDebounceWith.getDebounceTime())) >= 0) {
-            SwingUtilities.invokeLater(() -> {
-                this.historyPanelProvider.get().addEntry(alert, triggerValues);
-            });
-            this.lastTriggered.put(alertToDebounceWith, Instant.now());
-            new AlertProcessor(alert, triggerValues).start();
+        // now < (lastTriggered + debounceTime) ? -1
+        // now > (lastTriggered + debounceTime) ? 1
+        boolean isPastDebounceTime = !this.lastTriggered.containsKey(alertToDebounceWith) ||
+            Instant.now().compareTo(this.lastTriggered.get(alertToDebounceWith).plusMillis(alertToDebounceWith.getDebounceTime())) >= 0;
+        if (!isPastDebounceTime) {
+            if (alertToDebounceWith.isDebounceResetTime()) {
+                this.lastTriggered.put(alertToDebounceWith, Instant.now());
+            }
+            return;
         }
+
+        // If the alert hasn't been fired yet, or has been enough time, set the last trigger time to now and fire.
+        SwingUtilities.invokeLater(() -> {
+            this.historyPanelProvider.get().addEntry(alert, triggerValues);
+        });
+        this.lastTriggered.put(alertToDebounceWith, Instant.now());
+        this.plugin.processAlert(alert, triggerValues, false);
     }
 
     @AllArgsConstructor
     private static class MatchedItem {
-        List<String> groups;
-        int previousQuantity;
-        int currentQuantity;
+        private List<String> groups;
+        private int previousQuantity;
+        private int currentQuantity;
+    }
+
+    @Builder
+    private static class InventoryItemData {
+        private ItemComposition itemComposition;
+        private int quantity;
+
+        public boolean isNoted() {
+            return itemComposition.getNote() != -1;
+        }
     }
 }

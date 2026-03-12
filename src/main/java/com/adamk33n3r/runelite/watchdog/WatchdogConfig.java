@@ -10,6 +10,8 @@ import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.util.ColorUtil;
 
 import java.awt.Color;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
 
 @ConfigGroup(WatchdogConfig.CONFIG_GROUP_NAME)
 public interface WatchdogConfig extends Config {
@@ -25,6 +27,8 @@ public interface WatchdogConfig extends Config {
     String ENABLE_TTS = "enableTTS";
     String OVERRIDE_IMPORTS_WITH_DEFAULTS = "overrideImportsWithDefaults";
     String SIDE_PANEL_PRIORITY = "sidePanelPriority";
+    String ENABLE_NOTIFICATION_CATEGORIES = "enableNotificationCategories";
+    String DISABLE_ALL_ALERTS_ON_STARTUP = "disableAllAlertsOnStartup";
 
     // AFK Notification
     String DEFAULT_AFK_MODE = "defaultAFKMode";
@@ -42,9 +46,9 @@ public interface WatchdogConfig extends Config {
     String DEFAULT_OVERLAY_COLOR = "defaultOverlayColor";
     String DEFAULT_OVERLAY_TTL = "defaultOverlayTTL";
     String DEFAULT_OVERLAY_IMAGE_PATH = "defaultOverlayImagePath";
+    String DEFAULT_OVERLAY_RESIZE_IMAGE = "defaultOverlayResizeImage";
 
     // Popup
-    String DEFAULT_POPUP_COLOR = "defaultPopupColor";
     String DEFAULT_POPUP_TEXT_COLOR = "defaultPopupTextColor";
 
     // Screen Flash
@@ -73,6 +77,32 @@ public interface WatchdogConfig extends Config {
 
     // Request Focus
     String DEFAULT_FORCE_FOCUS = "defaultForceFocus";
+
+    // Markers
+    String DEFAULT_SCREEN_MARKER_BORDER_COLOR = "defaultScreenMarkerBorderColor";
+    String DEFAULT_SCREEN_MARKER_FILL_COLOR = "defaultScreenMarkerFillColor";
+    String DEFAULT_SCREEN_MARKER_BORDER_THICKNESS = "defaultScreenMarkerBorderThickness";
+    String DEFAULT_SCREEN_MARKER_DISPLAY_TIME = "defaultScreenMarkerDisplayTime";
+    String DEFAULT_SCREEN_MARKER_STICKY = "defaultScreenMarkerSticky";
+
+    String DEFAULT_OBJECT_MARKER_BORDER_COLOR = "defaultObjectMarkerBorderColor";
+    String DEFAULT_OBJECT_MARKER_FILL_COLOR = "defaultObjectMarkerFillColor";
+    String DEFAULT_OBJECT_MARKER_HULL = "defaultObjectMarkerHull";
+    String DEFAULT_OBJECT_MARKER_OUTLINE = "defaultObjectMarkerOutline";
+    String DEFAULT_OBJECT_MARKER_CLICKBOX = "defaultObjectMarkerClickbox";
+    String DEFAULT_OBJECT_MARKER_TILE = "defaultObjectMarkerTile";
+    String DEFAULT_OBJECT_MARKER_BORDER_THICKNESS = "defaultObjectMarkerBorderThickness";
+    String DEFAULT_OBJECT_MARKER_FEATHER = "defaultObjectMarkerFeather";
+    String DEFAULT_OBJECT_MARKER_DISPLAY_TIME = "defaultObjectMarkerDisplayTime";
+    String DEFAULT_OBJECT_MARKER_STICKY = "defaultObjectMarkerSticky";
+
+    // Hotkeys
+    String CLEAR_ALL_HOTKEY = "clearAllHotkey";
+    String STOP_ALL_PROCESSING_ALERTS_HOTKEY = "stopAllProcessingAlertsHotkey";
+    String STOP_ALL_SOUNDS_HOTKEY = "stopAllSoundsHotkey";
+    String DISMISS_ALL_OVERLAYS_HOTKEY = "dismissAllOverlaysHotkey";
+    String DISMISS_ALL_SCREEN_MARKERS_HOTKEY = "dismissAllScreenMarkersHotkey";
+    String DISMISS_ALL_OBJECT_MARKERS_HOTKEY = "dismissAllObjectMarkersHotkey";
 
     //region Hidden
     @ConfigItem(
@@ -129,11 +159,26 @@ public interface WatchdogConfig extends Config {
     @Range(min = Integer.MIN_VALUE)
     default int sidePanelPriority() { return 1; }
 
+    @ConfigItem(
+        keyName = ENABLE_NOTIFICATION_CATEGORIES,
+        name = "Enable Action Categories",
+        description = "Enables the action categories in the side panel"
+    )
+    default boolean enableNotificationCategories() { return true; }
+
+    @ConfigItem(
+        keyName = DISABLE_ALL_ALERTS_ON_STARTUP,
+        name = "Disable All Alerts on Startup",
+        description = "Disables all alerts on startup"
+    )
+    default boolean disableAllAlertsOnStartup() { return false; }
+
     //region AFK Notification
     @ConfigSection(
-        name = "AFK Notification",
-        description = "The options that control the afk notification settings",
-        position = 0
+        name = "AFK Settings",
+        description = "The options that control the afk settings",
+        position = 0,
+        closedByDefault = true
     )
     String afkNotificationSection = "afkNotificationSection";
 
@@ -257,6 +302,15 @@ public interface WatchdogConfig extends Config {
         position = 7
     )
     default String defaultOverlayImagePath() { return ""; }
+
+    @ConfigItem(
+        keyName = DEFAULT_OVERLAY_RESIZE_IMAGE,
+        name = "Default Resize Image",
+        description = "Whether to resize the image to a standard size",
+        section = overlaySection,
+        position = 8
+    )
+    default boolean defaultOverlayResizeImage() { return true; }
     //endregion
 
     //region Popup
@@ -404,7 +458,7 @@ public interface WatchdogConfig extends Config {
         description = "The default source (Eleven Labs needs your own API Key)",
         section = ttsSection
     )
-    default TTSSource defaultTTSSource() { return TTSSource.LEGACY; }
+    default TTSSource defaultTTSSource() { return TTSSource.ELEVEN_LABS; }
 
     @ConfigItem(
         keyName = DEFAULT_TTS_VOICE,
@@ -456,5 +510,218 @@ public interface WatchdogConfig extends Config {
         section = requestFocusSection
     )
     default boolean defaultRequestFocusForce() { return false; }
+    //endregion
+
+    // region Markers
+
+    @ConfigSection(
+        name = "Markers",
+        description = "The options that control the markers notifications",
+        position = 9,
+        closedByDefault = true
+    )
+    String markersSection = "markersSection";
+
+    @ConfigItem(
+        keyName = DEFAULT_SCREEN_MARKER_BORDER_COLOR,
+        name = "Default Screen Marker Border Color",
+        description = "The default border color",
+        section = markersSection,
+        position = 1
+    )
+    @Alpha
+    default Color defaultScreenMarkerBorderColor() { return Color.GREEN; }
+
+    @ConfigItem(
+        keyName = DEFAULT_SCREEN_MARKER_FILL_COLOR,
+        name = "Default Screen Marker Fill Color",
+        description = "The default fill color",
+        section = markersSection,
+        position = 2
+    )
+    @Alpha
+    default Color defaultScreenMarkerFillColor() { return null; }
+
+    @ConfigItem(
+        keyName = DEFAULT_SCREEN_MARKER_BORDER_THICKNESS,
+        name = "Default Screen Marker Border Thickness",
+        description = "The default border thickness",
+        section = markersSection,
+        position = 3
+    )
+    default int defaultScreenMarkerBorderThickness() { return 2; }
+
+    @ConfigItem(
+        keyName = DEFAULT_SCREEN_MARKER_DISPLAY_TIME,
+        name = "Default Screen Marker Display Time",
+        description = "The default display time",
+        section = markersSection,
+        position = 4
+    )
+    @Units(Units.SECONDS)
+    default int defaultScreenMarkerDisplayTime() { return 5; }
+
+    @ConfigItem(
+        keyName = DEFAULT_SCREEN_MARKER_STICKY,
+        name = "Default Screen Marker Sticky",
+        description = "The default sticky",
+        section = markersSection,
+        position = 5
+    )
+    default boolean defaultScreenMarkerSticky() { return false; }
+
+    @ConfigItem(
+        keyName = DEFAULT_OBJECT_MARKER_BORDER_COLOR,
+        name = "Default Object Marker Border Color",
+        description = "The default border color",
+        section = markersSection,
+        position = 6
+    )
+    @Alpha
+    default Color defaultObjectMarkerBorderColor() { return Color.YELLOW; }
+
+    @ConfigItem(
+        keyName = DEFAULT_OBJECT_MARKER_FILL_COLOR,
+        name = "Default Object Marker Fill Color",
+        description = "The default fill color",
+        section = markersSection,
+        position = 7
+    )
+    @Alpha
+    default Color defaultObjectMarkerFillColor() { return null; }
+
+    @ConfigItem(
+        keyName = DEFAULT_OBJECT_MARKER_HULL,
+        name = "Default Object Marker Hull",
+        description = "The default hull",
+        section = markersSection,
+        position = 8
+    )
+    default boolean defaultObjectMarkerHull() { return true; }
+
+    @ConfigItem(
+        keyName = DEFAULT_OBJECT_MARKER_OUTLINE,
+        name = "Default Object Marker Outline",
+        description = "The default outline",
+        section = markersSection,
+        position = 9
+    )
+    default boolean defaultObjectMarkerOutline() { return false; }
+
+    @ConfigItem(
+        keyName = DEFAULT_OBJECT_MARKER_CLICKBOX,
+        name = "Default Object Marker Clickbox",
+        description = "The default clickbox",
+        section = markersSection,
+        position = 10
+    )
+    default boolean defaultObjectMarkerClickbox() { return false; }
+
+    @ConfigItem(
+        keyName = DEFAULT_OBJECT_MARKER_TILE,
+        name = "Default Object Marker Tile",
+        description = "The default tile",
+        section = markersSection,
+        position = 11
+    )
+    default boolean defaultObjectMarkerTile() { return false; }
+
+    @ConfigItem(
+        keyName = DEFAULT_OBJECT_MARKER_BORDER_THICKNESS,
+        name = "Default Object Marker Border Thickness",
+        description = "The default border thickness",
+        section = markersSection,
+        position = 12
+    )
+    default double defaultObjectMarkerBorderThickness() { return 2.0d; }
+
+    @ConfigItem(
+        keyName = DEFAULT_OBJECT_MARKER_FEATHER,
+        name = "Default Object Marker Feather",
+        description = "The default feather",
+        section = markersSection,
+        position = 13
+    )
+    @Range(min = 0, max = 4)
+    default int defaultObjectMarkerFeather() { return 0; }
+
+    @ConfigItem(
+        keyName = DEFAULT_OBJECT_MARKER_DISPLAY_TIME,
+        name = "Default Object Marker Display Time",
+        description = "The default display time",
+        section = markersSection,
+        position = 14
+    )
+    @Units(Units.SECONDS)
+    default int defaultObjectMarkerDisplayTime() { return 5; }
+
+    @ConfigItem(
+        keyName = DEFAULT_OBJECT_MARKER_STICKY,
+        name = "Default Object Marker Sticky",
+        description = "The default sticky",
+        section = markersSection,
+        position = 15
+    )
+    default boolean defaultObjectMarkerSticky() { return false; }
+
+
+    // endregion
+
+    //region Hotkeys
+    @ConfigSection(
+        name = "Hotkeys",
+        description = "The hotkeys to use for various actions",
+        position = 10,
+        closedByDefault = true
+    )
+    String hotkeysSection = "hotkeysSection";
+
+    @ConfigItem(
+        keyName = CLEAR_ALL_HOTKEY,
+        name = "Clear All",
+        description = "The hotkey to clear all clearable alerts and notifications",
+        section = hotkeysSection
+    )
+    default Keybind clearAllHotkey() { return new Keybind(KeyEvent.VK_W, InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK); }
+
+    @ConfigItem(
+        keyName = STOP_ALL_PROCESSING_ALERTS_HOTKEY,
+        name = "Stop All Processing Alerts",
+        description = "The hotkey to stop all processing alerts",
+        section = hotkeysSection
+    )
+    default Keybind stopAllProcessingAlertsHotkey() { return Keybind.NOT_SET; }
+
+    @ConfigItem(
+        keyName = STOP_ALL_SOUNDS_HOTKEY,
+        name = "Stop All Queued Sounds",
+        description = "The hotkey to stop all queued sounds",
+        section = hotkeysSection
+    )
+    default Keybind stopAllQueuedSoundsHotkey() { return Keybind.NOT_SET; }
+
+    @ConfigItem(
+        keyName = DISMISS_ALL_OVERLAYS_HOTKEY,
+        name = "Dismiss All Overlays",
+        description = "The hotkey to dismiss all overlays",
+        section = hotkeysSection
+    )
+    default Keybind dismissAllOverlaysHotkey() { return Keybind.NOT_SET; }
+
+    @ConfigItem(
+        keyName = DISMISS_ALL_SCREEN_MARKERS_HOTKEY,
+        name = "Dismiss All Screen Markers",
+        description = "The hotkey to dismiss all screen markers",
+        section = hotkeysSection
+    )
+    default Keybind dismissAllScreenMarkersHotkey() { return Keybind.NOT_SET; }
+
+    @ConfigItem(
+        keyName = DISMISS_ALL_OBJECT_MARKERS_HOTKEY,
+        name = "Dismiss All Object Markers",
+        description = "The hotkey to dismiss all object markers",
+        section = hotkeysSection
+    )
+    default Keybind dismissAllObjectMarkersHotkey() { return Keybind.NOT_SET; }
     //endregion
 }

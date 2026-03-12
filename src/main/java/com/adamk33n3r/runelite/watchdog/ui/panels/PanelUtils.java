@@ -1,12 +1,11 @@
 package com.adamk33n3r.runelite.watchdog.ui.panels;
 
-import com.adamk33n3r.runelite.watchdog.Displayable;
-import com.adamk33n3r.runelite.watchdog.TriggerType;
-import com.adamk33n3r.runelite.watchdog.Util;
-import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
+import com.adamk33n3r.runelite.watchdog.*;
 import com.adamk33n3r.runelite.watchdog.alerts.Alert;
+import com.adamk33n3r.runelite.watchdog.alerts.RegexMatcher;
+import com.adamk33n3r.runelite.watchdog.ui.FlatTextArea;
+import com.adamk33n3r.runelite.watchdog.ui.FlatTextAreaNamespace;
 import com.adamk33n3r.runelite.watchdog.ui.Icons;
-import com.adamk33n3r.runelite.watchdog.ui.PlaceholderTextArea;
 import com.adamk33n3r.runelite.watchdog.ui.dropdownbutton.DropDownButtonFactory;
 
 import net.runelite.client.ui.ColorScheme;
@@ -24,13 +23,18 @@ import javax.annotation.Nullable;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileFilter;
+import javax.swing.text.AbstractDocument;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 import java.util.stream.Collectors;
@@ -178,20 +182,93 @@ public class PanelUtils {
         return checkbox;
     }
 
-
-    public static JTextArea createTextArea(String placeholder, String tooltip, String initialValue, Consumer<String> onChange) {
-        PlaceholderTextArea textArea = new PlaceholderTextArea(initialValue);
-        textArea.setPlaceholder(placeholder);
-        textArea.setToolTipText(tooltip);
-        textArea.setSelectedTextColor(Color.WHITE);
-        textArea.setSelectionColor(ColorScheme.BRAND_ORANGE_TRANSPARENT);
-        textArea.setLineWrap(true);
-        textArea.setWrapStyleWord(true);
-        textArea.setMargin(new Insets(4, 6, 5, 6));
-        textArea.addFocusListener(new FocusListener() {
+    public static FlatTextAreaNamespace createTextFieldNamespace(
+        String firstPlaceholder,
+        String firstTooltip,
+        String firstInitialValue,
+        String splitter,
+        String secondPlaceholder,
+        String secondTooltip,
+        String secondInitialValue,
+        BiConsumer<String, String> onChange
+    ) {
+        FlatTextAreaNamespace flatTextArea = new FlatTextAreaNamespace(firstPlaceholder, splitter, secondPlaceholder, true);
+        flatTextArea.getPrefixTextArea().setToolTipText(firstTooltip);
+        flatTextArea.getTextArea().setToolTipText(secondTooltip);
+        flatTextArea.getPrefixTextArea().setText(firstInitialValue);
+        flatTextArea.getTextArea().setText(secondInitialValue);
+        ((AbstractDocument) flatTextArea.getPrefixTextArea().getDocument()).setDocumentFilter(new LengthLimitFilter(4096));
+        ((AbstractDocument) flatTextArea.getDocument()).setDocumentFilter(new LengthLimitFilter(4096));
+        flatTextArea.getPrefixTextArea().getDocument().addDocumentListener((SimpleDocumentListener) ev -> {
+            onChange.accept(flatTextArea.getPrefixTextArea().getText(), flatTextArea.getTextArea().getText());
+        });
+        flatTextArea.getDocument().addDocumentListener((SimpleDocumentListener) ev -> {
+            onChange.accept(flatTextArea.getPrefixTextArea().getText(), flatTextArea.getTextArea().getText());
+        });
+        flatTextArea.getPrefixTextArea().addFocusListener(new FocusListener() {
             @Override
             public void focusGained(FocusEvent e) {
-                textArea.selectAll();
+                flatTextArea.getPrefixTextArea().selectAll();
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                onChange.accept(flatTextArea.getPrefixTextArea().getText(), flatTextArea.getTextArea().getText());
+            }
+        });
+        flatTextArea.getTextArea().addFocusListener(new FocusListener() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                flatTextArea.getTextArea().selectAll();
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                onChange.accept(flatTextArea.getPrefixTextArea().getText(), flatTextArea.getTextArea().getText());
+            }
+        });
+        addPasteMenu(flatTextArea.getPrefixTextArea());
+        addPasteMenu(flatTextArea.getTextArea());
+        return flatTextArea;
+    }
+
+    public static FlatTextArea createTextField(String placeholder, String tooltip, String initialValue, Consumer<String> onChange) {
+        FlatTextArea flatTextArea = new FlatTextArea(placeholder, true);
+        flatTextArea.setText(initialValue);
+        flatTextArea.setToolTipText(tooltip);
+        ((AbstractDocument) flatTextArea.getDocument()).setDocumentFilter(new LengthLimitFilter(200));
+        flatTextArea.getDocument().addDocumentListener((SimpleDocumentListener) ev -> {
+            onChange.accept(flatTextArea.getText());
+        });
+        flatTextArea.getTextArea().addFocusListener(new FocusListener() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                flatTextArea.getTextArea().selectAll();
+            }
+
+            @Override
+            public void focusLost(FocusEvent e) {
+                onChange.accept(flatTextArea.getText());
+            }
+        });
+        flatTextArea.setHoverBackgroundColor(ColorScheme.DARK_GRAY_HOVER_COLOR);
+        addPasteMenu(flatTextArea.getTextArea());
+        return flatTextArea;
+    }
+
+    public static FlatTextArea createTextArea(String placeholder, String tooltip, String initialValue, Consumer<String> onChange) {
+        FlatTextArea textArea = new FlatTextArea(placeholder, false);
+        textArea.setText(initialValue);
+        textArea.setToolTipText(tooltip);
+//        textArea.setSelectedTextColor(Color.WHITE);
+//        textArea.setSelectionColor(ColorScheme.BRAND_ORANGE_TRANSPARENT);
+//        textArea.setLineWrap(true);
+//        textArea.setWrapStyleWord(true);
+//        textArea.setMargin(new Insets(4, 6, 5, 6));
+        textArea.getTextArea().addFocusListener(new FocusListener() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                textArea.getTextArea().selectAll();
             }
 
             @Override
@@ -199,7 +276,8 @@ public class PanelUtils {
                 onChange.accept(textArea.getText());
             }
         });
-
+        textArea.setHoverBackgroundColor(ColorScheme.DARK_GRAY_HOVER_COLOR);
+        addPasteMenu(textArea.getTextArea());
         return textArea;
     }
 
@@ -210,6 +288,21 @@ public class PanelUtils {
             onChange.accept((Integer) spinner.getValue());
         });
         JFormattedTextField spinnerText = (JFormattedTextField) spinner.getEditor().getComponent(0);
+        spinnerText.setSelectedTextColor(Color.WHITE);
+        spinnerText.setSelectionColor(ColorScheme.BRAND_ORANGE_TRANSPARENT);
+
+        return spinner;
+    }
+
+    public static JSpinner createSpinnerDouble(double initialValue, double min, double max, double step, Consumer<Double> onChange) {
+        double value = Math.min(Math.max(min, initialValue), max);
+        JSpinner spinner = new JSpinner(new SpinnerNumberModel(value, min, max, step));
+        JSpinner.NumberEditor editor = new JSpinner.NumberEditor(spinner, "#0.##");
+        spinner.setEditor(editor);
+        spinner.addChangeListener(e -> {
+            onChange.accept((Double) spinner.getValue());
+        });
+        JFormattedTextField spinnerText = editor.getTextField();
         spinnerText.setSelectedTextColor(Color.WHITE);
         spinnerText.setSelectionColor(ColorScheme.BRAND_ORANGE_TRANSPARENT);
 
@@ -271,12 +364,12 @@ public class PanelUtils {
         return select;
     }
 
-    public static <T> JComboBox<T> createSelect(T[] items, T initialValue, @Nullable Function<T, String> onRender, Consumer<T> onChange) {
+    public static <T> JComboBox<T> createSelect(T[] items, T initialValue, @Nullable Function<T, String> onRender, String placeholder, Consumer<T> onChange) {
         JComboBox<T> select = new JComboBox<>(items);
         select.setSelectedItem(initialValue);
         select.setRenderer((list, value, index, isSelected, cellHasFocus) -> {
             if (onRender != null) {
-                String title = value == null ? "Loading..." : onRender.apply(value);
+                String title = value == null ? placeholder : onRender.apply(value);
                 return new DefaultListCellRenderer().getListCellRendererComponent(list, title, index, isSelected, cellHasFocus);
             }
 
@@ -335,6 +428,77 @@ public class PanelUtils {
         addDropDownButton.setPreferredSize(new Dimension(40, addDropDownButton.getPreferredSize().height));
         addDropDownButton.setToolTipText("Create New Alert");
         return addDropDownButton;
+    }
+
+    public static void addPasteMenu(JTextArea textArea) {
+        JPopupMenu popupMenu = new JPopupMenu();
+        JMenuItem pasteItem = new JMenuItem("Paste (Ctrl+V)");
+        pasteItem.addActionListener(e -> textArea.paste());
+        popupMenu.add(pasteItem);
+        textArea.setComponentPopupMenu(popupMenu);
+    }
+
+    public static JPanel createInputGroupWithSuffix(JComponent mainComponent, JComponent suffix) {
+        return createInputGroup(mainComponent, null, Collections.singletonList(suffix));
+    }
+
+    public static JPanel createInputGroup(JComponent mainComponent, java.util.List<JComponent> prefixes, List<JComponent> suffixes) {
+        return new InputGroup(mainComponent)
+            .addPrefixes(prefixes)
+            .addSuffixes(suffixes);
+    }
+
+    public static JPanel createRegexMatcher(RegexMatcher regexMatcher, String placeholder, String tooltip) {
+        return createRegexMatcher(regexMatcher, placeholder, tooltip, null);
+    }
+
+    public static JPanel createRegexMatcher(RegexMatcher regexMatcher, String placeholder, String tooltip, JComponent suffixAppend) {
+        return createRegexMatcher(
+            regexMatcher::getPattern,
+            regexMatcher::setPattern,
+            regexMatcher::isRegexEnabled,
+            regexMatcher::setRegexEnabled,
+            placeholder,
+            tooltip,
+            suffixAppend
+        );
+    }
+
+    public static JPanel createRegexMatcher(
+        Supplier<String> pattern,
+        Consumer<String> savePattern,
+        Supplier<Boolean> regexEnabled,
+        Consumer<Boolean> saveRegexEnabled,
+        String placeholder,
+        String tooltip,
+        JComponent suffixAppend
+    ) {
+        JPanel btnGroup = new JPanel(new GridLayout(1, 0, 5, 5));
+        btnGroup.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+        JButton regex = PanelUtils.createToggleActionButton(
+            Icons.REGEX_SELECTED,
+            Icons.REGEX_SELECTED_HOVER,
+            Icons.REGEX,
+            Icons.REGEX_HOVER,
+            "Disable regex",
+            "Enable regex",
+            regexEnabled.get(),
+            (btn, modifiers) -> {
+                saveRegexEnabled.accept(btn.isSelected());
+            }
+        );
+        btnGroup.add(regex);
+        if (suffixAppend != null) {
+            btnGroup.add(suffixAppend);
+        }
+        return createInputGroupWithSuffix(
+            createTextArea(placeholder, tooltip, pattern.get(), msg -> {
+                if (!isPatternValid(SwingUtilities.getWindowAncestor(btnGroup), msg, regexEnabled.get()))
+                    return;
+                savePattern.accept(msg);
+            }),
+            btnGroup
+        );
     }
 
     public static Component getDeepestComponentAt(JLayeredPane parent, Integer layer, int x, int y) {

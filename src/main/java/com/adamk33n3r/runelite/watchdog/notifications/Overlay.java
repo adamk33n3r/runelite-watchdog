@@ -24,17 +24,15 @@ public class Overlay extends MessageNotification {
     private Color textColor = DEFAULT_NOTIFICATION_TEXT_COLOR;
     private boolean sticky = false;
     private int timeToLive = 5;
+    private boolean countDown = false;
     private String imagePath;
     private String id;
+    private boolean resizeImage = true;
 
     @Inject
     public Overlay(WatchdogConfig config) {
         super(config);
-        this.color = config.defaultOverlayColor();
-        this.textColor = config.defaultOverlayTextColor();
-        this.sticky = config.defaultOverlaySticky();
-        this.timeToLive = config.defaultOverlayTTL();
-        this.imagePath = config.defaultOverlayImagePath();
+        this.setDefaults();
     }
 
     @Override
@@ -51,5 +49,6 @@ public class Overlay extends MessageNotification {
         this.setSticky(this.watchdogConfig.defaultOverlaySticky());
         this.setTimeToLive(this.watchdogConfig.defaultOverlayTTL());
         this.setImagePath(this.watchdogConfig.defaultOverlayImagePath());
+        this.setResizeImage(this.watchdogConfig.defaultOverlayResizeImage());
     }
 }

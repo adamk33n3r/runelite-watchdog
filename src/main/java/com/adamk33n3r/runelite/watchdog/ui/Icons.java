@@ -32,8 +32,9 @@ public abstract class Icons {
     public static final ImageIcon IMPORT = new ImageIcon(ImageUtil.loadImageResource(Icons.class, "mdi_import.png"));
     public static final ImageIcon IMPORT_HOVER = new ImageIcon(ImageUtil.alphaOffset(IMPORT.getImage(), -120));
     public static final ImageIcon DELETE = new ImageIcon(ImageUtil.loadImageResource(Icons.class, "mdi_delete.png"));
-    public static final ImageIcon DELETE_HOVER = new ImageIcon(ImageUtil.luminanceOffset(DELETE.getImage(), -80));
+    public static final ImageIcon DELETE_HOVER = new ImageIcon(ImageUtil.luminanceOffset(DELETE.getImage(), -120));
     public static final ImageIcon DOWNLOAD = new ImageIcon(ImageUtil.loadImageResource(Icons.class, "mdi_download.png"));
+    public static final ImageIcon DOWNLOAD_HOVER = new ImageIcon(ImageUtil.luminanceOffset(DOWNLOAD.getImage(), -120));
 
     public static final ImageIcon CLONE = new ImageIcon(ImageUtil.loadImageResource(Icons.class, "mdi_content-duplicate.png"));
     public static final ImageIcon CLONE_HOVER = new ImageIcon(ImageUtil.alphaOffset(CLONE.getImage(), -120));
@@ -78,6 +79,7 @@ public abstract class Icons {
     public static final ImageIcon TIMER_REMOVE = new ImageIcon(ImageUtil.loadImageResource(Icons.class, "mdi_timer-remove-outline.png"));
     public static final ImageIcon TIMER_REMOVE_HOVER = new ImageIcon(ImageUtil.luminanceOffset(TIMER_REMOVE.getImage(), -80));
     public static final ImageIcon BORDER_OUTSIDE = new ImageIcon(ImageUtil.luminanceOffset(ImageUtil.loadImageResource(Icons.class, "mdi_border-outside.png"), -80));
+    public static final ImageIcon FEATHER = new ImageIcon(ImageUtil.luminanceOffset(ImageUtil.loadImageResource(Icons.class, "mdi_feather.png"), -80));
     public static final ImageIcon DICE_MULTIPLE = new ImageIcon(ImageUtil.loadImageResource(Icons.class, "mdi_dice-multiple.png"));
     public static final ImageIcon DICE_MULTIPLE_HOVER = new ImageIcon(ImageUtil.luminanceOffset(DICE_MULTIPLE.getImage(), -80));
     public static final ImageIcon DICE_MULTIPLE_OFF = new ImageIcon(ImageUtil.luminanceOffset(ImageUtil.loadImageResource(Icons.class, "mdi_dice-multiple-outline.png"), -80));

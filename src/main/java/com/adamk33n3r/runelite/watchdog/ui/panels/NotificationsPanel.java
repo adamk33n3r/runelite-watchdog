@@ -1,16 +1,18 @@
 package com.adamk33n3r.runelite.watchdog.ui.panels;
 
-import com.adamk33n3r.runelite.watchdog.AlertManager;
-import com.adamk33n3r.runelite.watchdog.NotificationType;
-import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
+import com.adamk33n3r.runelite.watchdog.*;
 import com.adamk33n3r.runelite.watchdog.alerts.Alert;
 import com.adamk33n3r.runelite.watchdog.notifications.*;
 import com.adamk33n3r.runelite.watchdog.notifications.Popup;
+import com.adamk33n3r.runelite.watchdog.notifications.objectmarkers.ObjectMarker;
 import com.adamk33n3r.runelite.watchdog.ui.Icons;
 import com.adamk33n3r.runelite.watchdog.ui.StretchedStackedLayout;
 import com.adamk33n3r.runelite.watchdog.ui.dropdownbutton.DropDownButtonFactory;
+import com.adamk33n3r.runelite.watchdog.ui.notifications.panels.PluginMessageNotificationPanel;
 import com.adamk33n3r.runelite.watchdog.ui.notifications.panels.*;
 
+import net.runelite.client.config.ConfigManager;
+import net.runelite.client.plugins.PluginManager;
 import net.runelite.client.ui.DynamicGridLayout;
 import net.runelite.client.ui.components.DragAndDropReorderPane;
 import net.runelite.client.ui.components.colorpicker.ColorPickerManager;
@@ -26,13 +28,23 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionListener;
 import java.util.Arrays;
+import java.util.Comparator;
 
 @Slf4j
 public class NotificationsPanel extends JPanel {
-    private final Alert alert;
+    private Alert alert;
 
     @Inject
     private ColorPickerManager colorPickerManager;
+
+    @Inject
+    private ConfigManager configManager;
+
+    @Inject
+    private PluginManager pluginManager;
+
+    @Inject
+    private WatchdogConfig config;
 
     @Inject
     private AlertManager alertManager;
@@ -40,8 +52,7 @@ public class NotificationsPanel extends JPanel {
     @Getter
     private final DragAndDropReorderPane notificationContainer;
 
-    public NotificationsPanel(Alert alert) {
-        this.alert = alert;
+    public NotificationsPanel() {
         this.setLayout(new BorderLayout(0, 5));
         this.notificationContainer = new DragAndDropReorderPane();
         this.notificationContainer.addDragListener((c) -> {
@@ -52,6 +63,10 @@ public class NotificationsPanel extends JPanel {
             notification.getAlert().moveNotificationTo(notification, pos);
             this.alertManager.saveAlerts();
         });
+    }
+
+    public void init(Alert alert) {
+        this.alert = alert;
 
         JPopupMenu popupMenu = new JPopupMenu();
         ActionListener actionListener = e -> {
@@ -61,27 +76,41 @@ public class NotificationsPanel extends JPanel {
             this.notificationContainer.revalidate();
             this.alertManager.saveAlerts();
         };
-        Arrays.stream(NotificationType.values()).sorted().forEach(nType -> {
+
+        if (this.config.enableNotificationCategories()) {
+            Arrays.stream(NotificationCategory.values()).forEach(cat -> {
+                JMenu subMenu = new JMenu(cat.getName());
+                subMenu.setToolTipText(cat.getTooltip());
+                popupMenu.add(subMenu);
+                popupMenu.putClientProperty(cat.name(), subMenu);
+            });
+        }
+        Arrays.stream(NotificationType.values()).sorted(Comparator.comparing(NotificationType::getName)).forEach(nType -> {
             JMenuItem c = new JMenuItem(nType.getName());
             c.setToolTipText(nType.getTooltip());
             c.putClientProperty(NotificationType.class, nType);
             c.addActionListener(actionListener);
-            popupMenu.add(c);
+            if (this.config.enableNotificationCategories()) {
+                JMenu subMenu = (JMenu) popupMenu.getClientProperty(nType.getCategory().name());
+                subMenu.add(c);
+            } else {
+                popupMenu.add(c);
+            }
         });
         JButton addDropDownButton = DropDownButtonFactory.createDropDownButton(Icons.ADD, popupMenu);
         addDropDownButton.setPreferredSize(new Dimension(40, addDropDownButton.getPreferredSize().height));
-        addDropDownButton.setToolTipText("Create New Notification");
+        addDropDownButton.setToolTipText("Create New Action");
         JPanel headerPanel = new JPanel(new BorderLayout());
         JPanel leftPanel = new JPanel(new DynamicGridLayout(1, 0, 5, 5));
         headerPanel.add(leftPanel, BorderLayout.WEST);
-        leftPanel.add(new JLabel("Notifications"));
+        leftPanel.add(new JLabel("Actions"));
         JButton randomBtn = PanelUtils.createToggleActionButton(
             Icons.DICE_MULTIPLE,
             Icons.DICE_MULTIPLE_HOVER,
             Icons.DICE_MULTIPLE_OFF,
             Icons.DICE_MULTIPLE_OFF_HOVER,
-            "Fire all notifications in sequence",
-            "Fire a random notification",
+            "Fire all actions in sequence",
+            "Fire a random action",
             alert.isRandomNotifications(),
             (btn, mods) -> {
                 alert.setRandomNotifications(!alert.isRandomNotifications());
@@ -103,23 +132,16 @@ public class NotificationsPanel extends JPanel {
         scrollablePanel.add(this.notificationContainer);
         JScrollPane scrollPane = new JScrollPane(scrollablePanel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         this.add(scrollPane, BorderLayout.CENTER);
-    }
-
-    // After inject, build
-    @Inject
-    public void rebuild() {
-        this.notificationContainer.removeAll();
 
         for (Notification notification : this.alert.getNotifications()) {
             this.addPanel(notification);
         }
-
-        this.notificationContainer.revalidate();
-        this.notificationContainer.repaint();
     }
 
     private void addPanel(Notification notification) {
         PanelUtils.OnRemove removeNotification = (removedPanel) -> {
+            WatchdogPlugin.getInstance().getScreenMarkerUtil().finishCreation(true);
+            WatchdogPlugin.getInstance().getObjectMarkerManager().turnOffObjectMarkerMode();
             this.alert.getNotifications().remove(notification);
             this.notificationContainer.remove(removedPanel);
             this.notificationContainer.revalidate();
@@ -153,8 +175,24 @@ public class NotificationsPanel extends JPanel {
             notificationPanel = new DismissOverlayNotificationPanel((DismissOverlay) notification, this, this.alertManager::saveAlerts, removeNotification);
         else if (notification instanceof DismissScreenMarker)
             notificationPanel = new DismissScreenMarkerNotificationPanel((DismissScreenMarker) notification, this, this.alertManager::saveAlerts, removeNotification);
+        else if (notification instanceof DismissObjectMarker)
+            notificationPanel = new DismissObjectMarkerNotificationPanel((DismissObjectMarker) notification, this, this.alertManager::saveAlerts, removeNotification);
         else if (notification instanceof ScreenMarker)
             notificationPanel = new ScreenMarkerNotificationPanel((ScreenMarker) notification, this, this.colorPickerManager, this.alertManager::saveAlerts, removeNotification);
+        else if (notification instanceof ObjectMarker)
+            notificationPanel = new ObjectMarkerNotificationPanel((ObjectMarker) notification, this, this.colorPickerManager, this.alertManager::saveAlerts, removeNotification);
+        else if (notification instanceof Dink)
+            notificationPanel = new DinkNotificationPanel((Dink) notification, this, this.configManager, this.alertManager::saveAlerts, removeNotification);
+        else if (notification instanceof ShortestPath)
+            notificationPanel = new ShortestPathNotificationPanel((ShortestPath) notification, this, this.configManager, this.alertManager::saveAlerts, removeNotification);
+        else if (notification instanceof PluginMessage)
+            notificationPanel = new PluginMessageNotificationPanel((PluginMessage) notification, this, this.alertManager::saveAlerts, removeNotification);
+        else if (notification instanceof PluginToggle)
+            notificationPanel = new PluginToggleNotificationPanel((PluginToggle) notification, this, this.pluginManager, this.alertManager::saveAlerts, removeNotification);
+        else if (notification instanceof AlertToggle)
+            notificationPanel = new AlertToggleNotificationPanel((AlertToggle) notification, this, this.alertManager::saveAlerts, removeNotification);
+        else if (notification instanceof Counter)
+            notificationPanel = new CounterNotificationPanel((Counter) notification, this, this.alertManager::saveAlerts, removeNotification);
 
         if (notificationPanel != null)
             this.notificationContainer.add(notificationPanel);

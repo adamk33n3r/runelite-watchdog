@@ -121,7 +121,7 @@ public class SoundPlayer {
         log.debug(String.format("Now playing: %s", nextSound.getFile().getAbsolutePath()));
 
         if (nextSound.getFile().getName().endsWith(".mp3")) {
-            mp3Player.getPlayList().clear();
+            mp3Player.clearPlayList();
             mp3Player.add(nextSound.getFile());
             mp3Player.setVolume(nextSound.getGain() * 10);
             this.mp3IsPlaying = true;
@@ -130,7 +130,7 @@ public class SoundPlayer {
                 this.soundTimeout = null;
             }
             mp3Player.play();
-            // jaco.mp3 repeat functionality is broken, but we are using it to signal to ourselves to repeat on loop
+            // jaco.mp3 repeat functionality is broken as it only loops when skipping, but we are using it to signal to ourselves to repeat on loop
             mp3Player.setRepeat(true);
             setTimeout(() -> {
                 mp3Player.setRepeat(false);

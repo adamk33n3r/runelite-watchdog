@@ -6,6 +6,7 @@ import com.adamk33n3r.runelite.watchdog.hub.AlertHubCategory;
 import com.adamk33n3r.runelite.watchdog.notifications.*;
 import com.adamk33n3r.runelite.watchdog.notifications.tts.TTSSource;
 import com.adamk33n3r.runelite.watchdog.notifications.tts.Voice;
+import com.adamk33n3r.runelite.watchdog.notifications.objectmarkers.ObjectMarker;
 import com.adamk33n3r.runelite.watchdog.ui.ComparableNumber;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
 
@@ -29,6 +30,7 @@ import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -77,6 +79,7 @@ public class AlertManager {
             .recognizeSubtypes()
             .registerSubtype(ChatAlert.class)
             .registerSubtype(PlayerChatAlert.class)
+            .registerSubtype(OverheadTextAlert.class)
             .registerSubtype(NotificationFiredAlert.class)
             .registerSubtype(StatDrainAlert.class)
             .registerSubtype(StatChangedAlert.class)
@@ -100,6 +103,14 @@ public class AlertManager {
             .registerSubtype(RequestFocus.class)
             .registerSubtype(NotificationEvent.class)
             .registerSubtype(ScreenMarker.class)
+            .registerSubtype(ObjectMarker.class)
+            .registerSubtype(Dink.class)
+            .registerSubtype(Counter.class)
+            .registerSubtype(ShortestPath.class)
+            .registerSubtype(PluginMessage.class)
+            .registerSubtype(PluginToggle.class)
+            .registerSubtype(AlertToggle.class)
+            .registerSubtype(DismissObjectMarker.class)
             .registerSubtype(DismissOverlay.class)
             .registerSubtype(DismissScreenMarker.class);
         this.gson = this.clientGson.newBuilder()
@@ -280,6 +291,10 @@ public class AlertManager {
         return this.getAllAlertsFrom(this.alerts.stream(), false);
     }
 
+    public Stream<Alert> getAllAlertsAndGroups() {
+        return this.getAllAlertsFrom(this.alerts.stream(), true);
+    }
+
     public <T extends Alert> Stream<T> getAllAlertsOfType(Class<T> type) {
         return this.getAllAlerts()
             .filter(type::isInstance)
@@ -306,7 +321,7 @@ public class AlertManager {
     }
 
     public <T extends Alert> T createAlert(Class<T> alertClass) {
-        return WatchdogPlugin.getInstance().getInjector().getInstance(alertClass);
+        return this.plugin.getInjector().getInstance(alertClass);
     }
 
     public void addAlert(Alert alert, boolean overrideWithDefaults) {
@@ -360,6 +375,9 @@ public class AlertManager {
         this.importAlerts(json, this.alerts, false, false, false);
         this.createStarterAlertsIfEmpty();
         this.handleUpgrades();
+        if (this.watchdogConfig.disableAllAlertsOnStartup()) {
+            this.getAllAlertsFrom(this.alerts.stream(), true).forEach(alert -> alert.setEnabled(false));
+        }
     }
 
     public boolean importAlerts(String json, List<Alert> alerts, boolean append, boolean checkRegex, boolean overrideWithDefaults) throws JsonSyntaxException {
@@ -424,7 +442,7 @@ public class AlertManager {
     }
 
     private void setUpAlert(Alert alert, boolean overrideWithDefaults) {
-        WatchdogPlugin.getInstance().getInjector().injectMembers(alert);
+        this.plugin.getInjector().injectMembers(alert);
         if (alert instanceof AlertGroup) {
             ((AlertGroup) alert).getAlerts().forEach(subAlert -> this.setUpAlert(subAlert, overrideWithDefaults));
         } else {
@@ -435,10 +453,10 @@ public class AlertManager {
                 if (notification instanceof TextToSpeech) {
                     TextToSpeech tts = (TextToSpeech) notification;
                     if (tts.getSource() == TTSSource.ELEVEN_LABS && tts.getElevenLabsVoiceId() != null) {
-                        ElevenLabs.getVoice(WatchdogPlugin.getInstance().getHttpClient(), tts.getElevenLabsVoiceId(), tts::setElevenLabsVoice);
+                        ElevenLabs.getVoice(this.plugin.getHttpClient(), tts.getElevenLabsVoiceId(), tts::setElevenLabsVoice, log::error);
                     }
                 }
-                WatchdogPlugin.getInstance().getInjector().injectMembers(notification);
+                this.plugin.getInjector().injectMembers(notification);
                 if (overrideWithDefaults) {
                     notification.setDefaults();
                 }
@@ -450,8 +468,8 @@ public class AlertManager {
     private void handleUpgrades() {
         Version currentVersion = new Version(this.pluginVersion);
         Version configVersion = new Version(this.configManager.getConfiguration(WatchdogConfig.CONFIG_GROUP_NAME, WatchdogConfig.PLUGIN_VERSION));
-        log.debug("currentVersion: " + currentVersion);
-        log.debug("configVersion: " + configVersion);
+        log.debug("currentVersion: {}", currentVersion);
+        log.debug("configVersion: {}", configVersion);
         if (currentVersion.compareTo(configVersion) > 0) {
             log.debug("Checking if data migration needed");
             // Changed Stat Drain to Stat Change in v2.4.0, so need to swap sign of drainAmount and move to new alert
@@ -512,8 +530,72 @@ public class AlertManager {
                     });
             }
 
+            if (configVersion.compareTo(new Version("3.14.0")) < 0) {
+                log.debug("Need to migrate pattern matchers from matches to find");
+                this.getAllAlerts()
+                    .filter(alert -> alert instanceof RegexMatcher)
+                    .map(alert -> (RegexMatcher) alert)
+                    .forEach(alert -> {
+                        String prevPattern = alert.getPattern();
+                        if (!prevPattern.isEmpty()) {
+                            upgrade_3_14_0_patterns(
+                                alert::getPattern,
+                                alert::isRegexEnabled,
+                                alert::setPattern,
+                                alert::setRegexEnabled
+                            );
+                            log.debug("Migrating alert {} from {} to {}", ((Alert) alert).getName(), prevPattern, alert.getPattern());
+                        }
+
+                        if (alert instanceof OverheadTextAlert) {
+                            var overHeadTextAlert = (OverheadTextAlert) alert;
+                            if (overHeadTextAlert.getNpcName().isEmpty()) {
+                                return;
+                            }
+                            upgrade_3_14_0_patterns(
+                                overHeadTextAlert::getNpcName,
+                                overHeadTextAlert::isNpcRegexEnabled,
+                                overHeadTextAlert::setNpcName,
+                                overHeadTextAlert::setNpcRegexEnabled
+                            );
+                        }
+                    });
+            }
+
             this.configManager.setConfiguration(WatchdogConfig.CONFIG_GROUP_NAME, WatchdogConfig.PLUGIN_VERSION, currentVersion.getVersion());
             this.saveAlerts();
         }
     }
+
+    private void upgrade_3_14_0_patterns(
+        Supplier<String> patternSupplier,
+        Supplier<Boolean> regexEnabledSupplier,
+        Consumer<String> patternSave,
+        Consumer<Boolean> regexEnabledSave
+    ) {
+        String pattern = patternSupplier.get();
+        // If the pattern is not a regex, and it doesn't start with * or end with *
+        // then convert it to a regex and proceed with the conversion
+        if (!regexEnabledSupplier.get()) {
+            if (!pattern.startsWith("*") || !pattern.endsWith("*")) {
+                pattern = Util.createRegexFromGlob(pattern);
+                regexEnabledSave.accept(true);
+            } else if (pattern.length() > 1) {
+                pattern = pattern.substring(1, pattern.length() - 1);
+            }
+        }
+
+        if (regexEnabledSupplier.get()) {
+            // if the beginning of the pattern is not a ^ then add one
+            if (!pattern.startsWith("^")) {
+                pattern = "^" + pattern;
+            }
+            // if the end of the pattern is not a $ then add one
+            if (!pattern.endsWith("$")) {
+                pattern = pattern + "$";
+            }
+        }
+
+        patternSave.accept(pattern);
+    };
 }

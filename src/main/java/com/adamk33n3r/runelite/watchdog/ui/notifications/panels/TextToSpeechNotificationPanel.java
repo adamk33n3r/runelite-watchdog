@@ -14,14 +14,13 @@ import com.adamk33n3r.runelite.watchdog.ui.notifications.VolumeSlider;
 import com.adamk33n3r.runelite.watchdog.ui.panels.NotificationsPanel;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
 
+import lombok.extern.slf4j.Slf4j;
 import net.runelite.client.ui.ColorScheme;
 
 import javax.swing.*;
-import javax.swing.text.AbstractDocument;
 import java.awt.Font;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
 
+@Slf4j
 public class TextToSpeechNotificationPanel extends NotificationPanel {
     public TextToSpeechNotificationPanel(TextToSpeech notification, NotificationsPanel parentPanel, Runnable onChangeListener, PanelUtils.OnRemove onRemove) {
         super(notification, parentPanel, onChangeListener, onRemove);
@@ -44,24 +43,15 @@ public class TextToSpeechNotificationPanel extends NotificationPanel {
             return;
         }
 
-        FlatTextArea flatTextArea = new FlatTextArea("Enter your message...", true);
-        flatTextArea.setText(notification.getMessage());
-        ((AbstractDocument) flatTextArea.getDocument()).setDocumentFilter(new LengthLimitFilter(200));
-        flatTextArea.getDocument().addDocumentListener((SimpleDocumentListener) ev -> {
-            notification.setMessage(flatTextArea.getText());
-        });
-        flatTextArea.getTextArea().addFocusListener(new FocusListener() {
-            @Override
-            public void focusGained(FocusEvent e) {
-                flatTextArea.getTextArea().selectAll();
-            }
-
-            @Override
-            public void focusLost(FocusEvent e) {
+        FlatTextArea messageTextArea = PanelUtils.createTextField(
+            "Enter your message...",
+            "The message to play",
+            notification.getMessage(),
+            val -> {
+                notification.setMessage(val);
                 onChangeListener.run();
-            }
-        });
-        this.settings.add(flatTextArea);
+            });
+        this.settings.add(messageTextArea);
 
         JComboBox<TTSSource> sourceSelect = PanelUtils.createSelect(TTSSource.values(), notification.getSource(), (selected) -> {
             notification.setSource(selected);
@@ -82,7 +72,7 @@ public class TextToSpeechNotificationPanel extends NotificationPanel {
                     this.settings.add(settingsBtn);
                     return;
                 }
-                JComboBox<Voice> voiceSelect = PanelUtils.createSelect(new Voice[]{}, null, Voice::getName, (voice) -> {
+                JComboBox<Voice> voiceSelect = PanelUtils.createSelect(new Voice[]{}, null, Voice::getName, "Loading...", (voice) -> {
                     notification.setElevenLabsVoiceId(voice.getVoiceId());
                     //Not serialized
                     notification.setElevenLabsVoice(voice);
@@ -105,10 +95,12 @@ public class TextToSpeechNotificationPanel extends NotificationPanel {
                             }
                         });
                     });
-                });
+                }, log::error);
                 this.settings.add(voiceSelect);
                 break;
             case LEGACY:
+                JLabel deprecatedWarning = new JLabel("<html>The Legacy TTS API is deprecated and will likely be removed in the future.</html>");
+                this.settings.add(deprecatedWarning);
                 JSlider rateSlider = new JSlider(1, 5, notification.getRate());
                 rateSlider.setSnapToTicks(true);
                 rateSlider.setBackground(ColorScheme.MEDIUM_GRAY_COLOR);

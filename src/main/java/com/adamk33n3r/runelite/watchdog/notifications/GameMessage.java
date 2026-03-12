@@ -6,7 +6,6 @@ import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
 
 import net.runelite.api.ChatMessageType;
 import net.runelite.client.chat.ChatColorType;
-import net.runelite.client.chat.ChatMessageBuilder;
 import net.runelite.client.chat.ChatMessageManager;
 import net.runelite.client.chat.QueuedMessage;
 
