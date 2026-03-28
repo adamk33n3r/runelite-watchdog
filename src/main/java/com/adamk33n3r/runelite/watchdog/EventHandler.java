@@ -1,5 +1,6 @@
 package com.adamk33n3r.runelite.watchdog;
 
+import com.adamk33n3r.nodegraph.nodes.TriggerNode;
 import com.adamk33n3r.runelite.watchdog.alerts.*;
 import com.adamk33n3r.runelite.watchdog.alerts.InventoryAlert.InventoryAlertType;
 import com.adamk33n3r.runelite.watchdog.ui.panels.HistoryPanel;
@@ -106,6 +107,16 @@ public class EventHandler {
 
                     this.fireAlert(chatAlert, groups);
                 });
+            this.fireAdvancedAlertTriggers(PlayerChatAlert.class,
+                a -> a.getPlayerChatType() == PlayerChatType.ANY || a.getPlayerChatType().isOfType(chatMessage.getType()),
+                a -> {
+                    var msg = unformattedMessage;
+                    if (a.isPrependSender()) {
+                        var playerName = net.runelite.client.util.Text.sanitize(net.runelite.client.util.Text.removeFormattingTags(chatMessage.getName()));
+                        msg = String.format("%s: %s", playerName, msg);
+                    }
+                    return Util.matchPattern(a, msg);
+                });
             return;
         }
 
@@ -117,6 +128,10 @@ public class EventHandler {
 
                 this.fireAlert(gameAlert, groups);
             });
+
+        this.fireAdvancedAlertTriggers(ChatAlert.class,
+            a -> a.getGameMessageType() == GameMessageType.ANY || a.getGameMessageType().isOfType(chatMessage.getType()),
+            a -> Util.matchPattern(a, unformattedMessage));
     }
     //endregion
 
@@ -131,6 +146,12 @@ public class EventHandler {
 
                 this.fireAlert(notificationFiredAlert, groups);
             });
+
+        if (!this.firedByWatchdog) {
+            this.fireAdvancedAlertTriggers(NotificationFiredAlert.class,
+                a -> a.isAllowSelf() || !this.firedByWatchdog,
+                a -> Util.matchPattern(a, notificationFired.getMessage()));
+        }
     }
     //endregion
 
@@ -189,6 +210,22 @@ public class EventHandler {
                 return currentIs && prevWasNot;
             })
             .forEach(alert -> this.fireAlert(alert, statChanged.getSkill().getName()));
+
+        final int prevLevel = previousLevel;
+        this.fireAdvancedAlertTriggers(StatChangedAlert.class,
+            a -> {
+                if (a.getSkill() != statChanged.getSkill()) return false;
+                int targetLevel;
+                switch (a.getChangedMode()) {
+                    case RELATIVE: targetLevel = statChanged.getLevel() + a.getChangedAmount(); break;
+                    case ABSOLUTE: targetLevel = a.getChangedAmount(); break;
+                    case PERCENTAGE: targetLevel = (statChanged.getLevel() * a.getChangedAmount()) / 100; break;
+                    default: targetLevel = statChanged.getLevel(); break;
+                }
+                return a.getChangedComparator().compare(statChanged.getBoostedLevel(), targetLevel)
+                    && a.getChangedComparator().converse().compare(prevLevel, targetLevel);
+            },
+            a -> new String[]{ statChanged.getSkill().getName() });
     }
 
     private void handleXPDrop(StatChanged statChanged) {
@@ -204,6 +241,10 @@ public class EventHandler {
                 return isSkill && alert.getGainedComparator().compare(gainedXP, alert.getGainedAmount());
             })
             .forEach(alert -> this.fireAlert(alert, statChanged.getSkill().getName()));
+
+        this.fireAdvancedAlertTriggers(XPDropAlert.class,
+            a -> a.getSkill() == statChanged.getSkill() && a.getGainedComparator().compare(statChanged.getXp() - (previousXP == null ? 0 : previousXP), a.getGainedAmount()),
+            a -> new String[]{ statChanged.getSkill().getName() });
     }
     //endregion
 
@@ -222,6 +263,10 @@ public class EventHandler {
         this.alertManager.getAllEnabledAlertsOfType(SoundFiredAlert.class)
             .filter(soundFiredAlert -> soundFiredAlert.getSoundID() == soundID)
             .forEach(alert -> this.fireAlert(alert, "" + soundID));
+
+        this.fireAdvancedAlertTriggers(SoundFiredAlert.class,
+            a -> a.getSoundID() == soundID,
+            a -> new String[]{ "" + soundID });
     }
     //endregion
 
@@ -280,6 +325,38 @@ public class EventHandler {
                             break;
                     }
                 });
+
+            this.alertManager.getAllEnabledAlertsOfType(AdvancedAlert.class).forEach(adv ->
+                adv.getGraph().getTriggerNodesOfType(InventoryAlert.class)
+                    .filter(tn -> tn.getAlert().isEnabled())
+                    .forEach(tn -> {
+                        InventoryAlert inventoryAlert = (InventoryAlert) tn.getAlert();
+                        InventoryAlertType alertType = inventoryAlert.getInventoryAlertType();
+                        String[] groups = null;
+                        switch (alertType) {
+                            case FULL:
+                                if (itemCount == 28) groups = new String[]{ alertType.getName() };
+                                break;
+                            case EMPTY:
+                                if (itemCount == 0) groups = new String[]{ alertType.getName() };
+                                break;
+                            case SLOTS:
+                                if (inventoryAlert.getQuantityComparator().compare((int) itemCount, inventoryAlert.getItemQuantity()))
+                                    groups = new String[]{ alertType.getName() };
+                                break;
+                            case ITEM:
+                            case ITEM_CHANGE:
+                                Optional<MatchedItem> matched = this.getMatchedItems(inventoryAlert, itemMap);
+                                if (matched.isPresent()) {
+                                    int change = alertType == InventoryAlertType.ITEM ? 0 : matched.get().previousQuantity;
+                                    if (inventoryAlert.getQuantityComparator().compare(matched.get().currentQuantity - change, inventoryAlert.getItemQuantity()))
+                                        groups = matched.get().groups.toArray(new String[0]);
+                                }
+                                break;
+                        }
+                        if (groups != null) this.fireAdvancedAlertTriggerNode(adv, tn, groups);
+                    })
+            );
         }
         this.previousItemsTable = currentItems;
     }
@@ -427,6 +504,20 @@ public class EventHandler {
                     this.fireAlert(spawnedAlert, groups);
                 }
             });
+
+        this.fireAdvancedAlertTriggers(SpawnedAlert.class,
+            a -> a.getSpawnedDespawned() == mode
+                && a.getSpawnedType() == type
+                && (a.getDistance() == -1 || a.getDistanceComparator().compare(distanceToObject, a.getDistance()))
+                && additionalFilter.test(a),
+            a -> {
+                try {
+                    int parsedID = Integer.parseInt(a.getPattern());
+                    return id == parsedID ? new String[]{ a.getPattern() } : null;
+                } catch (NumberFormatException ignored) {
+                    return Util.matchPattern(a, unformattedName);
+                }
+            });
     }
     //endregion
 
@@ -440,6 +531,10 @@ public class EventHandler {
 
                 this.fireAlert(alert, groups);
             });
+
+        this.fireAdvancedAlertTriggers(OverheadTextAlert.class,
+            a -> a.getNpcName().isEmpty() || Util.matchPattern(a::getNpcName, a::isNpcRegexEnabled, overheadTextChanged.getActor().getName()) != null,
+            a -> Util.matchPattern(a, overheadTextChanged.getOverheadText()));
     }
 
     @Subscribe
@@ -463,7 +558,55 @@ public class EventHandler {
                 }
                 this.fireAlert(locationAlert, new String[] { String.valueOf(worldLocation.getX()), String.valueOf(worldLocation.getY()) });
             });
+
+        final WorldPoint prevLoc = this.previousLocation;
+        this.fireAdvancedAlertTriggers(LocationAlert.class,
+            a -> a.shouldFire(worldLocation) && (a.isRepeat() || !a.shouldFire(prevLoc)),
+            a -> new String[]{ String.valueOf(worldLocation.getX()), String.valueOf(worldLocation.getY()) });
+
         this.previousLocation = worldLocation;
+    }
+
+    private final Map<AdvancedAlert, Map<TriggerNode, Instant>> lastTriggeredAdvanced = new ConcurrentHashMap<>();
+
+    /**
+     * Fires all AdvancedAlerts that have TriggerNodes of the given alert class matching the predicate.
+     * Applies the AdvancedAlert's own debounce per trigger node.
+     */
+    private <T extends Alert> void fireAdvancedAlertTriggers(
+        Class<T> alertClass,
+        java.util.function.Predicate<T> matcher,
+        java.util.function.Function<T, String[]> groupsExtractor
+    ) {
+        this.alertManager.getAllEnabledAlertsOfType(AdvancedAlert.class).forEach(adv ->
+            adv.getGraph().getTriggerNodesOfType(alertClass)
+                .filter(tn -> tn.getAlert().isEnabled())
+                .filter(tn -> matcher.test(alertClass.cast(tn.getAlert())))
+                .forEach(tn -> {
+                    String[] groups = groupsExtractor.apply(alertClass.cast(tn.getAlert()));
+                    if (groups == null) return;
+                    this.fireAdvancedAlertTriggerNode(adv, tn, groups);
+                })
+        );
+    }
+
+    private void fireAdvancedAlertTriggerNode(AdvancedAlert alert, TriggerNode triggerNode, String[] triggerValues) {
+        if (!alert.isEnabled()) return;
+
+        Map<TriggerNode, Instant> nodeLastTriggered = this.lastTriggeredAdvanced.computeIfAbsent(alert, k -> new ConcurrentHashMap<>());
+        int debounce = alert.getDebounceTime();
+        if (debounce > 0) {
+            Instant last = nodeLastTriggered.get(triggerNode);
+            if (last != null && Instant.now().compareTo(last.plusMillis(debounce)) < 0) {
+                if (alert.isDebounceResetTime()) {
+                    nodeLastTriggered.put(triggerNode, Instant.now());
+                }
+                return;
+            }
+        }
+        nodeLastTriggered.put(triggerNode, Instant.now());
+        SwingUtilities.invokeLater(() -> this.historyPanelProvider.get().addEntry(alert, triggerValues));
+        alert.fireTriggerNode(triggerNode, triggerValues);
     }
 
     private void fireAlert(Alert alert, String triggerValue) {

@@ -2,15 +2,20 @@ package com.adamk33n3r.nodegraph;
 
 import com.adamk33n3r.nodegraph.nodes.NotificationNode;
 import com.adamk33n3r.nodegraph.nodes.TriggerNode;
+import com.adamk33n3r.runelite.watchdog.alerts.Alert;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Slf4j
 public class Graph {
+    @Getter
     private final List<Node> nodes = new ArrayList<>();
+    @Getter
     private final List<Connection<?>> connections = new ArrayList<>();
 
     public void add(Node node) {
@@ -19,7 +24,6 @@ public class Graph {
 
     public void remove(Node node) {
         this.nodes.remove(node);
-//        this.connections.removeIf(c -> c.getOutput().getNode().equals(node) || c.getInput().getNode().equals(node));
         List<Connection<?>> toRemove = this.connections.stream()
             .filter(c -> c.getOutput().getNode().equals(node) || c.getInput().getNode().equals(node))
             .collect(Collectors.toList());
@@ -53,9 +57,18 @@ public class Graph {
             });
     }
 
+    /**
+     * Returns all TriggerNodes whose embedded alert is an instance of the given alert class.
+     */
+    public <T extends Alert> Stream<TriggerNode> getTriggerNodesOfType(Class<T> alertClass) {
+        return nodes.stream()
+            .filter(n -> n instanceof TriggerNode)
+            .map(n -> (TriggerNode) n)
+            .filter(tn -> alertClass.isInstance(tn.getAlert()));
+    }
+
     @Override
     public String toString() {
-        // Print out directed graph from nodes through connections
         StringBuilder sb = new StringBuilder();
         for (Node node : this.nodes) {
             if (!(node instanceof TriggerNode)) {
@@ -72,8 +85,6 @@ public class Graph {
                         .append(connection.getInput().getName())
                         .append(":")
                         .append(connection.getInput().getNode().getClass().getSimpleName())
-                        .append(((NotificationNode)connection.getInput().getNode()).getDelayMilliseconds().getValue())
-                        .append(((NotificationNode)connection.getInput().getNode()).getNotification().getDelayMilliseconds())
                         .append("\n");
                 }
             }
@@ -84,20 +95,18 @@ public class Graph {
         return sb.toString();
     }
 
-    // TODO only does one level of processing
     public void process(Node node) {
         node.process();
         this.connections.stream()
             .filter(c -> c.getOutput().getNode() == node)
             .map(c -> c.getInput().getNode())
             .distinct()
-            .forEach(Node::process);
+            .forEach(this::process);
     }
 
     /**
-     * Finds and returns all notifications recursively that can be reached from triggerNode via connections to the enabled input
-     * @param triggerNode The trigger node to start from
-     * @return List of reachable notifications
+     * Finds and returns all notifications recursively reachable from triggerNode
+     * via connections to the enabled input.
      */
     public List<NotificationNode> getReachableNotificationsFromTrigger(TriggerNode triggerNode) {
         List<NotificationNode> reachableNotifications = new ArrayList<>();
@@ -107,7 +116,6 @@ public class Graph {
             Node node = nodesToProcess.remove(0);
             if (node instanceof NotificationNode) {
                 NotificationNode notification = ((NotificationNode) node);
-                System.out.println("Notification node: " + notification.getNotification().getType().getName() + " is enabled: " + notification.getEnabled().getValue());
                 if (notification.getEnabled().getValue()) {
                     reachableNotifications.add(notification);
                 }

@@ -11,5 +11,6 @@ public class ConnectionPointIn<T> extends ConnectionPoint {
     public ConnectionPointIn(NodePanel nodePanel, VarInput<T> varInput) {
         super(nodePanel);
         this.inputVar = varInput;
+        nodePanel.registerInputPoint(varInput, this);
     }
 }

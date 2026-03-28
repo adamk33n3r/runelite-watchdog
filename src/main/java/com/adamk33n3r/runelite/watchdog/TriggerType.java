@@ -1,6 +1,7 @@
 package com.adamk33n3r.runelite.watchdog;
 
 import com.adamk33n3r.runelite.watchdog.alerts.*;
+import com.adamk33n3r.runelite.watchdog.alerts.AdvancedAlert;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -20,6 +21,7 @@ public enum TriggerType implements Displayable {
     LOCATION("Location", "Triggers when you near a set location", LocationAlert.class),
     // Keep this last so that people maybe won't try to use it over the chat one
     NOTIFICATION_FIRED("Notification Fired", "When other plugins fire notifications", NotificationFiredAlert.class),
+    ADVANCED_ALERT("Advanced Alert", "Visual node graph based alert", AdvancedAlert.class),
     ;
 
     private final String name;

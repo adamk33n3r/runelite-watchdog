@@ -30,6 +30,14 @@ public class TriggerNode extends Node {
 
         this.nameOut.setValue(this.name.getValue());
         this.debounceOut.setValue(this.debounce.getValue());
+
+        reg(this.enabled);
+        reg(this.name);
+        reg(this.debounce);
+        reg(this.captureGroupsIn);
+        reg(this.captureGroups);
+        reg(this.nameOut);
+        reg(this.debounceOut);
     }
 
     @Override

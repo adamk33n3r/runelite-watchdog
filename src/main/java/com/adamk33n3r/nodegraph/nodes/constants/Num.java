@@ -8,6 +8,10 @@ import lombok.Getter;
 public class Num extends Node {
     private final VarOutput<Number> value = new VarOutput<>(this, "Value", Number.class, 0);
 
+    public Num() {
+        reg(this.value);
+    }
+
     public void setValue(int value) {
         this.value.setValue(value);
     }

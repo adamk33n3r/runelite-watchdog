@@ -10,5 +10,6 @@ public class ContinuousTriggerNode extends TriggerNode {
 
     public ContinuousTriggerNode(ContinuousAlert alert) {
         super(alert);
+        reg(this.isTriggered);
     }
 }

@@ -13,6 +13,8 @@ public class Dummy<T> extends Node {
     public Dummy(Class<T> type) {
         this.input = new VarInput<>(this, "Input", type, null);
         this.output = new VarOutput<>(this, "Output", type, null);
+        reg(this.input);
+        reg(this.output);
     }
 
     @Override

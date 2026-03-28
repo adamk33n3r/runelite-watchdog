@@ -5,6 +5,10 @@ import com.adamk33n3r.nodegraph.Node;
 import com.adamk33n3r.runelite.watchdog.ui.StretchedStackedLayout;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.NodeConnection;
 
+import com.adamk33n3r.nodegraph.VarInput;
+import com.adamk33n3r.nodegraph.VarOutput;
+import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.ConnectionPointIn;
+import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.ConnectionPointOut;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -16,7 +20,9 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.IdentityHashMap;
 import java.util.List;
+import java.util.Map;
 
 public class NodePanel extends JPanel {
     public static final int PANEL_WIDTH = 300;
@@ -31,6 +37,27 @@ public class NodePanel extends JPanel {
     private final GraphPanel graphPanel;
     @Getter
     private final Node node;
+
+    private final Map<VarOutput<?>, ConnectionPointOut<?>> outputRegistry = new IdentityHashMap<>();
+    private final Map<VarInput<?>, ConnectionPointIn<?>> inputRegistry = new IdentityHashMap<>();
+
+    public void registerOutputPoint(VarOutput<?> var, ConnectionPointOut<?> cp) {
+        outputRegistry.put(var, cp);
+    }
+
+    public void registerInputPoint(VarInput<?> var, ConnectionPointIn<?> cp) {
+        inputRegistry.put(var, cp);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> ConnectionPointOut<T> getOutputPoint(VarOutput<T> var) {
+        return (ConnectionPointOut<T>) outputRegistry.get(var);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> ConnectionPointIn<T> getInputPoint(VarInput<T> var) {
+        return (ConnectionPointIn<T>) inputRegistry.get(var);
+    }
 
     private final Border border;
 

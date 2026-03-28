@@ -11,6 +11,12 @@ public class And extends Node {
     private final VarInput<Boolean> b = new VarInput<>(this, "B", Boolean.class, false);
     private final VarOutput<Boolean> result = new VarOutput<>(this, "Result", Boolean.class, false);
 
+    public And() {
+        reg(this.a);
+        reg(this.b);
+        reg(this.result);
+    }
+
     @Override
     public void process() {
         this.result.setValue(this.a.getValue() && this.b.getValue());

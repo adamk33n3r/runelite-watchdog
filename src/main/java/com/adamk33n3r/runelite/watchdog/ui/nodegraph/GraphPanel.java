@@ -2,8 +2,10 @@ package com.adamk33n3r.runelite.watchdog.ui.nodegraph;
 
 import com.adamk33n3r.nodegraph.nodes.ContinuousTriggerNode;
 import com.adamk33n3r.nodegraph.nodes.constants.Num;
+import com.adamk33n3r.nodegraph.nodes.logic.And;
 import com.adamk33n3r.runelite.watchdog.NotificationType;
 import com.adamk33n3r.runelite.watchdog.TriggerType;
+import com.adamk33n3r.runelite.watchdog.alerts.Alert;
 import com.adamk33n3r.runelite.watchdog.alerts.ChatAlert;
 import com.adamk33n3r.runelite.watchdog.alerts.LocationAlert;
 import com.adamk33n3r.runelite.watchdog.alerts.SpawnedAlert;
@@ -151,15 +153,19 @@ public class GraphPanel extends JLayeredPane {
     }
 
     public void init(Injector injector) {
+        this.init(injector, new Graph());
+//        this.setUpExample2();
+    }
+
+    public void init(Injector injector, Graph existingGraph) {
         this.injector = injector;
         this.setBackground(ColorScheme.DARKER_GRAY_COLOR);
         this.setOpaque(false);
         this.setPreferredSize(new Dimension(6000, 4000));
         this.setName("Graph");
 
-        this.graph = new Graph();
-//        this.setUpExample1();
-        this.setUpExample2();
+        this.graph = existingGraph;
+        this.loadFromGraph(existingGraph);
 
         this.addMouseListener(new MouseAdapter() {
             @Override
@@ -272,23 +278,36 @@ public class GraphPanel extends JLayeredPane {
         this.popupLocation = SwingUtilities.convertPoint(parent, new Point(x, y), this);
 
         new NewNodePopup(filter).show(parent, x, y, (selected) -> {
-            System.out.println(selected);
+            int px = GraphPanel.this.popupLocation.x;
+            int py = GraphPanel.this.popupLocation.y;
             if (selected instanceof TriggerType) {
-                System.out.println("create alert node");
-                ChatAlert alert = new ChatAlert();
+                TriggerType triggerType = (TriggerType) selected;
+                Alert alert;
+                try {
+                    alert = triggerType.getImplClass().newInstance();
+                } catch (Exception e) {
+                    alert = new ChatAlert();
+                }
                 TriggerNode triggerNode = new TriggerNode(alert);
+                triggerNode.setX(px);
+                triggerNode.setY(py);
                 this.graph.add(triggerNode);
-
-                NodePanel nodePanel = new AlertNodePanel(GraphPanel.this, GraphPanel.this.popupLocation.x, GraphPanel.this.popupLocation.y, ((TriggerType) selected).getName(), Color.CYAN, triggerNode);
+                NodePanel nodePanel = new AlertNodePanel(GraphPanel.this, px, py, triggerType.getName(), NODE_TRIGGER_COLOR, triggerNode);
                 GraphPanel.this.add(nodePanel, NODE_LAYER, 0);
                 onSelect.accept(nodePanel);
             } else if (selected instanceof NotificationType) {
-                System.out.println("create notification node");
-                TextToSpeech tts = new TextToSpeech();
-                NotificationNode notificationNode = new NotificationNode(tts);
+                NotificationType notificationType = (NotificationType) selected;
+                com.adamk33n3r.runelite.watchdog.notifications.Notification notification;
+                try {
+                    notification = notificationType.getImplClass().newInstance();
+                } catch (Exception e) {
+                    notification = new TextToSpeech();
+                }
+                NotificationNode notificationNode = new NotificationNode(notification);
+                notificationNode.setX(px);
+                notificationNode.setY(py);
                 this.graph.add(notificationNode);
-
-                NodePanel nodePanel = new NotificationNodePanel(GraphPanel.this, GraphPanel.this.popupLocation.x, GraphPanel.this.popupLocation.y, ((NotificationType) selected).getName(), Color.ORANGE, notificationNode, colorPickerManager);
+                NodePanel nodePanel = new NotificationNodePanel(GraphPanel.this, px, py, notificationType.getName(), NODE_NOTIFICATION_COLOR, notificationNode, colorPickerManager);
                 GraphPanel.this.add(nodePanel, NODE_LAYER, 0);
                 onSelect.accept(nodePanel);
             } else if (selected instanceof LogicNodeType) {
@@ -301,8 +320,10 @@ public class GraphPanel extends JLayeredPane {
                     case EQUALS:
                     case NOT_EQUALS:
                         And andNode = new And();
+                        andNode.setX(px);
+                        andNode.setY(py);
                         this.graph.add(andNode);
-                        NodePanel nodePanel = new IfNodePanel(GraphPanel.this, andNode, GraphPanel.this.popupLocation.x, GraphPanel.this.popupLocation.y, logicNodeType.getName(), Color.MAGENTA);
+                        NodePanel nodePanel = new IfNodePanel(GraphPanel.this, andNode, px, py, logicNodeType.getName(), Color.MAGENTA);
                         GraphPanel.this.add(nodePanel, NODE_LAYER, 0);
                         onSelect.accept(nodePanel);
                         break;
@@ -313,7 +334,66 @@ public class GraphPanel extends JLayeredPane {
         }, () -> onSelect.accept(null));
     }
 
+    /**
+     * Reconstructs the visual representation of a graph by creating NodePanels
+     * for each node and NodeConnections for each connection.
+     */
+    public void loadFromGraph(Graph g) {
+        Map<Node, NodePanel> nodePanelMap = new java.util.IdentityHashMap<>();
+        for (Node node : g.getNodes()) {
+            NodePanel panel = createNodePanel(node);
+            if (panel != null) {
+                nodePanelMap.put(node, panel);
+                this.add(panel, NODE_LAYER);
+            }
+        }
+        for (com.adamk33n3r.nodegraph.Connection<?> conn : g.getConnections()) {
+            NodePanel outPanel = nodePanelMap.get(conn.getOutput().getNode());
+            NodePanel inPanel = nodePanelMap.get(conn.getInput().getNode());
+            if (outPanel == null || inPanel == null) continue;
+            ConnectionPointOut<?> outPoint = outPanel.getOutputPoint(conn.getOutput());
+            ConnectionPointIn<?> inPoint = inPanel.getInputPoint(conn.getInput());
+            if (outPoint == null || inPoint == null) continue;
+            NodeConnection nc = new NodeConnection(outPoint, inPoint);
+            this.add(nc, CONNECTION_LAYER);
+        }
+        this.revalidate();
+        this.repaint();
+    }
+
+    private static final Color NODE_TRIGGER_COLOR = new java.awt.Color(70, 130, 180);
+    private static final Color NODE_NOTIFICATION_COLOR = new java.awt.Color(220, 120, 60);
+    private static final Color NODE_CONSTANT_COLOR = new java.awt.Color(80, 160, 80);
+
+    /**
+     * Creates the appropriate NodePanel for a given Node instance.
+     */
+    public NodePanel createNodePanel(Node node) {
+        if (node instanceof ContinuousTriggerNode) {
+            ContinuousTriggerNode tn = (ContinuousTriggerNode) node;
+            String name = tn.getAlert().getName() != null ? tn.getAlert().getName() : tn.getAlert().getType().getName();
+            return new AlertNodePanel(this, tn.getX(), tn.getY(), name, NODE_TRIGGER_COLOR, tn);
+        } else if (node instanceof TriggerNode) {
+            TriggerNode tn = (TriggerNode) node;
+            String name = tn.getAlert().getName() != null ? tn.getAlert().getName() : tn.getAlert().getType().getName();
+            return new AlertNodePanel(this, tn.getX(), tn.getY(), name, NODE_TRIGGER_COLOR, tn);
+        } else if (node instanceof NotificationNode) {
+            NotificationNode nn = (NotificationNode) node;
+            String name = nn.getNotification().getType().getName();
+            return new NotificationNodePanel(this, nn.getX(), nn.getY(), name, NODE_NOTIFICATION_COLOR, nn, colorPickerManager);
+        } else if (node instanceof Bool) {
+            return new BoolNodePanel(this, (Bool) node, node.getX(), node.getY(), "Bool", NODE_CONSTANT_COLOR);
+        } else if (node instanceof Num) {
+            return new NumberNodePanel(this, (Num) node, node.getX(), node.getY(), "Number", NODE_CONSTANT_COLOR);
+        } else if (node instanceof And) {
+            return new IfNodePanel(this, (And) node, node.getX(), node.getY(), "AND", Color.MAGENTA);
+        }
+        return null;
+    }
+
     public void onNodeMoved(NodePanel nodePanel) {
+        nodePanel.getNode().setX(nodePanel.getX());
+        nodePanel.getNode().setY(nodePanel.getY());
         for (Connection connection : nodePanel.getConnections()) {
             connection.recalculateBounds();
         }
@@ -368,13 +448,13 @@ public class GraphPanel extends JLayeredPane {
         this.graph.process(node);
     }
 
+    public Graph getGraph() {
+        return this.graph;
+    }
+
     public void trigger(TriggerNode triggerNode) {
         this.graph.process(triggerNode);
-        List<NotificationNode> reachableNotificationsFromTrigger = this.graph.getReachableNotificationsFromTrigger(triggerNode);
-        System.out.println("Will fire the following notifications:");
-        for (NotificationNode notificationNode : reachableNotificationsFromTrigger) {
-            System.out.println("  " + notificationNode.getNotification().getType().getName());
-//            notificationNode.fire();
-        }
+        List<NotificationNode> reachableNotifications = this.graph.getReachableNotificationsFromTrigger(triggerNode);
+        reachableNotifications.forEach(NotificationNode::fire);
     }
 }

@@ -23,6 +23,7 @@ public class ConnectionPointOut<T> extends ConnectionPoint {
     public ConnectionPointOut(NodePanel nodePanel, VarOutput<T> outputVar) {
         super(nodePanel);
         this.outputVar = outputVar;
+        nodePanel.registerOutputPoint(outputVar, this);
         MouseAdapter mouseAdapter = new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {

@@ -248,6 +248,8 @@ public class WatchdogPanel extends PluginPanel {
             return new LocationAlertPanel(this, (LocationAlert) alert, this.client);
         } else if (alert instanceof OverheadTextAlert) {
             return new OverheadTextAlertPanel(this, (OverheadTextAlert) alert);
+        } else if (alert instanceof AdvancedAlert) {
+            return new AdvancedAlertPanel(this, (AdvancedAlert) alert);
         }
 
         return null;

@@ -11,6 +11,12 @@ public class Add extends Node {
     private final VarInput<Number> b = new VarInput<>(this, "B",Number.class, 0);
     private final VarOutput<Number> result = new VarOutput<>(this, "Result", Number.class, 0);
 
+    public Add() {
+        reg(this.a);
+        reg(this.b);
+        reg(this.result);
+    }
+
     @Override
     public void process() {
         this.result.setValue(this.a.getValue().doubleValue() + this.b.getValue().doubleValue());

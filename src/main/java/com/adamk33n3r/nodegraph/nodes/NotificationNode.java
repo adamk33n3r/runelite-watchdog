@@ -27,6 +27,13 @@ public class NotificationNode extends Node {
         this.fireWhenAfk.onChange((val) -> this.notification.setFireWhenAFKForSeconds(val.intValue()));
         this.delayMilliseconds.setValue(this.notification.getDelayMilliseconds());
         this.delayMilliseconds.onChange((val) -> this.notification.setDelayMilliseconds(val.intValue()));
+
+        reg(this.enabled);
+        reg(this.fireWhenFocused);
+        reg(this.fireWhenAfk);
+        reg(this.delayMilliseconds);
+        reg(this.alertName);
+        reg(this.captureGroups);
     }
 
     @Override

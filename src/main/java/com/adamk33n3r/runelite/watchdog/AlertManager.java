@@ -1,5 +1,6 @@
 package com.adamk33n3r.runelite.watchdog;
 
+import com.adamk33n3r.nodegraph.Graph;
 import com.adamk33n3r.runelite.watchdog.alerts.*;
 import com.adamk33n3r.runelite.watchdog.elevenlabs.ElevenLabs;
 import com.adamk33n3r.runelite.watchdog.hub.AlertHubCategory;
@@ -88,7 +89,8 @@ public class AlertManager {
             .registerSubtype(SpawnedAlert.class)
             .registerSubtype(InventoryAlert.class)
             .registerSubtype(AlertGroup.class)
-            .registerSubtype(LocationAlert.class);
+            .registerSubtype(LocationAlert.class)
+            .registerSubtype(AdvancedAlert.class);
         // Add new notification types here
         final RuntimeTypeAdapterFactory<Notification> notificationTypeFactory = RuntimeTypeAdapterFactory.of(Notification.class)
             .registerSubtype(TrayNotification.class)
@@ -113,11 +115,13 @@ public class AlertManager {
             .registerSubtype(DismissObjectMarker.class)
             .registerSubtype(DismissOverlay.class)
             .registerSubtype(DismissScreenMarker.class);
+        GraphSerializer graphSerializer = new GraphSerializer(alertTypeFactory, notificationTypeFactory, this.clientGson);
         this.gson = this.clientGson.newBuilder()
 //            .serializeNulls()
             .registerTypeAdapterFactory(alertTypeFactory)
             .registerTypeAdapterFactory(notificationTypeFactory)
             .registerTypeAdapter(AlertHubCategory.class, new MixedCaseEnumAdapter())
+            .registerTypeAdapter(Graph.class, graphSerializer)
             .create();
     }
 
