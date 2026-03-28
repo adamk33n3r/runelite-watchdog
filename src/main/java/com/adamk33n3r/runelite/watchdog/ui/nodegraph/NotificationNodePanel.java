@@ -143,7 +143,7 @@ public class NotificationNodePanel extends NodePanel {
                         this.items.add(settingsBtn);
                         return;
                     }
-                    JComboBox<Voice> voiceSelect = PanelUtils.createSelect(new Voice[]{}, null, Voice::getName, (voice) -> {
+                    JComboBox<Voice> voiceSelect = PanelUtils.createSelect(new Voice[]{}, null, Voice::getName, "Loading...", (voice) -> {
                         tts.setElevenLabsVoiceId(voice.getVoiceId());
                         //Not serialized
                         tts.setElevenLabsVoice(voice);
@@ -166,7 +166,7 @@ public class NotificationNodePanel extends NodePanel {
                                 }
                             });
                         });
-                    });
+                    }, System.err::println);
                     this.items.add(voiceSelect);
                     break;
                 case LEGACY:

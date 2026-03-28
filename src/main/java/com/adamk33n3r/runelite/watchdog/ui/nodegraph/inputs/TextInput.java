@@ -1,5 +1,6 @@
 package com.adamk33n3r.runelite.watchdog.ui.nodegraph.inputs;
 
+import com.adamk33n3r.runelite.watchdog.ui.FlatTextArea;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
 
 import javax.swing.*;
@@ -9,7 +10,7 @@ import java.awt.event.FocusListener;
 import java.util.function.Consumer;
 
 public class TextInput extends AbstractInput<String> {
-    private final JTextArea textField;
+    private final FlatTextArea textField;
 
     public TextInput(String label, String text) {
         JLabel labelComp = new JLabel(label);
@@ -33,7 +34,7 @@ public class TextInput extends AbstractInput<String> {
         this.textField.addFocusListener(new FocusListener() {
             @Override
             public void focusGained(FocusEvent e) {
-                textField.selectAll();
+                textField.getTextArea().selectAll();
             }
 
             @Override

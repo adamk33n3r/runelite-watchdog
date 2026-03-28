@@ -52,7 +52,7 @@ When adding a new alert or notification type:
 
 ### Alert Base Class (`Alert.java`)
 
-All alerts share: `enabled`, `name`, `debounceTime`, `debounceResetTime`, `randomNotifications`, and a `List<Notification>`. The `parent` (`AlertGroup`) reference is `@transient` and lazily resolved. `getType()` looks up the `TriggerType` by matching the concrete class.
+All alerts share: `enabled`, `name`, `alertMode`, `debounceTime`, `debounceResetTime`, `randomNotifications`, and a `List<Notification>`. The `parent` (`AlertGroup`) reference is `@transient` and lazily resolved. `getType()` looks up the `TriggerType` by matching the concrete class.
 
 ### Notification Base Class (`Notification.java`)
 
@@ -65,6 +65,10 @@ All alerts share: `enabled`, `name`, `debounceTime`, `debounceResetTime`, `rando
 ### Serialization
 
 Alerts are serialized to JSON via Gson with `RuntimeTypeAdapterFactory` for polymorphism. Import/export uses GZIP compression + Base64 encoding. The `AlertManager` registers all known alert and notification subtypes at init time — unknown subtypes from old versions are ignored via `.ignoreSubtype()`.
+
+### Node Graph Editor (in-progress, `feat/node-graph-editor` branch)
+
+A visual node-based editor is being built in `com.adamk33n3r.nodegraph` and `ui/nodegraph/`. `NodeGraphLauncher` in test sources can launch the editor standalone for development.
 
 ## Testing
 
