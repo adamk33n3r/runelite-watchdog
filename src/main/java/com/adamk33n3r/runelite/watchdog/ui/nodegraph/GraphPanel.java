@@ -55,6 +55,10 @@ public class GraphPanel extends JLayeredPane {
     private Point popupLocation;
     private Graph graph;
     private Injector injector;
+    private Runnable onChangeCallback;
+    private final javax.swing.Timer saveDebounceTimer = new javax.swing.Timer(300, e -> {
+        if (this.onChangeCallback != null) this.onChangeCallback.run();
+    });
 
     @Inject
     private ColorPickerManager colorPickerManager;
@@ -157,8 +161,17 @@ public class GraphPanel extends JLayeredPane {
 //        this.setUpExample2();
     }
 
+    public void setOnChange(Runnable onChange) {
+        this.onChangeCallback = onChange;
+    }
+
+    public void notifyChange() {
+        this.saveDebounceTimer.restart();
+    }
+
     public void init(Injector injector, Graph existingGraph) {
         this.injector = injector;
+        this.saveDebounceTimer.setRepeats(false);
         this.setBackground(ColorScheme.DARKER_GRAY_COLOR);
         this.setOpaque(false);
         this.setPreferredSize(new Dimension(6000, 4000));
@@ -261,6 +274,7 @@ public class GraphPanel extends JLayeredPane {
                 this.remove(nc);
             });
         }
+        this.notifyChange();
     }
 
     private void removeConnectionTo(ConnectionPointIn<?> input) {
@@ -331,6 +345,7 @@ public class GraphPanel extends JLayeredPane {
             }
             GraphPanel.this.revalidate();
             GraphPanel.this.repaint();
+            GraphPanel.this.notifyChange();
         }, () -> onSelect.accept(null));
     }
 
@@ -397,6 +412,7 @@ public class GraphPanel extends JLayeredPane {
         for (Connection connection : nodePanel.getConnections()) {
             connection.recalculateBounds();
         }
+        this.notifyChange();
     }
 
     public void moveNodeToTop(NodePanel nodePanel) {
@@ -415,6 +431,7 @@ public class GraphPanel extends JLayeredPane {
             .forEach(this::remove);
         this.revalidate();
         this.repaint();
+        this.notifyChange();
     }
 
     @Override

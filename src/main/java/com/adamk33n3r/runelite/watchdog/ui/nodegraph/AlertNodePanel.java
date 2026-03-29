@@ -62,10 +62,15 @@ public class AlertNodePanel extends NodePanel {
         this.items.add(testBtn);
 
         TextInput nameInput = new TextInput("Name", alert.getName());
+        nameInput.registerOnChange(v -> {
+            alert.setName(v);
+            this.notifyChange();
+        });
         this.items.add(new ConnectionLine<>(null, nameInput, this.alertName));
         JSpinner debounce = PanelUtils.createSpinner(alert.getDebounceTime(), 0, 8640000, 100, (val) -> {
             triggerNode.getDebounce().setValue(val);
             graphPanel.processNode(triggerNode);
+            this.notifyChange();
         });
 
         JPanel labeledComponent = PanelUtils.createLabeledComponent("Debounce Time (ms)", "How long to wait before allowing this alert to trigger again in milliseconds", debounce);
@@ -74,9 +79,9 @@ public class AlertNodePanel extends NodePanel {
             this.items.add(new TextInput("Message", ((ChatAlert) alert).getPattern()));
         } else if (alert instanceof SpawnedAlert) {
             SpawnedAlert spawnedAlert = (SpawnedAlert) alert;
-            JComboBox<SpawnedAlert.SpawnedDespawned> spawnedDespawned = PanelUtils.createSelect(SpawnedAlert.SpawnedDespawned.values(), spawnedAlert.getSpawnedDespawned(), spawnedAlert::setSpawnedDespawned);
+            JComboBox<SpawnedAlert.SpawnedDespawned> spawnedDespawned = PanelUtils.createSelect(SpawnedAlert.SpawnedDespawned.values(), spawnedAlert.getSpawnedDespawned(), v -> { spawnedAlert.setSpawnedDespawned(v); this.notifyChange(); });
             this.items.add(spawnedDespawned);
-            JComboBox<SpawnedAlert.SpawnedType> spawnedType = PanelUtils.createSelect(SpawnedAlert.SpawnedType.values(), spawnedAlert.getSpawnedType(), spawnedAlert::setSpawnedType);
+            JComboBox<SpawnedAlert.SpawnedType> spawnedType = PanelUtils.createSelect(SpawnedAlert.SpawnedType.values(), spawnedAlert.getSpawnedType(), v -> { spawnedAlert.setSpawnedType(v); this.notifyChange(); });
             this.items.add(spawnedType);
             this.items.add(new TextInput("Enter the object to trigger on...", spawnedAlert.getPattern()));
             /*

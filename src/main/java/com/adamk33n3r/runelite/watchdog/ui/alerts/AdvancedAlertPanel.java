@@ -6,10 +6,10 @@ import com.adamk33n3r.runelite.watchdog.alerts.AdvancedAlert;
 import com.adamk33n3r.runelite.watchdog.ui.panels.AlertPanel;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.GraphPanel;
 
-import net.runelite.client.ui.PluginPanel;
-
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 public class AdvancedAlertPanel extends AlertPanel<AdvancedAlert> {
     public AdvancedAlertPanel(WatchdogPanel watchdogPanel, AdvancedAlert alert) {
@@ -22,38 +22,26 @@ public class AdvancedAlertPanel extends AlertPanel<AdvancedAlert> {
             .addButton("Open Graph Editor", "Open the visual node graph editor for this alert", (btn, modifiers) -> {
                 GraphPanel graphPanel = new GraphPanel();
                 WatchdogPlugin.getInstance().getInjector().injectMembers(graphPanel);
+                graphPanel.setOnChange(() -> WatchdogPlugin.getInstance().getAlertManager().saveAlerts());
                 graphPanel.init(WatchdogPlugin.getInstance().getInjector(), this.alert.getGraph());
 
                 JScrollPane scrollPane = new JScrollPane(graphPanel);
                 scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
                 scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
 
-                GraphEditorPanel editorPanel = new GraphEditorPanel(this.watchdogPanel, scrollPane);
-                this.muxer.pushState(editorPanel);
+                JFrame frame = new JFrame("Graph Editor - " + this.alert.getName());
+                frame.setSize(new Dimension(1200, 800));
+                frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+                frame.setLayout(new BorderLayout());
+                frame.add(scrollPane, BorderLayout.CENTER);
+                frame.addWindowListener(new WindowAdapter() {
+                    @Override
+                    public void windowClosing(WindowEvent e) {
+                        WatchdogPlugin.getInstance().getAlertManager().saveAlerts();
+                    }
+                });
+                frame.setLocationRelativeTo(null);
+                frame.setVisible(true);
             });
-    }
-
-    /**
-     * A PluginPanel that wraps the GraphPanel in a scrollable view with a back button.
-     */
-    private static class GraphEditorPanel extends PluginPanel {
-        GraphEditorPanel(WatchdogPanel watchdogPanel, JScrollPane scrollPane) {
-            super(false);
-            this.setLayout(new BorderLayout());
-
-            JButton backButton = new JButton("Back");
-            backButton.addActionListener(e -> {
-                WatchdogPlugin.getInstance().getAlertManager().saveAlerts();
-                watchdogPanel.getMuxer().popState();
-            });
-            JPanel topBar = new JPanel(new BorderLayout());
-            topBar.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-            topBar.add(backButton, BorderLayout.WEST);
-            JLabel title = new JLabel("Graph Editor");
-            title.setForeground(Color.WHITE);
-            topBar.add(title, BorderLayout.CENTER);
-            this.add(topBar, BorderLayout.NORTH);
-            this.add(scrollPane, BorderLayout.CENTER);
-        }
     }
 }

@@ -69,7 +69,7 @@ public class NotificationNodePanel extends NodePanel {
                 true,
                 val -> {
                     screenFlash.setColor(val);
-//                    onChangeListener.run();
+                    this.notifyChange();
                 });
             this.items.add(colorPickerBtn);
 
@@ -83,13 +83,13 @@ public class NotificationNodePanel extends NodePanel {
             });
             flashModeSelect.addActionListener(e -> {
                 screenFlash.setFlashMode(flashModeSelect.getItemAt(flashModeSelect.getSelectedIndex()));
-//                onChangeListener.run();
+                this.notifyChange();
             });
             this.items.add(flashModeSelect);
 
             JSpinner flashDuration = PanelUtils.createSpinner(screenFlash.getFlashDuration(), 0, 120, 1, val -> {
                 screenFlash.setFlashDuration(val);
-//                onChangeListener.run();
+                this.notifyChange();
             });
             this.items.add(PanelUtils.createIconComponent(Icons.CLOCK, "Duration of flash, use 0 to flash until cancelled", flashDuration));
         } else if (notification instanceof TextToSpeech) {
@@ -119,16 +119,14 @@ public class NotificationNodePanel extends NodePanel {
 
                 @Override
                 public void focusLost(FocusEvent e) {
-//                    onChangeListener.run();
+                    NotificationNodePanel.this.notifyChange();
                 }
             });
             this.items.add(flatTextArea);
 
             JComboBox<TTSSource> sourceSelect = PanelUtils.createSelect(TTSSource.values(), tts.getSource(), (selected) -> {
                 tts.setSource(selected);
-//                onChangeListener.run();
-//                this.rebuild();
-//                this.revalidate();
+                this.notifyChange();
             });
             this.items.add(sourceSelect);
 
@@ -175,19 +173,19 @@ public class NotificationNodePanel extends NodePanel {
                     rateSlider.setBackground(ColorScheme.MEDIUM_GRAY_COLOR);
                     rateSlider.addChangeListener(ev -> {
                         tts.setRate(rateSlider.getValue());
-//                        onChangeListener.run();
+                        this.notifyChange();
                     });
                     this.items.add(PanelUtils.createIconComponent(Icons.SPEED, "The speed of the generated speech", rateSlider));
 
                     VoiceChooser voiceChooser = new VoiceChooser(tts);
-//                    voiceChooser.addActionListener(e -> onChangeListener.run());
+                    voiceChooser.addActionListener(e -> this.notifyChange());
                     this.items.add(PanelUtils.createIconComponent(Icons.SPEECH, "The voice to generate speech with", voiceChooser));
                     break;
             }
 
             VolumeSlider volumeSlider = new VolumeSlider(tts);
             volumeSlider.setBackground(ColorScheme.MEDIUM_GRAY_COLOR);
-//            volumeSlider.addChangeListener(e -> onChangeListener.run());
+            volumeSlider.addChangeListener(e -> this.notifyChange());
             this.items.add(PanelUtils.createIconComponent(Icons.VOLUME, "The volume to playback speech", volumeSlider));
         }
 

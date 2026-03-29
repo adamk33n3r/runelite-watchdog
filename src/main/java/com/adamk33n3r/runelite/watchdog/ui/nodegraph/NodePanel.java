@@ -129,6 +129,10 @@ public class NodePanel extends JPanel {
         });
     }
 
+    protected void notifyChange() {
+        this.graphPanel.notifyChange();
+    }
+
     public void addConnection(NodeConnection connection) {
         this.connections.add(connection);
     }
