@@ -57,7 +57,7 @@ public class ElevenLabsTest extends TestBase {
     public void test_generate_tts() throws InterruptedException {
         CountDownLatch countDownLatch = new CountDownLatch(1);
         ElevenLabs.getVoices(WatchdogPlugin.getInstance().getHttpClient(), voices -> {
-            ElevenLabs.generateTTS(WatchdogPlugin.getInstance().getHttpClient(), voices.getVoices().get(0), "This is a test", file -> {
+            ElevenLabs.generateTTS(WatchdogPlugin.getInstance().getHttpClient(), voices.getVoices().get(0), "test", file -> {
                 Assert.assertTrue(file.exists());
                 if (!file.delete()) {
                     System.err.println("Failed to delete temp file");
