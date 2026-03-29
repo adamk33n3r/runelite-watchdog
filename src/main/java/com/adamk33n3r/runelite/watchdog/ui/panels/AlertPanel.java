@@ -130,6 +130,7 @@ public abstract class AlertPanel<T extends Alert> extends PluginPanel {
                 WatchdogPlugin.getInstance().getScreenMarkerUtil().finishCreation(true);
                 WatchdogPlugin.getInstance().getObjectMarkerManager().turnOffObjectMarkerMode();
                 this.alertManager.saveAlerts();
+                this.onBack();
                 this.muxer.popState();
 
                 // Workaround for the onActivate rebuild issue
@@ -345,6 +346,8 @@ public abstract class AlertPanel<T extends Alert> extends PluginPanel {
         this.centerContainer.removeAll();
         this.build();
     }
+
+    protected void onBack() {}
 
     @Override
     public void onActivate() {
