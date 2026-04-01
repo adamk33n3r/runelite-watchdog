@@ -48,6 +48,9 @@ public class AlertManager {
     @Inject
     private WatchdogConfig watchdogConfig;
 
+    @Inject
+    private AlertBackupManager alertBackupManager;
+
     @Getter
     private final List<Alert> alerts = new CopyOnWriteArrayList<>();
 
@@ -426,6 +429,7 @@ public class AlertManager {
     public void saveAlerts() {
         String json = this.gson.toJson(this.alerts, ALERT_LIST_TYPE);
         this.configManager.setConfiguration(WatchdogConfig.CONFIG_GROUP_NAME, WatchdogConfig.ALERTS, json);
+        this.alertBackupManager.backup(json);
     }
 
     public String toJSON() {

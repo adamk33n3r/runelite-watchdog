@@ -17,7 +17,10 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import java.awt.BorderLayout;
+import java.awt.Desktop;
 import java.awt.Dimension;
+import java.io.File;
+import java.io.IOException;
 
 @Slf4j
 @Singleton
@@ -72,6 +75,19 @@ public class ToolsPanel extends PluginPanel {
         tools.add(PanelUtils.createButton("Reload All Alerts from Profile", "This will reload all alerts from disk", (btn, mods) -> {
             WatchdogPlugin.getInstance().getAlertManager().loadAlerts();
         }));
+        if (Desktop.isDesktopSupported()) {
+            tools.add(PanelUtils.createButton("Open Backups Folder", "Opens the alert backup folder in your file explorer", (btn, mods) -> {
+                File backupDir = WatchdogPlugin.getInstance().getAlertBackupManager().getBackupDir();
+                if (!backupDir.exists()) {
+                    backupDir.mkdirs();
+                }
+                try {
+                    Desktop.getDesktop().open(backupDir);
+                } catch (IOException e) {
+                    log.warn("Failed to open backup folder", e);
+                }
+            }));
+        }
         this.add(tools);
     }
 }

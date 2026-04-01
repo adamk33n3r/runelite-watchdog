@@ -96,6 +96,10 @@ public interface WatchdogConfig extends Config {
     String DEFAULT_OBJECT_MARKER_DISPLAY_TIME = "defaultObjectMarkerDisplayTime";
     String DEFAULT_OBJECT_MARKER_STICKY = "defaultObjectMarkerSticky";
 
+    // Backups
+    String BACKUP_ENABLED = "backupEnabled";
+    String BACKUP_RETENTION_DAYS = "backupRetentionDays";
+
     // Hotkeys
     String CLEAR_ALL_HOTKEY = "clearAllHotkey";
     String STOP_ALL_PROCESSING_ALERTS_HOTKEY = "stopAllProcessingAlertsHotkey";
@@ -481,6 +485,7 @@ public interface WatchdogConfig extends Config {
         keyName = ELEVEN_LABS_API_KEY,
         name = "Eleven Labs API Key",
         description = "Enter your API key",
+        secret = true,
         section = ttsSection
     )
     default String elevenLabsAPIKey() { return ""; }
@@ -667,11 +672,40 @@ public interface WatchdogConfig extends Config {
 
     // endregion
 
+    //region Backups
+    @ConfigSection(
+        name = "Backups",
+        description = "The options that control the alert backup system",
+        position = 10,
+        closedByDefault = true
+    )
+    String backupsSection = "backupsSection";
+
+    @ConfigItem(
+        keyName = BACKUP_ENABLED,
+        name = "Automatic Backups",
+        description = "Saves a daily compressed backup of your alerts to .runelite/watchdog/backups/",
+        section = backupsSection,
+        position = 0
+    )
+    default boolean backupEnabled() { return true; }
+
+    @ConfigItem(
+        keyName = BACKUP_RETENTION_DAYS,
+        name = "Max Backups",
+        description = "How many backup files to keep. Oldest files beyond this limit are deleted.",
+        section = backupsSection,
+        position = 1
+    )
+    @Range(min = 1)
+    default int backupRetentionDays() { return 7; }
+    //endregion
+
     //region Hotkeys
     @ConfigSection(
         name = "Hotkeys",
         description = "The hotkeys to use for various actions",
-        position = 10,
+        position = 11,
         closedByDefault = true
     )
     String hotkeysSection = "hotkeysSection";
