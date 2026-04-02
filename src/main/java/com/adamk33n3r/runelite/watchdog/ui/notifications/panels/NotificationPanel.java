@@ -30,6 +30,15 @@ public abstract class NotificationPanel extends JPanel {
     protected Runnable onChangeListener;
     protected PanelUtils.OnRemove onRemove;
     protected JPanel settings = new JPanel(new StretchedStackedLayout(3));
+    /**
+     * Subclasses with internal rebuild logic (e.g. conditional UI) should set this field before
+     * calling {@link #buildContent} so that callbacks inside buildContent can trigger a settings-only
+     * rebuild without touching the chrome. Set it to:
+     * {@code () -> { this.settings.removeAll(); this.buildContent(this.settings, this.onChangeListener); this.settings.revalidate(); }}
+     */
+    protected Runnable rebuildContent;
+
+    protected abstract void buildContent(JPanel container, Runnable onChange);
 
     private static final Border NAME_BOTTOM_BORDER = new CompoundBorder(
         BorderFactory.createMatteBorder(0, 0, 1, 0, ColorScheme.DARK_GRAY_COLOR),

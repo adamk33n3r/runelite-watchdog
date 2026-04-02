@@ -5,11 +5,14 @@ import com.adamk33n3r.runelite.watchdog.notifications.Dink;
 import com.adamk33n3r.runelite.watchdog.ui.FlatTextArea;
 import com.adamk33n3r.runelite.watchdog.ui.panels.NotificationsPanel;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
+
 import net.runelite.client.config.ConfigManager;
 
-import javax.swing.*;
+import javax.swing.JCheckBox;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.text.AbstractDocument;
-import java.awt.*;
+import java.awt.Font;
 
 public class DinkNotificationPanel extends NotificationPanel {
     private final ConfigManager configManager;
@@ -17,20 +20,21 @@ public class DinkNotificationPanel extends NotificationPanel {
     public DinkNotificationPanel(Dink notification, NotificationsPanel parentPanel, ConfigManager configManager, Runnable onChangeListener, PanelUtils.OnRemove onRemove) {
         super(notification, parentPanel, onChangeListener, onRemove);
         this.configManager = configManager;
-
-        this.rebuild();
+        this.rebuildContent = () -> { this.settings.removeAll(); this.buildContent(this.settings, this.onChangeListener); this.settings.revalidate(); };
+        this.buildContent(this.settings, onChangeListener);
     }
 
-    private void rebuild() {
-        this.settings.removeAll();
+    @Override
+    protected void buildContent(JPanel container, Runnable onChange) {
+        buildContent((Dink) this.notification, container, onChange, this.rebuildContent, this.configManager);
+    }
 
-        Dink notification = (Dink) this.notification;
-
+    public static void buildContent(Dink notification, JPanel container, Runnable onChange, Runnable rebuild, ConfigManager configManager) {
         String installedPlugins = configManager.getConfiguration("runelite", "externalPlugins");
         if (!installedPlugins.contains("dink")) {
             JLabel installDinkLabel = new JLabel("<html>Install the Dink plugin to use this Notification type</html>");
             installDinkLabel.setFont(new Font(installDinkLabel.getFont().getFontName(), Font.ITALIC | Font.BOLD, installDinkLabel.getFont().getSize()));
-            this.settings.add(installDinkLabel);
+            container.add(installDinkLabel);
             return;
         }
 
@@ -38,7 +42,7 @@ public class DinkNotificationPanel extends NotificationPanel {
         if (!externalEnabled) {
             JLabel enableExternalLabel = new JLabel("<html>Enable External Plugin Notifications in Dink's config to use this Notification type</html>");
             enableExternalLabel.setFont(new Font(enableExternalLabel.getFont().getFontName(), Font.ITALIC | Font.BOLD, enableExternalLabel.getFont().getSize()));
-            this.settings.add(enableExternalLabel);
+            container.add(enableExternalLabel);
             return;
         }
 
@@ -48,11 +52,11 @@ public class DinkNotificationPanel extends NotificationPanel {
             notification.getMessage(),
             val -> {
                 notification.setMessage(val);
-                onChangeListener.run();
+                onChange.run();
             }
         );
         ((AbstractDocument) message.getDocument()).setDocumentFilter(new LengthLimitFilter(4096));
-        this.settings.add(message);
+        container.add(message);
 
         FlatTextArea urls = PanelUtils.createTextField(
             "Custom urls (optional)...",
@@ -63,16 +67,16 @@ public class DinkNotificationPanel extends NotificationPanel {
                 if (val == null || val.isEmpty()) {
                     notification.setUrls(null);
                 }
-                onChangeListener.run();
+                onChange.run();
             }
         );
         ((AbstractDocument) urls.getDocument()).setDocumentFilter(new LengthLimitFilter(4096));
-        this.settings.add(urls);
+        container.add(urls);
 
         JCheckBox includeScreenshot = PanelUtils.createCheckbox("Include Screenshot", "Whether or not to include a screenshot in the discord message", notification.isIncludeScreenshot(), (selected) -> {
             notification.setIncludeScreenshot(selected);
-            onChangeListener.run();
+            onChange.run();
         });
-        this.settings.add(includeScreenshot);
+        container.add(includeScreenshot);
     }
 }

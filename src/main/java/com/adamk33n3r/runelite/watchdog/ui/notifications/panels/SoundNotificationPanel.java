@@ -12,6 +12,7 @@ import javax.sound.sampled.AudioFileFormat;
 import javax.sound.sampled.AudioSystem;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import java.util.Arrays;
 import java.util.stream.Collectors;
@@ -21,28 +22,36 @@ public class SoundNotificationPanel extends NotificationPanel {
 
     public SoundNotificationPanel(Sound sound, NotificationsPanel parentPanel, Runnable onChangeListener, PanelUtils.OnRemove onRemove) {
         super(sound, parentPanel, onChangeListener, onRemove);
+        this.buildContent(this.settings, onChangeListener);
+    }
 
+    @Override
+    protected void buildContent(JPanel container, Runnable onChange) {
+        buildContent((Sound) this.notification, container, onChange);
+    }
+
+    public static void buildContent(Sound sound, JPanel container, Runnable onChange) {
         String[] supportedExtensions = Stream.concat(
             Arrays.stream(AudioSystem.getAudioFileTypes())
                 .map(AudioFileFormat.Type::getExtension),
             Stream.of("mp3")
         ).toArray(String[]::new);
-        this.settings.add(new JLabel("Choose sound (" + Arrays.stream(supportedExtensions).map(ext -> '.' + ext).collect(Collectors.joining(", ")) + ")"));
-        this.settings.add(PanelUtils.createFileChooser(null, "Path to the sound file", ev -> {
+        container.add(new JLabel("Choose sound (" + Arrays.stream(supportedExtensions).map(ext -> '.' + ext).collect(Collectors.joining(", ")) + ")"));
+        container.add(PanelUtils.createFileChooser(null, "Path to the sound file", ev -> {
             JFileChooser fileChooser = (JFileChooser) ev.getSource();
             sound.setPath(fileChooser.getSelectedFile().getAbsolutePath());
-            onChangeListener.run();
+            onChange.run();
         }, sound.getPath(), "Sound Files", supportedExtensions));
 
         VolumeSlider volumeSlider = new VolumeSlider(sound);
         volumeSlider.setBackground(ColorScheme.MEDIUM_GRAY_COLOR);
-        volumeSlider.addChangeListener(e -> onChangeListener.run());
-        this.settings.add(PanelUtils.createIconComponent(Icons.VOLUME, "The volume to playback sound", volumeSlider));
+        volumeSlider.addChangeListener(e -> onChange.run());
+        container.add(PanelUtils.createIconComponent(Icons.VOLUME, "The volume to playback sound", volumeSlider));
 
         JSpinner repeatDuration = PanelUtils.createSpinner(sound.getRepeatDuration(), -1, 120, 1, val -> {
             sound.setRepeatDuration(val);
-            onChangeListener.run();
+            onChange.run();
         });
-        this.settings.add(PanelUtils.createIconComponent(Icons.CLOCK, "Duration to repeat sound, use -1 to repeat until cancelled", repeatDuration));
+        container.add(PanelUtils.createIconComponent(Icons.CLOCK, "Duration to repeat sound, use -1 to repeat until cancelled", repeatDuration));
     }
 }

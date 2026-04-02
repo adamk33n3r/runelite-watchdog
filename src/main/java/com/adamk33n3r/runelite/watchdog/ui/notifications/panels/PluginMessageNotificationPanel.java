@@ -5,21 +5,24 @@ import com.adamk33n3r.runelite.watchdog.ui.FlatTextArea;
 import com.adamk33n3r.runelite.watchdog.ui.FlatTextAreaNamespace;
 import com.adamk33n3r.runelite.watchdog.ui.panels.NotificationsPanel;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
+
 import net.runelite.client.ui.ColorScheme;
 
+import javax.swing.JPanel;
 
 public class PluginMessageNotificationPanel extends NotificationPanel {
     public PluginMessageNotificationPanel(PluginMessage notification, NotificationsPanel parentPanel, Runnable onChangeListener, PanelUtils.OnRemove onRemove) {
         super(notification, parentPanel, onChangeListener, onRemove);
-
-        this.rebuild();
+        this.rebuildContent = () -> { this.settings.removeAll(); this.buildContent(this.settings, this.onChangeListener); this.settings.revalidate(); };
+        this.buildContent(this.settings, onChangeListener);
     }
 
-    private void rebuild() {
-        this.settings.removeAll();
+    @Override
+    protected void buildContent(JPanel container, Runnable onChange) {
+        buildContent((PluginMessage) this.notification, container, onChange, this.rebuildContent);
+    }
 
-        PluginMessage notification = (PluginMessage) this.notification;
-
+    public static void buildContent(PluginMessage notification, JPanel container, Runnable onChange, Runnable rebuild) {
         FlatTextAreaNamespace fullText = PanelUtils.createTextFieldNamespace(
             "Namespace",
             "The namespace of the plugin message. Usually the name of the plugin.",
@@ -31,11 +34,11 @@ public class PluginMessageNotificationPanel extends NotificationPanel {
             (val1, val2) -> {
                 notification.setNamespace(val1);
                 notification.setName(val2);
-                onChangeListener.run();
+                onChange.run();
             }
         );
         fullText.setHoverBackgroundColor(ColorScheme.DARK_GRAY_HOVER_COLOR);
-        this.settings.add(fullText);
+        container.add(fullText);
 
         FlatTextArea dataText = PanelUtils.createTextField(
             "Data (JSON)",
@@ -43,9 +46,9 @@ public class PluginMessageNotificationPanel extends NotificationPanel {
             notification.getData(),
             val -> {
                 notification.setData(val);
-                onChangeListener.run();
+                onChange.run();
             }
         );
-        this.settings.add(dataText);
+        container.add(dataText);
     }
 }

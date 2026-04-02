@@ -12,19 +12,21 @@ import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.components.colorpicker.ColorPickerManager;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JPanel;
+import javax.swing.JSpinner;
+import java.awt.BorderLayout;
 
 public class ScreenMarkerNotificationPanel extends NotificationPanel {
+    private final ColorPickerManager colorPickerManager;
     private ScreenMarkerOverlay screenMarkerOverlay;
     private JButton setMarkerButton;
-    private JPanel displayTime;
-    private JPanel stickyId;
 
     public ScreenMarkerNotificationPanel(ScreenMarker notification, NotificationsPanel parentPanel, ColorPickerManager colorPickerManager, Runnable onChangeListener, PanelUtils.OnRemove onRemove) {
         super(notification, parentPanel, onChangeListener, onRemove);
+        this.colorPickerManager = colorPickerManager;
         // Rebind onRemove to hook into it so that we can delete the screen marker when this notification is deleted
-        // Perhaps this should be refactored
         this.onRemove = (ele) -> {
             ScreenMarkerUtil screenMarkerUtil = WatchdogPlugin.getInstance().getScreenMarkerUtil();
             if (this.screenMarkerOverlay != null) {
@@ -33,20 +35,21 @@ public class ScreenMarkerNotificationPanel extends NotificationPanel {
             screenMarkerUtil.finishCreation(true);
             onRemove.elementRemoved(ele);
         };
+        this.buildContent(this.settings, onChangeListener);
+    }
 
-        net.runelite.client.plugins.screenmarkers.ScreenMarker screenMarker = notification.getScreenMarker();
+    @Override
+    protected void buildContent(JPanel container, Runnable onChange) {
+        net.runelite.client.plugins.screenmarkers.ScreenMarker screenMarker = ((ScreenMarker) this.notification).getScreenMarker();
 
         this.setMarkerButton = PanelUtils.createButton("Set Marker", "Set Marker", (btn, modifiers) -> {
             ScreenMarkerUtil screenMarkerUtil = WatchdogPlugin.getInstance().getScreenMarkerUtil();
-            // Done
             if (screenMarkerUtil.isCreatingScreenMarker()) {
                 this.screenMarkerOverlay = screenMarkerUtil.finishCreation(false);
                 this.setMarkerButton.setText("Set Marker");
                 this.setMarkerButton.setToolTipText("Set Marker");
-                // Start
             } else {
-                // Call this first so that it can get the location and size before we delete it
-                screenMarkerUtil.startCreation(notification);
+                screenMarkerUtil.startCreation((ScreenMarker) this.notification);
                 if (this.screenMarkerOverlay != null) {
                     screenMarkerUtil.deleteMarker(this.screenMarkerOverlay);
                 }
@@ -54,90 +57,62 @@ public class ScreenMarkerNotificationPanel extends NotificationPanel {
                 this.setMarkerButton.setToolTipText("Finish");
             }
         });
-        this.settings.add(this.setMarkerButton);
+        container.add(this.setMarkerButton);
 
         FlatTextArea markerLabel = PanelUtils.createTextField(
-            "Optional marker label...",
-            "",
+            "Optional marker label...", "",
             screenMarker.getName(),
             val -> {
                 screenMarker.setName(val);
                 screenMarker.setLabelled(!val.isEmpty());
-                onChangeListener.run();
+                onChange.run();
             }
         );
-        this.settings.add(markerLabel);
+        container.add(markerLabel);
 
-        this.settings.add(PanelUtils.createColorPicker(
-            "Border Color",
-            "The color of the border",
-            "Border Color",
-            this,
-            notification.getScreenMarker().getColor(),
-            colorPickerManager,
-            true,
-            val -> {
-               screenMarker.setColor(val);
-               onChangeListener.run();
-            }));
+        container.add(PanelUtils.createColorPicker(
+            "Border Color", "The color of the border", "Border Color",
+            container, screenMarker.getColor(),
+            this.colorPickerManager, true,
+            val -> { screenMarker.setColor(val); onChange.run(); }));
 
-        this.settings.add(PanelUtils.createColorPicker(
-            "Fill Color",
-            "The color of the interior",
-            "Fill Color",
-            this,
-            notification.getScreenMarker().getFill(),
-            colorPickerManager,
-            true,
-            val -> {
-                screenMarker.setFill(val);
-                onChangeListener.run();
-            }));
+        container.add(PanelUtils.createColorPicker(
+            "Fill Color", "The color of the interior", "Fill Color",
+            container, screenMarker.getFill(),
+            this.colorPickerManager, true,
+            val -> { screenMarker.setFill(val); onChange.run(); }));
 
         JSpinner thickness = PanelUtils.createSpinner(
-            screenMarker.getBorderThickness(),
-            0,
-            Integer.MAX_VALUE,
-            1,
-            val -> {
-                screenMarker.setBorderThickness(val);
-                onChangeListener.run();
-            }
-        );
+            screenMarker.getBorderThickness(), 0, Integer.MAX_VALUE, 1,
+            val -> { screenMarker.setBorderThickness(val); onChange.run(); });
+        container.add(PanelUtils.createIconComponent(Icons.BORDER_OUTSIDE, "Border thickness", thickness));
 
-        JPanel borderThickness = PanelUtils.createIconComponent(Icons.BORDER_OUTSIDE, "Border thickness", thickness);
-        this.settings.add(borderThickness);
-        JSpinner displayTime = PanelUtils.createSpinner(notification.getDisplayTime(), 0, 99, 1, val -> {
-            notification.setDisplayTime(val);
-            onChangeListener.run();
+        JSpinner displayTime = PanelUtils.createSpinner(((ScreenMarker) this.notification).getDisplayTime(), 0, 99, 1, val -> {
+            ((ScreenMarker) this.notification).setDisplayTime(val);
+            onChange.run();
         });
-        displayTime.setEnabled(!notification.isSticky());
-        this.displayTime = PanelUtils.createIconComponent(Icons.CLOCK, "Time to display the marker in seconds.", displayTime);
-        JCheckBox sticky = PanelUtils.createCheckbox("Sticky", "Set the notification to not expire", notification.isSticky(), val -> {
-            notification.setSticky(val);
+        displayTime.setEnabled(!((ScreenMarker) this.notification).isSticky());
+        JPanel displayTimePanel = PanelUtils.createIconComponent(Icons.CLOCK, "Time to display the marker in seconds.", displayTime);
+        JCheckBox sticky = PanelUtils.createCheckbox("Sticky", "Set the notification to not expire", ((ScreenMarker) this.notification).isSticky(), val -> {
+            ((ScreenMarker) this.notification).setSticky(val);
             displayTime.setEnabled(!val);
-            this.revalidate();
-            onChangeListener.run();
+            onChange.run();
         });
 
-        this.settings.add(this.displayTime);
         JPanel sub = new JPanel(new BorderLayout(3, 3));
         sub.setBackground(ColorScheme.DARKER_GRAY_COLOR);
-        this.settings.add(sub);
-
         sub.add(sticky, BorderLayout.EAST);
-        sub.add(this.displayTime);
+        sub.add(displayTimePanel);
+        container.add(sub);
 
-        this.stickyId = PanelUtils.createTextField(
-            "ID for Dismiss Screen Marker...",
-            "",
-            notification.getId(),
-            val -> {
-                notification.setId(val);
-                onChangeListener.run();
-            }
-        );
-
-        this.settings.add(this.stickyId);
+        container.add(PanelUtils.createTextField(
+            "ID for Dismiss Screen Marker...", "",
+            ((ScreenMarker) this.notification).getId(),
+            val -> { ((ScreenMarker) this.notification).setId(val); onChange.run(); }
+        ));
     }
+
+    // ScreenMarkerNotificationPanel is intentionally not using a static buildContent because
+    // it needs instance state (screenMarkerOverlay, setMarkerButton) that is incompatible with a
+    // stateless static factory.  The factory's populateContent will call the instance buildContent.
 }

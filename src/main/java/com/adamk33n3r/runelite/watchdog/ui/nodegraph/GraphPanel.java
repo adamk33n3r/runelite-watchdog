@@ -63,6 +63,12 @@ public class GraphPanel extends JLayeredPane {
     @Inject
     private ColorPickerManager colorPickerManager;
 
+    @Inject
+    private com.adamk33n3r.runelite.watchdog.ui.panels.NotificationPanelFactory notificationPanelFactory;
+
+    @Inject
+    private com.adamk33n3r.runelite.watchdog.ui.panels.AlertPanelContentFactory alertPanelContentFactory;
+
     private void setUpExample1() {
         /*
          * Alerts
@@ -104,13 +110,13 @@ public class GraphPanel extends JLayeredPane {
         /*
          * Node Panels
          */
-        AlertNodePanel test = new AlertNodePanel(this, 425, 165, "Test", Color.RED, triggerNode);
+        AlertNodePanel test = new AlertNodePanel(this, 425, 165, "Test", Color.RED, triggerNode, alertPanelContentFactory);
         this.add(test, NODE_LAYER);
 
-        NotificationNodePanel testTEST = new NotificationNodePanel(this, 815, 365, "Text to Speech", Color.PINK, notificationNode, colorPickerManager);
+        NotificationNodePanel testTEST = new NotificationNodePanel(this, 815, 365, "Text to Speech", Color.PINK, notificationNode, notificationPanelFactory);
         this.add(testTEST, NODE_LAYER);
 
-        NotificationNodePanel screenFlashNodePanel = new NotificationNodePanel(this, 815, 65, "Screen Flash", Color.PINK, screenFlashNode, colorPickerManager);
+        NotificationNodePanel screenFlashNodePanel = new NotificationNodePanel(this, 815, 65, "Screen Flash", Color.PINK, screenFlashNode, notificationPanelFactory);
         this.add(screenFlashNodePanel, NODE_LAYER);
 
         BoolNodePanel boolNodePanel = new BoolNodePanel(this, boolNode, 15, 15, "Bool Node", Color.CYAN);
@@ -133,22 +139,22 @@ public class GraphPanel extends JLayeredPane {
         insideNMZ.shouldFire();
         TriggerNode nmzTriggerNode = new ContinuousTriggerNode(insideNMZ);
         this.graph.add(nmzTriggerNode);
-        AlertNodePanel nmzTriggerNodePanel = new AlertNodePanel(this, 15, 15, "Inside NMZ", Color.RED, nmzTriggerNode);
+        AlertNodePanel nmzTriggerNodePanel = new AlertNodePanel(this, 15, 15, "Inside NMZ", Color.RED, nmzTriggerNode, alertPanelContentFactory);
         this.add(nmzTriggerNodePanel, NODE_LAYER);
 
         NotificationNode soundEffectNode = new NotificationNode(new SoundEffect());
         this.graph.add(soundEffectNode);
-        NotificationNodePanel soundEffectNodePanel = new NotificationNodePanel(this, 815, 300, "Sound Effect", Color.PINK, soundEffectNode, colorPickerManager);
+        NotificationNodePanel soundEffectNodePanel = new NotificationNodePanel(this, 815, 300, "Sound Effect", Color.PINK, soundEffectNode, notificationPanelFactory);
         this.add(soundEffectNodePanel, NODE_LAYER);
 
         NotificationNode screenFlashNode = new NotificationNode(new ScreenFlash());
         this.graph.add(screenFlashNode);
-        NotificationNodePanel screenFlashNodePanel = new NotificationNodePanel(this, 815, 15, "Screen Flash", Color.PINK, screenFlashNode, colorPickerManager);
+        NotificationNodePanel screenFlashNodePanel = new NotificationNodePanel(this, 815, 15, "Screen Flash", Color.PINK, screenFlashNode, notificationPanelFactory);
         this.add(screenFlashNodePanel, NODE_LAYER);
 
         TriggerNode statChangedTriggerNode = new TriggerNode(new StatChangedAlert());
         this.graph.add(statChangedTriggerNode);
-        AlertNodePanel statChangedTriggerNodePanel = new AlertNodePanel(this, 425, 15, "Stat Changed", Color.RED, statChangedTriggerNode);
+        AlertNodePanel statChangedTriggerNodePanel = new AlertNodePanel(this, 425, 15, "Stat Changed", Color.RED, statChangedTriggerNode, alertPanelContentFactory);
         this.add(statChangedTriggerNodePanel, NODE_LAYER);
 
         this.connect(nmzTriggerNodePanel.getIsTriggered(), statChangedTriggerNodePanel.getEnabled());
@@ -306,7 +312,7 @@ public class GraphPanel extends JLayeredPane {
                 triggerNode.setX(px);
                 triggerNode.setY(py);
                 this.graph.add(triggerNode);
-                NodePanel nodePanel = new AlertNodePanel(GraphPanel.this, px, py, triggerType.getName(), NODE_TRIGGER_COLOR, triggerNode);
+                NodePanel nodePanel = new AlertNodePanel(GraphPanel.this, px, py, triggerType.getName(), NODE_TRIGGER_COLOR, triggerNode, alertPanelContentFactory);
                 GraphPanel.this.add(nodePanel, NODE_LAYER, 0);
                 onSelect.accept(nodePanel);
             } else if (selected instanceof NotificationType) {
@@ -321,7 +327,7 @@ public class GraphPanel extends JLayeredPane {
                 notificationNode.setX(px);
                 notificationNode.setY(py);
                 this.graph.add(notificationNode);
-                NodePanel nodePanel = new NotificationNodePanel(GraphPanel.this, px, py, notificationType.getName(), NODE_NOTIFICATION_COLOR, notificationNode, colorPickerManager);
+                NodePanel nodePanel = new NotificationNodePanel(GraphPanel.this, px, py, notificationType.getName(), NODE_NOTIFICATION_COLOR, notificationNode, notificationPanelFactory);
                 GraphPanel.this.add(nodePanel, NODE_LAYER, 0);
                 onSelect.accept(nodePanel);
             } else if (selected instanceof LogicNodeType) {
@@ -387,15 +393,15 @@ public class GraphPanel extends JLayeredPane {
         if (node instanceof ContinuousTriggerNode) {
             ContinuousTriggerNode tn = (ContinuousTriggerNode) node;
             String name = tn.getAlert().getName() != null ? tn.getAlert().getName() : tn.getAlert().getType().getName();
-            return new AlertNodePanel(this, tn.getX(), tn.getY(), name, NODE_TRIGGER_COLOR, tn);
+            return new AlertNodePanel(this, tn.getX(), tn.getY(), name, NODE_TRIGGER_COLOR, tn, alertPanelContentFactory);
         } else if (node instanceof TriggerNode) {
             TriggerNode tn = (TriggerNode) node;
             String name = tn.getAlert().getName() != null ? tn.getAlert().getName() : tn.getAlert().getType().getName();
-            return new AlertNodePanel(this, tn.getX(), tn.getY(), name, NODE_TRIGGER_COLOR, tn);
+            return new AlertNodePanel(this, tn.getX(), tn.getY(), name, NODE_TRIGGER_COLOR, tn, alertPanelContentFactory);
         } else if (node instanceof NotificationNode) {
             NotificationNode nn = (NotificationNode) node;
             String name = nn.getNotification().getType().getName();
-            return new NotificationNodePanel(this, nn.getX(), nn.getY(), name, NODE_NOTIFICATION_COLOR, nn, colorPickerManager);
+            return new NotificationNodePanel(this, nn.getX(), nn.getY(), name, NODE_NOTIFICATION_COLOR, nn, notificationPanelFactory);
         } else if (node instanceof Bool) {
             return new BoolNodePanel(this, (Bool) node, node.getX(), node.getY(), "Bool", NODE_CONSTANT_COLOR);
         } else if (node instanceof Num) {

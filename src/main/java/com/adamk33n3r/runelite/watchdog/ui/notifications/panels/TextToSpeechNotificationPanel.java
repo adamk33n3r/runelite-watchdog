@@ -1,7 +1,5 @@
 package com.adamk33n3r.runelite.watchdog.ui.notifications.panels;
 
-import com.adamk33n3r.runelite.watchdog.LengthLimitFilter;
-import com.adamk33n3r.runelite.watchdog.SimpleDocumentListener;
 import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
 import com.adamk33n3r.runelite.watchdog.elevenlabs.ElevenLabs;
 import com.adamk33n3r.runelite.watchdog.elevenlabs.Voice;
@@ -17,29 +15,34 @@ import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.client.ui.ColorScheme;
 
-import javax.swing.*;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 import java.awt.Font;
 
 @Slf4j
 public class TextToSpeechNotificationPanel extends NotificationPanel {
     public TextToSpeechNotificationPanel(TextToSpeech notification, NotificationsPanel parentPanel, Runnable onChangeListener, PanelUtils.OnRemove onRemove) {
         super(notification, parentPanel, onChangeListener, onRemove);
-
-        this.rebuild();
+        this.rebuildContent = () -> { this.settings.removeAll(); this.buildContent(this.settings, this.onChangeListener); this.settings.revalidate(); };
+        this.buildContent(this.settings, onChangeListener);
     }
 
-    private void rebuild() {
-        this.settings.removeAll();
+    @Override
+    protected void buildContent(JPanel container, Runnable onChange) {
+        buildContent((TextToSpeech) this.notification, container, onChange, this.rebuildContent);
+    }
 
-        TextToSpeech notification = (TextToSpeech) this.notification;
-
+    public static void buildContent(TextToSpeech notification, JPanel container, Runnable onChange, Runnable rebuild) {
         if (!WatchdogPlugin.getInstance().getConfig().ttsEnabled()) {
             JLabel ttsLabel = new JLabel("<html>Enable TTS in the config to use this Notification type</html>");
             ttsLabel.setFont(new Font(ttsLabel.getFont().getFontName(), Font.ITALIC | Font.BOLD, ttsLabel.getFont().getSize()));
-            this.settings.add(ttsLabel);
+            container.add(ttsLabel);
             JButton settingsBtn = new JButton("Open Config");
             settingsBtn.addActionListener(ev -> WatchdogPlugin.getInstance().openConfiguration());
-            this.settings.add(settingsBtn);
+            container.add(settingsBtn);
             return;
         }
 
@@ -49,38 +52,35 @@ public class TextToSpeechNotificationPanel extends NotificationPanel {
             notification.getMessage(),
             val -> {
                 notification.setMessage(val);
-                onChangeListener.run();
+                onChange.run();
             });
-        this.settings.add(messageTextArea);
+        container.add(messageTextArea);
 
         JComboBox<TTSSource> sourceSelect = PanelUtils.createSelect(TTSSource.values(), notification.getSource(), (selected) -> {
             notification.setSource(selected);
-            onChangeListener.run();
-            this.rebuild();
-            this.revalidate();
+            onChange.run();
+            rebuild.run();
         });
-        this.settings.add(sourceSelect);
+        container.add(sourceSelect);
 
         switch (notification.getSource()) {
             case ELEVEN_LABS:
                 if (WatchdogPlugin.getInstance().getConfig().elevenLabsAPIKey().isEmpty()) {
                     JLabel ttsLabel = new JLabel("<html>Add your API key in the config to use Eleven Labs</html>");
                     ttsLabel.setFont(new Font(ttsLabel.getFont().getFontName(), Font.ITALIC | Font.BOLD, ttsLabel.getFont().getSize()));
-                    this.settings.add(ttsLabel);
+                    container.add(ttsLabel);
                     JButton settingsBtn = new JButton("Open Config");
                     settingsBtn.addActionListener(ev -> WatchdogPlugin.getInstance().openConfiguration());
-                    this.settings.add(settingsBtn);
+                    container.add(settingsBtn);
                     return;
                 }
                 JComboBox<Voice> voiceSelect = PanelUtils.createSelect(new Voice[]{}, null, Voice::getName, "Loading...", (voice) -> {
                     notification.setElevenLabsVoiceId(voice.getVoiceId());
-                    //Not serialized
                     notification.setElevenLabsVoice(voice);
                 });
 
                 ElevenLabs.getVoices(WatchdogPlugin.getInstance().getHttpClient(), (voices) -> {
                     SwingUtilities.invokeLater(() -> {
-                        // Store the voice id prior to adding to the list because adding the first item will select it
                         String elevenLabsVoiceId = notification.getElevenLabsVoiceId();
                         voices.getVoices().forEach((voice) -> {
                             voiceSelect.addItem(voice);
@@ -96,29 +96,29 @@ public class TextToSpeechNotificationPanel extends NotificationPanel {
                         });
                     });
                 }, log::error);
-                this.settings.add(voiceSelect);
+                container.add(voiceSelect);
                 break;
             case LEGACY:
                 JLabel deprecatedWarning = new JLabel("<html>The Legacy TTS API is deprecated and will likely be removed in the future.</html>");
-                this.settings.add(deprecatedWarning);
-                JSlider rateSlider = new JSlider(1, 5, notification.getRate());
+                container.add(deprecatedWarning);
+                javax.swing.JSlider rateSlider = new javax.swing.JSlider(1, 5, notification.getRate());
                 rateSlider.setSnapToTicks(true);
                 rateSlider.setBackground(ColorScheme.MEDIUM_GRAY_COLOR);
                 rateSlider.addChangeListener(ev -> {
                     notification.setRate(rateSlider.getValue());
-                    onChangeListener.run();
+                    onChange.run();
                 });
-                this.settings.add(PanelUtils.createIconComponent(Icons.SPEED, "The speed of the generated speech", rateSlider));
+                container.add(PanelUtils.createIconComponent(Icons.SPEED, "The speed of the generated speech", rateSlider));
 
                 VoiceChooser voiceChooser = new VoiceChooser(notification);
-                voiceChooser.addActionListener(e -> onChangeListener.run());
-                this.settings.add(PanelUtils.createIconComponent(Icons.SPEECH, "The voice to generate speech with", voiceChooser));
+                voiceChooser.addActionListener(e -> onChange.run());
+                container.add(PanelUtils.createIconComponent(Icons.SPEECH, "The voice to generate speech with", voiceChooser));
                 break;
         }
 
         VolumeSlider volumeSlider = new VolumeSlider(notification);
         volumeSlider.setBackground(ColorScheme.MEDIUM_GRAY_COLOR);
-        volumeSlider.addChangeListener(e -> onChangeListener.run());
-        this.settings.add(PanelUtils.createIconComponent(Icons.VOLUME, "The volume to playback speech", volumeSlider));
+        volumeSlider.addChangeListener(e -> onChange.run());
+        container.add(PanelUtils.createIconComponent(Icons.VOLUME, "The volume to playback speech", volumeSlider));
     }
 }

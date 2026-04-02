@@ -340,6 +340,9 @@ public abstract class AlertPanel<T extends Alert> extends PluginPanel {
         return this;
     }
 
+    protected JPanel getControlContainer() { return this.controlContainer; }
+    protected Runnable getSaveAction() { return this.alertManager::saveAlerts; }
+
     protected abstract void build();
     public void rebuild() {
         this.controlContainer.removeAll();

@@ -3,6 +3,7 @@ package com.adamk33n3r.runelite.watchdog.ui.alerts;
 import com.adamk33n3r.runelite.watchdog.PlayerChatType;
 import com.adamk33n3r.runelite.watchdog.WatchdogPanel;
 import com.adamk33n3r.runelite.watchdog.alerts.PlayerChatAlert;
+import com.adamk33n3r.runelite.watchdog.ui.panels.AlertContentBuilder;
 import com.adamk33n3r.runelite.watchdog.ui.panels.AlertPanel;
 
 public class PlayerChatAlertPanel extends AlertPanel<PlayerChatAlert> {
@@ -12,13 +13,18 @@ public class PlayerChatAlertPanel extends AlertPanel<PlayerChatAlert> {
 
     @Override
     protected void build() {
-        this.addAlertDefaults()
-            .addRegexMatcher(this.alert, "Enter the message to trigger on...", "The message to trigger on. Supports glob (*)", MessagePickerButton.createPlayerChatPickerButton((selected) -> {
-                this.alert.setPattern(selected);
-                this.rebuild();
-            }, this.alert::getPlayerChatType))
-            .addSelect("Chat Type", "The type of message", PlayerChatType.class, this.alert.getPlayerChatType(), this.alert::setPlayerChatType)
-            .addCheckbox("Prepend Sender", "Prepend the sender's name to the message in the form of '{name}: {message}'. Affects pattern matching", this.alert.isPrependSender(), this.alert::setPrependSender)
-            .addNotifications();
+        this.addAlertDefaults();
+        buildTypeContent(this.alert, new AlertContentBuilder(this.getControlContainer(), this.getSaveAction(), this::rebuild));
+        this.addNotifications();
+    }
+
+    public static void buildTypeContent(PlayerChatAlert alert, AlertContentBuilder builder) {
+        builder
+            .addRegexMatcher(alert, "Enter the message to trigger on...", "The message to trigger on. Supports glob (*)", MessagePickerButton.createPlayerChatPickerButton((selected) -> {
+                alert.setPattern(selected);
+                builder.rebuild();
+            }, alert::getPlayerChatType))
+            .addSelect("Chat Type", "The type of message", PlayerChatType.class, alert.getPlayerChatType(), alert::setPlayerChatType)
+            .addCheckbox("Prepend Sender", "Prepend the sender's name to the message in the form of '{name}: {message}'. Affects pattern matching", alert.isPrependSender(), alert::setPrependSender);
     }
 }

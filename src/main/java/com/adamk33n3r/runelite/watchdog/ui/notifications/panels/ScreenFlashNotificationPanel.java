@@ -11,25 +11,37 @@ import net.runelite.client.ui.components.colorpicker.ColorPickerManager;
 
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JComboBox;
+import javax.swing.JPanel;
 import javax.swing.JSpinner;
 
 public class ScreenFlashNotificationPanel extends NotificationPanel {
+    private final ColorPickerManager colorPickerManager;
+
     public ScreenFlashNotificationPanel(ScreenFlash screenFlash, NotificationsPanel parentPanel, ColorPickerManager colorPickerManager, Runnable onChangeListener, PanelUtils.OnRemove onRemove) {
         super(screenFlash, parentPanel, onChangeListener, onRemove);
+        this.colorPickerManager = colorPickerManager;
+        this.buildContent(this.settings, onChangeListener);
+    }
 
+    @Override
+    protected void buildContent(JPanel container, Runnable onChange) {
+        buildContent((ScreenFlash) this.notification, container, onChange, this.colorPickerManager);
+    }
+
+    public static void buildContent(ScreenFlash screenFlash, JPanel container, Runnable onChange, ColorPickerManager colorPickerManager) {
         ColorJButton colorPickerBtn = PanelUtils.createColorPicker(
             "Pick a color",
             "The color to flash the screen",
             "Flash Color",
-            this,
+            container,
             screenFlash.getColor(),
             colorPickerManager,
             true,
             val -> {
                 screenFlash.setColor(val);
-                onChangeListener.run();
+                onChange.run();
             });
-        this.settings.add(colorPickerBtn);
+        container.add(colorPickerBtn);
 
         JComboBox<FlashMode> flashModeSelect = new JComboBox<>(FlashMode.values());
         flashModeSelect.setToolTipText("The screen flash mode");
@@ -47,14 +59,14 @@ public class ScreenFlashNotificationPanel extends NotificationPanel {
         });
         flashModeSelect.addActionListener(e -> {
             screenFlash.setFlashMode(flashModeSelect.getItemAt(flashModeSelect.getSelectedIndex()));
-            onChangeListener.run();
+            onChange.run();
         });
-        this.settings.add(flashModeSelect);
+        container.add(flashModeSelect);
 
         JSpinner flashDuration = PanelUtils.createSpinner(screenFlash.getFlashDuration(), 0, 120, 1, val -> {
             screenFlash.setFlashDuration(val);
-            onChangeListener.run();
+            onChange.run();
         });
-        this.settings.add(PanelUtils.createIconComponent(Icons.CLOCK, "Duration of flash, use 0 to flash until cancelled", flashDuration));
+        container.add(PanelUtils.createIconComponent(Icons.CLOCK, "Duration of flash, use 0 to flash until cancelled", flashDuration));
     }
 }

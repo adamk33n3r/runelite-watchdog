@@ -12,99 +12,110 @@ import net.runelite.client.ui.components.colorpicker.ColorPickerManager;
 import javax.swing.JFileChooser;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
-import java.awt.*;
+import java.awt.BorderLayout;
 
 public class OverlayNotificationPanel extends MessageNotificationPanel {
-    private JPanel displayTime;
-    private JPanel stickyId;
+    private final ColorPickerManager colorPickerManager;
 
     public OverlayNotificationPanel(Overlay notification, NotificationsPanel parentPanel, ColorPickerManager colorPickerManager, Runnable onChangeListener, PanelUtils.OnRemove onRemove) {
         super(notification, true, parentPanel, onChangeListener, onRemove);
+        this.colorPickerManager = colorPickerManager;
+        // MessageNotificationPanel already added the text area; add Overlay-specific controls
+        buildExtraContent(notification, this.settings, onChangeListener, colorPickerManager);
+    }
 
+    @Override
+    protected void buildContent(JPanel container, Runnable onChange) {
+        buildContent((Overlay) this.notification, container, onChange, this.colorPickerManager);
+    }
+
+    public static void buildContent(Overlay notification, JPanel container, Runnable onChange, ColorPickerManager colorPickerManager) {
+        MessageNotificationPanel.buildContent(notification, true, container, onChange);
+        buildExtraContent(notification, container, onChange, colorPickerManager);
+    }
+
+    private static void buildExtraContent(Overlay notification, JPanel container, Runnable onChange, ColorPickerManager colorPickerManager) {
         ColorJButton fgColorPicker = PanelUtils.createColorPicker(
             "Pick a color",
             "The text color of the notification",
             "Text Color",
-            this,
+            container,
             notification.getTextColor(),
             colorPickerManager,
             false,
             val -> {
                 notification.setTextColor(val);
-                onChangeListener.run();
+                onChange.run();
             }
         );
-        this.settings.add(fgColorPicker);
+        container.add(fgColorPicker);
 
         ColorJButton colorPicker = PanelUtils.createColorPicker(
             "Pick a color",
             "The background color of the notification",
             "Background Color",
-            this,
+            container,
             notification.getColor(),
             colorPickerManager,
             true,
             val -> {
                 notification.setColor(val);
-                onChangeListener.run();
+                onChange.run();
             }
         );
-        this.settings.add(colorPicker);
+        container.add(colorPicker);
 
         JPanel fileSub = new JPanel(new BorderLayout(3, 3));
         fileSub.setBackground(ColorScheme.DARKER_GRAY_COLOR);
-        this.settings.add(fileSub);
+        container.add(fileSub);
         fileSub.add(PanelUtils.createFileChooser(null, "Path to the image file", ev -> {
             JFileChooser fileChooser = (JFileChooser) ev.getSource();
             notification.setImagePath(fileChooser.getSelectedFile().getAbsolutePath());
-            onChangeListener.run();
+            onChange.run();
         }, notification.getImagePath(), "Image Files", "png", "jpg"));
 
         var resizeImageCheckbox = PanelUtils.createCheckbox("Resize", "Resize the image to a standard size", notification.isResizeImage(), val -> {
             notification.setResizeImage(val);
-            onChangeListener.run();
+            onChange.run();
         });
         fileSub.add(resizeImageCheckbox, BorderLayout.EAST);
 
         JPanel sub = new JPanel(new BorderLayout(3, 3));
         sub.setBackground(ColorScheme.DARKER_GRAY_COLOR);
-        this.settings.add(sub);
+        container.add(sub);
 
         JSpinner displayTime = PanelUtils.createSpinner(notification.getTimeToLive(), 1, 999, 1, val -> {
             notification.setTimeToLive(val);
-            onChangeListener.run();
+            onChange.run();
         });
         displayTime.setEnabled(!notification.isSticky());
-        this.displayTime = PanelUtils.createIconComponent(Icons.CLOCK, "Time to display in seconds", displayTime);
+        JPanel displayTimePanel = PanelUtils.createIconComponent(Icons.CLOCK, "Time to display in seconds", displayTime);
 
         var countDownCheckbox = PanelUtils.createCheckbox("Countdown", "Count down to 0 instead of up to time", notification.isCountDown(), val -> {
             notification.setCountDown(val);
-            this.revalidate();
-            onChangeListener.run();
+            onChange.run();
         });
 
-        sub.add(this.displayTime);
+        sub.add(displayTimePanel);
         sub.add(countDownCheckbox, BorderLayout.EAST);
 
         var stickyCheckbox = PanelUtils.createCheckbox("Sticky", "Set the notification to not expire", notification.isSticky(), val -> {
             notification.setSticky(val);
             displayTime.setEnabled(!val);
             countDownCheckbox.setEnabled(!val);
-            this.revalidate();
-            onChangeListener.run();
+            onChange.run();
         });
-        this.settings.add(stickyCheckbox);
+        container.add(stickyCheckbox);
 
-        this.stickyId = PanelUtils.createTextField(
+        JPanel stickyId = PanelUtils.createTextField(
             "ID for Dismiss Overlay...",
             "",
             notification.getId(),
             val -> {
                 notification.setId(val);
-                onChangeListener.run();
+                onChange.run();
             }
         );
-
-        this.settings.add(this.stickyId);
+        container.add(stickyId);
     }
 }
