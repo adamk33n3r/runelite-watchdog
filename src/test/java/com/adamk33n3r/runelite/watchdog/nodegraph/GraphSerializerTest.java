@@ -72,15 +72,15 @@ public class GraphSerializerTest {
         NotificationNode notifNode = new NotificationNode(notif);
         graph.add(trigger);
         graph.add(notifNode);
-        graph.connect(trigger.getCaptureGroups(), notifNode.getCaptureGroups());
+        graph.connect(trigger.getExec(), notifNode.getExec());
 
         Graph loaded = roundTrip(graph);
 
         assertEquals(2, loaded.getNodes().size());
         assertEquals(1, loaded.getConnections().size());
         Connection<?> conn = loaded.getConnections().get(0);
-        assertEquals("Capture Groups Out", conn.getOutput().getName());
-        assertEquals("Capture Groups In", conn.getInput().getName());
+        assertEquals("Exec", conn.getOutput().getName());
+        assertEquals("Exec", conn.getInput().getName());
     }
 
     @Test
@@ -129,7 +129,7 @@ public class GraphSerializerTest {
         Graph loaded = roundTrip(graph);
         TriggerNode loadedTrigger = (TriggerNode) loaded.getNodes().get(0);
         assertTrue(loadedTrigger.getInputs().containsKey("Capture Groups In"));
-        assertTrue(loadedTrigger.getOutputs().containsKey("Capture Groups Out"));
+        assertTrue(loadedTrigger.getOutputs().containsKey("Exec"));
     }
 
     @Test
@@ -140,7 +140,7 @@ public class GraphSerializerTest {
         NotificationNode notifNode = new NotificationNode(notif);
         graph.add(trigger);
         graph.add(notifNode);
-        graph.connect(trigger.getCaptureGroups(), notifNode.getCaptureGroups());
+        graph.connect(trigger.getExec(), notifNode.getExec());
 
         Graph loaded = roundTrip(graph);
         TriggerNode loadedTrigger = (TriggerNode) loaded.getNodes().stream()
@@ -152,7 +152,7 @@ public class GraphSerializerTest {
         loadedTrigger.getCaptureGroupsIn().setValue(groups);
         loadedTrigger.process();
 
-        assertArrayEquals(groups, loadedNotif.getCaptureGroups().getValue());
+        assertArrayEquals(groups, loadedNotif.getExec().getValue().getCaptureGroups());
     }
 
     @Test

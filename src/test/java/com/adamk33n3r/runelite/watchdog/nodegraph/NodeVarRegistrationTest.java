@@ -33,7 +33,7 @@ public class NodeVarRegistrationTest {
     @Test
     public void triggerNode_registersAllOutputs() {
         TriggerNode node = new TriggerNode(new ChatAlert("test"));
-        assertTrue(node.getOutputs().containsKey("Capture Groups Out"));
+        assertTrue(node.getOutputs().containsKey("Exec"));
         assertTrue(node.getOutputs().containsKey("Name"));
         assertTrue(node.getOutputs().containsKey("Debounce Out"));
     }
@@ -45,7 +45,7 @@ public class NodeVarRegistrationTest {
         assertTrue(node.getInputs().containsKey("Enabled"));
         assertTrue(node.getInputs().containsKey("Fire When Focused"));
         assertTrue(node.getInputs().containsKey("Fire When AFK"));
-        assertTrue(node.getInputs().containsKey("Capture Groups In"));
+        assertTrue(node.getInputs().containsKey("Exec"));
     }
 
     @Test
@@ -92,7 +92,7 @@ public class NodeVarRegistrationTest {
         ContinuousTriggerNode node = new ContinuousTriggerNode(alert);
         assertTrue(node.getOutputs().containsKey("Is Triggered"));
         // Also inherits TriggerNode outputs
-        assertTrue(node.getOutputs().containsKey("Capture Groups Out"));
+        assertTrue(node.getOutputs().containsKey("Exec"));
     }
 
     @Test

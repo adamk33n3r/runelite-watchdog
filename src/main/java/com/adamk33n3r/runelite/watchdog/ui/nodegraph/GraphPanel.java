@@ -24,6 +24,7 @@ import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.Connection;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.ConnectionPointIn;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.ConnectionPointOut;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.NodeConnection;
+import lombok.Getter;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.components.colorpicker.ColorPickerManager;
 import net.runelite.client.util.ImageUtil;
@@ -53,6 +54,7 @@ public class GraphPanel extends JLayeredPane {
     private double zoomLevel = 1;
     private final Map<Component, Dimension> originalSizes = new HashMap<>();
     private Point popupLocation;
+    @Getter
     private Graph graph;
     private Injector injector;
     private Runnable onChangeCallback;
@@ -128,9 +130,9 @@ public class GraphPanel extends JLayeredPane {
 //        NodePanel logicNodePanel = new IfNodePanel(this, null, 400, 200, "If Node", Color.CYAN);
 //        this.add(logicNodePanel, NODE_LAYER);
 
-        this.connect(test.getCaptureGroupsOut(), testTEST.getCaptureGroupsIn());
+        this.connect(test.getExecOut(), testTEST.getExecIn());
 //        this.connect(test.getAlertName(), testTEST.getAlertNameIn());
-        this.connect(test.getCaptureGroupsOut(), screenFlashNodePanel.getCaptureGroupsIn());
+        this.connect(test.getExecOut(), screenFlashNodePanel.getExecIn());
         this.connect(boolNodePanel.getBoolValueOut(), screenFlashNodePanel.getEnabledIn());
     }
 
@@ -158,8 +160,8 @@ public class GraphPanel extends JLayeredPane {
         this.add(statChangedTriggerNodePanel, NODE_LAYER);
 
         this.connect(nmzTriggerNodePanel.getIsTriggered(), statChangedTriggerNodePanel.getEnabled());
-        this.connect(statChangedTriggerNodePanel.getCaptureGroupsOut(), soundEffectNodePanel.getCaptureGroupsIn());
-        this.connect(statChangedTriggerNodePanel.getCaptureGroupsOut(), screenFlashNodePanel.getCaptureGroupsIn());
+        this.connect(statChangedTriggerNodePanel.getExecOut(), soundEffectNodePanel.getExecIn());
+        this.connect(statChangedTriggerNodePanel.getExecOut(), screenFlashNodePanel.getExecIn());
     }
 
     public void init(Injector injector) {
@@ -500,13 +502,10 @@ public class GraphPanel extends JLayeredPane {
         this.graph.process(node);
     }
 
-    public Graph getGraph() {
-        return this.graph;
-    }
-
-    public void trigger(TriggerNode triggerNode) {
+    public void trigger(TriggerNode triggerNode, String[] triggerValues) {
+        triggerNode.getCaptureGroupsIn().setValue(triggerValues);
         this.graph.process(triggerNode);
-        List<NotificationNode> reachableNotifications = this.graph.getReachableNotificationsFromTrigger(triggerNode);
-        reachableNotifications.forEach(NotificationNode::fire);
+        this.graph.getReachableNotificationsFromTrigger(triggerNode)
+            .forEach(NotificationNode::fire);
     }
 }

@@ -1,6 +1,7 @@
 package com.adamk33n3r.nodegraph.nodes;
 
 import com.adamk33n3r.nodegraph.Node;
+import com.adamk33n3r.nodegraph.ExecSignal;
 import com.adamk33n3r.nodegraph.VarInput;
 import com.adamk33n3r.runelite.watchdog.notifications.Notification;
 import lombok.*;
@@ -15,13 +16,13 @@ public class NotificationNode extends Node {
     private final VarInput<Number> fireWhenAfkSeconds = new VarInput<>(this, "Fire When AFK", Number.class, 0);
 //    private final VarInput<Number> delayMilliseconds = new VarInput<>(this, "Delay (ms)", Number.class, 0);
 //    private final VarInput<String> alertName = new VarInput<>(this, "Alert Name", String.class, "");
-    private final VarInput<String[]> captureGroups = new VarInput<>(this, "Capture Groups In", String[].class, new String[0]);
+    private final VarInput<ExecSignal> exec = new VarInput<>(this, "Exec", ExecSignal.class, new ExecSignal(new String[0]));
 
     // Could maybe output "if fired" or something
 
     public NotificationNode(Notification notification) {
         this.notification = notification;
-        this.captureGroups.setAllowMultipleConnections(true);
+        this.exec.setAllowMultipleConnections(true);
 
         this.fireWhenFocused.setValue(this.notification.isFireWhenFocused());
         this.fireWhenFocused.onChange(this.notification::setFireWhenFocused);
@@ -38,7 +39,7 @@ public class NotificationNode extends Node {
         reg(this.fireWhenAfkSeconds);
 //        reg(this.delayMilliseconds);
 //        reg(this.alertName);
-        reg(this.captureGroups);
+        reg(this.exec);
     }
 
     @Override
@@ -50,6 +51,6 @@ public class NotificationNode extends Node {
     }
 
     public void fire() {
-        this.notification.fire(this.captureGroups.getValue());
+        this.notification.fire(this.exec.getValue().getCaptureGroups());
     }
 }

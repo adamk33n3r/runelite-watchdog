@@ -1,19 +1,16 @@
 package com.adamk33n3r.runelite.watchdog.ui.nodegraph;
 
+import com.adamk33n3r.nodegraph.ExecSignal;
 import com.adamk33n3r.nodegraph.nodes.ContinuousTriggerNode;
 import com.adamk33n3r.runelite.watchdog.alerts.Alert;
 import com.adamk33n3r.nodegraph.nodes.TriggerNode;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.ConnectionLine;
-import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.ConnectionPoint;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.ConnectionPointIn;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.ConnectionPointOut;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.inputs.BoolInput;
-import com.adamk33n3r.runelite.watchdog.ui.nodegraph.inputs.NumberInput;
-import com.adamk33n3r.runelite.watchdog.ui.nodegraph.inputs.TextInput;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.inputs.ViewInput;
 import com.adamk33n3r.runelite.watchdog.ui.panels.AlertContentPanel;
 import com.adamk33n3r.runelite.watchdog.ui.panels.AlertPanelContentFactory;
-import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
 
 import lombok.Getter;
 
@@ -24,7 +21,7 @@ import java.awt.*;
 public class AlertNodePanel extends NodePanel {
     private ConnectionPointOut<Boolean> isTriggered;
 
-    private final ConnectionPointOut<String[]> captureGroupsOut;
+    private final ConnectionPointOut<ExecSignal> execOut;
     private final ConnectionPointOut<String> alertName;
     private final ConnectionPointOut<Number> testOut;
     private final ConnectionPointIn<Boolean> enabled;
@@ -45,8 +42,8 @@ public class AlertNodePanel extends NodePanel {
             this.items.add(toggleIsTriggered);
         }
 
-        this.captureGroupsOut = new ConnectionPointOut<>(this, triggerNode.getCaptureGroups());
-        this.items.add(new ConnectionLine<>(null, new ViewInput<>("Triggered", triggerNode.getCaptureGroups().getValue()), this.captureGroupsOut));
+        this.execOut = new ConnectionPointOut<>(this, triggerNode.getExec());
+        this.items.add(new ConnectionLine<>(null, new ViewInput<>("Exec", triggerNode.getExec().getValue()), this.execOut));
         this.alertName = new ConnectionPointOut<>(this, triggerNode.getNameOut());
 //        this.items.add(new ConnectionLine<>(null, new TextInput("Alert Name", triggerNode.getNameOut().getValue()), this.alertName));
         this.testOut = new ConnectionPointOut<>(this, triggerNode.getDebounceOut());
@@ -57,7 +54,7 @@ public class AlertNodePanel extends NodePanel {
         this.items.add(new ConnectionLine<>(this.enabled, enabledInput, this.enabledOut));
 
         JButton testBtn = new JButton("TEST");
-        testBtn.addActionListener((ev) -> graphPanel.trigger(triggerNode));
+        testBtn.addActionListener((ev) -> graphPanel.trigger(triggerNode, new String[]{"test1", "test2"}));
         this.items.add(testBtn);
 
 //        TextInput nameInput = new TextInput("Name", alert.getName());

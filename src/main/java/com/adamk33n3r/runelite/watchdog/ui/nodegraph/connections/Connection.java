@@ -8,14 +8,20 @@ import java.awt.geom.CubicCurve2D;
 public class Connection extends JComponent {
     protected static final int END_SIZE = 10;
     protected static final int BOUNDS_OFFSET = 40;
+    private static final Color EXEC_COLOR = new Color(255, 165, 50);
 
     protected Point start;
     protected Point end;
+    protected boolean exec = false;
 
     public Connection(Point start, Point end) {
         this.start = start;
         this.end = end;
         this.recalculateBounds();
+    }
+
+    public void setExec(boolean exec) {
+        this.exec = exec;
     }
 
     @Override
@@ -40,15 +46,15 @@ public class Connection extends JComponent {
             startX + 100, startY,
             endX - 100, endY,
             endX, endY);
-        g2.setColor(Color.WHITE);
-        g2.setStroke(new BasicStroke(4));
+        g2.setColor(this.exec ? EXEC_COLOR : Color.WHITE);
+        g2.setStroke(new BasicStroke(this.exec ? 5 : 4));
         g2.draw(curve);
 
 //        g.setColor(Color.GREEN);
 //        g.fillRect((int) startX - END_SIZE/2, (int) (startY - END_SIZE / 2), END_SIZE, END_SIZE);
 //        g.setColor(Color.RED);
 //        g.fillRect((int) (endX - END_SIZE/2), (int) (endY - END_SIZE / 2), END_SIZE, END_SIZE);
-        g2.setColor(Color.WHITE);
+        g2.setColor(this.exec ? EXEC_COLOR : Color.WHITE);
         g2.setStroke(new BasicStroke(5, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
         int arcDiameter = 20;
         g2.fillArc(startX-arcDiameter/2, startY-arcDiameter/2, arcDiameter, arcDiameter, 90, -180);

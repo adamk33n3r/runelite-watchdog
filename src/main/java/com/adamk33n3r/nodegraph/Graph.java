@@ -150,7 +150,7 @@ public class Graph {
                 continue;
             }
             this.connections.stream()
-                .filter(c -> c.getOutput().getNode() == node)
+                .filter(c -> c.getOutput().getNode() == node && c.getOutput().getType() == ExecSignal.class)
                 .map(c -> c.getInput().getNode())
                 .distinct()
                 .forEach(nodesToProcess::add);

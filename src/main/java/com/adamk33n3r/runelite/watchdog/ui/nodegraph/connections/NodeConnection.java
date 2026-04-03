@@ -17,6 +17,9 @@ public class NodeConnection extends Connection {
 
     public NodeConnection(ConnectionPointOut<?> start, ConnectionPointIn<?> end) {
         super(start == null ? new Point() : start.getLocation(), end == null ? new Point() : end.getLocation());
+        if (start != null) {
+            this.setExec(start.isExec());
+        }
 //        this.startNodePanel = start;
 //        this.endNodePanel = end;
         this.startPoint = start;

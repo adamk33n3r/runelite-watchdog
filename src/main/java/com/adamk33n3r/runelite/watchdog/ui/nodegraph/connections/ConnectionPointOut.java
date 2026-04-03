@@ -1,5 +1,6 @@
 package com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections;
 
+import com.adamk33n3r.nodegraph.ExecSignal;
 import com.adamk33n3r.runelite.watchdog.NotificationType;
 import com.adamk33n3r.nodegraph.VarOutput;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.AlertNodePanel;
@@ -21,7 +22,7 @@ public class ConnectionPointOut<T> extends ConnectionPoint {
     private DragConnection newConnection;
 
     public ConnectionPointOut(NodePanel nodePanel, VarOutput<T> outputVar) {
-        super(nodePanel);
+        super(nodePanel, outputVar.getType() == ExecSignal.class, true);
         this.outputVar = outputVar;
         nodePanel.registerOutputPoint(outputVar, this);
         MouseAdapter mouseAdapter = new MouseAdapter() {
@@ -53,10 +54,8 @@ public class ConnectionPointOut<T> extends ConnectionPoint {
                         //                    System.out.println("dropped on graph");
                         // TODO: Update this to filter to only allow nodes that have a connection point that will match the connection point being dragged from
                         nodePanel.getGraphPanel().createNode(e.getComponent(), e.getX(), e.getY(), new Class[]{NotificationType.class, LogicNodeType.class}, (newNode) -> {
-                            // TODO: will probably be able to remove this condition once the below TODO is implemented
                             if (nodePanel instanceof AlertNodePanel && newNode instanceof NotificationNodePanel) {
-                                // TODO: update this to connect to the connection point that you're dragging from
-                                nodePanel.getGraphPanel().connect(((AlertNodePanel) nodePanel).getCaptureGroupsOut(), ((NotificationNodePanel) newNode).getCaptureGroupsIn());
+                                nodePanel.getGraphPanel().connect(((AlertNodePanel) nodePanel).getExecOut(), ((NotificationNodePanel) newNode).getExecIn());
                             }
                             removeNewConnection();
                         });

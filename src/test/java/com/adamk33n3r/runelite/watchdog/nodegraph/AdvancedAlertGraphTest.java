@@ -55,7 +55,7 @@ public class AdvancedAlertGraphTest {
         NotificationNode notifNode = new NotificationNode(mockNotif);
         graph.add(trigger);
         graph.add(notifNode);
-        graph.connect(trigger.getCaptureGroups(), notifNode.getCaptureGroups());
+        graph.connect(trigger.getExec(), notifNode.getExec());
 
         List<NotificationNode> result = graph.getReachableNotificationsFromTrigger(trigger);
         assertTrue(result.isEmpty());
@@ -70,7 +70,7 @@ public class AdvancedAlertGraphTest {
         notifNode.getEnabled().setValue(false);
         graph.add(trigger);
         graph.add(notifNode);
-        graph.connect(trigger.getCaptureGroups(), notifNode.getCaptureGroups());
+        graph.connect(trigger.getExec(), notifNode.getExec());
 
         List<NotificationNode> result = graph.getReachableNotificationsFromTrigger(trigger);
         assertTrue(result.isEmpty());
@@ -84,7 +84,7 @@ public class AdvancedAlertGraphTest {
         NotificationNode notifNode = new NotificationNode(mockNotif);
         graph.add(trigger);
         graph.add(notifNode);
-        graph.connect(trigger.getCaptureGroups(), notifNode.getCaptureGroups());
+        graph.connect(trigger.getExec(), notifNode.getExec());
 
         List<NotificationNode> result = graph.getReachableNotificationsFromTrigger(trigger);
         assertEquals(1, result.size());
@@ -101,7 +101,7 @@ public class AdvancedAlertGraphTest {
         NotificationNode notifNode = new NotificationNode(mockNotif);
         graph.add(trigger);
         graph.add(notifNode);
-        graph.connect(trigger.getCaptureGroups(), notifNode.getCaptureGroups());
+        graph.connect(trigger.getExec(), notifNode.getExec());
 
         String[] groups = new String[]{"hello", "world"};
         adv.fireTriggerNode(trigger, groups);
@@ -139,8 +139,8 @@ public class AdvancedAlertGraphTest {
         graph.add(trigger);
         graph.add(notifNode1);
         graph.add(notifNode2);
-        graph.connect(trigger.getCaptureGroups(), notifNode1.getCaptureGroups());
-        graph.connect(trigger.getCaptureGroups(), notifNode2.getCaptureGroups());
+        graph.connect(trigger.getExec(), notifNode1.getExec());
+        graph.connect(trigger.getExec(), notifNode2.getExec());
 
         adv.fireTriggerNode(trigger, new String[]{"test"});
 

@@ -1,12 +1,12 @@
 package com.adamk33n3r.runelite.watchdog.ui.nodegraph;
 
+import com.adamk33n3r.nodegraph.ExecSignal;
 import com.adamk33n3r.nodegraph.nodes.NotificationNode;
 import com.adamk33n3r.runelite.watchdog.notifications.Notification;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.ConnectionLine;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.ConnectionPointIn;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.inputs.BoolInput;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.inputs.NumberInput;
-import com.adamk33n3r.runelite.watchdog.ui.nodegraph.inputs.TextInput;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.inputs.ViewInput;
 import com.adamk33n3r.runelite.watchdog.ui.notifications.panels.NotificationContentPanel;
 import com.adamk33n3r.runelite.watchdog.ui.panels.NotificationPanelFactory;
@@ -19,7 +19,7 @@ import java.awt.Color;
 @Getter
 public class NotificationNodePanel extends NodePanel {
     private final ConnectionPointIn<Boolean> enabledIn;
-    private final ConnectionPointIn<String[]> captureGroupsIn;
+    private final ConnectionPointIn<ExecSignal> execIn;
 //    private final ConnectionPointIn<String> alertNameIn;
 //    private final ConnectionPointIn<Number> delayMillisecondsIn;
     private final ConnectionPointIn<Boolean> fireWhenFocusedIn;
@@ -30,10 +30,10 @@ public class NotificationNodePanel extends NodePanel {
         super(graphPanel, notificationNode, x, y, name, color);
         Notification notification = notificationNode.getNotification();
 
+        this.execIn = new ConnectionPointIn<>(this, notificationNode.getExec());
+        this.items.add(new ConnectionLine<>(this.execIn, new ViewInput<>("Exec", notificationNode.getExec().getValue()), null));
         this.enabledIn = new ConnectionPointIn<>(this, notificationNode.getEnabled());
         this.items.add(new ConnectionLine<>(this.enabledIn, new BoolInput("Enabled", notificationNode.getEnabled()), null));
-        this.captureGroupsIn = new ConnectionPointIn<>(this, notificationNode.getCaptureGroups());
-        this.items.add(new ConnectionLine<>(this.captureGroupsIn, new ViewInput<>("Capture Groups", notificationNode.getCaptureGroups().getValue()), null));
 //        this.alertNameIn = new ConnectionPointIn<>(this, notificationNode.getAlertName());
 //        this.items.add(new ConnectionLine<>(this.alertNameIn, new TextInput("Alert Name", ""), null));
 //        this.delayMillisecondsIn = new ConnectionPointIn<>(this, notificationNode.getDelayMilliseconds());

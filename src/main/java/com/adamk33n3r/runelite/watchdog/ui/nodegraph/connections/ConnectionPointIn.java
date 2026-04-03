@@ -1,5 +1,6 @@
 package com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections;
 
+import com.adamk33n3r.nodegraph.ExecSignal;
 import com.adamk33n3r.nodegraph.VarInput;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.NodePanel;
 import lombok.Getter;
@@ -9,7 +10,7 @@ public class ConnectionPointIn<T> extends ConnectionPoint {
     private final VarInput<T> inputVar;
 
     public ConnectionPointIn(NodePanel nodePanel, VarInput<T> varInput) {
-        super(nodePanel);
+        super(nodePanel, varInput.getType() == ExecSignal.class, true);
         this.inputVar = varInput;
         nodePanel.registerInputPoint(varInput, this);
     }

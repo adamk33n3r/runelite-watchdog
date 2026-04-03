@@ -23,8 +23,8 @@ public class AdvancedAlert extends Alert {
      */
     public void fireTriggerNode(TriggerNode triggerNode, String[] triggerValues) {
         triggerNode.getCaptureGroupsIn().setValue(triggerValues);
-        triggerNode.process();
-        graph.getReachableNotificationsFromTrigger(triggerNode)
+        this.graph.process(triggerNode);
+        this.graph.getReachableNotificationsFromTrigger(triggerNode)
             .forEach(NotificationNode::fire);
     }
 }

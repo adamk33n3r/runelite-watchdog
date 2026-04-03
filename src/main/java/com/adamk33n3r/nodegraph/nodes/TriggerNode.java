@@ -1,6 +1,7 @@
 package com.adamk33n3r.nodegraph.nodes;
 
 import com.adamk33n3r.nodegraph.Node;
+import com.adamk33n3r.nodegraph.ExecSignal;
 import com.adamk33n3r.nodegraph.VarInput;
 import com.adamk33n3r.nodegraph.VarOutput;
 import com.adamk33n3r.runelite.watchdog.alerts.Alert;
@@ -15,9 +16,7 @@ public class TriggerNode extends Node {
     private final VarInput<Number> debounce = new VarInput<>(this, "Debounce", Number.class, 0);
     private final VarInput<String[]> captureGroupsIn = new VarInput<>(this, "Capture Groups In", String[].class, new String[0]);
 
-//    private final VarOutput<Alert> outAlert = new VarOutput<>("Alert", this.alert);
-    // Perhaps only need to send this one
-    private final VarOutput<String[]> captureGroups = new VarOutput<>(this, "Capture Groups Out", String[].class, new String[0]);
+    private final VarOutput<ExecSignal> exec = new VarOutput<>(this, "Exec", ExecSignal.class, new ExecSignal(new String[0]));
     private final VarOutput<String> nameOut = new VarOutput<>(this, "Name", String.class, this.name.getValue());
     private final VarOutput<Number> debounceOut = new VarOutput<>(this, "Debounce Out", Number.class, this.debounce.getValue());
     private final VarOutput<Boolean> enabledOut = new VarOutput<>(this, "Enabled Out", Boolean.class, this.enabled.getValue());
@@ -37,7 +36,7 @@ public class TriggerNode extends Node {
         reg(this.name);
         reg(this.debounce);
         reg(this.captureGroupsIn);
-        reg(this.captureGroups);
+        reg(this.exec);
         reg(this.nameOut);
         reg(this.debounceOut);
         reg(this.enabledOut);
@@ -46,7 +45,7 @@ public class TriggerNode extends Node {
     @Override
     public void process() {
         this.nameOut.setValue(this.name.getValue());
-        this.captureGroups.setValue(this.captureGroupsIn.getValue());
+        this.exec.setValue(new ExecSignal(this.captureGroupsIn.getValue()));
         this.debounceOut.setValue(this.debounce.getConnection() != null ? this.debounce.getValue() : this.alert.getDebounceTime());
         this.enabledOut.setValue(this.enabled.getValue());
     }

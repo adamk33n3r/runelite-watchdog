@@ -62,7 +62,7 @@ public class AdvancedAlertTest extends TestBase {
         NotificationNode notifNode = new NotificationNode(new ScreenFlash());
         alert.getGraph().add(trigger);
         alert.getGraph().add(notifNode);
-        alert.getGraph().connect(trigger.getCaptureGroups(), notifNode.getCaptureGroups());
+        alert.getGraph().connect(trigger.getExec(), notifNode.getExec());
 
         String json = alertManager.getGson().toJson(alert, Alert.class);
         AdvancedAlert loaded = (AdvancedAlert) alertManager.getGson().fromJson(json, Alert.class);
