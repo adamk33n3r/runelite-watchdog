@@ -41,6 +41,7 @@ public class ConnectionLine<T> extends JPanel {
                 System.out.println("value changed");
                 this.out.getOutputVar().setValue(newValue);
             });
+            // TODO: need to unregister these when the panel closes because they stick around
             this.out.getOutputVar().onConnectChange((connected) -> {
                 if (connected) {
                     this.out.setBackground(Color.GREEN);

@@ -31,6 +31,7 @@ public class TriggerNode extends Node {
         this.nameOut.setValue(this.name.getValue());
         this.debounceOut.setValue(this.debounce.getValue());
         this.enabledOut.setValue(this.enabled.getValue());
+        this.exec.setValue(new ExecSignal(this.captureGroupsIn.getValue()));
 
         reg(this.enabled);
         reg(this.name);

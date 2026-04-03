@@ -16,6 +16,7 @@ import lombok.Getter;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Random;
 
 @Getter
 public class AlertNodePanel extends NodePanel {
@@ -43,7 +44,9 @@ public class AlertNodePanel extends NodePanel {
         }
 
         this.execOut = new ConnectionPointOut<>(this, triggerNode.getExec());
-        this.items.add(new ConnectionLine<>(null, new ViewInput<>("Exec", triggerNode.getExec().getValue()), this.execOut));
+        ViewInput<ExecSignal> exec = new ViewInput<>("Exec", triggerNode.getExec().getValue());
+        triggerNode.getCaptureGroupsIn().onChange((captureGroups) -> exec.setValue(new ExecSignal(captureGroups)));
+        this.items.add(new ConnectionLine<>(null, exec, this.execOut));
         this.alertName = new ConnectionPointOut<>(this, triggerNode.getNameOut());
 //        this.items.add(new ConnectionLine<>(null, new TextInput("Alert Name", triggerNode.getNameOut().getValue()), this.alertName));
         this.testOut = new ConnectionPointOut<>(this, triggerNode.getDebounceOut());
@@ -54,7 +57,14 @@ public class AlertNodePanel extends NodePanel {
         this.items.add(new ConnectionLine<>(this.enabled, enabledInput, this.enabledOut));
 
         JButton testBtn = new JButton("TEST");
-        testBtn.addActionListener((ev) -> graphPanel.trigger(triggerNode, new String[]{"test1", "test2"}));
+        testBtn.addActionListener((ev) -> {
+            int count = new Random().nextInt(4) + 1;
+            String[] strings = new String[count];
+            for (int i = 1; i < count + 1; i++) {
+                strings[i - 1] = String.format("test%d", i);
+            }
+            graphPanel.trigger(triggerNode, strings);
+        });
         this.items.add(testBtn);
 
 //        TextInput nameInput = new TextInput("Name", alert.getName());
