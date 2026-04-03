@@ -6,8 +6,12 @@ import com.adamk33n3r.runelite.watchdog.alerts.Alert;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -31,9 +35,30 @@ public class Graph {
         this.connections.removeAll(toRemove);
     }
 
+    private boolean wouldCreateCycle(Node source, Node dest) {
+        Set<Node> visited = new HashSet<>();
+        Deque<Node> stack = new ArrayDeque<>();
+        stack.push(source);
+        while (!stack.isEmpty()) {
+            Node node = stack.pop();
+            if (node == dest) return true;
+            if (!visited.add(node)) continue;
+            this.connections.stream()
+                .filter(c -> c.getInput().getNode() == node)
+                .map(c -> c.getOutput().getNode())
+                .forEach(stack::push);
+        }
+        return false;
+    }
+
     public <T> boolean connect(VarOutput<T> output, VarInput<T> input) {
         if (output.getConnections().stream().anyMatch(c -> c.getInput().equals(input))) {
             log.warn("Connection already exists");
+            return false;
+        }
+
+        if (wouldCreateCycle(output.getNode(), input.getNode())) {
+            log.warn("Connection would create a cycle");
             return false;
         }
 

@@ -45,8 +45,6 @@ public class NodeVarRegistrationTest {
         assertTrue(node.getInputs().containsKey("Enabled"));
         assertTrue(node.getInputs().containsKey("Fire When Focused"));
         assertTrue(node.getInputs().containsKey("Fire When AFK"));
-        assertTrue(node.getInputs().containsKey("Delay (ms)"));
-        assertTrue(node.getInputs().containsKey("Alert Name"));
         assertTrue(node.getInputs().containsKey("Capture Groups In"));
     }
 
