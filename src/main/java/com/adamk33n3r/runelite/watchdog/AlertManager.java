@@ -1,6 +1,8 @@
 package com.adamk33n3r.runelite.watchdog;
 
 import com.adamk33n3r.nodegraph.Graph;
+import com.adamk33n3r.nodegraph.nodes.NotificationNode;
+import com.adamk33n3r.nodegraph.nodes.TriggerNode;
 import com.adamk33n3r.runelite.watchdog.alerts.*;
 import com.adamk33n3r.runelite.watchdog.elevenlabs.ElevenLabs;
 import com.adamk33n3r.runelite.watchdog.hub.AlertHubCategory;
@@ -453,6 +455,26 @@ public class AlertManager {
         this.plugin.getInjector().injectMembers(alert);
         if (alert instanceof AlertGroup) {
             ((AlertGroup) alert).getAlerts().forEach(subAlert -> this.setUpAlert(subAlert, overrideWithDefaults));
+        } else if (alert instanceof AdvancedAlert) {
+            AdvancedAlert advancedAlert = (AdvancedAlert) alert;
+            advancedAlert.getGraph().getNodes().forEach(node -> {
+                if (node instanceof TriggerNode) {
+                    this.setUpAlert(((TriggerNode) node).getAlert(), overrideWithDefaults);
+                } else if (node instanceof NotificationNode) {
+                    Notification notification = ((NotificationNode) node).getNotification();
+                    if (notification instanceof TextToSpeech) {
+                        TextToSpeech tts = (TextToSpeech) notification;
+                        if (tts.getSource() == TTSSource.ELEVEN_LABS && tts.getElevenLabsVoiceId() != null) {
+                            ElevenLabs.getVoice(this.plugin.getHttpClient(), tts.getElevenLabsVoiceId(), tts::setElevenLabsVoice, log::error);
+                        }
+                    }
+                    this.plugin.getInjector().injectMembers(notification);
+                    if (overrideWithDefaults) {
+                        notification.setDefaults();
+                    }
+                    notification.setAlert(alert);
+                }
+            });
         } else {
             if (alert.getNotifications() == null) {
                 return;

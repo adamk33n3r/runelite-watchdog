@@ -2,54 +2,52 @@ package com.adamk33n3r.runelite.watchdog.ui.notifications.panels;
 
 import com.adamk33n3r.runelite.watchdog.notifications.Overhead;
 import com.adamk33n3r.runelite.watchdog.ui.Icons;
-import com.adamk33n3r.runelite.watchdog.ui.panels.NotificationsPanel;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
 
 import net.runelite.client.ui.components.ColorJButton;
 import net.runelite.client.ui.components.colorpicker.ColorPickerManager;
 
-import javax.swing.JPanel;
 import javax.swing.JSpinner;
 
-public class OverheadNotificationPanel extends MessageNotificationPanel {
+public class OverheadNotificationPanel extends NotificationContentPanel<Overhead> {
     private final ColorPickerManager colorPickerManager;
 
-    public OverheadNotificationPanel(Overhead notification, NotificationsPanel parentPanel, ColorPickerManager colorPickerManager, Runnable onChangeListener, PanelUtils.OnRemove onRemove) {
-        super(notification, true, parentPanel, onChangeListener, onRemove);
+    public OverheadNotificationPanel(Overhead notification, ColorPickerManager colorPickerManager, Runnable onChange) {
+        super(notification, onChange);
         this.colorPickerManager = colorPickerManager;
-        // MessageNotificationPanel already added the text area; add Overhead-specific controls
-        buildExtraContent(notification, this.settings, onChangeListener, colorPickerManager);
+        this.init();
     }
 
     @Override
-    protected void buildContent(JPanel container, Runnable onChange) {
-        buildContent((Overhead) this.notification, container, onChange, this.colorPickerManager);
-    }
+    protected void buildContent() {
+        this.add(PanelUtils.createTextField(
+            "Enter your formatted message...",
+            "",
+            this.notification.getMessage(),
+            val -> {
+                this.notification.setMessage(val);
+                this.onChange.run();
+            }
+        ));
 
-    public static void buildContent(Overhead notification, JPanel container, Runnable onChange, ColorPickerManager colorPickerManager) {
-        MessageNotificationPanel.buildContent(notification, true, container, onChange);
-        buildExtraContent(notification, container, onChange, colorPickerManager);
-    }
-
-    private static void buildExtraContent(Overhead notification, JPanel container, Runnable onChange, ColorPickerManager colorPickerManager) {
         ColorJButton colorPickerBtn = PanelUtils.createColorPicker(
             "Pick a color",
             "The color of the overhead text. Right click to reset.",
             "Text Color",
-            container,
-            notification.getTextColor(),
-            colorPickerManager,
+            this,
+            this.notification.getTextColor(),
+            this.colorPickerManager,
             false,
             val -> {
-                notification.setTextColor(val);
-                onChange.run();
+                this.notification.setTextColor(val);
+                this.onChange.run();
             });
-        container.add(colorPickerBtn);
+        this.add(colorPickerBtn);
 
-        JSpinner displayTime = PanelUtils.createSpinner(notification.getDisplayTime(), 1, 99, 1, val -> {
-            notification.setDisplayTime(val);
-            onChange.run();
+        JSpinner displayTime = PanelUtils.createSpinner(this.notification.getDisplayTime(), 1, 99, 1, val -> {
+            this.notification.setDisplayTime(val);
+            this.onChange.run();
         });
-        container.add(PanelUtils.createIconComponent(Icons.CLOCK, "Time to display overhead in seconds", displayTime));
+        this.add(PanelUtils.createIconComponent(Icons.CLOCK, "Time to display overhead in seconds", displayTime));
     }
 }

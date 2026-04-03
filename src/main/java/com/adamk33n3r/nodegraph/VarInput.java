@@ -19,12 +19,16 @@ public class VarInput<T> extends Var<T> {
     public void setConnection(Connection<T> connection) {
         assert connection != null;
         this.connection = connection;
-        this.onConnectChange.forEach((consumer) -> consumer.accept(true));
+        this.fireConnectChange(true);
     }
 
     public void removeConnection() {
         this.connection = null;
-        this.onConnectChange.forEach((consumer) -> consumer.accept(false));
+        this.fireConnectChange(false);
+    }
+
+    public void fireConnectChange(boolean connect) {
+        this.onConnectChange.forEach((consumer) -> consumer.accept(connect));
     }
 
     @Override

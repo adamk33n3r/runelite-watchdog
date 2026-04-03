@@ -6,10 +6,7 @@ import com.adamk33n3r.runelite.watchdog.ui.Icons;
 import com.adamk33n3r.runelite.watchdog.ui.ImportExportDialog;
 import com.adamk33n3r.runelite.watchdog.ui.MessagePickerDialog;
 import com.adamk33n3r.runelite.watchdog.ui.alerts.*;
-import com.adamk33n3r.runelite.watchdog.ui.panels.AlertListPanel;
-import com.adamk33n3r.runelite.watchdog.ui.panels.HistoryPanel;
-import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
-import com.adamk33n3r.runelite.watchdog.ui.panels.ToolsPanel;
+import com.adamk33n3r.runelite.watchdog.ui.panels.*;
 
 import net.runelite.api.Client;
 import net.runelite.api.MessageNode;
@@ -83,6 +80,9 @@ public class WatchdogPanel extends PluginPanel {
 
     @Inject
     private WatchdogConfig watchdogConfig;
+
+    @Inject
+    private AlertPanelContentFactory alertPanelContentFactory;
 
     @Inject
     private Client client;
@@ -226,31 +226,32 @@ public class WatchdogPanel extends PluginPanel {
     }
 
     private PluginPanel createPluginPanel(Alert alert) {
-        if (alert instanceof PlayerChatAlert) {
-            return new PlayerChatAlertPanel(this, (PlayerChatAlert) alert);
-        } else if (alert instanceof ChatAlert) {
-            return new GameMessageAlertPanel(this, (ChatAlert) alert);
-        } else if (alert instanceof NotificationFiredAlert) {
-            return new NotificationFiredAlertPanel(this, (NotificationFiredAlert) alert);
-        } else if (alert instanceof StatChangedAlert) {
-            return new StatChangedAlertPanel(this, (StatChangedAlert) alert);
-        } else if (alert instanceof XPDropAlert) {
-            return new XPDropAlertPanel(this, (XPDropAlert) alert);
-        } else if (alert instanceof SoundFiredAlert) {
-            return new SoundFiredAlertPanel(this, (SoundFiredAlert) alert);
-        } else if (alert instanceof SpawnedAlert) {
-            return new SpawnedAlertPanel(this, (SpawnedAlert) alert);
-        } else if (alert instanceof InventoryAlert) {
-            return new InventoryAlertPanel(this, (InventoryAlert) alert);
-        } else if (alert instanceof AlertGroup) {
-            return new AlertGroupPanel(this, (AlertGroup) alert);
-        } else if (alert instanceof LocationAlert) {
-            return new LocationAlertPanel(this, (LocationAlert) alert, this.client);
-        } else if (alert instanceof OverheadTextAlert) {
-            return new OverheadTextAlertPanel(this, (OverheadTextAlert) alert);
-        } else if (alert instanceof AdvancedAlert) {
-            return new AdvancedAlertPanel(this, (AdvancedAlert) alert);
-        }
+        Runnable onChange = () -> WatchdogPlugin.getInstance().getAlertManager().saveAlerts();
+//        return new AlertPanel<>(this, this.alertPanelContentFactory.createContentPanel(alert, onChange));
+        if (alert instanceof PlayerChatAlert)
+            return new AlertPanel<>(this, new PlayerChatAlertPanel((PlayerChatAlert) alert, onChange));
+        if (alert instanceof ChatAlert)
+            return new AlertPanel<>(this, new GameMessageAlertPanel((ChatAlert) alert, onChange));
+        if (alert instanceof NotificationFiredAlert)
+            return new AlertPanel<>(this, new NotificationFiredAlertPanel((NotificationFiredAlert) alert, onChange));
+        if (alert instanceof StatChangedAlert)
+            return new AlertPanel<>(this, new StatChangedAlertPanel((StatChangedAlert) alert, onChange));
+        if (alert instanceof XPDropAlert)
+            return new AlertPanel<>(this, new XPDropAlertPanel((XPDropAlert) alert, onChange));
+        if (alert instanceof SoundFiredAlert)
+            return new AlertPanel<>(this, new SoundFiredAlertPanel((SoundFiredAlert) alert, onChange));
+        if (alert instanceof SpawnedAlert)
+            return new AlertPanel<>(this, new SpawnedAlertPanel((SpawnedAlert) alert, onChange));
+        if (alert instanceof InventoryAlert)
+            return new AlertPanel<>(this, new InventoryAlertPanel((InventoryAlert) alert, onChange));
+        if (alert instanceof AlertGroup)
+            return new AlertPanel<>(this, new AlertGroupPanel((AlertGroup) alert, this, onChange));
+        if (alert instanceof LocationAlert)
+            return new AlertPanel<>(this, new LocationAlertPanel((LocationAlert) alert, this.client, onChange));
+        if (alert instanceof OverheadTextAlert)
+            return new AlertPanel<>(this, new OverheadTextAlertPanel((OverheadTextAlert) alert, onChange));
+        if (alert instanceof AdvancedAlert)
+            return new AlertPanel<>(this, new AdvancedAlertPanel((AdvancedAlert) alert, onChange));
 
         return null;
     }

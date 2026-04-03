@@ -129,7 +129,7 @@ public class GraphPanel extends JLayeredPane {
 //        this.add(logicNodePanel, NODE_LAYER);
 
         this.connect(test.getCaptureGroupsOut(), testTEST.getCaptureGroupsIn());
-        this.connect(test.getAlertName(), testTEST.getAlertNameIn());
+//        this.connect(test.getAlertName(), testTEST.getAlertNameIn());
         this.connect(test.getCaptureGroupsOut(), screenFlashNodePanel.getCaptureGroupsIn());
         this.connect(boolNodePanel.getBoolValueOut(), screenFlashNodePanel.getEnabledIn());
     }
@@ -304,7 +304,7 @@ public class GraphPanel extends JLayeredPane {
                 TriggerType triggerType = (TriggerType) selected;
                 Alert alert;
                 try {
-                    alert = triggerType.getImplClass().newInstance();
+                    alert = injector.getInstance(triggerType.getImplClass());
                 } catch (Exception e) {
                     alert = new ChatAlert();
                 }
@@ -319,7 +319,7 @@ public class GraphPanel extends JLayeredPane {
                 NotificationType notificationType = (NotificationType) selected;
                 com.adamk33n3r.runelite.watchdog.notifications.Notification notification;
                 try {
-                    notification = notificationType.getImplClass().newInstance();
+                    notification = injector.getInstance(notificationType.getImplClass());
                 } catch (Exception e) {
                     notification = new TextToSpeech();
                 }
@@ -375,6 +375,10 @@ public class GraphPanel extends JLayeredPane {
             ConnectionPointOut<?> outPoint = outPanel.getOutputPoint(conn.getOutput());
             ConnectionPointIn<?> inPoint = inPanel.getInputPoint(conn.getInput());
             if (outPoint == null || inPoint == null) continue;
+//            this.connect(outPoint, inPoint);
+//            this.graph.connect(outPoint.getOutputVar(), inPoint.getInputVar());
+            outPoint.getOutputVar().fireConnectChange(true);
+            inPoint.getInputVar().fireConnectChange(true);
             NodeConnection nc = new NodeConnection(outPoint, inPoint);
             this.add(nc, CONNECTION_LAYER);
         }

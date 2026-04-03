@@ -18,10 +18,18 @@ public abstract class Node {
     @Getter
     protected final Map<String, VarOutput<?>> outputs = new LinkedHashMap<>();
 
+    /**
+     * Register input var for deserialization
+     * @param v
+     */
     protected void reg(VarInput<?> v) {
         inputs.put(v.getName(), v);
     }
 
+    /**
+     * Register output var for deserialization
+     * @param v
+     */
     protected void reg(VarOutput<?> v) {
         outputs.put(v.getName(), v);
     }

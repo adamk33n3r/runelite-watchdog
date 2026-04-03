@@ -1,40 +1,33 @@
 package com.adamk33n3r.runelite.watchdog.ui.alerts;
 
-import com.adamk33n3r.runelite.watchdog.WatchdogPanel;
 import com.adamk33n3r.runelite.watchdog.alerts.StatChangedAlert;
 import com.adamk33n3r.runelite.watchdog.alerts.StatChangedMode;
 import com.adamk33n3r.runelite.watchdog.ui.ComparableNumber;
-import com.adamk33n3r.runelite.watchdog.ui.panels.AlertContentBuilder;
-import com.adamk33n3r.runelite.watchdog.ui.panels.AlertPanel;
+import com.adamk33n3r.runelite.watchdog.ui.panels.AlertContentPanel;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
 
 import net.runelite.api.Skill;
 
 import javax.swing.JPanel;
 
-public class StatChangedAlertPanel extends AlertPanel<StatChangedAlert> {
-    public StatChangedAlertPanel(WatchdogPanel watchdogPanel, StatChangedAlert alert) {
-        super(watchdogPanel, alert);
+public class StatChangedAlertPanel extends AlertContentPanel<StatChangedAlert> {
+
+    public StatChangedAlertPanel(StatChangedAlert alert, Runnable onChange) {
+        super(alert, onChange);
+        this.init();
     }
 
     @Override
-    protected void build() {
-        this.addAlertDefaults();
-        buildTypeContent(this.alert, new AlertContentBuilder(this.getControlContainer(), this.getSaveAction(), this::rebuild));
-        this.addNotifications();
-    }
-
-    public static void buildTypeContent(StatChangedAlert alert, AlertContentBuilder builder) {
-        builder
-            .addSelect("Skill", "The skill to track.", Skill.class, alert.getSkill(), alert::setSkill)
-            .addSelect("Changed Mode", "The mode to compare the skill to the amount with.", StatChangedMode.class, alert.getChangedMode(), val -> {
-                alert.setChangedMode(val);
-                builder.rebuild();
+    public void buildTypeContent() {
+        this.addSelect("Skill", "The skill to track.", Skill.class, this.alert.getSkill(), this.alert::setSkill)
+            .addSelect("Changed Mode", "The mode to compare the skill to the amount with.", StatChangedMode.class, this.alert.getChangedMode(), val -> {
+                this.alert.setChangedMode(val);
+                this.rebuild();
             })
-            .addSubPanelControl(alert.getChangedMode() == StatChangedMode.RELATIVE ?
-                createRelativeLevelPanel(alert) : alert.getChangedMode() == StatChangedMode.PERCENTAGE ?
-                createPercentageLevelPanel(alert) :
-                createAbsoluteLevelPanel(alert));
+            .addSubPanelControl(this.alert.getChangedMode() == StatChangedMode.RELATIVE ?
+                createRelativeLevelPanel(this.alert) : this.alert.getChangedMode() == StatChangedMode.PERCENTAGE ?
+                createPercentageLevelPanel(this.alert) :
+                createAbsoluteLevelPanel(this.alert));
     }
 
     private static JPanel createRelativeLevelPanel(StatChangedAlert alert) {

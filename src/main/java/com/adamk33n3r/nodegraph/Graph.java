@@ -47,7 +47,7 @@ public class Graph {
         return true;
     }
 
-    public <T> void disconnect(VarOutput<T> output, VarInput<T> input) {
+    public void disconnect(VarOutput<?> output, VarInput<?> input) {
         this.connections.stream()
             .filter(c -> c.getOutput().equals(output) && c.getInput().equals(input))
             .findFirst()

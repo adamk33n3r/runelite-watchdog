@@ -2,81 +2,73 @@ package com.adamk33n3r.runelite.watchdog.ui.notifications.panels;
 
 import com.adamk33n3r.runelite.watchdog.LengthLimitFilter;
 import com.adamk33n3r.runelite.watchdog.notifications.Dink;
-import com.adamk33n3r.runelite.watchdog.ui.FlatTextArea;
-import com.adamk33n3r.runelite.watchdog.ui.panels.NotificationsPanel;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
 
 import net.runelite.client.config.ConfigManager;
 
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
-import javax.swing.JPanel;
 import javax.swing.text.AbstractDocument;
 import java.awt.Font;
 
-public class DinkNotificationPanel extends NotificationPanel {
+public class DinkNotificationPanel extends NotificationContentPanel<Dink> {
     private final ConfigManager configManager;
 
-    public DinkNotificationPanel(Dink notification, NotificationsPanel parentPanel, ConfigManager configManager, Runnable onChangeListener, PanelUtils.OnRemove onRemove) {
-        super(notification, parentPanel, onChangeListener, onRemove);
+    public DinkNotificationPanel(Dink notification, ConfigManager configManager, Runnable onChange) {
+        super(notification, onChange);
         this.configManager = configManager;
-        this.rebuildContent = () -> { this.settings.removeAll(); this.buildContent(this.settings, this.onChangeListener); this.settings.revalidate(); };
-        this.buildContent(this.settings, onChangeListener);
+        this.init();
     }
 
     @Override
-    protected void buildContent(JPanel container, Runnable onChange) {
-        buildContent((Dink) this.notification, container, onChange, this.rebuildContent, this.configManager);
-    }
-
-    public static void buildContent(Dink notification, JPanel container, Runnable onChange, Runnable rebuild, ConfigManager configManager) {
-        String installedPlugins = configManager.getConfiguration("runelite", "externalPlugins");
+    protected void buildContent() {
+        String installedPlugins = this.configManager.getConfiguration("runelite", "externalPlugins");
         if (!installedPlugins.contains("dink")) {
             JLabel installDinkLabel = new JLabel("<html>Install the Dink plugin to use this Notification type</html>");
             installDinkLabel.setFont(new Font(installDinkLabel.getFont().getFontName(), Font.ITALIC | Font.BOLD, installDinkLabel.getFont().getSize()));
-            container.add(installDinkLabel);
+            this.add(installDinkLabel);
             return;
         }
 
-        boolean externalEnabled = configManager.getConfiguration("dinkplugin", "notifyExternal").equals("true");
+        boolean externalEnabled = this.configManager.getConfiguration("dinkplugin", "notifyExternal").equals("true");
         if (!externalEnabled) {
             JLabel enableExternalLabel = new JLabel("<html>Enable External Plugin Notifications in Dink's config to use this Notification type</html>");
             enableExternalLabel.setFont(new Font(enableExternalLabel.getFont().getFontName(), Font.ITALIC | Font.BOLD, enableExternalLabel.getFont().getSize()));
-            container.add(enableExternalLabel);
+            this.add(enableExternalLabel);
             return;
         }
 
-        FlatTextArea message = PanelUtils.createTextField(
+        var message = PanelUtils.createTextField(
             "Enter your message...",
             "Message to send with Dink",
-            notification.getMessage(),
+            this.notification.getMessage(),
             val -> {
-                notification.setMessage(val);
-                onChange.run();
+                this.notification.setMessage(val);
+                this.onChange.run();
             }
         );
         ((AbstractDocument) message.getDocument()).setDocumentFilter(new LengthLimitFilter(4096));
-        container.add(message);
+        this.add(message);
 
-        FlatTextArea urls = PanelUtils.createTextField(
+        var urls = PanelUtils.createTextField(
             "Custom urls (optional)...",
             "Semicolon separated list of urls to send with Dink",
-            notification.getUrls(),
+            this.notification.getUrls(),
             val -> {
-                notification.setUrls(val);
+                this.notification.setUrls(val);
                 if (val == null || val.isEmpty()) {
-                    notification.setUrls(null);
+                    this.notification.setUrls(null);
                 }
-                onChange.run();
+                this.onChange.run();
             }
         );
         ((AbstractDocument) urls.getDocument()).setDocumentFilter(new LengthLimitFilter(4096));
-        container.add(urls);
+        this.add(urls);
 
-        JCheckBox includeScreenshot = PanelUtils.createCheckbox("Include Screenshot", "Whether or not to include a screenshot in the discord message", notification.isIncludeScreenshot(), (selected) -> {
-            notification.setIncludeScreenshot(selected);
-            onChange.run();
+        JCheckBox includeScreenshot = PanelUtils.createCheckbox("Include Screenshot", "Whether or not to include a screenshot in the discord message", this.notification.isIncludeScreenshot(), selected -> {
+            this.notification.setIncludeScreenshot(selected);
+            this.onChange.run();
         });
-        container.add(includeScreenshot);
+        this.add(includeScreenshot);
     }
 }

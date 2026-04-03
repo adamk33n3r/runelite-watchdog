@@ -18,7 +18,7 @@ public class NumberNodePanel extends NodePanel {
 
         this.numValue = new ConnectionPointOut<>(this, node.getValue());
 
-        NumberInput numberInput = new NumberInput("Number Value", node.getValue().getValue());
+        NumberInput numberInput = new NumberInput("Number Value", node.getValue());
         this.items.add(new ConnectionLine<>(null, numberInput, this.numValue));
 
         this.pack();

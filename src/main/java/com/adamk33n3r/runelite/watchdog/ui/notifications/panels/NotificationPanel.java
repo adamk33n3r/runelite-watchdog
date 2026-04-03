@@ -23,39 +23,38 @@ import java.awt.GridLayout;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public abstract class NotificationPanel extends JPanel {
-    @Getter
-    protected Notification notification;
+/**
+ * Sidebar chrome wrapper for a {@link NotificationContentPanel}.
+ * Provides the title bar, enable/disable toggle, AFK/delay configuration,
+ * test and delete buttons. The type-specific content is supplied via
+ * the {@link NotificationContentPanel} passed at construction time.
+ */
+public class NotificationPanel extends JPanel {
+    private final NotificationContentPanel<?> contentPanel;
     private final NotificationsPanel parentPanel;
-    protected Runnable onChangeListener;
-    protected PanelUtils.OnRemove onRemove;
-    protected JPanel settings = new JPanel(new StretchedStackedLayout(3));
-    /**
-     * Subclasses with internal rebuild logic (e.g. conditional UI) should set this field before
-     * calling {@link #buildContent} so that callbacks inside buildContent can trigger a settings-only
-     * rebuild without touching the chrome. Set it to:
-     * {@code () -> { this.settings.removeAll(); this.buildContent(this.settings, this.onChangeListener); this.settings.revalidate(); }}
-     */
-    protected Runnable rebuildContent;
-
-    protected abstract void buildContent(JPanel container, Runnable onChange);
+    private final Runnable onChangeListener;
+    private PanelUtils.OnRemove onRemove;
 
     private static final Border NAME_BOTTOM_BORDER = new CompoundBorder(
         BorderFactory.createMatteBorder(0, 0, 1, 0, ColorScheme.DARK_GRAY_COLOR),
         BorderFactory.createMatteBorder(5, 10, 5, 0, ColorScheme.DARKER_GRAY_COLOR));
 
-    public NotificationPanel(Notification notification, NotificationsPanel parentPanel, Runnable onChangeListener, PanelUtils.OnRemove onRemove) {
-        this.notification = notification;
+    public NotificationPanel(NotificationContentPanel<?> contentPanel, NotificationsPanel parentPanel, Runnable onChangeListener, PanelUtils.OnRemove onRemove) {
+        this.contentPanel = contentPanel;
         this.parentPanel = parentPanel;
         this.onChangeListener = onChangeListener;
         this.onRemove = onRemove;
 
         this.setLayout(new BorderLayout());
         this.setBorder(new EmptyBorder(3, 0, 0, 0));
-        this.settings.setBorder(new EmptyBorder(5, 10, 5, 10));
-        this.settings.setBackground(ColorScheme.DARKER_GRAY_COLOR);
         this.rebuild();
     }
+
+    /** Delegates to the wrapped content panel so drag-reorder and other callers can identify the notification. */
+    public Notification getNotification() {
+        return this.contentPanel.getNotification();
+    }
+
     private void rebuild() {
         this.removeAll();
 
@@ -67,6 +66,7 @@ public abstract class NotificationPanel extends JPanel {
 
         nameWrapper.setBackground(ColorScheme.DARKER_GRAY_COLOR);
         nameWrapper.setBorder(NAME_BOTTOM_BORDER);
+        Notification notification = this.contentPanel.getNotification();
         NotificationType notificationType = notification.getType();
         JLabel nameLabel = new JLabel(notificationType.getName());
         nameLabel.setToolTipText(notificationType.getTooltip());
@@ -82,7 +82,7 @@ public abstract class NotificationPanel extends JPanel {
         toggleButton.setSelected(notification.isEnabled());
         toggleButton.addItemListener(i -> {
             notification.setEnabled(toggleButton.isSelected());
-            onChangeListener.run();
+            this.onChangeListener.run();
         });
         nameWrapper.add(toggleButton, BorderLayout.WEST);
 
@@ -103,10 +103,10 @@ public abstract class NotificationPanel extends JPanel {
             1,
             25 * 60,
             1,
-            (val) -> {
+            val -> {
                 notification.setFireWhenAFKForSeconds(val);
                 previousAFKSeconds.set(val);
-                onChangeListener.run();
+                this.onChangeListener.run();
             });
 
         afkTimerConfigRow.add(afkTimerLabel);
@@ -131,7 +131,7 @@ public abstract class NotificationPanel extends JPanel {
                 }
                 this.rebuild();
                 this.revalidate();
-                onChangeListener.run();
+                this.onChangeListener.run();
             });
         rightActions.add(afkButton);
 
@@ -146,10 +146,10 @@ public abstract class NotificationPanel extends JPanel {
             100,
             5 * 60000,
             100,
-            (val) -> {
+            val -> {
                 notification.setDelayMilliseconds(val);
                 previousDelayMilliseconds.set(val);
-                onChangeListener.run();
+                this.onChangeListener.run();
             });
 
         delayConfigRow.add(delayLabel);
@@ -178,7 +178,7 @@ public abstract class NotificationPanel extends JPanel {
                 }
                 this.rebuild();
                 this.revalidate();
-                onChangeListener.run();
+                this.onChangeListener.run();
             });
         rightActions.add(delayButton);
 
@@ -192,7 +192,7 @@ public abstract class NotificationPanel extends JPanel {
             notification.isFireWhenFocused(),
             (btn, modifiers) -> {
                 notification.setFireWhenFocused(btn.isSelected());
-                onChangeListener.run();
+                this.onChangeListener.run();
             });
         rightActions.add(focusBtn);
 
@@ -201,7 +201,7 @@ public abstract class NotificationPanel extends JPanel {
             Icons.TEST_HOVER,
             "Test the notification",
             (btn, modifiers) -> new Thread(() -> {
-                this.notification.fireForced(new String[]{ "1", "2", "3", "4", "5" });
+                notification.fireForced(new String[]{"1", "2", "3", "4", "5"});
             }).start());
         rightActions.add(testBtn);
 
@@ -212,8 +212,7 @@ public abstract class NotificationPanel extends JPanel {
             (btn, modifiers) -> this.onRemove.elementRemoved(this));
         rightActions.add(deleteBtn);
 
-
-        container.add(this.settings);
+        container.add(this.contentPanel);
 
         this.add(container, BorderLayout.CENTER);
     }

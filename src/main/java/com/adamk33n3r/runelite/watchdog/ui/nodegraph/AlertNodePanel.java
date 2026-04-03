@@ -10,7 +10,7 @@ import com.adamk33n3r.runelite.watchdog.ui.nodegraph.inputs.BoolInput;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.inputs.NumberInput;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.inputs.TextInput;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.inputs.ViewInput;
-import com.adamk33n3r.runelite.watchdog.ui.panels.AlertContentBuilder;
+import com.adamk33n3r.runelite.watchdog.ui.panels.AlertContentPanel;
 import com.adamk33n3r.runelite.watchdog.ui.panels.AlertPanelContentFactory;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
 
@@ -46,9 +46,9 @@ public class AlertNodePanel extends NodePanel {
         this.captureGroupsOut = new ConnectionPointOut<>(this, triggerNode.getCaptureGroups());
         this.items.add(new ConnectionLine<>(null, new ViewInput<>("Triggered", triggerNode.getCaptureGroups().getValue()), this.captureGroupsOut));
         this.alertName = new ConnectionPointOut<>(this, triggerNode.getNameOut());
-        this.items.add(new ConnectionLine<>(null, new TextInput("Alert Name", triggerNode.getNameOut().getValue()), this.alertName));
+//        this.items.add(new ConnectionLine<>(null, new TextInput("Alert Name", triggerNode.getNameOut().getValue()), this.alertName));
         this.testOut = new ConnectionPointOut<>(this, triggerNode.getDebounceOut());
-        this.items.add(new ConnectionLine<>(new ConnectionPointIn<>(this, triggerNode.getDebounce()), new NumberInput("Debounce", triggerNode.getDebounceOut().getValue().intValue()), this.testOut));
+//        this.items.add(new ConnectionLine<>(new ConnectionPointIn<>(this, triggerNode.getDebounce()), new NumberInput("Debounce", triggerNode.getDebounceOut().getValue().intValue()), this.testOut));
         this.enabled = new ConnectionPointIn<>(this, triggerNode.getEnabled());
         BoolInput enabledInput = new BoolInput("Enabled", triggerNode.getEnabled());
         this.items.add(new ConnectionLine<>(this.enabled, enabledInput, null));
@@ -57,36 +57,31 @@ public class AlertNodePanel extends NodePanel {
         testBtn.addActionListener((ev) -> graphPanel.trigger(triggerNode));
         this.items.add(testBtn);
 
-        TextInput nameInput = new TextInput("Name", alert.getName());
-        nameInput.registerOnChange(v -> {
-            alert.setName(v);
-            this.notifyChange();
-        });
-        this.items.add(new ConnectionLine<>(null, nameInput, this.alertName));
-
-        JSpinner debounce = PanelUtils.createSpinner(alert.getDebounceTime(), 0, 8640000, 100, (val) -> {
-            triggerNode.getDebounce().setValue(val);
-            graphPanel.processNode(triggerNode);
-            this.notifyChange();
-        });
-        this.items.add(PanelUtils.createLabeledComponent("Debounce Time (ms)", "How long to wait before allowing this alert to trigger again in milliseconds", debounce));
+//        TextInput nameInput = new TextInput("Name", alert.getName());
+//        nameInput.registerOnChange(v -> {
+//            alert.setName(v);
+//            this.notifyChange();
+//        });
+//        this.items.add(new ConnectionLine<>(null, nameInput, this.alertName));
+//
+//        JSpinner debounce = PanelUtils.createSpinner(alert.getDebounceTime(), 0, 8640000, 100, (val) -> {
+//            triggerNode.getDebounce().setValue(val);
+//            graphPanel.processNode(triggerNode);
+//            this.notifyChange();
+//        });
+//        this.items.add(PanelUtils.createLabeledComponent("Debounce Time (ms)", "How long to wait before allowing this alert to trigger again in milliseconds", debounce));
 
         // Type-specific controls via factory — supports rebuild for conditional UI panels
-        final int fixedItemCount = this.items.getComponentCount();
-        Runnable[] holder = { null };
-        holder[0] = () -> {
-            Component[] comps = this.items.getComponents();
-            for (int i = comps.length - 1; i >= fixedItemCount; i--) {
-                this.items.remove(comps[i]);
-            }
-            AlertContentBuilder b = new AlertContentBuilder(this.items, this::notifyChange, holder[0]);
-            alertPanelContentFactory.populateContent(alert, b);
-            this.items.revalidate();
-            this.items.repaint();
-            this.pack();
-        };
-        AlertContentBuilder builder = new AlertContentBuilder(this.items, this::notifyChange, holder[0]);
-        alertPanelContentFactory.populateContent(alert, builder);
+        AlertContentPanel<?> content = alertPanelContentFactory.createContentPanel(alert, this::notifyChange);
+        if (content != null) {
+            content.setOnRebuild(() -> {
+                this.items.revalidate();
+                this.items.repaint();
+                this.pack();
+            });
+//            content.buildTypeContent();
+            this.items.add(content);
+        }
 
         this.pack();
     }

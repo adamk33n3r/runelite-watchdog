@@ -2,51 +2,50 @@ package com.adamk33n3r.runelite.watchdog.ui.panels;
 
 import com.adamk33n3r.runelite.watchdog.*;
 import com.adamk33n3r.runelite.watchdog.alerts.Alert;
-import com.adamk33n3r.runelite.watchdog.alerts.AlertGroup;
-import com.adamk33n3r.runelite.watchdog.alerts.AlertMode;
-import com.adamk33n3r.runelite.watchdog.alerts.RegexMatcher;
 import com.adamk33n3r.runelite.watchdog.ui.*;
 
-import net.runelite.client.plugins.info.JRichTextPane;
-import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.MultiplexingPluginPanel;
 import net.runelite.client.ui.PluginPanel;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.text.WordUtils;
 
 import javax.swing.*;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
-import java.util.Collections;
-import java.util.List;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
 
+/**
+ * Sidebar chrome wrapper for an {@link AlertContentPanel}.
+ * Provides the back button, type name label, test/import/export buttons, enable toggle,
+ * and conditionally the {@link NotificationsPanel} for actions.
+ * <p>
+ * The type-specific content (including alert defaults) is supplied via the
+ * {@link AlertContentPanel} passed at construction time.
+ */
 @Slf4j
-public abstract class AlertPanel<T extends Alert> extends PluginPanel {
-    private final JPanel controlContainer;
-    private final JPanel centerContainer;
-    protected final WatchdogPanel watchdogPanel;
-    protected final WatchdogPlugin plugin;
-    protected final MultiplexingPluginPanel muxer;
-    protected final T alert;
-
+public class AlertPanel<T extends Alert> extends PluginPanel {
+    private final AlertContentPanel<T> contentPanel;
+    private final WatchdogPanel watchdogPanel;
+    private final WatchdogPlugin plugin;
+    private final MultiplexingPluginPanel muxer;
     private final AlertManager alertManager;
+    private JPanel centerContainer;
 
-    public AlertPanel(WatchdogPanel watchdogPanel, T alert) {
+    public AlertPanel(WatchdogPanel watchdogPanel, AlertContentPanel<T> contentPanel) {
         super(false);
 
         this.watchdogPanel = watchdogPanel;
         this.muxer = watchdogPanel.getMuxer();
-        this.alert = alert;
+        this.contentPanel = contentPanel;
         this.plugin = WatchdogPlugin.getInstance();
         this.alertManager = plugin.getAlertManager();
 
         this.setLayout(new BorderLayout());
+        this.buildChrome();
+    }
+
+    private void buildChrome() {
+        Alert alert = this.contentPanel.alert;
 
         JPanel northPanel = new JPanel(new StretchedStackedLayout(3));
         this.add(northPanel, BorderLayout.NORTH);
@@ -54,7 +53,7 @@ public abstract class AlertPanel<T extends Alert> extends PluginPanel {
         JPanel nameGroup = new JPanel(new BorderLayout());
         nameGroup.setBorder(new EmptyBorder(10, 5, 10, 5));
 
-        TriggerType triggerType = this.alert.getType();
+        TriggerType triggerType = alert.getType();
         JLabel nameLabel = new JLabel(triggerType.getName());
         nameLabel.setToolTipText(triggerType.getTooltip());
         nameLabel.setForeground(Color.WHITE);
@@ -62,7 +61,7 @@ public abstract class AlertPanel<T extends Alert> extends PluginPanel {
 
         JPanel rightButtons = new JPanel(new GridLayout(1, 0));
 
-        if (alert instanceof AlertGroup) {
+        if (contentPanel.isAlertGroup()) {
             JButton importAlertBtn = PanelUtils.createActionButton(
                 Icons.IMPORT,
                 Icons.IMPORT_HOVER,
@@ -71,8 +70,7 @@ public abstract class AlertPanel<T extends Alert> extends PluginPanel {
                     ImportExportDialog importExportDialog = new ImportExportDialog(
                         SwingUtilities.getWindowAncestor(this),
                         (json, append) -> {
-                            boolean result = this.alertManager.importAlerts(json, ((AlertGroup) alert).getAlerts(), append, true, WatchdogPlugin.getInstance().getConfig().overrideImportsWithDefaults());
-                            // Delay for layout. Without this, it would sometimes make the search/actions narrower.
+                            boolean result = this.alertManager.importAlerts(json, ((com.adamk33n3r.runelite.watchdog.alerts.AlertGroup) alert).getAlerts(), append, true, WatchdogPlugin.getInstance().getConfig().overrideImportsWithDefaults());
                             SwingUtilities.invokeLater(this::rebuild);
                             return result;
                         }
@@ -130,7 +128,7 @@ public abstract class AlertPanel<T extends Alert> extends PluginPanel {
                 WatchdogPlugin.getInstance().getScreenMarkerUtil().finishCreation(true);
                 WatchdogPlugin.getInstance().getObjectMarkerManager().turnOffObjectMarkerMode();
                 this.alertManager.saveAlerts();
-                this.onBack();
+                this.contentPanel.onBack();
                 this.muxer.popState();
 
                 // Workaround for the onActivate rebuild issue
@@ -147,222 +145,33 @@ public abstract class AlertPanel<T extends Alert> extends PluginPanel {
         nameGroup.add(backButton, BorderLayout.WEST);
 
         northPanel.add(nameGroup);
-
-        this.controlContainer = new JPanel(new StretchedStackedLayout(3));
-        this.controlContainer.setBorder(new EmptyBorder(0, 5, 0, 5));
-        northPanel.add(this.controlContainer);
+        northPanel.add(this.contentPanel);
 
         this.centerContainer = new JPanel(new BorderLayout());
         this.add(this.centerContainer, BorderLayout.CENTER);
-    }
 
-    public AlertPanel<T> addLabel(String label) {
-        JLabel labelComp = new JLabel(label);
-        this.controlContainer.add(labelComp);
-        return this;
-    }
-
-    public AlertPanel<T> addRichTextPane(String text) {
-        JRichTextPane richTextPane = new JRichTextPane();
-        richTextPane.setContentType("text/html");
-        richTextPane.setText(text);
-        richTextPane.setForeground(Color.WHITE);
-        this.controlContainer.add(richTextPane);
-        return this;
-    }
-
-    public AlertPanel<T> addTextField(String placeholder, String tooltip, String initialValue, Consumer<String> saveAction) {
-        PlaceholderTextField textField = new PlaceholderTextField(initialValue);
-        textField.setSelectedTextColor(Color.WHITE);
-        textField.setSelectionColor(ColorScheme.BRAND_ORANGE_TRANSPARENT);
-        textField.setPlaceholder(placeholder);
-        textField.setToolTipText(tooltip);
-        textField.addFocusListener(new FocusListener() {
-            @Override
-            public void focusGained(FocusEvent e) {
-                textField.selectAll();
-            }
-
-            @Override
-            public void focusLost(FocusEvent e) {
-                saveAction.accept(textField.getText());
-                alertManager.saveAlerts();
-            }
-        });
-        this.controlContainer.add(textField);
-        return this;
-    }
-
-    public AlertPanel<T> addTextArea(String placeholder, String tooltip, String initialValue, Consumer<String> saveAction) {
-        FlatTextArea textArea = PanelUtils.createTextArea(placeholder, tooltip, initialValue, val -> {
-            saveAction.accept(val);
-            this.alertManager.saveAlerts();
-        });
-        this.controlContainer.add(textArea);
-        return this;
-    }
-
-    public AlertPanel<T> addSpinner(String name, String tooltip, int initialValue, Consumer<Integer> saveAction) {
-        return this.addSpinner(name, tooltip, initialValue, saveAction, 0, Integer.MAX_VALUE, 1);
-    }
-
-    public AlertPanel<T> addSpinner(String name, String tooltip, int initialValue, Consumer<Integer> saveAction, int min, int max, int step) {
-        JSpinner spinner = PanelUtils.createSpinner(initialValue, min, max, step, val -> {
-            saveAction.accept(val);
-            this.alertManager.saveAlerts();
-        });
-        this.controlContainer.add(PanelUtils.createLabeledComponent(name, tooltip, spinner));
-        return this;
-    }
-
-    public <E extends Enum<E>> AlertPanel<T> addSelect(String name, String tooltip, Class<E> enumType, E initialValue, Consumer<E> saveAction) {
-        JComboBox<E> select = PanelUtils.createSelect(enumType.getEnumConstants(), initialValue, val -> {
-            saveAction.accept(val);
-            this.alertManager.saveAlerts();
-        });
-        this.controlContainer.add(PanelUtils.createLabeledComponent(name, tooltip, select));
-        return this;
-    }
-
-    public AlertPanel<T> addCheckbox(String name, String tooltip, boolean initialValue, Consumer<Boolean> saveAction) {
-        JCheckBox checkbox = PanelUtils.createCheckbox(name, tooltip, initialValue, val -> {
-            saveAction.accept(val);
-            this.alertManager.saveAlerts();
-        });
-        this.controlContainer.add(checkbox);
-        return this;
-    }
-
-    public AlertPanel<T> addInputGroupWithSuffix(JComponent mainComponent, JComponent suffix) {
-        return this.addInputGroup(mainComponent, null, Collections.singletonList(suffix));
-    }
-
-    public AlertPanel<T> addInputGroup(JComponent mainComponent, List<JComponent> prefixes, List<JComponent> suffixes) {
-        InputGroup textFieldGroup = new InputGroup(mainComponent)
-            .addPrefixes(prefixes)
-            .addSuffixes(suffixes);
-        this.controlContainer.add(textFieldGroup);
-        return this;
-    }
-
-    public AlertPanel<T> addAlertDefaults() {
-        JSpinner spinner = PanelUtils.createSpinner(
-            this.alert.getDebounceTime(),
-            0,
-            8640000, // 6 hours - max time a player can be logged in
-            100,
-            val -> {
-                this.alert.setDebounceTime(val);
-                this.alertManager.saveAlerts();
-            }
-        );
-        JCheckBox checkbox = PanelUtils.createCheckbox("Reset", "Reset the debounce time every time this alert is triggered", this.alert.isDebounceResetTime(), val -> {
-            this.alert.setDebounceResetTime(val);
-            this.alertManager.saveAlerts();
-        });
-        JPanel sub = new JPanel(new BorderLayout(5, 5));
-        sub.add(spinner);
-        sub.add(checkbox, BorderLayout.EAST);
-        return this
-            .addTextField("Enter the alert name...", "Name of Alert", this.alert.getName(), this.alert::setName)
-            .addIf((panel) -> panel.addSelect("Alert Mode", "How to handle re-triggering when this alert is already running",
-                    AlertMode.class, this.alert.getAlertMode(), this.alert::setAlertMode)
-            , () -> !(this.alert instanceof AlertGroup))
-            .addSubPanelControl(PanelUtils.createLabeledComponent(
-                "Debounce (ms)",
-                "How long to wait before allowing this alert to trigger again in milliseconds",
-                sub
-            )
-        );
-    }
-
-    public AlertPanel<T> addIf(Consumer<AlertPanel<T>> panel, Supplier<Boolean> ifFunc) {
-        if (ifFunc.get()) {
-            panel.accept(this);
+        if (this.contentPanel.includeNotifications()) {
+            this.addNotifications(alert);
         }
-        return this;
     }
 
-    public AlertPanel<T> addRegexMatcher(RegexMatcher regexMatcher, String placeholder, String tooltip) {
-        return this.addRegexMatcher(regexMatcher, placeholder, tooltip, null);
-    }
-
-    public AlertPanel<T> addRegexMatcher(RegexMatcher regexMatcher, String placeholder, String tooltip, JComponent suffixAppend) {
-        return this.addRegexMatcher(
-            regexMatcher::getPattern,
-            regexMatcher::setPattern,
-            regexMatcher::isRegexEnabled,
-            regexMatcher::setRegexEnabled,
-            placeholder,
-            tooltip,
-            suffixAppend
-        );
-    }
-
-    public AlertPanel<T> addRegexMatcher(
-        Supplier<String> pattern,
-        Consumer<String> savePattern,
-        Supplier<Boolean> regexEnabled,
-        Consumer<Boolean> saveRegexEnabled,
-        String placeholder,
-        String tooltip,
-        JComponent suffixAppend
-    ) {
-        var regexMatcher = PanelUtils.createRegexMatcher(pattern, savePattern, regexEnabled, saveRegexEnabled, placeholder, tooltip, suffixAppend);
-        this.controlContainer.add(regexMatcher);
-        return this;
-    }
-
-    public AlertPanel<T> addNotifications() {
+    private void addNotifications(Alert alert) {
         NotificationsPanel notificationPanel = WatchdogPlugin.getInstance().getInjector().getInstance(NotificationsPanel.class);
-        notificationPanel.init(this.alert);
+        notificationPanel.init(alert);
         notificationPanel.setBorder(new CompoundBorder(new EmptyBorder(0, 5, 0, 5), new HorizontalRuleBorder(10)));
         this.centerContainer.add(notificationPanel);
-
-        return this;
     }
 
-    public AlertPanel<T> addSubPanel(JPanel sub) {
-        this.centerContainer.add(sub);
-        return this;
-    }
-
-    public AlertPanel<T> addSubPanelControl(JPanel sub) {
-        this.controlContainer.add(sub);
-        return this;
-    }
-
-    public AlertPanel<T> addButton(String text, String tooltip, PanelUtils.ButtonClickListener clickListener) {
-        JButton button = new JButton(text);
-        button.setToolTipText(tooltip);
-        button.addActionListener((ev) -> clickListener.clickPerformed(button, ev.getModifiers()));
-        this.controlContainer.add(button);
-        return this;
-    }
-
-    protected JPanel getControlContainer() { return this.controlContainer; }
-    protected Runnable getSaveAction() { return this.alertManager::saveAlerts; }
-
-    protected abstract void build();
     public void rebuild() {
-        this.controlContainer.removeAll();
-        this.centerContainer.removeAll();
-        this.build();
+        this.removeAll();
+        this.contentPanel.rebuild();
+        this.buildChrome();
+        this.revalidate();
+        this.repaint();
     }
-
-    protected void onBack() {}
 
     @Override
     public void onActivate() {
-        // Getting some weird resizing issues when this is called when switching tabs or collapsing the side panel
-        // if there is lots of text in a text area? idk
-        // Moved to the muxer.onAdd
-
-        // this causes it to resize on collapse/restore
-//        this.rebuild();
-//        SwingUtilities.invokeLater(() -> {
-//            // this causes it to resize on edit
-//            this.rebuild();
-//        });
+        // See commented-out code in original AlertPanel — resize issues when rebuilding on activate.
     }
 }

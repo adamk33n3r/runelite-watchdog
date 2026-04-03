@@ -18,14 +18,18 @@ public class VarOutput<T> extends Var<T> {
 
     public void addConnection(Connection<T> connection) {
         this.connections.add(connection);
-        this.onConnectChange.forEach((consumer) -> consumer.accept(true));
+        this.fireConnectChange(true);
     }
 
     public void removeConnection(Connection<T> connection) {
         this.connections.remove(connection);
         if (this.connections.isEmpty()) {
-            this.onConnectChange.forEach((consumer) -> consumer.accept(false));
+            this.fireConnectChange(false);
         }
+    }
+
+    public void fireConnectChange(boolean connect) {
+        this.onConnectChange.forEach((consumer) -> consumer.accept(connect));
     }
 
     @Override

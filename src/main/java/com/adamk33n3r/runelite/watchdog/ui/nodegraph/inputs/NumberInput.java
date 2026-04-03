@@ -1,5 +1,7 @@
 package com.adamk33n3r.runelite.watchdog.ui.nodegraph.inputs;
 
+import com.adamk33n3r.nodegraph.Var;
+
 import javax.swing.*;
 import java.awt.*;
 import java.util.function.Consumer;
@@ -7,10 +9,11 @@ import java.util.function.Consumer;
 public class NumberInput extends AbstractInput<Number> {
     private final JSpinner spinner;
 
-    public NumberInput(String label, Number value) {
+    public NumberInput(String label, Var<Number> value) {
         JLabel labelComp = new JLabel(label);
         this.spinner = new JSpinner();
-        this.spinner.setValue(value);
+        this.spinner.setValue(value.getValue());
+        this.registerOnChange(value::setValue);
         this.add(labelComp, BorderLayout.WEST);
         this.add(this.spinner);
     }
