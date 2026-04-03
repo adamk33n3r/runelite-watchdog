@@ -300,8 +300,8 @@ public class GraphPanel extends JLayeredPane {
         this.popupLocation = SwingUtilities.convertPoint(parent, new Point(x, y), this);
 
         new NewNodePopup(filter).show(parent, x, y, (selected) -> {
-            int px = GraphPanel.this.popupLocation.x;
-            int py = GraphPanel.this.popupLocation.y;
+            int px = this.popupLocation.x;
+            int py = this.popupLocation.y;
             if (selected instanceof TriggerType) {
                 TriggerType triggerType = (TriggerType) selected;
                 Alert alert;
@@ -314,8 +314,8 @@ public class GraphPanel extends JLayeredPane {
                 triggerNode.setX(px);
                 triggerNode.setY(py);
                 this.graph.add(triggerNode);
-                NodePanel nodePanel = new AlertNodePanel(GraphPanel.this, px, py, triggerType.getName(), NODE_TRIGGER_COLOR, triggerNode, alertPanelContentFactory);
-                GraphPanel.this.add(nodePanel, NODE_LAYER, 0);
+                NodePanel nodePanel = new AlertNodePanel(this, px, py, triggerType.getName(), NODE_TRIGGER_COLOR, triggerNode, alertPanelContentFactory);
+                this.add(nodePanel, NODE_LAYER, 0);
                 onSelect.accept(nodePanel);
             } else if (selected instanceof NotificationType) {
                 NotificationType notificationType = (NotificationType) selected;
@@ -329,8 +329,8 @@ public class GraphPanel extends JLayeredPane {
                 notificationNode.setX(px);
                 notificationNode.setY(py);
                 this.graph.add(notificationNode);
-                NodePanel nodePanel = new NotificationNodePanel(GraphPanel.this, px, py, notificationType.getName(), NODE_NOTIFICATION_COLOR, notificationNode, notificationPanelFactory);
-                GraphPanel.this.add(nodePanel, NODE_LAYER, 0);
+                NodePanel nodePanel = new NotificationNodePanel(this, px, py, notificationType.getName(), NODE_NOTIFICATION_COLOR, notificationNode, notificationPanelFactory);
+                this.add(nodePanel, NODE_LAYER, 0);
                 onSelect.accept(nodePanel);
             } else if (selected instanceof LogicNodeType) {
                 LogicNodeType logicNodeType = (LogicNodeType) selected;
@@ -345,15 +345,38 @@ public class GraphPanel extends JLayeredPane {
                         andNode.setX(px);
                         andNode.setY(py);
                         this.graph.add(andNode);
-                        NodePanel nodePanel = new IfNodePanel(GraphPanel.this, andNode, px, py, logicNodeType.getName(), Color.MAGENTA);
-                        GraphPanel.this.add(nodePanel, NODE_LAYER, 0);
+                        NodePanel nodePanel = new IfNodePanel(this, andNode, px, py, logicNodeType.getName(), Color.MAGENTA);
+                        this.add(nodePanel, NODE_LAYER, 0);
+                        onSelect.accept(nodePanel);
+                        break;
+                }
+            } else if (selected instanceof VariableNodeType) {
+                VariableNodeType variableNodeType = (VariableNodeType) selected;
+                NodePanel nodePanel;
+                switch (variableNodeType) {
+                    case BOOLEAN:
+                        Bool boolNode = new Bool();
+                        boolNode.setX(px);
+                        boolNode.setY(py);
+                        this.graph.add(boolNode);
+                        nodePanel = this.createNodePanel(boolNode);
+                        this.add(nodePanel, NODE_LAYER, 0);
+                        onSelect.accept(nodePanel);
+                        break;
+                    case NUMBER:
+                        Num numNode = new Num();
+                        numNode.setX(px);
+                        numNode.setY(py);
+                        this.graph.add(numNode);
+                        nodePanel = this.createNodePanel(numNode);
+                        this.add(nodePanel, NODE_LAYER, 0);
                         onSelect.accept(nodePanel);
                         break;
                 }
             }
-            GraphPanel.this.revalidate();
-            GraphPanel.this.repaint();
-            GraphPanel.this.notifyChange();
+            this.revalidate();
+            this.repaint();
+            this.notifyChange();
         }, () -> onSelect.accept(null));
     }
 

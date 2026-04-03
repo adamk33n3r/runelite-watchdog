@@ -2,6 +2,7 @@ package com.adamk33n3r.runelite.watchdog.ui.nodegraph;
 
 import com.adamk33n3r.runelite.watchdog.NotificationType;
 import com.adamk33n3r.runelite.watchdog.TriggerType;
+import com.google.common.collect.ImmutableMap;
 import net.runelite.client.util.Text;
 
 import com.google.common.base.Splitter;
@@ -13,11 +14,17 @@ import java.awt.event.MouseEvent;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 public class NewNodePopup extends JPopupMenu {
-    public static final List<Class<? extends Enum<?>>> DEFAULT_ITEMS = Arrays.asList(TriggerType.class, NotificationType.class, LogicNodeType.class);
+    public static final List<Class<? extends Enum<?>>> DEFAULT_ITEMS = Arrays.asList(
+        TriggerType.class,
+        NotificationType.class,
+        VariableNodeType.class,
+        LogicNodeType.class
+    );
     private final JList<Object> itemList;
     private final static Splitter SPLITTER = Splitter.on(' ').trimResults().omitEmptyStrings();
     private final JTextField search;
@@ -56,10 +63,22 @@ public class NewNodePopup extends JPopupMenu {
         super.show(invoker, x, y);
     }
 
+
+    private static final Map<Class<? extends Enum<?>>, String> enumToCategory = ImmutableMap.of(
+        TriggerType.class, "Alert",
+        NotificationType.class, "Notification",
+        LogicNodeType.class, "Condition",
+        VariableNodeType.class, "Variable"
+    );
+
     @SafeVarargs
     public NewNodePopup(Class<? extends Enum<?>>... items) {
         this.items = (items == null ? DEFAULT_ITEMS.stream() : Arrays.stream(items))
-            .map(CustomList.Items::new).toArray(CustomList.Items[]::new);
+            .map((item) -> new CustomList.Items(
+                item,
+                enumToCategory.get(item),
+                e -> !(e == TriggerType.ALERT_GROUP || e == TriggerType.ADVANCED_ALERT))
+            ).toArray(CustomList.Items[]::new);
         this.itemList = new CustomList(this.items);
 
         this.search = new JTextField();

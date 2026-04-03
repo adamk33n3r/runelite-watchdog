@@ -7,10 +7,14 @@ import com.adamk33n3r.runelite.watchdog.TriggerType;
 import com.google.common.collect.ImmutableMap;
 import lombok.Getter;
 
+import javax.annotation.Nonnull;
 import javax.swing.*;
 import java.awt.*;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.function.BooleanSupplier;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 public class CustomList extends JList<Object> {
@@ -66,20 +70,11 @@ public class CustomList extends JList<Object> {
     public static class Items {
         private final Enum<?>[] items;
         private final String category;
-        private static final Map<Class<? extends Enum<?>>, String> enumToCategory = ImmutableMap.of(
-            TriggerType.class, "Alert",
-            NotificationType.class, "Notification",
-            LogicNodeType.class, "Condition"
-        );
-        public Items(Class<? extends Enum<?>> enumClass) {
-            if (enumClass == TriggerType.class) {
-                this.items = Arrays.stream(enumClass.getEnumConstants()).filter(c ->
-                    !(c == TriggerType.ALERT_GROUP || c == TriggerType.ADVANCED_ALERT)
-                ).toArray(Enum[]::new);
-            } else {
-                this.items = enumClass.getEnumConstants();
-            }
-            this.category = enumToCategory.get(enumClass);
+        public Items(@Nonnull Class<? extends Enum<?>> enumClass, @Nonnull String category, @Nonnull Predicate<Enum<?>> filter) {
+            this.items = Arrays.stream(enumClass.getEnumConstants())
+                .filter(filter)
+                .toArray(Enum<?>[]::new);
+            this.category = category;
         }
     }
 }
