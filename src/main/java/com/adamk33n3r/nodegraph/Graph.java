@@ -37,8 +37,8 @@ public class Graph {
             return false;
         }
 
-        // There is an existing connection to this input, disconnect it
-        if (input.getConnection() != null) {
+        // There is an existing connection to this input, disconnect it (unless multi-connection is allowed)
+        if (!input.isAllowMultipleConnections() && input.getConnection() != null) {
             this.disconnect(input.getConnection().getOutput(), input);
         }
 

@@ -11,7 +11,7 @@ public class Connection<T> {
         this.output = output;
         this.input = input;
         this.output.addConnection(this);
-        this.input.setConnection(this);
+        this.input.addConnection(this);
         this.input.setValue(this.output.getValue());
     }
 
@@ -25,6 +25,6 @@ public class Connection<T> {
 
     public void remove() {
         this.output.removeConnection(this);
-        this.input.removeConnection();
+        this.input.removeConnection(this);
     }
 }

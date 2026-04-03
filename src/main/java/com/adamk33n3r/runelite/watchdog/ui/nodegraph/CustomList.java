@@ -72,7 +72,13 @@ public class CustomList extends JList<Object> {
             LogicNodeType.class, "Condition"
         );
         public Items(Class<? extends Enum<?>> enumClass) {
-            this.items = enumClass.getEnumConstants();
+            if (enumClass == TriggerType.class) {
+                this.items = Arrays.stream(enumClass.getEnumConstants()).filter(c ->
+                    !(c == TriggerType.ALERT_GROUP || c == TriggerType.ADVANCED_ALERT)
+                ).toArray(Enum[]::new);
+            } else {
+                this.items = enumClass.getEnumConstants();
+            }
             this.category = enumToCategory.get(enumClass);
         }
     }

@@ -21,6 +21,7 @@ public class NotificationNode extends Node {
 
     public NotificationNode(Notification notification) {
         this.notification = notification;
+        this.captureGroups.setAllowMultipleConnections(true);
 
         this.fireWhenFocused.setValue(this.notification.isFireWhenFocused());
         this.fireWhenFocused.onChange(this.notification::setFireWhenFocused);

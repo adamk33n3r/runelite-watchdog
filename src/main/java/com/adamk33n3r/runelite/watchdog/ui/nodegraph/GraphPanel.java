@@ -268,7 +268,9 @@ public class GraphPanel extends JLayeredPane {
     public <T> void connect(ConnectionPointOut<T> output, ConnectionPointIn<T> input) {
         boolean madeConnection = this.graph.connect(output.getOutputVar(), input.getInputVar());
         if (madeConnection) {
-            this.removeConnectionTo(input);
+            if (!input.getInputVar().isAllowMultipleConnections()) {
+                this.removeConnectionTo(input);
+            }
             Connection conn = new NodeConnection(output, input);
             this.add(conn, CONNECTION_LAYER);
 //            this.processNode(output.getNodePanel().getNode());

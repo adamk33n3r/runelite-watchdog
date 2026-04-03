@@ -1,14 +1,16 @@
 package com.adamk33n3r.nodegraph;
 
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
 public class VarInput<T> extends Var<T> {
-    @Getter
-    private Connection<T> connection;
+    private final List<Connection<T>> connections = new ArrayList<>();
+    @Getter @Setter
+    private boolean allowMultipleConnections = false;
     private final List<Consumer<T>> onChange = new ArrayList<>();
     private final List<Consumer<Boolean>> onConnectChange = new ArrayList<>();
 
@@ -16,15 +18,21 @@ public class VarInput<T> extends Var<T> {
         super(node, name, type, initialValue);
     }
 
-    public void setConnection(Connection<T> connection) {
+    public Connection<T> getConnection() {
+        return this.connections.isEmpty() ? null : this.connections.get(this.connections.size() - 1);
+    }
+
+    public void addConnection(Connection<T> connection) {
         assert connection != null;
-        this.connection = connection;
+        this.connections.add(connection);
         this.fireConnectChange(true);
     }
 
-    public void removeConnection() {
-        this.connection = null;
-        this.fireConnectChange(false);
+    public void removeConnection(Connection<T> connection) {
+        this.connections.remove(connection);
+        if (this.connections.isEmpty()) {
+            this.fireConnectChange(false);
+        }
     }
 
     public void fireConnectChange(boolean connect) {
@@ -44,11 +52,16 @@ public class VarInput<T> extends Var<T> {
     }
 
     public void receive() {
-        if (this.connection == null) {
+        if (this.connections.isEmpty()) {
             return;
         }
 
-        this.value = this.connection.get();
+        // For multi-connection inputs, value is set via push (send()) — don't overwrite with stale pull data
+        if (this.allowMultipleConnections) {
+            return;
+        }
+
+        this.value = this.connections.get(0).get();
         this.onChange.forEach((consumer) -> consumer.accept(this.value));
     }
 

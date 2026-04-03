@@ -20,6 +20,7 @@ public class TriggerNode extends Node {
     private final VarOutput<String[]> captureGroups = new VarOutput<>(this, "Capture Groups Out", String[].class, new String[0]);
     private final VarOutput<String> nameOut = new VarOutput<>(this, "Name", String.class, this.name.getValue());
     private final VarOutput<Number> debounceOut = new VarOutput<>(this, "Debounce Out", Number.class, this.debounce.getValue());
+    private final VarOutput<Boolean> enabledOut = new VarOutput<>(this, "Enabled Out", Boolean.class, this.enabled.getValue());
 
     public TriggerNode(Alert alert) {
         this.alert = alert;
@@ -30,6 +31,7 @@ public class TriggerNode extends Node {
 
         this.nameOut.setValue(this.name.getValue());
         this.debounceOut.setValue(this.debounce.getValue());
+        this.enabledOut.setValue(this.enabled.getValue());
 
         reg(this.enabled);
         reg(this.name);
@@ -38,6 +40,7 @@ public class TriggerNode extends Node {
         reg(this.captureGroups);
         reg(this.nameOut);
         reg(this.debounceOut);
+        reg(this.enabledOut);
     }
 
     @Override
@@ -45,5 +48,6 @@ public class TriggerNode extends Node {
         this.nameOut.setValue(this.name.getValue());
         this.captureGroups.setValue(this.captureGroupsIn.getValue());
         this.debounceOut.setValue(this.debounce.getConnection() != null ? this.debounce.getValue() : this.alert.getDebounceTime());
+        this.enabledOut.setValue(this.enabled.getValue());
     }
 }

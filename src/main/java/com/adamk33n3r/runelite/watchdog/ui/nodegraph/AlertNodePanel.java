@@ -4,6 +4,7 @@ import com.adamk33n3r.nodegraph.nodes.ContinuousTriggerNode;
 import com.adamk33n3r.runelite.watchdog.alerts.Alert;
 import com.adamk33n3r.nodegraph.nodes.TriggerNode;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.ConnectionLine;
+import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.ConnectionPoint;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.ConnectionPointIn;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.ConnectionPointOut;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.inputs.BoolInput;
@@ -27,6 +28,7 @@ public class AlertNodePanel extends NodePanel {
     private final ConnectionPointOut<String> alertName;
     private final ConnectionPointOut<Number> testOut;
     private final ConnectionPointIn<Boolean> enabled;
+    private final ConnectionPointOut<Boolean> enabledOut;
 
     public AlertNodePanel(GraphPanel graphPanel, int x, int y, String name, Color color, TriggerNode triggerNode, AlertPanelContentFactory alertPanelContentFactory) {
         super(graphPanel, triggerNode, x, y, name, color);
@@ -51,7 +53,8 @@ public class AlertNodePanel extends NodePanel {
 //        this.items.add(new ConnectionLine<>(new ConnectionPointIn<>(this, triggerNode.getDebounce()), new NumberInput("Debounce", triggerNode.getDebounceOut().getValue().intValue()), this.testOut));
         this.enabled = new ConnectionPointIn<>(this, triggerNode.getEnabled());
         BoolInput enabledInput = new BoolInput("Enabled", triggerNode.getEnabled());
-        this.items.add(new ConnectionLine<>(this.enabled, enabledInput, null));
+        this.enabledOut = new ConnectionPointOut<>(this, triggerNode.getEnabledOut());
+        this.items.add(new ConnectionLine<>(this.enabled, enabledInput, this.enabledOut));
 
         JButton testBtn = new JButton("TEST");
         testBtn.addActionListener((ev) -> graphPanel.trigger(triggerNode));
