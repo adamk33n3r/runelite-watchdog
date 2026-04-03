@@ -1,6 +1,7 @@
 package com.adamk33n3r.runelite.watchdog;
 
 import net.runelite.client.RuneLite;
+import net.runelite.client.config.ConfigManager;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -23,8 +24,19 @@ public class AlertBackupManager {
     @Inject
     private WatchdogConfig config;
 
+    @Inject
+    private ConfigManager configManager;
+
+    private String getSafeProfileName() {
+        String name = configManager.getProfile().getName();
+        if (name == null || name.isEmpty()) {
+            return "default";
+        }
+        return name.replaceAll("[\\\\/:*?\"<>|]", "_");
+    }
+
     public File getBackupDir() {
-        return new File(RuneLite.RUNELITE_DIR, "watchdog/backups");
+        return new File(RuneLite.RUNELITE_DIR, "watchdog/backups/" + getSafeProfileName());
     }
 
     public void backup(String json) {
