@@ -380,7 +380,8 @@ public class AlertManager {
     }
 
     public void loadAlerts() {
-        final String json = this.configManager.getConfiguration(WatchdogConfig.CONFIG_GROUP_NAME, WatchdogConfig.ALERTS);
+        final String data = this.configManager.getConfiguration(WatchdogConfig.CONFIG_GROUP_NAME, WatchdogConfig.ALERTS);
+        final String json = Util.isCompressed(data) ? Util.decompressAlerts(data) : data;
         this.importAlerts(json, this.alerts, false, false, false);
         this.createStarterAlertsIfEmpty();
         this.handleUpgrades();
@@ -430,7 +431,7 @@ public class AlertManager {
 
     public void saveAlerts() {
         String json = this.gson.toJson(this.alerts, ALERT_LIST_TYPE);
-        this.configManager.setConfiguration(WatchdogConfig.CONFIG_GROUP_NAME, WatchdogConfig.ALERTS, json);
+        this.configManager.setConfiguration(WatchdogConfig.CONFIG_GROUP_NAME, WatchdogConfig.ALERTS, Util.compressAlerts(json));
         this.alertBackupManager.backup(json);
     }
 
