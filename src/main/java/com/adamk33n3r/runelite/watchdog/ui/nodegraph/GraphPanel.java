@@ -423,11 +423,15 @@ public class GraphPanel extends JLayeredPane {
     public NodePanel createNodePanel(Node node) {
         if (node instanceof ContinuousTriggerNode) {
             ContinuousTriggerNode tn = (ContinuousTriggerNode) node;
-            String name = tn.getAlert().getName() != null ? tn.getAlert().getName() : tn.getAlert().getType().getName();
+            String name = tn.getAlert().getName() != null ?
+                String.format("%s - %s", tn.getAlert().getName(), tn.getAlert().getType().getName()) :
+                tn.getAlert().getType().getName();
             return new AlertNodePanel(this, tn.getX(), tn.getY(), name, NODE_TRIGGER_COLOR, tn, alertPanelContentFactory);
         } else if (node instanceof TriggerNode) {
             TriggerNode tn = (TriggerNode) node;
-            String name = tn.getAlert().getName() != null ? tn.getAlert().getName() : tn.getAlert().getType().getName();
+            String name = tn.getAlert().getName() != null ?
+                String.format("%s - %s", tn.getAlert().getName(), tn.getAlert().getType().getName()) :
+                tn.getAlert().getType().getName();
             return new AlertNodePanel(this, tn.getX(), tn.getY(), name, NODE_TRIGGER_COLOR, tn, alertPanelContentFactory);
         } else if (node instanceof NotificationNode) {
             NotificationNode nn = (NotificationNode) node;

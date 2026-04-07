@@ -12,7 +12,7 @@ public final class ExecSignal {
 
     @Override
     public String toString() {
-        if (captureGroups.length == 0) return "[]";
+        if (captureGroups.length == 0) return "[ ]";
         StringBuilder sb = new StringBuilder("[");
         for (int i = 0; i < captureGroups.length; i++) {
             if (i > 0) sb.append(", ");

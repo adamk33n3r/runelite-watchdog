@@ -186,8 +186,6 @@ public class GraphSerializer implements JsonSerializer<Graph>, JsonDeserializer<
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     private void connectUnchecked(Graph graph, VarOutput<?> output, VarInput<?> input) {
-        // TODO: this normally runs the on connect listeners which the UI hooks into so that it can update the colors of the connections
-        // but this is only being called once on deserialization
         graph.connect((VarOutput) output, (VarInput) input);
     }
 }

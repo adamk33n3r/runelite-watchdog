@@ -45,16 +45,16 @@ public class NotificationNodePanel extends NodePanel {
         this.fireWhenAfkSecondsIn = new ConnectionPointIn<>(this, notificationNode.getFireWhenAfkSeconds());
         this.items.add(new ConnectionLine<>(this.fireWhenAfkSecondsIn, new NumberInput("AFK Seconds", notificationNode.getFireWhenAfkSeconds()), null));
 
-        JButton testBtn = new JButton("TEST");
-        testBtn.addActionListener(ev -> notification.fireForced(new String[]{}));
-        this.items.add(testBtn);
-
         // Populate type-specific controls via content panel instance
         NotificationContentPanel<?> contentPanel = notificationPanelFactory.createContentPanel(notification, this::notifyChange);
         if (contentPanel != null) {
             contentPanel.setOnRebuild(this::pack);
             this.items.add(contentPanel);
         }
+
+        JButton testBtn = new JButton("TEST");
+        testBtn.addActionListener(ev -> notification.fireForced(new String[]{}));
+        this.items.add(testBtn);
 
         this.pack();
     }

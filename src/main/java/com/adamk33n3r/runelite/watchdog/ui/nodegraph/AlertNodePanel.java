@@ -56,31 +56,6 @@ public class AlertNodePanel extends NodePanel {
         this.enabledOut = new ConnectionPointOut<>(this, triggerNode.getEnabledOut());
         this.items.add(new ConnectionLine<>(this.enabled, enabledInput, this.enabledOut));
 
-        JButton testBtn = new JButton("TEST");
-        testBtn.addActionListener((ev) -> {
-            int count = new Random().nextInt(4) + 1;
-            String[] strings = new String[count];
-            for (int i = 1; i < count + 1; i++) {
-                strings[i - 1] = String.format("test%d", i);
-            }
-            graphPanel.trigger(triggerNode, strings);
-        });
-        this.items.add(testBtn);
-
-//        TextInput nameInput = new TextInput("Name", alert.getName());
-//        nameInput.registerOnChange(v -> {
-//            alert.setName(v);
-//            this.notifyChange();
-//        });
-//        this.items.add(new ConnectionLine<>(null, nameInput, this.alertName));
-//
-//        JSpinner debounce = PanelUtils.createSpinner(alert.getDebounceTime(), 0, 8640000, 100, (val) -> {
-//            triggerNode.getDebounce().setValue(val);
-//            graphPanel.processNode(triggerNode);
-//            this.notifyChange();
-//        });
-//        this.items.add(PanelUtils.createLabeledComponent("Debounce Time (ms)", "How long to wait before allowing this alert to trigger again in milliseconds", debounce));
-
         // Type-specific controls via factory — supports rebuild for conditional UI panels
         AlertContentPanel<?> content = alertPanelContentFactory.createContentPanel(alert, this::notifyChange);
         if (content != null) {
@@ -92,6 +67,17 @@ public class AlertNodePanel extends NodePanel {
 //            content.buildTypeContent();
             this.items.add(content);
         }
+
+        JButton testBtn = new JButton("TEST");
+        testBtn.addActionListener((ev) -> {
+            int count = new Random().nextInt(4) + 1;
+            String[] strings = new String[count];
+            for (int i = 1; i < count + 1; i++) {
+                strings[i - 1] = String.format("test%d", i);
+            }
+            graphPanel.trigger(triggerNode, strings);
+        });
+        this.items.add(testBtn);
 
         this.pack();
     }
