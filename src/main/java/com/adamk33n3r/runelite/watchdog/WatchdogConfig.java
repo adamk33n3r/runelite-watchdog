@@ -29,6 +29,7 @@ public interface WatchdogConfig extends Config {
     String SIDE_PANEL_PRIORITY = "sidePanelPriority";
     String ENABLE_NOTIFICATION_CATEGORIES = "enableNotificationCategories";
     String DISABLE_ALL_ALERTS_ON_STARTUP = "disableAllAlertsOnStartup";
+    String ENABLE_ADVANCED_ALERTS = "enableAdvancedAlerts";
 
     // AFK Notification
     String DEFAULT_AFK_MODE = "defaultAFKMode";
@@ -158,10 +159,17 @@ public interface WatchdogConfig extends Config {
     @ConfigItem(
         keyName = SIDE_PANEL_PRIORITY,
         name = "Side Panel Priority",
-        description = "Panel icon priority, Lower # = higher pos, Higher # = lower pos "
+        description = "Panel icon priority, Lower # = higher pos, Higher # = lower pos"
     )
     @Range(min = Integer.MIN_VALUE)
     default int sidePanelPriority() { return 1; }
+
+    @ConfigItem(
+        keyName = ENABLE_ADVANCED_ALERTS,
+        name = "Enable Advanced Alerts (Beta)",
+        description = "Enable the creation of Advanced Alerts (currently in BETA)"
+    )
+    default boolean enableAdvancedAlerts() { return false; }
 
     @ConfigItem(
         keyName = ENABLE_NOTIFICATION_CATEGORIES,
@@ -176,6 +184,35 @@ public interface WatchdogConfig extends Config {
         description = "Disables all alerts on startup"
     )
     default boolean disableAllAlertsOnStartup() { return false; }
+
+    //region Backups
+    @ConfigSection(
+        name = "Backups",
+        description = "The options that control the alert backup system",
+        position = -1,
+        closedByDefault = true
+    )
+    String backupsSection = "backupsSection";
+
+    @ConfigItem(
+        keyName = BACKUP_ENABLED,
+        name = "Automatic Backups",
+        description = "Saves a daily compressed backup of your alerts to .runelite/watchdog/backups/",
+        section = backupsSection,
+        position = 0
+    )
+    default boolean backupEnabled() { return true; }
+
+    @ConfigItem(
+        keyName = BACKUP_RETENTION_DAYS,
+        name = "Max Backups",
+        description = "How many backup files to keep. Oldest files beyond this limit are deleted.",
+        section = backupsSection,
+        position = 1
+    )
+    @Range(min = 1)
+    default int backupRetentionDays() { return 7; }
+    //endregion
 
     //region AFK Notification
     @ConfigSection(
@@ -672,40 +709,11 @@ public interface WatchdogConfig extends Config {
 
     // endregion
 
-    //region Backups
-    @ConfigSection(
-        name = "Backups",
-        description = "The options that control the alert backup system",
-        position = 10,
-        closedByDefault = true
-    )
-    String backupsSection = "backupsSection";
-
-    @ConfigItem(
-        keyName = BACKUP_ENABLED,
-        name = "Automatic Backups",
-        description = "Saves a daily compressed backup of your alerts to .runelite/watchdog/backups/",
-        section = backupsSection,
-        position = 0
-    )
-    default boolean backupEnabled() { return true; }
-
-    @ConfigItem(
-        keyName = BACKUP_RETENTION_DAYS,
-        name = "Max Backups",
-        description = "How many backup files to keep. Oldest files beyond this limit are deleted.",
-        section = backupsSection,
-        position = 1
-    )
-    @Range(min = 1)
-    default int backupRetentionDays() { return 7; }
-    //endregion
-
     //region Hotkeys
     @ConfigSection(
         name = "Hotkeys",
         description = "The hotkeys to use for various actions",
-        position = 11,
+        position = 10,
         closedByDefault = true
     )
     String hotkeysSection = "hotkeysSection";

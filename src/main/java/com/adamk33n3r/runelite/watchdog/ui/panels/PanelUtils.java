@@ -416,6 +416,7 @@ public class PanelUtils {
         popupMenu.add(alertGroupMenuItem);
         popupMenu.addSeparator();
         Arrays.stream(TriggerType.values())
+            .filter(tType -> tType != TriggerType.ADVANCED_ALERT || WatchdogPlugin.getInstance().getConfig().enableAdvancedAlerts())
             .filter(tType -> tType != TriggerType.ALERT_GROUP)
             .forEach(tType -> {
                 JMenuItem c = new JMenuItem(tType.getName());
