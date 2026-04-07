@@ -438,9 +438,13 @@ public class GraphPanel extends JLayeredPane {
             String name = nn.getNotification().getType().getName();
             return new NotificationNodePanel(this, nn.getX(), nn.getY(), name, NODE_NOTIFICATION_COLOR, nn, notificationPanelFactory);
         } else if (node instanceof Bool) {
-            return new BoolNodePanel(this, (Bool) node, node.getX(), node.getY(), "Bool", NODE_CONSTANT_COLOR);
+            Bool boolNode = (Bool) node;
+            String boolName = !boolNode.getNameOut().getValue().isEmpty() ? boolNode.getNameOut().getValue() : "Bool";
+            return new BoolNodePanel(this, boolNode, node.getX(), node.getY(), boolName, NODE_CONSTANT_COLOR);
         } else if (node instanceof Num) {
-            return new NumberNodePanel(this, (Num) node, node.getX(), node.getY(), "Number", NODE_CONSTANT_COLOR);
+            Num numNode = (Num) node;
+            String numName = !numNode.getNameOut().getValue().isEmpty() ? numNode.getNameOut().getValue() : "Number";
+            return new NumberNodePanel(this, numNode, node.getX(), node.getY(), numName, NODE_CONSTANT_COLOR);
         } else if (node instanceof And) {
             return new IfNodePanel(this, (And) node, node.getX(), node.getY(), "AND", Color.MAGENTA);
         }

@@ -5,6 +5,7 @@ import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.ConnectionLine;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.ConnectionPointIn;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.ConnectionPointOut;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.inputs.BoolInput;
+import com.adamk33n3r.runelite.watchdog.ui.nodegraph.inputs.TextInput;
 import lombok.Getter;
 
 import java.awt.*;
@@ -16,6 +17,10 @@ public class BoolNodePanel extends NodePanel {
 
     public BoolNodePanel(GraphPanel graphPanel, Bool boolNode, int x, int y, String name, Color color) {
         super(graphPanel, boolNode, x, y, name, color);
+
+        TextInput nameInput = new TextInput("Name", boolNode.getNameOut());
+        nameInput.registerOnType(this::updateHeaderLabel);
+        this.items.add(nameInput);
 
 //        this.boolValueIn = new ConnectionPointIn<>(this, boolNode.getValueIn());
         this.boolValueOut = new ConnectionPointOut<>(this, boolNode.getValueOut());

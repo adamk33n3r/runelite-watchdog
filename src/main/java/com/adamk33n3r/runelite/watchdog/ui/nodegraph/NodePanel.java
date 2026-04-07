@@ -59,6 +59,7 @@ public class NodePanel extends JPanel {
         return (ConnectionPointIn<T>) inputRegistry.get(var);
     }
 
+    private JLabel nameLabel;
     private final Border border;
 
 //    protected JPanel inConnectionPoints;
@@ -74,7 +75,7 @@ public class NodePanel extends JPanel {
 //        this.setBorder(BorderFactory.createSoftBevelBorder(BevelBorder.RAISED));
         this.border = BorderFactory.createEmptyBorder(5, 5, 5, 5);
         this.setLayout(new BorderLayout());
-        JLabel nameLabel = new JLabel(name);
+        this.nameLabel = new JLabel(name);
         nameLabel.setForeground(Util.textColorForBG(color));
         nameLabel.setPreferredSize(new Dimension(0, TITLE_HEIGHT));
         nameLabel.setBorder(new EmptyBorder(0, 5, 0, 0));
@@ -127,6 +128,10 @@ public class NodePanel extends JPanel {
             this.revalidate();
             this.repaint();
         });
+    }
+
+    public void updateHeaderLabel(String newName) {
+        this.nameLabel.setText(newName);
     }
 
     protected void notifyChange() {

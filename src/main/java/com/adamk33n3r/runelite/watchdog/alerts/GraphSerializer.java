@@ -54,9 +54,11 @@ public class GraphSerializer implements JsonSerializer<Graph>, JsonDeserializer<
             } else if (node instanceof Num) {
                 nodeObj.addProperty("type", "Num");
                 nodeObj.addProperty("value", ((Num) node).getValue().getValue().doubleValue());
+                nodeObj.addProperty("name", ((Num) node).getNameOut().getValue());
             } else if (node instanceof Bool) {
                 nodeObj.addProperty("type", "Bool");
                 nodeObj.addProperty("value", ((Bool) node).getValueOut().getValue());
+                nodeObj.addProperty("name", ((Bool) node).getNameOut().getValue());
             } else if (node instanceof And) {
                 nodeObj.addProperty("type", "And");
             } else if (node instanceof Add) {
@@ -121,6 +123,9 @@ public class GraphSerializer implements JsonSerializer<Graph>, JsonDeserializer<
                             if (nodeObj.has("value")) {
                                 num.setValue(nodeObj.get("value").getAsInt());
                             }
+                            if (nodeObj.has("name")) {
+                                num.getNameOut().setValue(nodeObj.get("name").getAsString());
+                            }
                             node = num;
                             break;
                         }
@@ -128,6 +133,9 @@ public class GraphSerializer implements JsonSerializer<Graph>, JsonDeserializer<
                             Bool bool = new Bool();
                             if (nodeObj.has("value")) {
                                 bool.setValue(nodeObj.get("value").getAsBoolean());
+                            }
+                            if (nodeObj.has("name")) {
+                                bool.getNameOut().setValue(nodeObj.get("name").getAsString());
                             }
                             node = bool;
                             break;

@@ -28,8 +28,11 @@ public class AlertNodePanel extends NodePanel {
     private final ConnectionPointIn<Boolean> enabled;
     private final ConnectionPointOut<Boolean> enabledOut;
 
+    private final transient TriggerNode triggerNode;
+
     public AlertNodePanel(GraphPanel graphPanel, int x, int y, String name, Color color, TriggerNode triggerNode, AlertPanelContentFactory alertPanelContentFactory) {
         super(graphPanel, triggerNode, x, y, name, color);
+        this.triggerNode = triggerNode;
         Alert alert = triggerNode.getAlert();
 
         if (triggerNode instanceof ContinuousTriggerNode) {
@@ -59,6 +62,8 @@ public class AlertNodePanel extends NodePanel {
         // Type-specific controls via factory — supports rebuild for conditional UI panels
         AlertContentPanel<?> content = alertPanelContentFactory.createContentPanel(alert, this::notifyChange);
         if (content != null) {
+            content.setOnNameType(this::updateHeaderLabel);
+            content.setOnNameChange(() -> this.updateHeaderLabel(triggerNode.getAlert().getName()));
             content.setOnRebuild(() -> {
                 this.items.revalidate();
                 this.items.repaint();
@@ -80,5 +85,10 @@ public class AlertNodePanel extends NodePanel {
         this.items.add(testBtn);
 
         this.pack();
+    }
+
+    public void updateHeaderLabel(String newName) {
+        String name = String.format("%s - %s", newName, this.triggerNode.getAlert().getType().getName());
+        super.updateHeaderLabel(name);
     }
 }

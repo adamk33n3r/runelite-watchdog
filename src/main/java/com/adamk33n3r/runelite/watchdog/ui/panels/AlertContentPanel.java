@@ -10,6 +10,7 @@ import com.adamk33n3r.runelite.watchdog.ui.FlatTextArea;
 import com.adamk33n3r.runelite.watchdog.ui.PlaceholderTextField;
 import com.adamk33n3r.runelite.watchdog.ui.StretchedStackedLayout;
 
+import lombok.Setter;
 import net.runelite.client.plugins.info.JRichTextPane;
 import net.runelite.client.ui.ColorScheme;
 
@@ -36,7 +37,19 @@ public abstract class AlertContentPanel<T extends Alert> extends JPanel {
     protected T alert;
     protected Runnable onChange;
     protected AlertManager alertManager;
+    /**
+     * -- SETTER --
+     *  Sets a callback invoked after every
+     *  call.
+     *  Node panels set this to call
+     *  after a content rebuild.
+     */
+    @Setter
     private Runnable onRebuild;
+    @Setter
+    private Runnable onNameChange;
+    @Setter
+    private Consumer<String> onNameType;
 
     protected AlertContentPanel(T alert, Runnable onChange) {
         this.alert = alert;
@@ -84,14 +97,6 @@ public abstract class AlertContentPanel<T extends Alert> extends JPanel {
     }
 
     /**
-     * Sets a callback invoked after every {@link #rebuild()} call.
-     * Node panels set this to call {@code pack()} after a content rebuild.
-     */
-    public void setOnRebuild(Runnable onRebuild) {
-        this.onRebuild = onRebuild;
-    }
-
-    /**
      * Returns {@code true} if the sidebar should add a {@link NotificationsPanel} below this content.
      * Override to return {@code false} for alert types that don't use the notification list
      * (e.g. AdvancedAlert, which uses the node graph instead).
@@ -136,6 +141,14 @@ public abstract class AlertContentPanel<T extends Alert> extends JPanel {
         textField.setSelectionColor(ColorScheme.BRAND_ORANGE_TRANSPARENT);
         textField.setPlaceholder(placeholder);
         textField.setToolTipText(tooltip);
+        textField.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+            @Override
+            public void insertUpdate(javax.swing.event.DocumentEvent e) { fireOnNameType(textField.getText()); }
+            @Override
+            public void removeUpdate(javax.swing.event.DocumentEvent e) { fireOnNameType(textField.getText()); }
+            @Override
+            public void changedUpdate(javax.swing.event.DocumentEvent e) {}
+        });
         textField.addFocusListener(new FocusListener() {
             @Override
             public void focusGained(FocusEvent e) {
@@ -146,10 +159,19 @@ public abstract class AlertContentPanel<T extends Alert> extends JPanel {
             public void focusLost(FocusEvent e) {
                 saveAction.accept(textField.getText());
                 alertManager.saveAlerts();
+                if (AlertContentPanel.this.onNameChange != null) {
+                    AlertContentPanel.this.onNameChange.run();
+                }
             }
         });
         this.add(textField);
         return this;
+    }
+
+    private void fireOnNameType(String text) {
+        if (this.onNameType != null) {
+            this.onNameType.accept(text);
+        }
     }
 
     public AlertContentPanel<T> addTextArea(String placeholder, String tooltip, String initialValue, Consumer<String> saveAction) {
