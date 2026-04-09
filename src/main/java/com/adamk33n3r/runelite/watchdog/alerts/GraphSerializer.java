@@ -15,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 @Slf4j
 public class GraphSerializer implements JsonSerializer<Graph>, JsonDeserializer<Graph> {
@@ -157,6 +158,7 @@ public class GraphSerializer implements JsonSerializer<Graph>, JsonDeserializer<
 
                 node.setX(x);
                 node.setY(y);
+                node.setId(UUID.fromString(id));
                 nodeById.put(id, node);
                 graph.add(node);
             }

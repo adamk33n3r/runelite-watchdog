@@ -8,8 +8,8 @@ import java.util.Map;
 import java.util.UUID;
 
 public abstract class Node {
-    @Getter
-    private final UUID id = UUID.randomUUID();
+    @Getter @Setter
+    private UUID id = UUID.randomUUID();
     @Getter @Setter
     private int x, y;
 
