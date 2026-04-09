@@ -82,6 +82,12 @@ public class Graph {
             });
     }
 
+    public Stream<TriggerNode> getTriggerNodes() {
+        return this.nodes.stream()
+            .filter(n -> n instanceof TriggerNode)
+            .map(n -> (TriggerNode) n);
+    }
+
     /**
      * Returns all TriggerNodes whose embedded alert is an instance of the given alert class.
      */

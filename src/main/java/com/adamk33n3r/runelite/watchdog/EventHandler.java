@@ -470,7 +470,11 @@ public class EventHandler {
         }
         WorldPoint location = tileObject.getWorldLocation();
         if (tileObject instanceof GameObject) {
-            WorldPoint playerLocation = this.client.getLocalPlayer().getWorldLocation();
+            Player localPlayer = this.client.getLocalPlayer();
+            if (localPlayer == null) {
+                return;
+            }
+            WorldPoint playerLocation = localPlayer.getWorldLocation();
             location = Util.getClosestTile(playerLocation, (GameObject) tileObject);
         }
         this.onSpawned(impostor.getName(), impostor.getId(), location, mode, type);
@@ -484,8 +488,12 @@ public class EventHandler {
         if (name == null) {
             return;
         }
+        Player localPlayer = this.client.getLocalPlayer();
+        if (localPlayer == null) {
+            return;
+        }
         String unformattedName = Text.removeFormattingTags(name);
-        int distanceToObject = location.distanceTo(this.client.getLocalPlayer().getWorldLocation());
+        int distanceToObject = location.distanceTo(localPlayer.getWorldLocation());
         this.alertManager.getAllEnabledAlertsOfType(SpawnedAlert.class)
             .filter(spawnedAlert -> spawnedAlert.getSpawnedDespawned() == mode)
             .filter(spawnedAlert -> spawnedAlert.getSpawnedType() == type)
@@ -540,8 +548,12 @@ public class EventHandler {
     @Subscribe
     private void onGameTick(GameTick gameTick) {
         // Location alerts
-        var world = this.client.getLocalPlayer().getWorldLocation();
-        var worldView = this.client.getLocalPlayer().getWorldView();
+        Player localPlayer = this.client.getLocalPlayer();
+        if (localPlayer == null) {
+            return;
+        }
+        var world = localPlayer.getWorldLocation();
+        var worldView = localPlayer.getWorldView();
         var localWorld = LocalPoint.fromWorld(worldView, world);
         // Should never be null
         if (localWorld == null) {

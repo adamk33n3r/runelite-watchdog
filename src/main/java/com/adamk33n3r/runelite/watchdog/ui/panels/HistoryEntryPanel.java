@@ -1,6 +1,7 @@
 package com.adamk33n3r.runelite.watchdog.ui.panels;
 
 import com.adamk33n3r.runelite.watchdog.Util;
+import com.adamk33n3r.runelite.watchdog.alerts.AdvancedAlert;
 import com.adamk33n3r.runelite.watchdog.alerts.Alert;
 import com.adamk33n3r.runelite.watchdog.notifications.MessageNotification;
 
@@ -15,6 +16,7 @@ import javax.swing.border.EtchedBorder;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.stream.Collectors;
 
 public class HistoryEntryPanel extends JPanel {
     @Getter
@@ -29,19 +31,26 @@ public class HistoryEntryPanel extends JPanel {
         this.add(alertType);
         JLabel alertName = new JLabel(alert.getName());
         this.add(alertName);
-        alert.getNotifications().stream()
-            .filter(notification -> notification instanceof MessageNotification)
-            .map(notification -> (MessageNotification) notification)
-            .forEach(notification -> {
-                String message = Util.processTriggerValues(notification.getMessage(), triggerValues);
-                JTextArea wrappingTextArea = new JTextArea(notification.getType().getName() + ": " + message);
-                wrappingTextArea.setLineWrap(true);
-                wrappingTextArea.setWrapStyleWord(true);
-                wrappingTextArea.setOpaque(false);
-                wrappingTextArea.setEditable(false);
-                wrappingTextArea.setFocusable(false);
-                this.add(wrappingTextArea);
-            });
+        if (alert instanceof AdvancedAlert) {
+            String alertNames = ((AdvancedAlert) alert).getGraph().getTriggerNodes()
+                .map(n -> n.getAlert().getName())
+                .collect(Collectors.joining("<br/>"));
+            this.add(new JLabel("<html>" + alertNames + "</html>"));
+        } else if (alert.getNotifications() != null) {
+            alert.getNotifications().stream()
+                .filter(notification -> notification instanceof MessageNotification)
+                .map(notification -> (MessageNotification) notification)
+                .forEach(notification -> {
+                    String message = Util.processTriggerValues(notification.getMessage(), triggerValues);
+                    JTextArea wrappingTextArea = new JTextArea(notification.getType().getName() + ": " + message);
+                    wrappingTextArea.setLineWrap(true);
+                    wrappingTextArea.setWrapStyleWord(true);
+                    wrappingTextArea.setOpaque(false);
+                    wrappingTextArea.setEditable(false);
+                    wrappingTextArea.setFocusable(false);
+                    this.add(wrappingTextArea);
+                });
+        }
         String formattedTime = DateTimeFormatter.ofPattern("HH:mm:ss").withZone(ZoneId.systemDefault()).format(Instant.now());
         this.add(new JLabel(formattedTime));
     }
