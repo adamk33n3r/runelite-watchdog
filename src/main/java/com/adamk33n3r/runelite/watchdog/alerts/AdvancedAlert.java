@@ -4,17 +4,24 @@ import com.adamk33n3r.nodegraph.Graph;
 import com.adamk33n3r.nodegraph.nodes.NotificationNode;
 import com.adamk33n3r.nodegraph.nodes.TriggerNode;
 import lombok.Getter;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 
+@Getter
+@Setter
+@Accessors(chain = true)
 public class AdvancedAlert extends Alert {
-    @Getter
     private Graph graph = new Graph();
 
     public AdvancedAlert() {
-        super("New Advanced Alert");
+        this("New Advanced Alert");
     }
 
     public AdvancedAlert(String name) {
         super(name);
+        // So that we don't serialize these
+        this.setNotifications(null);
+        this.setAlertMode(null);
     }
 
     /**

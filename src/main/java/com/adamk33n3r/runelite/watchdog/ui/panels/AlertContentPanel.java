@@ -3,6 +3,7 @@ package com.adamk33n3r.runelite.watchdog.ui.panels;
 import com.adamk33n3r.runelite.watchdog.AlertManager;
 import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
 import com.adamk33n3r.runelite.watchdog.alerts.Alert;
+import com.adamk33n3r.runelite.watchdog.alerts.AdvancedAlert;
 import com.adamk33n3r.runelite.watchdog.alerts.AlertGroup;
 import com.adamk33n3r.runelite.watchdog.alerts.AlertMode;
 import com.adamk33n3r.runelite.watchdog.alerts.RegexMatcher;
@@ -299,11 +300,11 @@ public abstract class AlertContentPanel<T extends Alert> extends JPanel {
             .addTextField("Enter the alert name...", "Name of Alert", this.alert.getName(), this.alert::setName)
             .addIf(panel -> panel.addSelect("Alert Mode", "How to handle re-triggering when this alert is already running",
                     AlertMode.class, this.alert.getAlertMode(), this.alert::setAlertMode),
-                () -> !(this.alert instanceof AlertGroup))
-            .addSubPanelControl(PanelUtils.createLabeledComponent(
+                () -> !(this.alert instanceof AlertGroup) && !(this.alert instanceof AdvancedAlert))
+            .addIf(panel -> panel.addSubPanelControl(PanelUtils.createLabeledComponent(
                 "Debounce (ms)",
                 "How long to wait before allowing this alert to trigger again in milliseconds",
-                sub
-            ));
+                sub)),
+                () -> !(this.alert instanceof AdvancedAlert));
     }
 }
