@@ -127,3 +127,4 @@ jobs:
           generateReleaseNotes: true
           name: Release ${{ github.ref_name }}
           tag: ${{ github.ref_name }}
+          prerelease: ${{ contains(github.ref_name, '-alpha') || contains(github.ref_name, '-beta') }}
