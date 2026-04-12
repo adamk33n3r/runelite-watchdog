@@ -10,12 +10,15 @@ import net.runelite.client.config.ConfigManager;
 import net.runelite.client.ui.laf.RuneLiteLAF;
 import okhttp3.OkHttpClient;
 import org.mockito.Mockito;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.applet.Applet;
 import java.awt.*;
 
 public class NodeGraphLauncher {
+    private static final Logger log = LoggerFactory.getLogger(NodeGraphLauncher.class);
     private static JFrame jFrame;
     private static Injector injector;
     public static void main(String[] args) throws Exception {
@@ -45,7 +48,7 @@ public class NodeGraphLauncher {
         JButton reload = new JButton("RELOAD");
         jPanel.add(reload, BorderLayout.NORTH);
         reload.addActionListener((ev) -> {
-            System.out.println("Reloading...");
+            log.info("Reloading...");
             SwingUtilities.invokeLater(NodeGraphLauncher::rebuild);
         });
 

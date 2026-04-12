@@ -25,6 +25,7 @@ import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.ConnectionPoint
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.ConnectionPointOut;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.NodeConnection;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.components.colorpicker.ColorPickerManager;
 import net.runelite.client.util.ImageUtil;
@@ -44,6 +45,7 @@ import java.awt.image.BufferedImage;
 import java.util.*;
 import java.util.function.Consumer;
 
+@Slf4j
 public class GraphPanel extends JLayeredPane {
     private static final double MIN_ZOOM = 0.6;
     private static final double MAX_ZOOM = 1.0;
@@ -239,24 +241,24 @@ public class GraphPanel extends JLayeredPane {
             @Override
             public void keyPressed(KeyEvent e) {
                 if (e.getKeyCode() == KeyEvent.VK_D) {
-                    System.out.println("Dump Panels");
-                    System.out.println("Nodes:");
+                    log.debug("Dump Panels");
+                    log.debug("Nodes:");
                     for (Component component : GraphPanel.this.getComponentsInLayer(NODE_LAYER)) {
                         if (component instanceof NodePanel) {
                             NodePanel nodePanel = (NodePanel) component;
-                            System.out.println(nodePanel.getName());
+                            log.debug(nodePanel.getName());
                         }
                     }
-                    System.out.println("Connections:");
+                    log.debug("Connections:");
                     for (Component component : GraphPanel.this.getComponentsInLayer(CONNECTION_LAYER)) {
                         if (component instanceof NodeConnection) {
                             NodeConnection nodeConnection = (NodeConnection) component;
-                            System.out.println(nodeConnection.getStartPoint().getNodePanel().getName() + " -> " + nodeConnection.getEndPoint().getNodePanel().getName());
+                            log.debug(nodeConnection.getStartPoint().getNodePanel().getName() + " -> " + nodeConnection.getEndPoint().getNodePanel().getName());
                         }
                     }
 
-                    System.out.println("DUMP GRAPH");
-                    System.out.println(GraphPanel.this.graph);
+                    log.debug("DUMP GRAPH");
+                    log.debug(GraphPanel.this.graph.toString());
                 }
             }
         });

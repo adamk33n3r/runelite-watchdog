@@ -38,7 +38,6 @@ public class ConnectionLine<T> extends JPanel {
         if (this.out != null) {
             this.add(this.out, BorderLayout.EAST);
             variable.registerOnChange((newValue) -> {
-                System.out.println("value changed");
                 this.out.getOutputVar().setValue(newValue);
             });
             // TODO: need to unregister these when the panel closes because they stick around

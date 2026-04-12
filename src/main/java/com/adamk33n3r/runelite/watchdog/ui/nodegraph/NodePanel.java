@@ -92,7 +92,6 @@ public class NodePanel extends JPanel {
         MouseAdapter onTopAdapter = new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                System.out.println("mouse pressed node");
                 graphPanel.moveNodeToTop(NodePanel.this);
             }
         };
