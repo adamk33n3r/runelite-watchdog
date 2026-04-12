@@ -28,6 +28,8 @@ public class NodePanel extends JPanel {
     public static final int PANEL_WIDTH = 300;
     public static final int PANEL_HEIGHT = 200;
     public static final int TITLE_HEIGHT = 20;
+    public static final Color NODE_BODY_COLOR = new Color(38, 38, 38);
+    private static final int CORNER_ARC = 8;
 
     protected JPanel items;
 
@@ -60,6 +62,8 @@ public class NodePanel extends JPanel {
         return (ConnectionPointIn<T>) inputRegistry.get(var);
     }
 
+    @Getter
+    private final Color titleColor;
     private JLabel nameLabel;
     private final Border border;
 
@@ -69,11 +73,10 @@ public class NodePanel extends JPanel {
     public NodePanel(GraphPanel graphPanel, Node node, int x, int y, String name, Color color) {
         this.graphPanel = graphPanel;
         this.node = node;
+        this.titleColor = color;
         this.setName(name);
         this.setBounds(x, y, PANEL_WIDTH, PANEL_HEIGHT);
-        this.setBackground(color);
-//        this.setBorder(BorderFactory.createLineBorder(ColorScheme.DARK_GRAY_COLOR, 2));
-//        this.setBorder(BorderFactory.createSoftBevelBorder(BevelBorder.RAISED));
+        this.setOpaque(false);
         this.border = BorderFactory.createEmptyBorder(5, 5, 5, 5);
         this.setLayout(new BorderLayout());
         this.nameLabel = new JLabel(name);
@@ -81,11 +84,30 @@ public class NodePanel extends JPanel {
         nameLabel.setPreferredSize(new Dimension(0, TITLE_HEIGHT));
         nameLabel.setBorder(new EmptyBorder(0, 5, 0, 0));
         JPanel topPanel = new JPanel(new BorderLayout());
-        topPanel.setBackground(color);
+        topPanel.setOpaque(false);
         topPanel.add(nameLabel, BorderLayout.CENTER);
-        JButton button = new JButton("X");
-        button.addActionListener((ev) -> {
-            this.graphPanel.removeNode(this);
+        JButton button = new JButton("\u00D7");
+        button.setOpaque(false);
+        button.setContentAreaFilled(false);
+        button.setBorderPainted(false);
+        button.setFocusPainted(false);
+        button.setForeground(Util.textColorForBG(color));
+        button.setPreferredSize(new Dimension(20, 20));
+        button.addActionListener((ev) -> this.graphPanel.removeNode(this));
+        button.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                button.setBackground(new Color(180, 40, 40, 160));
+                button.setOpaque(true);
+                button.setContentAreaFilled(true);
+                button.repaint();
+            }
+            @Override
+            public void mouseExited(MouseEvent e) {
+                button.setOpaque(false);
+                button.setContentAreaFilled(false);
+                button.repaint();
+            }
         });
         topPanel.add(button, BorderLayout.EAST);
         this.add(topPanel, BorderLayout.NORTH);
@@ -98,7 +120,9 @@ public class NodePanel extends JPanel {
         };
 
         JPanel itemsWrapper = new JPanel(new BorderLayout());
+        itemsWrapper.setOpaque(false);
         this.items = new JPanel();
+        this.items.setOpaque(false);
         itemsWrapper.add(this.items, BorderLayout.NORTH);
         this.items.setBorder(this.border);
         this.items.setLayout(new StretchedStackedLayout(5));
@@ -114,6 +138,33 @@ public class NodePanel extends JPanel {
         this.addMouseListener(draggingMouseAdapter);
         this.addMouseMotionListener(draggingMouseAdapter);
         this.addMouseListener(onTopAdapter);
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        Graphics2D g2 = (Graphics2D) g.create();
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+        int w = getWidth();
+        int h = getHeight();
+
+        // Dark node body
+        g2.setColor(NODE_BODY_COLOR);
+        g2.fillRoundRect(0, 0, w, h, CORNER_ARC, CORNER_ARC);
+
+        // Colored title bar — clip to the title region so only the top corners round
+        Shape originalClip = g2.getClip();
+        g2.setClip(0, 0, w, TITLE_HEIGHT);
+        g2.setColor(this.titleColor);
+        g2.fillRoundRect(0, 0, w, h, CORNER_ARC, CORNER_ARC);
+        g2.setClip(originalClip);
+
+        // Border
+        g2.setStroke(new BasicStroke(1.5f));
+        g2.setColor(this.titleColor.darker());
+        g2.drawRoundRect(0, 0, w - 1, h - 1, CORNER_ARC, CORNER_ARC);
+
+        g2.dispose();
     }
 
     public void pack() {

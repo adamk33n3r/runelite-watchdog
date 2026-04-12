@@ -15,6 +15,7 @@ public class ConnectionLine<T> extends JPanel {
         this.in = in;
         this.out = out;
         this.setLayout(new BorderLayout(5, 5));
+        this.setOpaque(false);
         if (this.in != null) {
             variable.setValue(this.in.getInputVar().getValue());
             this.add(this.in, BorderLayout.WEST);
@@ -26,11 +27,11 @@ public class ConnectionLine<T> extends JPanel {
             }));
             disposers.add(this.in.getInputVar().onConnectChange((connected) -> {
                 if (connected) {
-                    this.in.setBackground(Color.GREEN);
+                    this.in.setBackground(ConnectionPoint.CONNECTED_DATA_COLOR);
                     // disable swing component
                     variable.setEnabled(false);
                 } else {
-                    this.in.setBackground(Color.RED);
+                    this.in.setBackground(ConnectionPoint.DISCONNECTED_COLOR);
                     // enable swing component
                     variable.setEnabled(true);
                 }
@@ -44,9 +45,9 @@ public class ConnectionLine<T> extends JPanel {
             });
             disposers.add(this.out.getOutputVar().onConnectChange((connected) -> {
                 if (connected) {
-                    this.out.setBackground(Color.GREEN);
+                    this.out.setBackground(ConnectionPoint.CONNECTED_DATA_COLOR);
                 } else {
-                    this.out.setBackground(Color.RED);
+                    this.out.setBackground(ConnectionPoint.DISCONNECTED_COLOR);
                 }
             }));
         }

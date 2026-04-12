@@ -9,6 +9,8 @@ import java.awt.*;
 @Getter
 public abstract class ConnectionPoint extends JComponent {
     protected static final Color EXEC_COLOR = new Color(255, 165, 50);
+    public static final Color DISCONNECTED_COLOR = new Color(75, 75, 75);
+    public static final Color CONNECTED_DATA_COLOR = new Color(210, 210, 210);
 
     private final NodePanel nodePanel;
     private final boolean exec;
@@ -20,7 +22,7 @@ public abstract class ConnectionPoint extends JComponent {
         this.nodePanel = nodePanel;
         this.exec = exec;
         this.arrowRight = arrowRight;
-        this.setBackground(Color.RED);
+        this.setBackground(DISCONNECTED_COLOR);
     }
 
     @Override
@@ -30,10 +32,9 @@ public abstract class ConnectionPoint extends JComponent {
         Graphics2D g2 = (Graphics2D) g;
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
+        boolean connected = !DISCONNECTED_COLOR.equals(this.getBackground());
+
         if (this.exec) {
-            // Amber when connected, red when disconnected
-            boolean connected = !Color.RED.equals(this.getBackground());
-            g2.setColor(connected ? EXEC_COLOR : Color.RED);
             int w = this.size.width;
             int h = this.size.height;
             int mid = h / 2;
@@ -45,10 +46,25 @@ public abstract class ConnectionPoint extends JComponent {
                 xs = new int[]{w, 0, w};
                 ys = new int[]{0, mid, h};
             }
+            g2.setColor(connected ? EXEC_COLOR : DISCONNECTED_COLOR);
             g2.fillPolygon(xs, ys, 3);
+            g2.setColor(Color.BLACK);
+            g2.setStroke(new BasicStroke(1f));
+            g2.drawPolygon(xs, ys, 3);
         } else {
-            g2.setColor(this.getBackground());
-            g2.fillRect(0, 0, this.size.width, this.size.height);
+            int margin = 3;
+            int d = this.size.width - margin * 2;
+            if (connected) {
+                g2.setColor(CONNECTED_DATA_COLOR);
+                g2.fillOval(margin, margin, d, d);
+                g2.setColor(new Color(30, 30, 30));
+                g2.setStroke(new BasicStroke(1f));
+                g2.drawOval(margin, margin, d, d);
+            } else {
+                g2.setColor(DISCONNECTED_COLOR);
+                g2.setStroke(new BasicStroke(2f));
+                g2.drawOval(margin, margin, d, d);
+            }
         }
     }
 

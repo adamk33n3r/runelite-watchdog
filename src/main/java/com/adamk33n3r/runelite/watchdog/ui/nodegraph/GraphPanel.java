@@ -425,10 +425,10 @@ public class GraphPanel extends JLayeredPane {
         this.repaint();
     }
 
-    private static final Color NODE_TRIGGER_COLOR = new java.awt.Color(70, 130, 180);
-    private static final Color NODE_NOTIFICATION_COLOR = new java.awt.Color(220, 120, 60);
-    private static final Color NODE_CONSTANT_COLOR = new java.awt.Color(80, 160, 80);
-    private static final Color NODE_LOGIC_COLOR = new java.awt.Color(160, 80, 200);
+    private static final Color NODE_TRIGGER_COLOR = new java.awt.Color(50, 120, 200);
+    private static final Color NODE_NOTIFICATION_COLOR = new java.awt.Color(210, 90, 30);
+    private static final Color NODE_CONSTANT_COLOR = new java.awt.Color(50, 165, 50);
+    private static final Color NODE_LOGIC_COLOR = new java.awt.Color(145, 60, 210);
 
     /**
      * Creates the appropriate NodePanel for a given Node instance.
@@ -569,25 +569,26 @@ public class GraphPanel extends JLayeredPane {
 
     private void paintNodeBodyInOverview(Graphics2D g2, NodePanel np) {
         int x = np.getX(), y = np.getY(), w = np.getWidth(), h = np.getHeight();
-        Color bg = np.getBackground();
+        Color titleColor = np.getTitleColor();
 
-        g2.setColor(bg.darker());
+        // Dark body — matches live mode
+        g2.setColor(NodePanel.NODE_BODY_COLOR);
         g2.fillRoundRect(x, y, w, h, 10, 10);
 
-        // Title bar
-        g2.setColor(bg);
+        // Colored title bar
+        g2.setColor(titleColor);
         g2.fillRect(x, y, w, NodePanel.TITLE_HEIGHT + 4);
         g2.fillRoundRect(x, y, w, NodePanel.TITLE_HEIGHT + 14, 10, 10);
 
         // Border
         g2.setStroke(new BasicStroke(2));
-        g2.setColor(bg.darker().darker());
+        g2.setColor(titleColor.darker());
         g2.drawRoundRect(x, y, w, h, 10, 10);
     }
 
     private void paintNodeLabelInOverview(Graphics2D g2, NodePanel np) {
         g2.setFont(g2.getFont().deriveFont(Font.BOLD, 11f));
-        g2.setColor(Util.textColorForBG(np.getBackground()));
+        g2.setColor(Util.textColorForBG(np.getTitleColor()));
         int screenX = (int)(np.getX() * zoomLevel) + 7;
         int screenY = (int)(np.getY() * zoomLevel) + 13;
         g2.drawString(np.getName(), screenX, screenY);
