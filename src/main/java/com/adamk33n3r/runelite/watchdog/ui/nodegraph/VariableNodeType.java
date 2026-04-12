@@ -9,6 +9,12 @@ import lombok.Getter;
 public enum VariableNodeType implements Displayable {
     BOOLEAN("Boolean", "Boolean", BoolNodePanel.class),
     NUMBER("Number", "Number", NumberNodePanel.class),
+//    // can use same controls as LocationAlertPanel, but will constantly output true/false rather than triggering an exec
+//    LOCATION("Location", "Location condition", IfNodePanel.class),
+//    // outputs true/false if plugin by name is on/off
+//    PLUGIN("Plugin", "Plugin", IfNodePanel.class),
+//    // outputs true/false based on inventory contents
+//    INVENTORY("Inventory", "Inventory", InventoryNodePanel.class),
     ;
 
     private final String name;

@@ -2,7 +2,8 @@ package com.adamk33n3r.runelite.watchdog.ui.nodegraph;
 
 import com.adamk33n3r.nodegraph.nodes.ContinuousTriggerNode;
 import com.adamk33n3r.nodegraph.nodes.constants.Num;
-import com.adamk33n3r.nodegraph.nodes.logic.And;
+import com.adamk33n3r.nodegraph.nodes.logic.BooleanGate;
+import com.adamk33n3r.nodegraph.nodes.logic.Equality;
 import com.adamk33n3r.runelite.watchdog.NotificationType;
 import com.adamk33n3r.runelite.watchdog.TriggerType;
 import com.adamk33n3r.runelite.watchdog.Util;
@@ -132,9 +133,6 @@ public class GraphPanel extends JLayeredPane {
 
         NumberNodePanel numNodePanel = new NumberNodePanel(this, numNode, 15, 215, "Num Node", Color.CYAN);
         this.add(numNodePanel, NODE_LAYER);
-
-//        NodePanel logicNodePanel = new IfNodePanel(this, null, 400, 200, "If Node", Color.CYAN);
-//        this.add(logicNodePanel, NODE_LAYER);
 
         this.connect(test.getExecOut(), testTEST.getExecIn());
 //        this.connect(test.getAlertName(), testTEST.getAlertNameIn());
@@ -347,19 +345,23 @@ public class GraphPanel extends JLayeredPane {
             } else if (selected instanceof LogicNodeType) {
                 LogicNodeType logicNodeType = (LogicNodeType) selected;
                 switch (logicNodeType) {
-                    case AND:
-                    case OR:
-                    case GREATER_THAN:
-                    case LESS_THAN:
-                    case EQUALS:
-                    case NOT_EQUALS:
-                        And andNode = new And();
-                        andNode.setX(px);
-                        andNode.setY(py);
-                        this.graph.add(andNode);
-                        NodePanel nodePanel = new IfNodePanel(this, andNode, px, py, logicNodeType.getName(), Color.MAGENTA);
-                        this.add(nodePanel, NODE_LAYER, 0);
-                        onSelect.accept(nodePanel);
+                    case BOOLEAN:
+                        BooleanGate boolGate = new BooleanGate();
+                        boolGate.setX(px);
+                        boolGate.setY(py);
+                        this.graph.add(boolGate);
+                        NodePanel boolGatePanel = new BooleanGateNodePanel(this, boolGate, px, py, logicNodeType.getName(), NODE_LOGIC_COLOR);
+                        this.add(boolGatePanel, NODE_LAYER, 0);
+                        onSelect.accept(boolGatePanel);
+                        break;
+                    case EQUALITY:
+                        Equality equalityNode = new Equality();
+                        equalityNode.setX(px);
+                        equalityNode.setY(py);
+                        this.graph.add(equalityNode);
+                        NodePanel equalityPanel = new EqualityNodePanel(this, equalityNode, px, py, logicNodeType.getName(), NODE_LOGIC_COLOR);
+                        this.add(equalityPanel, NODE_LAYER, 0);
+                        onSelect.accept(equalityPanel);
                         break;
                 }
             } else if (selected instanceof VariableNodeType) {
@@ -426,6 +428,7 @@ public class GraphPanel extends JLayeredPane {
     private static final Color NODE_TRIGGER_COLOR = new java.awt.Color(70, 130, 180);
     private static final Color NODE_NOTIFICATION_COLOR = new java.awt.Color(220, 120, 60);
     private static final Color NODE_CONSTANT_COLOR = new java.awt.Color(80, 160, 80);
+    private static final Color NODE_LOGIC_COLOR = new java.awt.Color(160, 80, 200);
 
     /**
      * Creates the appropriate NodePanel for a given Node instance.
@@ -455,8 +458,12 @@ public class GraphPanel extends JLayeredPane {
             Num numNode = (Num) node;
             String numName = !numNode.getNameOut().getValue().isEmpty() ? numNode.getNameOut().getValue() : "Number";
             return new NumberNodePanel(this, numNode, node.getX(), node.getY(), numName, NODE_CONSTANT_COLOR);
-        } else if (node instanceof And) {
-            return new IfNodePanel(this, (And) node, node.getX(), node.getY(), "AND", Color.MAGENTA);
+        } else if (node instanceof BooleanGate) {
+            BooleanGate bg = (BooleanGate) node;
+            return new BooleanGateNodePanel(this, bg, bg.getX(), bg.getY(), bg.getOp().toString(), NODE_LOGIC_COLOR);
+        } else if (node instanceof Equality) {
+            Equality eq = (Equality) node;
+            return new EqualityNodePanel(this, eq, eq.getX(), eq.getY(), "Equality", NODE_LOGIC_COLOR);
         }
         return null;
     }

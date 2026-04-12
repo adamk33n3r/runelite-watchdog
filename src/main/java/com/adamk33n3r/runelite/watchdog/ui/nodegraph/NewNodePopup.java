@@ -22,8 +22,8 @@ public class NewNodePopup extends JPopupMenu {
     public static final List<Class<? extends Enum<?>>> DEFAULT_ITEMS = Arrays.asList(
         TriggerType.class,
         NotificationType.class,
-        VariableNodeType.class
-//        LogicNodeType.class
+        VariableNodeType.class,
+        LogicNodeType.class
     );
     private final JList<Object> itemList;
     private final static Splitter SPLITTER = Splitter.on(' ').trimResults().omitEmptyStrings();

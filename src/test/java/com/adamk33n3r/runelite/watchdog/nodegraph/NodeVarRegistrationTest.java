@@ -5,7 +5,6 @@ import com.adamk33n3r.nodegraph.nodes.NotificationNode;
 import com.adamk33n3r.nodegraph.nodes.TriggerNode;
 import com.adamk33n3r.nodegraph.nodes.constants.Bool;
 import com.adamk33n3r.nodegraph.nodes.constants.Num;
-import com.adamk33n3r.nodegraph.nodes.logic.And;
 import com.adamk33n3r.nodegraph.nodes.math.Add;
 import com.adamk33n3r.runelite.watchdog.alerts.ChatAlert;
 import com.adamk33n3r.runelite.watchdog.alerts.ContinuousAlert;
@@ -67,14 +66,6 @@ public class NodeVarRegistrationTest {
         Num node = new Num();
         assertTrue(node.getInputs().isEmpty());
         assertTrue(node.getOutputs().containsKey("Value"));
-    }
-
-    @Test
-    public void and_registersABAndResult() {
-        And node = new And();
-        assertTrue(node.getInputs().containsKey("A"));
-        assertTrue(node.getInputs().containsKey("B"));
-        assertTrue(node.getOutputs().containsKey("Result"));
     }
 
     @Test

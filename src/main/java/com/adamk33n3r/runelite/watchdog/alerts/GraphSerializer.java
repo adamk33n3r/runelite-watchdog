@@ -4,7 +4,6 @@ import com.adamk33n3r.nodegraph.*;
 import com.adamk33n3r.nodegraph.nodes.*;
 import com.adamk33n3r.nodegraph.nodes.constants.Bool;
 import com.adamk33n3r.nodegraph.nodes.constants.Num;
-import com.adamk33n3r.nodegraph.nodes.logic.And;
 import com.adamk33n3r.nodegraph.nodes.math.Add;
 import com.adamk33n3r.runelite.watchdog.RuntimeTypeAdapterFactory;
 import com.adamk33n3r.runelite.watchdog.notifications.Notification;
@@ -60,8 +59,6 @@ public class GraphSerializer implements JsonSerializer<Graph>, JsonDeserializer<
                 nodeObj.addProperty("type", "Bool");
                 nodeObj.addProperty("value", ((Bool) node).getValueOut().getValue());
                 nodeObj.addProperty("name", ((Bool) node).getNameOut().getValue());
-            } else if (node instanceof And) {
-                nodeObj.addProperty("type", "And");
             } else if (node instanceof Add) {
                 nodeObj.addProperty("type", "Add");
             } else {
@@ -141,9 +138,6 @@ public class GraphSerializer implements JsonSerializer<Graph>, JsonDeserializer<
                             node = bool;
                             break;
                         }
-                        case "And":
-                            node = new And();
-                            break;
                         case "Add":
                             node = new Add();
                             break;
