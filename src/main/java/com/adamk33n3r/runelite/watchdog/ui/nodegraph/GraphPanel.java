@@ -503,7 +503,7 @@ public class GraphPanel extends JLayeredPane {
     }
 
     private void setZoomLevel(double zoom) {
-        double newZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, zoom));
+        double newZoom = Math.round(Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, zoom)) * 10.0) / 10.0;
         boolean shouldBeOverview = newZoom < OVERVIEW_THRESHOLD;
         if (shouldBeOverview != this.overviewMode) {
             this.overviewMode = shouldBeOverview;
