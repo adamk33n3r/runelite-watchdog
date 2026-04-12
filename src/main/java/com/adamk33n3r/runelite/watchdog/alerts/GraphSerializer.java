@@ -4,6 +4,8 @@ import com.adamk33n3r.nodegraph.*;
 import com.adamk33n3r.nodegraph.nodes.*;
 import com.adamk33n3r.nodegraph.nodes.constants.Bool;
 import com.adamk33n3r.nodegraph.nodes.constants.Num;
+import com.adamk33n3r.nodegraph.nodes.logic.BooleanGate;
+import com.adamk33n3r.nodegraph.nodes.logic.Equality;
 import com.adamk33n3r.nodegraph.nodes.math.Add;
 import com.adamk33n3r.runelite.watchdog.RuntimeTypeAdapterFactory;
 import com.adamk33n3r.runelite.watchdog.notifications.Notification;
@@ -61,6 +63,12 @@ public class GraphSerializer implements JsonSerializer<Graph>, JsonDeserializer<
                 nodeObj.addProperty("name", ((Bool) node).getNameOut().getValue());
             } else if (node instanceof Add) {
                 nodeObj.addProperty("type", "Add");
+            } else if (node instanceof BooleanGate) {
+                nodeObj.addProperty("type", "BooleanGate");
+                nodeObj.addProperty("op", ((BooleanGate) node).getOp().getValue().name());
+            } else if (node instanceof Equality) {
+                nodeObj.addProperty("type", "Equality");
+                nodeObj.addProperty("op", ((Equality) node).getOp().getValue().name());
             } else {
                 log.warn("Unknown node type during serialization: {}", node.getClass().getSimpleName());
                 continue;
@@ -141,6 +149,22 @@ public class GraphSerializer implements JsonSerializer<Graph>, JsonDeserializer<
                         case "Add":
                             node = new Add();
                             break;
+                        case "BooleanGate": {
+                            BooleanGate gate = new BooleanGate();
+                            if (nodeObj.has("op")) {
+                                gate.getOp().setValue(BooleanGate.Op.valueOf(nodeObj.get("op").getAsString()));
+                            }
+                            node = gate;
+                            break;
+                        }
+                        case "Equality": {
+                            Equality eq = new Equality();
+                            if (nodeObj.has("op")) {
+                                eq.getOp().setValue(Equality.Op.valueOf(nodeObj.get("op").getAsString()));
+                            }
+                            node = eq;
+                            break;
+                        }
                         default:
                             log.warn("Unknown node type during deserialization: {}", nodeType);
                             continue;

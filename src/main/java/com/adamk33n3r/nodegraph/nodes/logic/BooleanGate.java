@@ -6,7 +6,6 @@ import com.adamk33n3r.nodegraph.VarOutput;
 import com.adamk33n3r.runelite.watchdog.Displayable;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.Setter;
 
 @Getter
 public class BooleanGate extends Node {
@@ -25,14 +24,16 @@ public class BooleanGate extends Node {
         }
     }
 
-    @Setter
-    private Op op = Op.AND;
-
+    private final VarInput<Op> op = new VarInput<>(this, "Op", Op.class, Op.AND);
     private final VarInput<Boolean> a = new VarInput<>(this, "A", Boolean.class, false);
     private final VarInput<Boolean> b = new VarInput<>(this, "B", Boolean.class, false);
     private final VarOutput<Boolean> result = new VarOutput<>(this, "Result", Boolean.class, false);
 
     public BooleanGate() {
+        this.op.onChange(op -> this.process());
+        this.a.onChange(a -> this.process());
+        this.b.onChange(b -> this.process());
+
         reg(this.a);
         reg(this.b);
         reg(this.result);
@@ -40,7 +41,7 @@ public class BooleanGate extends Node {
 
     @Override
     public void process() {
-        switch (this.op) {
+        switch (this.op.getValue()) {
             case AND:
                 this.result.setValue(this.a.getValue() && this.b.getValue());
                 break;

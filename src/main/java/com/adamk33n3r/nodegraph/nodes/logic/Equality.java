@@ -29,14 +29,16 @@ public class Equality extends Node {
         }
     }
 
-    @Setter
-    private Op op = Op.EQUAL;
-
+    private final VarInput<Op> op = new VarInput<>(this, "Op", Op.class, Op.EQUAL);
     private final VarInput<Number> a = new VarInput<>(this, "A", Number.class, 0);
     private final VarInput<Number> b = new VarInput<>(this, "B", Number.class, 0);
     private final VarOutput<Boolean> result = new VarOutput<>(this, "Result", Boolean.class, false);
 
     public Equality() {
+        this.op.onChange(op -> this.process());
+        this.a.onChange(a -> this.process());
+        this.b.onChange(b -> this.process());
+
         reg(this.a);
         reg(this.b);
         reg(this.result);
@@ -47,7 +49,7 @@ public class Equality extends Node {
         double aVal = this.a.getValue().doubleValue();
         double bVal = this.b.getValue().doubleValue();
         boolean res;
-        switch (this.op) {
+        switch (this.op.getValue()) {
             case EQUAL:         res = aVal == bVal; break;
             case NOT_EQUAL:     res = aVal != bVal; break;
             case GREATER:       res = aVal > bVal; break;

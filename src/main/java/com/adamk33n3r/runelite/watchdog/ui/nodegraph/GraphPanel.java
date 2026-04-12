@@ -460,10 +460,10 @@ public class GraphPanel extends JLayeredPane {
             return new NumberNodePanel(this, numNode, node.getX(), node.getY(), numName, NODE_CONSTANT_COLOR);
         } else if (node instanceof BooleanGate) {
             BooleanGate bg = (BooleanGate) node;
-            return new BooleanGateNodePanel(this, bg, bg.getX(), bg.getY(), bg.getOp().toString(), NODE_LOGIC_COLOR);
+            return new BooleanGateNodePanel(this, bg, bg.getX(), bg.getY(), LogicNodeType.BOOLEAN.getName(), NODE_LOGIC_COLOR);
         } else if (node instanceof Equality) {
             Equality eq = (Equality) node;
-            return new EqualityNodePanel(this, eq, eq.getX(), eq.getY(), "Equality", NODE_LOGIC_COLOR);
+            return new EqualityNodePanel(this, eq, eq.getX(), eq.getY(), LogicNodeType.EQUALITY.getName(), NODE_LOGIC_COLOR);
         }
         return null;
     }

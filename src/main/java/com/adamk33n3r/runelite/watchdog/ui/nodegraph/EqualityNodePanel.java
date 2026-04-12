@@ -19,9 +19,9 @@ public class EqualityNodePanel extends NodePanel {
         super(graphPanel, node, x, y, name, color);
 
         JComboBox<Equality.Op> opBox = new JComboBox<>(Equality.Op.values());
-        opBox.setSelectedItem(node.getOp());
+        opBox.setSelectedItem(node.getOp().getValue());
         opBox.addActionListener(e -> {
-            node.setOp((Equality.Op) opBox.getSelectedItem());
+            node.getOp().setValue((Equality.Op) opBox.getSelectedItem());
             this.notifyChange();
         });
         this.items.add(opBox);
@@ -33,7 +33,11 @@ public class EqualityNodePanel extends NodePanel {
         this.items.add(new ConnectionLine<>(inB, new NumberInput("B", node.getB()), null));
 
         this.resultOut = new ConnectionPointOut<>(this, node.getResult());
-        this.items.add(new ConnectionLine<>(null, new ViewInput<>("Result", node.getResult().getValue()), this.resultOut));
+        ViewInput<Boolean> result = new ViewInput<>("Result", node.getResult().getValue());
+        node.getA().onChange(a -> result.setValue(node.getResult().getValue()));
+        node.getB().onChange(b -> result.setValue(node.getResult().getValue()));
+        node.getOp().onChange(op -> result.setValue(node.getResult().getValue()));
+        this.items.add(new ConnectionLine<>(null, result, this.resultOut));
 
         this.pack();
     }
