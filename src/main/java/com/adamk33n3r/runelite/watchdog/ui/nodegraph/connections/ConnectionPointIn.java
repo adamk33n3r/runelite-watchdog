@@ -10,7 +10,7 @@ public class ConnectionPointIn<T> extends ConnectionPoint {
     private final VarInput<T> inputVar;
 
     public ConnectionPointIn(NodePanel nodePanel, VarInput<T> varInput) {
-        super(nodePanel, varInput.getType() == ExecSignal.class, true);
+        super(nodePanel, varInput.getType() == ExecSignal.class, true, varInput.getType());
         this.inputVar = varInput;
         nodePanel.registerInputPoint(varInput, this);
     }

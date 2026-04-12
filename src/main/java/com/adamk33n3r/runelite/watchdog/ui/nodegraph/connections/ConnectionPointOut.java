@@ -22,7 +22,7 @@ public class ConnectionPointOut<T> extends ConnectionPoint {
     private DragConnection newConnection;
 
     public ConnectionPointOut(NodePanel nodePanel, VarOutput<T> outputVar) {
-        super(nodePanel, outputVar.getType() == ExecSignal.class, true);
+        super(nodePanel, outputVar.getType() == ExecSignal.class, true, outputVar.getType());
         this.outputVar = outputVar;
         nodePanel.registerOutputPoint(outputVar, this);
         MouseAdapter mouseAdapter = new MouseAdapter() {

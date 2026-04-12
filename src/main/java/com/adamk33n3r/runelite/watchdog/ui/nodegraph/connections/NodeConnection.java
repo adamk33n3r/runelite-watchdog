@@ -19,6 +19,9 @@ public class NodeConnection extends Connection {
         super(start == null ? new Point() : start.getLocation(), end == null ? new Point() : end.getLocation());
         if (start != null) {
             this.setExec(start.isExec());
+            if (!start.isExec()) {
+                this.setLineColor(TypeColorRegistry.getColor(start.getOutputVar().getType()));
+            }
         }
 //        this.startNodePanel = start;
 //        this.endNodePanel = end;

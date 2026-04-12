@@ -8,21 +8,27 @@ import java.awt.*;
 
 @Getter
 public abstract class ConnectionPoint extends JComponent {
-    protected static final Color EXEC_COLOR = new Color(255, 165, 50);
+    protected static final Color EXEC_COLOR = new Color(220, 220, 220);
     public static final Color DISCONNECTED_COLOR = new Color(75, 75, 75);
-    public static final Color CONNECTED_DATA_COLOR = new Color(210, 210, 210);
 
     private final NodePanel nodePanel;
     private final boolean exec;
     /** true = right-pointing (output), false = left-pointing (input) */
     private final boolean arrowRight;
+    private final Class<?> type;
+    private boolean connected = false;
     private final Dimension size = new Dimension(20, 20);
 
-    public ConnectionPoint(NodePanel nodePanel, boolean exec, boolean arrowRight) {
+    public ConnectionPoint(NodePanel nodePanel, boolean exec, boolean arrowRight, Class<?> type) {
         this.nodePanel = nodePanel;
         this.exec = exec;
         this.arrowRight = arrowRight;
-        this.setBackground(DISCONNECTED_COLOR);
+        this.type = type;
+    }
+
+    public void setConnected(boolean connected) {
+        this.connected = connected;
+        repaint();
     }
 
     @Override
@@ -31,8 +37,6 @@ public abstract class ConnectionPoint extends JComponent {
 
         Graphics2D g2 = (Graphics2D) g;
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
-        boolean connected = !DISCONNECTED_COLOR.equals(this.getBackground());
 
         if (this.exec) {
             int w = this.size.width;
@@ -46,22 +50,23 @@ public abstract class ConnectionPoint extends JComponent {
                 xs = new int[]{w, 0, w};
                 ys = new int[]{0, mid, h};
             }
-            g2.setColor(connected ? EXEC_COLOR : DISCONNECTED_COLOR);
+            g2.setColor(this.connected ? EXEC_COLOR : DISCONNECTED_COLOR);
             g2.fillPolygon(xs, ys, 3);
             g2.setColor(Color.BLACK);
             g2.setStroke(new BasicStroke(1f));
             g2.drawPolygon(xs, ys, 3);
         } else {
+            Color typeColor = TypeColorRegistry.getColor(this.type);
             int margin = 3;
             int d = this.size.width - margin * 2;
-            if (connected) {
-                g2.setColor(CONNECTED_DATA_COLOR);
+            if (this.connected) {
+                g2.setColor(typeColor);
                 g2.fillOval(margin, margin, d, d);
                 g2.setColor(new Color(30, 30, 30));
                 g2.setStroke(new BasicStroke(1f));
                 g2.drawOval(margin, margin, d, d);
             } else {
-                g2.setColor(DISCONNECTED_COLOR);
+                g2.setColor(typeColor);
                 g2.setStroke(new BasicStroke(2f));
                 g2.drawOval(margin, margin, d, d);
             }

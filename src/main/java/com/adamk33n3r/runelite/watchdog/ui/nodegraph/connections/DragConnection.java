@@ -15,6 +15,10 @@ public class DragConnection extends Connection {
         this.startNodePanel = start;
         this.startPoint = startPoint;
         this.endOffset = end;
+        this.setExec(startPoint.isExec());
+        if (!startPoint.isExec()) {
+            this.setLineColor(TypeColorRegistry.getColor(startPoint.getOutputVar().getType()));
+        }
         this.recalculateBounds();
     }
 
