@@ -62,7 +62,8 @@ public class VarInput<T> extends Var<T> {
         }
 
         this.value = this.connections.get(0).get();
-        this.onChange.forEach((consumer) -> consumer.accept(this.value));
+        // Pull-based refresh: do NOT fire onChange here.
+        // onChange is only for push-based updates (setValue), not internal cache refreshes.
     }
 
     public Runnable onChange(Consumer<T> onChange) {
