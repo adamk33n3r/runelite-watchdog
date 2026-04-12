@@ -65,12 +65,14 @@ public class VarInput<T> extends Var<T> {
         this.onChange.forEach((consumer) -> consumer.accept(this.value));
     }
 
-    public void onChange(Consumer<T> onChange) {
+    public Runnable onChange(Consumer<T> onChange) {
         this.onChange.add(onChange);
+        return () -> this.onChange.remove(onChange);
     }
 
-    public void onConnectChange(Consumer<Boolean> onConnectChange) {
+    public Runnable onConnectChange(Consumer<Boolean> onConnectChange) {
         this.onConnectChange.add(onConnectChange);
+        return () -> this.onConnectChange.remove(onConnectChange);
     }
 
     public VarOutput<T> toOutput() {

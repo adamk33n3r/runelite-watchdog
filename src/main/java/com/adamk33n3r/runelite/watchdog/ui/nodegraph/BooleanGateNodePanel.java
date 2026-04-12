@@ -34,9 +34,9 @@ public class BooleanGateNodePanel extends NodePanel {
 
         this.resultOut = new ConnectionPointOut<>(this, node.getResult());
         ViewInput<Boolean> result = new ViewInput<>("Result", node.getResult().getValue());
-        node.getA().onChange(a -> result.setValue(node.getResult().getValue()));
-        node.getB().onChange(b -> result.setValue(node.getResult().getValue()));
-        node.getOp().onChange(op -> result.setValue(node.getResult().getValue()));
+        addDisposer(node.getA().onChange(a -> result.setValue(node.getResult().getValue())));
+        addDisposer(node.getB().onChange(b -> result.setValue(node.getResult().getValue())));
+        addDisposer(node.getOp().onChange(op -> result.setValue(node.getResult().getValue())));
         this.items.add(new ConnectionLine<>(null, result, this.resultOut));
 
         this.pack();

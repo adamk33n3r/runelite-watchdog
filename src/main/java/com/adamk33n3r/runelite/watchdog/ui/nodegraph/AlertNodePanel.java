@@ -48,7 +48,7 @@ public class AlertNodePanel extends NodePanel {
 
         this.execOut = new ConnectionPointOut<>(this, triggerNode.getExec());
         ViewInput<ExecSignal> exec = new ViewInput<>("Exec", triggerNode.getExec().getValue());
-        triggerNode.getCaptureGroupsIn().onChange((captureGroups) -> exec.setValue(new ExecSignal(captureGroups)));
+        addDisposer(triggerNode.getCaptureGroupsIn().onChange((captureGroups) -> exec.setValue(new ExecSignal(captureGroups))));
         this.items.add(new ConnectionLine<>(null, exec, this.execOut));
         this.alertName = new ConnectionPointOut<>(this, triggerNode.getNameOut());
 //        this.items.add(new ConnectionLine<>(null, new TextInput("Alert Name", triggerNode.getNameOut().getValue()), this.alertName));

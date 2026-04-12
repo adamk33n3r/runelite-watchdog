@@ -33,6 +33,7 @@ public class NodePanel extends JPanel {
 
     @Getter
     private List<NodeConnection> connections = new ArrayList<>();
+    private final List<Runnable> disposers = new ArrayList<>();
     @Getter
     private final GraphPanel graphPanel;
     @Getter
@@ -143,5 +144,16 @@ public class NodePanel extends JPanel {
 
     public void removeConnection(NodeConnection connection) {
         this.connections.remove(connection);
+    }
+
+    protected void addDisposer(Runnable disposer) {
+        this.disposers.add(disposer);
+    }
+
+    @Override
+    public void removeNotify() {
+        super.removeNotify();
+        this.disposers.forEach(Runnable::run);
+        this.disposers.clear();
     }
 }

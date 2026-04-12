@@ -44,7 +44,8 @@ public class VarOutput<T> extends Var<T> {
         }
     }
 
-    public void onConnectChange(Consumer<Boolean> onConnectChange) {
+    public Runnable onConnectChange(Consumer<Boolean> onConnectChange) {
         this.onConnectChange.add(onConnectChange);
+        return () -> this.onConnectChange.remove(onConnectChange);
     }
 }

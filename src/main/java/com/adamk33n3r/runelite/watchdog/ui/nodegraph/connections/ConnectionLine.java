@@ -3,10 +3,13 @@ package com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections;
 import javax.annotation.Nullable;
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ConnectionLine<T> extends JPanel {
     private final ConnectionPointIn<T> in;
     private final ConnectionPointOut<T> out;
+    private final List<Runnable> disposers = new ArrayList<>();
 
     public ConnectionLine(@Nullable ConnectionPointIn<T> in, ConnectedVariable<T> variable, @Nullable ConnectionPointOut<T> out) {
         this.in = in;
@@ -15,13 +18,13 @@ public class ConnectionLine<T> extends JPanel {
         if (this.in != null) {
             variable.setValue(this.in.getInputVar().getValue());
             this.add(this.in, BorderLayout.WEST);
-            this.in.getInputVar().onChange((newValue) -> {
+            disposers.add(this.in.getInputVar().onChange((newValue) -> {
                 variable.setValue(newValue); // Sets the value of the swing component
                 if (this.out != null) {
                     this.out.getOutputVar().setValue(newValue);
                 }
-            });
-            this.in.getInputVar().onConnectChange((connected) -> {
+            }));
+            disposers.add(this.in.getInputVar().onConnectChange((connected) -> {
                 if (connected) {
                     this.in.setBackground(Color.GREEN);
                     // disable swing component
@@ -31,24 +34,29 @@ public class ConnectionLine<T> extends JPanel {
                     // enable swing component
                     variable.setEnabled(true);
                 }
-            });
+            }));
         }
-
 
         if (this.out != null) {
             this.add(this.out, BorderLayout.EAST);
             variable.registerOnChange((newValue) -> {
                 this.out.getOutputVar().setValue(newValue);
             });
-            // TODO: need to unregister these when the panel closes because they stick around
-            this.out.getOutputVar().onConnectChange((connected) -> {
+            disposers.add(this.out.getOutputVar().onConnectChange((connected) -> {
                 if (connected) {
                     this.out.setBackground(Color.GREEN);
                 } else {
                     this.out.setBackground(Color.RED);
                 }
-            });
+            }));
         }
         this.add(variable.getComponent(), BorderLayout.CENTER);
+    }
+
+    @Override
+    public void removeNotify() {
+        super.removeNotify();
+        this.disposers.forEach(Runnable::run);
+        this.disposers.clear();
     }
 }

@@ -66,9 +66,13 @@ public class GraphSerializer implements JsonSerializer<Graph>, JsonDeserializer<
             } else if (node instanceof BooleanGate) {
                 nodeObj.addProperty("type", "BooleanGate");
                 nodeObj.addProperty("op", ((BooleanGate) node).getOp().getValue().name());
+                nodeObj.addProperty("a", ((BooleanGate) node).getA().getValue());
+                nodeObj.addProperty("b", ((BooleanGate) node).getB().getValue());
             } else if (node instanceof Equality) {
                 nodeObj.addProperty("type", "Equality");
                 nodeObj.addProperty("op", ((Equality) node).getOp().getValue().name());
+                nodeObj.addProperty("a", ((Equality) node).getA().getValue());
+                nodeObj.addProperty("b", ((Equality) node).getB().getValue());
             } else {
                 log.warn("Unknown node type during serialization: {}", node.getClass().getSimpleName());
                 continue;
@@ -153,6 +157,8 @@ public class GraphSerializer implements JsonSerializer<Graph>, JsonDeserializer<
                             BooleanGate gate = new BooleanGate();
                             if (nodeObj.has("op")) {
                                 gate.getOp().setValue(BooleanGate.Op.valueOf(nodeObj.get("op").getAsString()));
+                                gate.getA().setValue(nodeObj.get("a").getAsBoolean());
+                                gate.getB().setValue(nodeObj.get("b").getAsBoolean());
                             }
                             node = gate;
                             break;
@@ -161,6 +167,8 @@ public class GraphSerializer implements JsonSerializer<Graph>, JsonDeserializer<
                             Equality eq = new Equality();
                             if (nodeObj.has("op")) {
                                 eq.getOp().setValue(Equality.Op.valueOf(nodeObj.get("op").getAsString()));
+                                eq.getA().setValue(nodeObj.get("a").getAsDouble());
+                                eq.getB().setValue(nodeObj.get("b").getAsDouble());
                             }
                             node = eq;
                             break;
