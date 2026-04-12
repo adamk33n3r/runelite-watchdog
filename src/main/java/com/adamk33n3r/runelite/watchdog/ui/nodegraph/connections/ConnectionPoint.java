@@ -5,6 +5,8 @@ import lombok.Getter;
 
 import javax.swing.JComponent;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 @Getter
 public abstract class ConnectionPoint extends JComponent {
@@ -17,6 +19,7 @@ public abstract class ConnectionPoint extends JComponent {
     private final boolean arrowRight;
     private final Class<?> type;
     private boolean connected = false;
+    protected boolean hovered = false;
     private final Dimension size = new Dimension(20, 20);
 
     public ConnectionPoint(NodePanel nodePanel, boolean exec, boolean arrowRight, Class<?> type) {
@@ -24,6 +27,23 @@ public abstract class ConnectionPoint extends JComponent {
         this.exec = exec;
         this.arrowRight = arrowRight;
         this.type = type;
+        this.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                hovered = true;
+                repaint();
+            }
+
+            @Override
+            public void mouseExited(MouseEvent e) {
+                hovered = false;
+                repaint();
+            }
+        });
+    }
+
+    protected boolean shouldFill() {
+        return false;
     }
 
     public void setConnected(boolean connected) {
@@ -50,7 +70,7 @@ public abstract class ConnectionPoint extends JComponent {
                 xs = new int[]{w, 0, w};
                 ys = new int[]{0, mid, h};
             }
-            g2.setColor(this.connected ? EXEC_COLOR : DISCONNECTED_COLOR);
+            g2.setColor(this.connected || shouldFill() ? EXEC_COLOR : DISCONNECTED_COLOR);
             g2.fillPolygon(xs, ys, 3);
             g2.setColor(Color.BLACK);
             g2.setStroke(new BasicStroke(1f));
@@ -59,7 +79,7 @@ public abstract class ConnectionPoint extends JComponent {
             Color typeColor = TypeColorRegistry.getColor(this.type);
             int margin = 3;
             int d = this.size.width - margin * 2;
-            if (this.connected) {
+            if (this.connected || shouldFill()) {
                 g2.setColor(typeColor);
                 g2.fillOval(margin, margin, d, d);
                 g2.setColor(new Color(30, 30, 30));

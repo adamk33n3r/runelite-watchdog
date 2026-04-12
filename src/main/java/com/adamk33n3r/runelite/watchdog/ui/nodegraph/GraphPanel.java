@@ -63,6 +63,13 @@ public class GraphPanel extends JLayeredPane {
     private Point popupLocation;
     @Getter
     private Graph graph;
+    @Getter
+    private Class<?> activeDragType = null;
+
+    public void setActiveDragType(Class<?> type) {
+        this.activeDragType = type;
+        this.repaint();
+    }
     private Injector injector;
     private Runnable onChangeCallback;
     private final javax.swing.Timer saveDebounceTimer = new javax.swing.Timer(300, e -> {

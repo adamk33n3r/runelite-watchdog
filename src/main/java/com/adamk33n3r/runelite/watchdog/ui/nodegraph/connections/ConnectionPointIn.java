@@ -14,4 +14,11 @@ public class ConnectionPointIn<T> extends ConnectionPoint {
         this.inputVar = varInput;
         nodePanel.registerInputPoint(varInput, this);
     }
+
+    @Override
+    protected boolean shouldFill() {
+        if (isExec() || !hovered) return false;
+        Class<?> dragType = getNodePanel().getGraphPanel().getActiveDragType();
+        return dragType != null && dragType == getType();
+    }
 }

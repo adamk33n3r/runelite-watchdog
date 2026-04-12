@@ -34,6 +34,7 @@ public class ConnectionPointOut<T> extends ConnectionPoint {
                 Point point = SwingUtilities.convertPoint(ConnectionPointOut.this, e.getPoint(), nodePanel);
                 point.x -= NodePanel.PANEL_WIDTH;
                 ConnectionPointOut.this.newConnection = new DragConnection(nodePanel, ConnectionPointOut.this, point);
+                nodePanel.getGraphPanel().setActiveDragType(outputVar.getType());
                 nodePanel.getGraphPanel().add(ConnectionPointOut.this.newConnection, GraphPanel.NEW_CONNECTION_LAYER, 0);
                 nodePanel.getGraphPanel().revalidate();
                 nodePanel.getGraphPanel().repaint();
@@ -106,10 +107,18 @@ public class ConnectionPointOut<T> extends ConnectionPoint {
         this.addMouseMotionListener(mouseAdapter);
     }
 
+    @Override
+    protected boolean shouldFill() {
+        if (this.newConnection != null) return true;
+        if (getNodePanel().getGraphPanel().getActiveDragType() != null) return false;
+        return this.hovered;
+    }
+
     private void removeNewConnection() {
         if (this.newConnection == null) {
             return;
         }
+        this.getNodePanel().getGraphPanel().setActiveDragType(null);
         this.getNodePanel().getGraphPanel().remove(this.newConnection);
         this.getNodePanel().getGraphPanel().revalidate();
         this.getNodePanel().getGraphPanel().repaint();
