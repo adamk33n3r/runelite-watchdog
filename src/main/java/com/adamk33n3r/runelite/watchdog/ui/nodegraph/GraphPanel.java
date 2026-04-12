@@ -5,6 +5,7 @@ import com.adamk33n3r.nodegraph.nodes.constants.Num;
 import com.adamk33n3r.nodegraph.nodes.logic.And;
 import com.adamk33n3r.runelite.watchdog.NotificationType;
 import com.adamk33n3r.runelite.watchdog.TriggerType;
+import com.adamk33n3r.runelite.watchdog.Util;
 import com.adamk33n3r.runelite.watchdog.alerts.Alert;
 import com.adamk33n3r.runelite.watchdog.alerts.ChatAlert;
 import com.adamk33n3r.runelite.watchdog.alerts.LocationAlert;
@@ -15,7 +16,6 @@ import com.adamk33n3r.nodegraph.Node;
 import com.adamk33n3r.nodegraph.nodes.NotificationNode;
 import com.adamk33n3r.nodegraph.nodes.TriggerNode;
 import com.adamk33n3r.nodegraph.nodes.constants.Bool;
-import com.adamk33n3r.nodegraph.nodes.logic.And;
 import com.adamk33n3r.runelite.watchdog.alerts.StatChangedAlert;
 import com.adamk33n3r.runelite.watchdog.notifications.ScreenFlash;
 import com.adamk33n3r.runelite.watchdog.notifications.SoundEffect;
@@ -38,21 +38,25 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.CubicCurve2D;
 import java.awt.image.BufferedImage;
 import java.util.*;
-import java.util.List;
 import java.util.function.Consumer;
 
 public class GraphPanel extends JLayeredPane {
-    private static final int ZOOM_FACTOR = 10; // Adjust this value for zoom sensitivity
-    private static final double MIN_ZOOM = 0.1; // Minimum zoom level
-    private static final double MAX_ZOOM = 3.0; // Maximum zoom level
+    private static final double MIN_ZOOM = 0.6;
+    private static final double MAX_ZOOM = 1.0;
+    private static final double OVERVIEW_THRESHOLD = 1.0;
+    private static final int CANVAS_WIDTH = 6000;
+    private static final int CANVAS_HEIGHT = 4000;
+    private static final Color OVERVIEW_EXEC_COLOR = new Color(255, 165, 50);
     public static final Integer NODE_LAYER = 1;
     public static final Integer CONNECTION_LAYER = 0;
     public static final Integer NEW_CONNECTION_LAYER = 2;
     private static final BufferedImage BACKGROUND_IMG = ImageUtil.loadImageResource(GraphPanel.class, "graph-bg.png");
-    private double zoomLevel = 1;
-    private final Map<Component, Dimension> originalSizes = new HashMap<>();
+    private double zoomLevel = 1.0;
+    private boolean overviewMode = false;
     private Point popupLocation;
     @Getter
     private Graph graph;
@@ -182,7 +186,7 @@ public class GraphPanel extends JLayeredPane {
         this.saveDebounceTimer.setRepeats(false);
         this.setBackground(ColorScheme.DARKER_GRAY_COLOR);
         this.setOpaque(false);
-        this.setPreferredSize(new Dimension(6000, 4000));
+        this.setPreferredSize(new Dimension(CANVAS_WIDTH, CANVAS_HEIGHT));
         this.setName("Graph");
 
         this.graph = existingGraph;
@@ -192,11 +196,24 @@ public class GraphPanel extends JLayeredPane {
             @Override
             public void mouseClicked(MouseEvent e) {
                 GraphPanel.this.grabFocus();
+                if (overviewMode && SwingUtilities.isLeftMouseButton(e)) {
+                    int worldX = (int)(e.getX() / zoomLevel);
+                    int worldY = (int)(e.getY() / zoomLevel);
+                    for (Component c : getComponentsInLayer(NODE_LAYER)) {
+                        if (!(c instanceof NodePanel)) continue;
+                        NodePanel np = (NodePanel) c;
+                        if (np.getBounds().contains(worldX, worldY)) {
+                            setZoomLevel(1.0);
+                            scrollToNode(np);
+                            return;
+                        }
+                    }
+                }
             }
 
             @Override
             public void mouseReleased(MouseEvent e) {
-                if (SwingUtilities.isRightMouseButton(e)) {
+                if (!overviewMode && SwingUtilities.isRightMouseButton(e)) {
                     GraphPanel.this.createNode(e.getComponent(), e.getX(), e.getY(), null, (s) -> {});
                 }
             }
@@ -212,20 +229,11 @@ public class GraphPanel extends JLayeredPane {
         });
         this.addMouseListener(draggingGraph);
         this.addMouseMotionListener(draggingGraph);
-//        this.addMouseWheelListener(new MouseAdapter() {
-//            @Override
-//            public void mouseWheelMoved(MouseWheelEvent e) {
-//                if (e.getWheelRotation() < 0) {
-//                    // Zoom in
-//                    zoomLevel = Math.min(MAX_ZOOM, zoomLevel + (1.0 / ZOOM_FACTOR));
-//                } else {
-//                    // Zoom out
-//                    zoomLevel = Math.max(MIN_ZOOM, zoomLevel - (1.0 / ZOOM_FACTOR));
-//                }
-//                rescaleComponents(Graph.this, zoomLevel);
-//                repaint();
-//            }
-//        });
+        this.addMouseWheelListener(e -> {
+            e.consume();
+            double delta = e.getWheelRotation() > 0 ? -0.1 : 0.1;
+            setZoomLevel(zoomLevel + delta);
+        });
 
         this.addKeyListener(new KeyAdapter() {
             @Override
@@ -482,28 +490,115 @@ public class GraphPanel extends JLayeredPane {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-        ((Graphics2D)g).scale(this.zoomLevel, this.zoomLevel);
-        int width = this.getWidth();
-        int height = this.getHeight();
-        for (int x = 0; x < width; x += BACKGROUND_IMG.getWidth()) {
-            for (int y = 0; y < height; y += BACKGROUND_IMG.getHeight()) {
-                g.drawImage(BACKGROUND_IMG, x, y, this);
+        int scaledW = Math.max(1, (int)(BACKGROUND_IMG.getWidth() * zoomLevel));
+        int scaledH = Math.max(1, (int)(BACKGROUND_IMG.getHeight() * zoomLevel));
+        for (int x = 0; x < getWidth(); x += scaledW) {
+            for (int y = 0; y < getHeight(); y += scaledH) {
+                g.drawImage(BACKGROUND_IMG, x, y, scaledW, scaledH, this);
+            }
+        }
+        if (overviewMode) {
+            paintOverview((Graphics2D) g);
+        }
+    }
+
+    private void setZoomLevel(double zoom) {
+        double newZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, zoom));
+        boolean shouldBeOverview = newZoom < OVERVIEW_THRESHOLD;
+        if (shouldBeOverview != this.overviewMode) {
+            this.overviewMode = shouldBeOverview;
+            for (Component c : this.getComponents()) {
+                c.setVisible(!this.overviewMode);
+            }
+        }
+        this.zoomLevel = newZoom;
+        if (this.overviewMode) {
+            this.setPreferredSize(new Dimension(
+                (int)(CANVAS_WIDTH * this.zoomLevel),
+                (int)(CANVAS_HEIGHT * this.zoomLevel)
+            ));
+        } else {
+            this.setPreferredSize(new Dimension(CANVAS_WIDTH, CANVAS_HEIGHT));
+        }
+        this.revalidate();
+        this.repaint();
+    }
+
+    private void scrollToNode(NodePanel np) {
+        JViewport viewport = (JViewport) SwingUtilities.getAncestorOfClass(JViewport.class, this);
+        if (viewport == null) return;
+        Rectangle vr = viewport.getViewRect();
+        int x = np.getX() - vr.width / 2 + np.getWidth() / 2;
+        int y = np.getY() - vr.height / 2 + np.getHeight() / 2;
+        scrollRectToVisible(new Rectangle(x, y, vr.width, vr.height));
+    }
+
+    private void paintOverview(Graphics2D g2) {
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        AffineTransform saved = g2.getTransform();
+        g2.scale(zoomLevel, zoomLevel);
+
+        for (Component c : getComponentsInLayer(CONNECTION_LAYER)) {
+            if (c instanceof NodeConnection) {
+                paintConnectionInOverview(g2, (NodeConnection) c);
+            }
+        }
+        for (Component c : getComponentsInLayer(NODE_LAYER)) {
+            if (c instanceof NodePanel) {
+                paintNodeBodyInOverview(g2, (NodePanel) c);
+            }
+        }
+
+        // Draw labels at fixed screen size — reset transform so font size is viewport-relative
+        g2.setTransform(saved);
+        for (Component c : getComponentsInLayer(NODE_LAYER)) {
+            if (c instanceof NodePanel) {
+                paintNodeLabelInOverview(g2, (NodePanel) c);
             }
         }
     }
 
-    // Helper method to rescale Swing components
-    private void rescaleComponents(Container container, double scale) {
-        for (Component component : container.getComponents()) {
-            if (component instanceof Container) {
-                this.rescaleComponents((Container) component, scale);
-            }
-//            Dimension originalSize = component.getPreferredSize();
-//            if (!this.originalSizes.containsKey(component)) {
-//                this.originalSizes.put(component, originalSize);
-//            }
-            component.setSize((int) (component.getWidth() * scale), (int) (component.getHeight() * scale));
-        }
+    private void paintNodeBodyInOverview(Graphics2D g2, NodePanel np) {
+        int x = np.getX(), y = np.getY(), w = np.getWidth(), h = np.getHeight();
+        Color bg = np.getBackground();
+
+        g2.setColor(bg.darker());
+        g2.fillRoundRect(x, y, w, h, 10, 10);
+
+        // Title bar
+        g2.setColor(bg);
+        g2.fillRect(x, y, w, NodePanel.TITLE_HEIGHT + 4);
+        g2.fillRoundRect(x, y, w, NodePanel.TITLE_HEIGHT + 14, 10, 10);
+
+        // Border
+        g2.setStroke(new BasicStroke(2));
+        g2.setColor(bg.darker().darker());
+        g2.drawRoundRect(x, y, w, h, 10, 10);
+    }
+
+    private void paintNodeLabelInOverview(Graphics2D g2, NodePanel np) {
+        g2.setFont(g2.getFont().deriveFont(Font.BOLD, 11f));
+        g2.setColor(Util.textColorForBG(np.getBackground()));
+        int screenX = (int)(np.getX() * zoomLevel) + 7;
+        int screenY = (int)(np.getY() * zoomLevel) + 13;
+        g2.drawString(np.getName(), screenX, screenY);
+    }
+
+    private void paintConnectionInOverview(Graphics2D g2, NodeConnection nc) {
+        ConnectionPointOut<?> startPort = nc.getStartPoint();
+        ConnectionPointIn<?> endPort = nc.getEndPoint();
+        if (startPort == null || endPort == null) return;
+
+        // convertPoint works on hidden components — bounds are preserved by Swing
+        Point s = SwingUtilities.convertPoint(startPort.getParent(), startPort.getLocation(), this);
+        s.translate(startPort.getWidth(), startPort.getHeight() / 2);
+        Point e = SwingUtilities.convertPoint(endPort.getParent(), endPort.getLocation(), this);
+        e.translate(0, endPort.getHeight() / 2);
+
+        boolean exec = startPort.isExec();
+        g2.setColor(exec ? OVERVIEW_EXEC_COLOR : Color.WHITE);
+        g2.setStroke(new BasicStroke(exec ? 3 : 2));
+        g2.draw(new CubicCurve2D.Double(s.x, s.y, s.x + 100, s.y, e.x - 100, e.y, e.x, e.y));
     }
 
     public void processNode(Node node) {
