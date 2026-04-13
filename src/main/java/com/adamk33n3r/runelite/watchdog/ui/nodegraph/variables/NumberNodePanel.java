@@ -1,6 +1,8 @@
-package com.adamk33n3r.runelite.watchdog.ui.nodegraph;
+package com.adamk33n3r.runelite.watchdog.ui.nodegraph.variables;
 
 import com.adamk33n3r.nodegraph.nodes.constants.Num;
+import com.adamk33n3r.runelite.watchdog.ui.nodegraph.GraphPanel;
+import com.adamk33n3r.runelite.watchdog.ui.nodegraph.NodePanel;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.ConnectionLine;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.ConnectionPointOut;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.inputs.NumberInput;

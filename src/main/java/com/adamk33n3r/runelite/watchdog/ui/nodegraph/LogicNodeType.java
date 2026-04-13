@@ -15,6 +15,10 @@ public enum LogicNodeType implements Displayable {
     BOOLEAN("Boolean Gate", "Boolean logic e.g. and/or", BooleanGate.class, BooleanGateNodePanel.class),
     // dropdown to select which equality type, will have 2 inputs and must be same data type
     EQUALITY("Equality", "Equality logic e.g. ==/!=/>/<", Equality.class, EqualityNodePanel.class),
+    // takes in 2 WorldPoint inputs to compare, or uses same controls as LocationAlertPanel for x,y,plane if that input is not connected
+    // additionally, will have other controls of LocationAlertPanel like Cardinal Only, Distance, and a button to grab the current
+    // location
+//    LOCATION_COMPARE("Location", "Location", LocationCompare.class, LocationCompareNodePanel.class),
     ;
 
     private final String name;

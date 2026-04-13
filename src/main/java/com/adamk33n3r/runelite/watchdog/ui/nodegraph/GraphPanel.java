@@ -26,6 +26,8 @@ import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.Connection;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.ConnectionPointIn;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.ConnectionPointOut;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.NodeConnection;
+import com.adamk33n3r.runelite.watchdog.ui.nodegraph.variables.BoolNodePanel;
+import com.adamk33n3r.runelite.watchdog.ui.nodegraph.variables.NumberNodePanel;
 import com.adamk33n3r.runelite.watchdog.ui.panels.AlertPanelContentFactory;
 import com.adamk33n3r.runelite.watchdog.ui.panels.NotificationPanelFactory;
 import lombok.Getter;
@@ -36,6 +38,7 @@ import net.runelite.client.util.ImageUtil;
 
 import com.google.inject.Injector;
 
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.swing.*;
 import java.awt.*;
@@ -320,10 +323,10 @@ public class GraphPanel extends JLayeredPane {
             });
     }
 
-    public void createNode(Component parent, int x, int y, VarOutput<?> outputVar, Consumer<NodePanel> onSelect) {
+    public void createNode(Component parent, int x, int y, @Nullable VarOutput<?> outputVar, Consumer<NodePanel> onSelect) {
         this.popupLocation = SwingUtilities.convertPoint(parent, new Point(x, y), this);
 
-        new NewNodePopup(enumVal -> this.compatibilityChecker.hasCompatibleInput(enumVal, outputVar.getType()))
+        new NewNodePopup(enumVal -> outputVar == null || this.compatibilityChecker.hasCompatibleInput(enumVal, outputVar.getType()))
             .show(parent, x, y, (selected) -> {
                 int px = this.popupLocation.x;
                 int py = this.popupLocation.y;
