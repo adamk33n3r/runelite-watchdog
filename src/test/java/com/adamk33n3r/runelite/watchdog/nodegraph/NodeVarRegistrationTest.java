@@ -24,8 +24,6 @@ public class NodeVarRegistrationTest {
     public void triggerNode_registersAllInputs() {
         TriggerNode node = new TriggerNode(new ChatAlert("test"));
         assertTrue(node.getInputs().containsKey("Enabled"));
-        assertTrue(node.getInputs().containsKey("Name"));
-        assertTrue(node.getInputs().containsKey("Debounce"));
         assertTrue(node.getInputs().containsKey("Capture Groups In"));
     }
 
@@ -33,8 +31,7 @@ public class NodeVarRegistrationTest {
     public void triggerNode_registersAllOutputs() {
         TriggerNode node = new TriggerNode(new ChatAlert("test"));
         assertTrue(node.getOutputs().containsKey("Exec"));
-        assertTrue(node.getOutputs().containsKey("Name"));
-        assertTrue(node.getOutputs().containsKey("Debounce Out"));
+        assertTrue(node.getOutputs().containsKey("Enabled Out"));
     }
 
     @Test
@@ -79,7 +76,6 @@ public class NodeVarRegistrationTest {
     @Test
     public void continuousTriggerNode_registersIsTriggeredOutput() {
         ContinuousAlert alert = Mockito.mock(ContinuousAlert.class);
-        Mockito.when(alert.getName()).thenReturn("continuous test");
         ContinuousTriggerNode node = new ContinuousTriggerNode(alert);
         assertTrue(node.getOutputs().containsKey("Is Triggered"));
         // Also inherits TriggerNode outputs
