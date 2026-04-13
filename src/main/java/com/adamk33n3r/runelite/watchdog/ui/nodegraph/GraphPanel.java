@@ -45,6 +45,7 @@ import java.awt.geom.CubicCurve2D;
 import java.awt.image.BufferedImage;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 @Slf4j
 public class GraphPanel extends JLayeredPane {
@@ -314,9 +315,13 @@ public class GraphPanel extends JLayeredPane {
     }
 
     public void createNode(Component parent, int x, int y, Class<? extends Enum<?>>[] filter, Consumer<NodePanel> onSelect) {
+        this.createNode(parent, x, y, filter, e -> true, onSelect);
+    }
+
+    public void createNode(Component parent, int x, int y, Class<? extends Enum<?>>[] filter, Predicate<Enum<?>> itemFilter, Consumer<NodePanel> onSelect) {
         this.popupLocation = SwingUtilities.convertPoint(parent, new Point(x, y), this);
 
-        new NewNodePopup(filter).show(parent, x, y, (selected) -> {
+        new NewNodePopup(itemFilter, filter).show(parent, x, y, (selected) -> {
             int px = this.popupLocation.x;
             int py = this.popupLocation.y;
             if (selected instanceof TriggerType) {

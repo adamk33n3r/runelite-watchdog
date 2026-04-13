@@ -23,8 +23,8 @@ public class AlertNodePanel extends NodePanel {
     private ConnectionPointOut<Boolean> isTriggered;
 
     private final ConnectionPointOut<ExecSignal> execOut;
-    private final ConnectionPointOut<String> alertName;
-    private final ConnectionPointOut<Number> testOut;
+//    private final ConnectionPointOut<String> alertName;
+//    private final ConnectionPointOut<Number> debounceOut;
     private final ConnectionPointIn<Boolean> enabled;
     private final ConnectionPointOut<Boolean> enabledOut;
 
@@ -50,9 +50,9 @@ public class AlertNodePanel extends NodePanel {
         ViewInput<ExecSignal> exec = new ViewInput<>("Exec", triggerNode.getExec().getValue());
         addDisposer(triggerNode.getCaptureGroupsIn().onChange((captureGroups) -> exec.setValue(new ExecSignal(captureGroups))));
         this.items.add(new ConnectionLine<>(null, exec, this.execOut));
-        this.alertName = new ConnectionPointOut<>(this, triggerNode.getNameOut());
+//        this.alertName = new ConnectionPointOut<>(this, triggerNode.getNameOut());
 //        this.items.add(new ConnectionLine<>(null, new TextInput("Alert Name", triggerNode.getNameOut().getValue()), this.alertName));
-        this.testOut = new ConnectionPointOut<>(this, triggerNode.getDebounceOut());
+//        this.debounceOut = new ConnectionPointOut<>(this, triggerNode.getDebounceOut());
 //        this.items.add(new ConnectionLine<>(new ConnectionPointIn<>(this, triggerNode.getDebounce()), new NumberInput("Debounce", triggerNode.getDebounceOut().getValue().intValue()), this.testOut));
         this.enabled = new ConnectionPointIn<>(this, triggerNode.getEnabled());
         BoolInput enabledInput = new BoolInput("Enabled", triggerNode.getEnabled());

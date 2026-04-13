@@ -1,13 +1,11 @@
 package com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections;
 
 import com.adamk33n3r.nodegraph.ExecSignal;
-import com.adamk33n3r.runelite.watchdog.NotificationType;
+import com.adamk33n3r.nodegraph.VarInput;
 import com.adamk33n3r.nodegraph.VarOutput;
-import com.adamk33n3r.runelite.watchdog.ui.nodegraph.AlertNodePanel;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.GraphPanel;
-import com.adamk33n3r.runelite.watchdog.ui.nodegraph.LogicNodeType;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.NodePanel;
-import com.adamk33n3r.runelite.watchdog.ui.nodegraph.NotificationNodePanel;
+import com.adamk33n3r.runelite.watchdog.ui.nodegraph.NodeTypeCompatibilityChecker;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
 import lombok.Getter;
 
@@ -15,6 +13,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Getter
 public class ConnectionPointOut<T> extends ConnectionPoint {
@@ -52,14 +52,26 @@ public class ConnectionPointOut<T> extends ConnectionPoint {
                     //                System.out.print("deepest component: ");
                     //                System.out.println(deepestComponentAt);
                     if (deepestComponentAt.equals(nodePanel.getGraphPanel()) || (deepestComponentAt instanceof Connection && deepestComponentAt.getParent().equals(nodePanel.getGraphPanel()))) {
-                        //                    System.out.println("dropped on graph");
-                        // TODO: Update this to filter to only allow nodes that have a connection point that will match the connection point being dragged from
-                        nodePanel.getGraphPanel().createNode(e.getComponent(), e.getX(), e.getY(), new Class[]{NotificationType.class, LogicNodeType.class}, (newNode) -> {
-                            if (nodePanel instanceof AlertNodePanel && newNode instanceof NotificationNodePanel) {
-                                nodePanel.getGraphPanel().connect(((AlertNodePanel) nodePanel).getExecOut(), ((NotificationNodePanel) newNode).getExecIn());
+                        nodePanel.getGraphPanel().createNode(
+                            e.getComponent(), e.getX(), e.getY(),
+                            null, // show all categories; item predicate handles filtering
+                            enumVal -> NodeTypeCompatibilityChecker.hasCompatibleInput(enumVal, outputVar.getType()),
+                            (newNode) -> {
+                                if (newNode != null) {
+                                    List<VarInput<?>> candidateVars = newNode.getAllInputPoints().stream()
+                                        .map(ConnectionPointIn::getInputVar)
+                                        .collect(Collectors.toList());
+                                    VarInput<T> bestVar = ConnectionAutoMatcher.findBestMatchingInput(outputVar, candidateVars);
+                                    if (bestVar != null) {
+                                        ConnectionPointIn<T> bestCp = newNode.getInputPoint(bestVar);
+                                        if (bestCp != null) {
+                                            nodePanel.getGraphPanel().connect(ConnectionPointOut.this, bestCp);
+                                        }
+                                    }
+                                }
+                                removeNewConnection();
                             }
-                            removeNewConnection();
-                        });
+                        );
                         return;
                     }
 

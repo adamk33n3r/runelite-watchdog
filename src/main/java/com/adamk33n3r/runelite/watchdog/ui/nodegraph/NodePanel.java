@@ -20,7 +20,10 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.IdentityHashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -42,7 +45,8 @@ public class NodePanel extends JPanel {
     private final Node node;
 
     private final Map<VarOutput<?>, ConnectionPointOut<?>> outputRegistry = new IdentityHashMap<>();
-    private final Map<VarInput<?>, ConnectionPointIn<?>> inputRegistry = new IdentityHashMap<>();
+    // LinkedHashMap preserves insertion order so "first of type" fallback in ConnectionAutoMatcher is deterministic
+    private final Map<VarInput<?>, ConnectionPointIn<?>> inputRegistry = new LinkedHashMap<>();
 
     public void registerOutputPoint(VarOutput<?> var, ConnectionPointOut<?> cp) {
         outputRegistry.put(var, cp);
@@ -60,6 +64,10 @@ public class NodePanel extends JPanel {
     @SuppressWarnings("unchecked")
     public <T> ConnectionPointIn<T> getInputPoint(VarInput<T> var) {
         return (ConnectionPointIn<T>) inputRegistry.get(var);
+    }
+
+    public Collection<ConnectionPointIn<?>> getAllInputPoints() {
+        return Collections.unmodifiableCollection(inputRegistry.values());
     }
 
     @Getter

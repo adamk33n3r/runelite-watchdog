@@ -16,6 +16,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 public class NewNodePopup extends JPopupMenu {
@@ -73,11 +74,16 @@ public class NewNodePopup extends JPopupMenu {
 
     @SafeVarargs
     public NewNodePopup(Class<? extends Enum<?>>... items) {
+        this(e -> true, items);
+    }
+
+    @SafeVarargs
+    public NewNodePopup(Predicate<Enum<?>> itemFilter, Class<? extends Enum<?>>... items) {
         this.items = (items == null ? DEFAULT_ITEMS.stream() : Arrays.stream(items))
             .map((item) -> new CustomList.Items(
                 item,
                 enumToCategory.get(item),
-                e -> !(e == TriggerType.ALERT_GROUP || e == TriggerType.ADVANCED_ALERT))
+                e -> !(e == TriggerType.ALERT_GROUP || e == TriggerType.ADVANCED_ALERT) && itemFilter.test(e))
             ).toArray(CustomList.Items[]::new);
         this.itemList = new CustomList(this.items);
 
@@ -106,10 +112,13 @@ public class NewNodePopup extends JPopupMenu {
     }
 
     private void filter() {
-        this.itemList.setListData(Arrays.stream(this.items).flatMap(i -> Stream.concat(Stream.of("c:"+i.getCategory()), Arrays.stream(i.getItems())))
-            .filter(item -> {
-                String option = item.toString();
-                return option.startsWith("c:") || Text.matchesSearchTerms(SPLITTER.split(this.search.getText().toUpperCase()), Collections.singleton(option.toUpperCase()));
+        this.itemList.setListData(Arrays.stream(this.items).flatMap(i -> {
+            Object[] matching = Arrays.stream(i.getItems())
+                .filter(item -> Text.matchesSearchTerms(SPLITTER.split(this.search.getText().toUpperCase()),
+                    Collections.singleton(item.toString().toUpperCase())))
+                .toArray();
+            if (matching.length == 0) return Stream.empty();
+            return Stream.concat(Stream.of("c:" + i.getCategory()), Arrays.stream(matching));
         }).toArray(Object[]::new));
     }
 }

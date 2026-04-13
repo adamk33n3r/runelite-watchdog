@@ -20,7 +20,9 @@ import java.util.stream.Stream;
 public class CustomList extends JList<Object> {
     public CustomList(Items[] items) {
         super();
-        Stream<Object> objectStream = Arrays.stream(items).flatMap(i -> Stream.concat(Stream.of("c:"+i.category), Arrays.stream(i.items)));
+        Stream<Object> objectStream = Arrays.stream(items)
+            .filter(i -> i.items.length > 0)
+            .flatMap(i -> Stream.concat(Stream.of("c:"+i.category), Arrays.stream(i.items)));
         this.setListData(objectStream.toArray());
         this.setCellRenderer(new DefaultListCellRenderer() {
             @Override
