@@ -27,10 +27,9 @@ public class AdvancedAlertPanel extends AlertContentPanel<AdvancedAlert> {
                 return;
             }
 
-            GraphPanel graphPanel = new GraphPanel();
-            WatchdogPlugin.getInstance().getInjector().injectMembers(graphPanel);
+            GraphPanel graphPanel = WatchdogPlugin.getInstance().getInjector().getInstance(GraphPanel.class);
             graphPanel.setOnChange(() -> WatchdogPlugin.getInstance().getAlertManager().saveAlerts());
-            graphPanel.init(WatchdogPlugin.getInstance().getInjector(), this.alert.getGraph());
+            graphPanel.init(this.alert.getGraph());
 
             JScrollPane scrollPane = new JScrollPane(graphPanel);
             scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);

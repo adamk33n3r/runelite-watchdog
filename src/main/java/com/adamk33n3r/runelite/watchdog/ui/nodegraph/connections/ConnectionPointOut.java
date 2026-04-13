@@ -8,6 +8,7 @@ import com.adamk33n3r.runelite.watchdog.ui.nodegraph.NodePanel;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.NodeTypeCompatibilityChecker;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.swing.*;
 import java.awt.*;
@@ -16,6 +17,7 @@ import java.awt.event.MouseEvent;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Getter
 public class ConnectionPointOut<T> extends ConnectionPoint {
     private final VarOutput<T> outputVar;
@@ -97,6 +99,7 @@ public class ConnectionPointOut<T> extends ConnectionPoint {
                     removeNewConnection();
 
                 } catch (Exception ex) {
+                    log.error("e: ", ex);
                     removeNewConnection();
                 }
             }

@@ -48,7 +48,6 @@ import java.awt.geom.CubicCurve2D;
 import java.awt.image.BufferedImage;
 import java.util.*;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
 
 @Slf4j
 public class GraphPanel extends JLayeredPane {
@@ -74,7 +73,6 @@ public class GraphPanel extends JLayeredPane {
         this.activeDragType = type;
         this.repaint();
     }
-    private Injector injector;
     private Runnable onChangeCallback;
     private final javax.swing.Timer saveDebounceTimer = new javax.swing.Timer(300, e -> {
         if (this.onChangeCallback != null) this.onChangeCallback.run();
@@ -88,6 +86,9 @@ public class GraphPanel extends JLayeredPane {
 
     @Inject
     private NotificationPanelFactory notificationPanelFactory;
+
+    @Inject
+    private Injector injector;
 
     @Inject
     private NodeTypeCompatibilityChecker compatibilityChecker;
@@ -182,8 +183,8 @@ public class GraphPanel extends JLayeredPane {
         this.connect(statChangedTriggerNodePanel.getExecOut(), screenFlashNodePanel.getExecIn());
     }
 
-    public void init(Injector injector) {
-        this.init(injector, new Graph());
+    public void init() {
+        this.init(new Graph());
 //        this.setUpExample2();
     }
 
@@ -195,8 +196,7 @@ public class GraphPanel extends JLayeredPane {
         this.saveDebounceTimer.restart();
     }
 
-    public void init(Injector injector, Graph existingGraph) {
-        this.injector = injector;
+    public void init(Graph existingGraph) {
         this.saveDebounceTimer.setRepeats(false);
         this.setBackground(ColorScheme.DARKER_GRAY_COLOR);
         this.setOpaque(false);
