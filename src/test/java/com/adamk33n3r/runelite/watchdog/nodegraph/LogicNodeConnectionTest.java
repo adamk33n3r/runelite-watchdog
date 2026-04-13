@@ -4,9 +4,12 @@ import com.adamk33n3r.nodegraph.Connection;
 import com.adamk33n3r.nodegraph.VarInput;
 import com.adamk33n3r.nodegraph.VarOutput;
 import com.adamk33n3r.nodegraph.nodes.constants.Bool;
+import com.adamk33n3r.nodegraph.nodes.constants.Location;
 import com.adamk33n3r.nodegraph.nodes.constants.Num;
 import com.adamk33n3r.nodegraph.nodes.logic.BooleanGate;
 import com.adamk33n3r.nodegraph.nodes.logic.Equality;
+import com.adamk33n3r.nodegraph.nodes.logic.LocationCompare;
+import net.runelite.api.coords.WorldPoint;
 import org.junit.Test;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -121,5 +124,92 @@ public class LogicNodeConnectionTest {
         // Now make equality false: 5 == 10 → false; gate: false AND true → false
         numB.setValue(10);
         assertFalse(gate.getResult().getValue());
+    }
+
+    // 7. LocationCompare: same point at distance 0 → true
+    @Test
+    public void test_locationCompare_samePoint_isTrue() {
+        LocationCompare lc = new LocationCompare();
+        lc.getA().setValue(new WorldPoint(3200, 3200, 0));
+        lc.getB().setValue(new WorldPoint(3200, 3200, 0));
+        lc.setDistance(0);
+        lc.process();
+        assertTrue(lc.getResult().getValue());
+    }
+
+    // 8. LocationCompare: points far apart at distance 0 → false
+    @Test
+    public void test_locationCompare_outOfRange_isFalse() {
+        LocationCompare lc = new LocationCompare();
+        lc.getA().setValue(new WorldPoint(3200, 3200, 0));
+        lc.getB().setValue(new WorldPoint(3210, 3210, 0));
+        lc.setDistance(0);
+        lc.process();
+        assertFalse(lc.getResult().getValue());
+    }
+
+    // 9. LocationCompare: diagonal points with cardinalOnly → false
+    @Test
+    public void test_locationCompare_cardinalOnly_diagonal_isFalse() {
+        LocationCompare lc = new LocationCompare();
+        lc.getA().setValue(new WorldPoint(3200, 3200, 0));
+        lc.getB().setValue(new WorldPoint(3201, 3201, 0));
+        lc.setDistance(10);
+        lc.setCardinalOnly(true);
+        lc.process();
+        assertFalse(lc.getResult().getValue());
+    }
+
+    // 10. LocationCompare: cardinal directions pass with cardinalOnly
+    @Test
+    public void test_locationCompare_cardinalOnly_sameX_isTrue() {
+        LocationCompare lc = new LocationCompare();
+        lc.getA().setValue(new WorldPoint(3200, 3200, 0));
+        lc.getB().setValue(new WorldPoint(3200, 3203, 0));
+        lc.setDistance(5);
+        lc.setCardinalOnly(true);
+        lc.process();
+        assertTrue(lc.getResult().getValue());
+    }
+
+    // 11. LocationCompare: points within specified distance → true
+    @Test
+    public void test_locationCompare_withinDistance_isTrue() {
+        LocationCompare lc = new LocationCompare();
+        lc.getA().setValue(new WorldPoint(3200, 3200, 0));
+        lc.getB().setValue(new WorldPoint(3203, 3204, 0));
+        lc.setDistance(5);
+        lc.process();
+        assertTrue(lc.getResult().getValue());
+    }
+
+    // 12. Connecting Location outputs to LocationCompare inputs does not stack overflow
+    @Test
+    public void test_locationCompare_connection_does_not_stack_overflow() {
+        Location locA = new Location();
+        locA.setValue(new WorldPoint(3200, 3200, 0));
+        LocationCompare lc = new LocationCompare();
+        new Connection<>(locA.getValue(), lc.getA());
+    }
+
+    // 13. LocationCompare auto-recomputes when input changes via connection
+    @Test
+    public void test_locationCompare_recomputes_on_push() {
+        Location locA = new Location();
+        Location locB = new Location();
+        locA.setValue(new WorldPoint(3200, 3200, 0));
+        locB.setValue(new WorldPoint(3200, 3200, 0));
+
+        LocationCompare lc = new LocationCompare();
+        lc.setDistance(0);
+        new Connection<>(locA.getValue(), lc.getA());
+        new Connection<>(locB.getValue(), lc.getB());
+
+        // Same point → true
+        assertTrue(lc.getResult().getValue());
+
+        // Push new location → different point → false
+        locB.setValue(new WorldPoint(3205, 3205, 0));
+        assertFalse(lc.getResult().getValue());
     }
 }

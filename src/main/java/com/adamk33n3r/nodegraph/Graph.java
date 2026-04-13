@@ -82,6 +82,10 @@ public class Graph {
             });
     }
 
+    public <T extends Node> Stream<T> getNodesOfType(Class<T> nodeClass) {
+        return nodes.stream().filter(nodeClass::isInstance).map(nodeClass::cast);
+    }
+
     public Stream<TriggerNode> getTriggerNodes() {
         return this.nodes.stream()
             .filter(n -> n instanceof TriggerNode)

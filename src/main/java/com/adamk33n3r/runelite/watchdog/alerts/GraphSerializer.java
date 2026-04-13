@@ -3,12 +3,19 @@ package com.adamk33n3r.runelite.watchdog.alerts;
 import com.adamk33n3r.nodegraph.*;
 import com.adamk33n3r.nodegraph.nodes.*;
 import com.adamk33n3r.nodegraph.nodes.constants.Bool;
+import com.adamk33n3r.nodegraph.nodes.constants.InventoryVar;
+import com.adamk33n3r.nodegraph.nodes.constants.Location;
 import com.adamk33n3r.nodegraph.nodes.constants.Num;
+import com.adamk33n3r.nodegraph.nodes.constants.PluginVar;
 import com.adamk33n3r.nodegraph.nodes.logic.BooleanGate;
 import com.adamk33n3r.nodegraph.nodes.logic.Equality;
+import com.adamk33n3r.nodegraph.nodes.logic.LocationCompare;
 import com.adamk33n3r.nodegraph.nodes.math.Add;
 import com.adamk33n3r.runelite.watchdog.RuntimeTypeAdapterFactory;
 import com.adamk33n3r.runelite.watchdog.notifications.Notification;
+import com.adamk33n3r.runelite.watchdog.ui.ComparableNumber;
+
+import net.runelite.api.coords.WorldPoint;
 
 import com.google.gson.*;
 import lombok.extern.slf4j.Slf4j;
@@ -73,6 +80,36 @@ public class GraphSerializer implements JsonSerializer<Graph>, JsonDeserializer<
                 nodeObj.addProperty("op", ((Equality) node).getOp().getValue().name());
                 nodeObj.addProperty("a", ((Equality) node).getA().getValue());
                 nodeObj.addProperty("b", ((Equality) node).getB().getValue());
+            } else if (node instanceof Location) {
+                nodeObj.addProperty("type", "Location");
+                nodeObj.addProperty("name", ((Location) node).getNameOut().getValue());
+            } else if (node instanceof PluginVar) {
+                nodeObj.addProperty("type", "PluginVar");
+                nodeObj.addProperty("name", ((PluginVar) node).getNameOut().getValue());
+                nodeObj.addProperty("pluginName", ((PluginVar) node).getPluginName());
+            } else if (node instanceof InventoryVar) {
+                InventoryVar inv = (InventoryVar) node;
+                nodeObj.addProperty("type", "InventoryVar");
+                nodeObj.addProperty("name", inv.getNameOut().getValue());
+                nodeObj.addProperty("inventoryAlertType", inv.getInventoryAlertType().name());
+                nodeObj.addProperty("inventoryMatchType", inv.getInventoryMatchType().name());
+                nodeObj.addProperty("itemName", inv.getItemName());
+                nodeObj.addProperty("isRegexEnabled", inv.isRegexEnabled());
+                nodeObj.addProperty("itemQuantity", inv.getItemQuantity());
+                nodeObj.addProperty("quantityComparator", inv.getQuantityComparator().name());
+            } else if (node instanceof LocationCompare) {
+                LocationCompare lc = (LocationCompare) node;
+                nodeObj.addProperty("type", "LocationCompare");
+                WorldPoint a = lc.getA().getValue();
+                nodeObj.addProperty("ax", a.getX());
+                nodeObj.addProperty("ay", a.getY());
+                nodeObj.addProperty("aPlane", a.getPlane());
+                WorldPoint b = lc.getB().getValue();
+                nodeObj.addProperty("bx", b.getX());
+                nodeObj.addProperty("by", b.getY());
+                nodeObj.addProperty("bPlane", b.getPlane());
+                nodeObj.addProperty("distance", lc.getDistance());
+                nodeObj.addProperty("cardinalOnly", lc.isCardinalOnly());
             } else {
                 log.warn("Unknown node type during serialization: {}", node.getClass().getSimpleName());
                 continue;
@@ -171,6 +208,74 @@ public class GraphSerializer implements JsonSerializer<Graph>, JsonDeserializer<
                                 eq.getB().setValue(nodeObj.get("b").getAsDouble());
                             }
                             node = eq;
+                            break;
+                        }
+                        case "Location": {
+                            Location loc = new Location();
+                            if (nodeObj.has("name")) {
+                                loc.getNameOut().setValue(nodeObj.get("name").getAsString());
+                            }
+                            node = loc;
+                            break;
+                        }
+                        case "PluginVar": {
+                            PluginVar pv = new PluginVar();
+                            if (nodeObj.has("name")) {
+                                pv.getNameOut().setValue(nodeObj.get("name").getAsString());
+                            }
+                            if (nodeObj.has("pluginName")) {
+                                pv.setPluginName(nodeObj.get("pluginName").getAsString());
+                            }
+                            node = pv;
+                            break;
+                        }
+                        case "InventoryVar": {
+                            InventoryVar inv = new InventoryVar();
+                            if (nodeObj.has("name")) {
+                                inv.getNameOut().setValue(nodeObj.get("name").getAsString());
+                            }
+                            if (nodeObj.has("inventoryAlertType")) {
+                                inv.setInventoryAlertType(InventoryAlert.InventoryAlertType.valueOf(nodeObj.get("inventoryAlertType").getAsString()));
+                            }
+                            if (nodeObj.has("inventoryMatchType")) {
+                                inv.setInventoryMatchType(InventoryAlert.InventoryMatchType.valueOf(nodeObj.get("inventoryMatchType").getAsString()));
+                            }
+                            if (nodeObj.has("itemName")) {
+                                inv.setItemName(nodeObj.get("itemName").getAsString());
+                            }
+                            if (nodeObj.has("isRegexEnabled")) {
+                                inv.setRegexEnabled(nodeObj.get("isRegexEnabled").getAsBoolean());
+                            }
+                            if (nodeObj.has("itemQuantity")) {
+                                inv.setItemQuantity(nodeObj.get("itemQuantity").getAsInt());
+                            }
+                            if (nodeObj.has("quantityComparator")) {
+                                inv.setQuantityComparator(ComparableNumber.Comparator.valueOf(nodeObj.get("quantityComparator").getAsString()));
+                            }
+                            node = inv;
+                            break;
+                        }
+                        case "LocationCompare": {
+                            LocationCompare lc = new LocationCompare();
+                            if (nodeObj.has("ax")) {
+                                lc.getA().setValue(new WorldPoint(
+                                    nodeObj.get("ax").getAsInt(),
+                                    nodeObj.get("ay").getAsInt(),
+                                    nodeObj.get("aPlane").getAsInt()));
+                            }
+                            if (nodeObj.has("bx")) {
+                                lc.getB().setValue(new WorldPoint(
+                                    nodeObj.get("bx").getAsInt(),
+                                    nodeObj.get("by").getAsInt(),
+                                    nodeObj.get("bPlane").getAsInt()));
+                            }
+                            if (nodeObj.has("distance")) {
+                                lc.setDistance(nodeObj.get("distance").getAsInt());
+                            }
+                            if (nodeObj.has("cardinalOnly")) {
+                                lc.setCardinalOnly(nodeObj.get("cardinalOnly").getAsBoolean());
+                            }
+                            node = lc;
                             break;
                         }
                         default:

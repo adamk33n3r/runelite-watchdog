@@ -5,7 +5,11 @@ import com.adamk33n3r.nodegraph.Graph;
 import com.adamk33n3r.nodegraph.nodes.NotificationNode;
 import com.adamk33n3r.nodegraph.nodes.TriggerNode;
 import com.adamk33n3r.nodegraph.nodes.constants.Bool;
+import com.adamk33n3r.nodegraph.nodes.constants.InventoryVar;
+import com.adamk33n3r.nodegraph.nodes.constants.Location;
 import com.adamk33n3r.nodegraph.nodes.constants.Num;
+import com.adamk33n3r.nodegraph.nodes.constants.PluginVar;
+import com.adamk33n3r.nodegraph.nodes.logic.LocationCompare;
 import com.adamk33n3r.runelite.watchdog.RuntimeTypeAdapterFactory;
 import com.adamk33n3r.runelite.watchdog.alerts.Alert;
 import com.adamk33n3r.runelite.watchdog.alerts.AdvancedAlert;
@@ -14,7 +18,11 @@ import com.adamk33n3r.runelite.watchdog.alerts.GraphSerializer;
 import com.adamk33n3r.runelite.watchdog.notifications.Notification;
 import com.adamk33n3r.runelite.watchdog.notifications.ScreenFlash;
 
+import com.adamk33n3r.runelite.watchdog.alerts.InventoryAlert;
+import com.adamk33n3r.runelite.watchdog.ui.ComparableNumber;
+
 import com.google.gson.Gson;
+import net.runelite.api.coords.WorldPoint;
 import net.runelite.http.api.RuneLiteAPI;
 import org.junit.Before;
 import org.junit.Test;
@@ -166,6 +174,74 @@ public class GraphSerializerTest {
 
         Graph loaded = roundTrip(graph);
         assertEquals(5, loaded.getNodes().size());
+    }
+
+    @Test
+    public void roundTrip_preservesLocationName() {
+        Graph graph = new Graph();
+        Location loc = new Location();
+        loc.getNameOut().setValue("My Location");
+        graph.add(loc);
+
+        Graph loaded = roundTrip(graph);
+        Location loadedLoc = (Location) loaded.getNodes().get(0);
+        assertEquals("My Location", loadedLoc.getNameOut().getValue());
+    }
+
+    @Test
+    public void roundTrip_preservesPluginVarConfig() {
+        Graph graph = new Graph();
+        PluginVar pv = new PluginVar();
+        pv.getNameOut().setValue("GPU Check");
+        pv.setPluginName("GPU");
+        graph.add(pv);
+
+        Graph loaded = roundTrip(graph);
+        PluginVar loadedPv = (PluginVar) loaded.getNodes().get(0);
+        assertEquals("GPU Check", loadedPv.getNameOut().getValue());
+        assertEquals("GPU", loadedPv.getPluginName());
+    }
+
+    @Test
+    public void roundTrip_preservesInventoryVarConfig() {
+        Graph graph = new Graph();
+        InventoryVar inv = new InventoryVar();
+        inv.getNameOut().setValue("Lobster Check");
+        inv.setInventoryAlertType(InventoryAlert.InventoryAlertType.ITEM);
+        inv.setInventoryMatchType(InventoryAlert.InventoryMatchType.UN_NOTED);
+        inv.setItemName("Lobster");
+        inv.setRegexEnabled(true);
+        inv.setItemQuantity(5);
+        inv.setQuantityComparator(ComparableNumber.Comparator.GREATER_THAN);
+        graph.add(inv);
+
+        Graph loaded = roundTrip(graph);
+        InventoryVar loadedInv = (InventoryVar) loaded.getNodes().get(0);
+        assertEquals("Lobster Check", loadedInv.getNameOut().getValue());
+        assertEquals(InventoryAlert.InventoryAlertType.ITEM, loadedInv.getInventoryAlertType());
+        assertEquals(InventoryAlert.InventoryMatchType.UN_NOTED, loadedInv.getInventoryMatchType());
+        assertEquals("Lobster", loadedInv.getItemName());
+        assertTrue(loadedInv.isRegexEnabled());
+        assertEquals(5, loadedInv.getItemQuantity());
+        assertEquals(ComparableNumber.Comparator.GREATER_THAN, loadedInv.getQuantityComparator());
+    }
+
+    @Test
+    public void roundTrip_preservesLocationCompareConfig() {
+        Graph graph = new Graph();
+        LocationCompare lc = new LocationCompare();
+        lc.getA().setValue(new WorldPoint(3200, 3200, 0));
+        lc.getB().setValue(new WorldPoint(3210, 3210, 1));
+        lc.setDistance(5);
+        lc.setCardinalOnly(true);
+        graph.add(lc);
+
+        Graph loaded = roundTrip(graph);
+        LocationCompare loadedLc = (LocationCompare) loaded.getNodes().get(0);
+        assertEquals(new WorldPoint(3200, 3200, 0), loadedLc.getA().getValue());
+        assertEquals(new WorldPoint(3210, 3210, 1), loadedLc.getB().getValue());
+        assertEquals(5, loadedLc.getDistance());
+        assertTrue(loadedLc.isCardinalOnly());
     }
 
     private Graph roundTrip(Graph graph) {

@@ -1,6 +1,9 @@
 package com.adamk33n3r.runelite.watchdog;
 
 import com.adamk33n3r.nodegraph.nodes.TriggerNode;
+import com.adamk33n3r.nodegraph.nodes.constants.InventoryVar;
+import com.adamk33n3r.nodegraph.nodes.constants.Location;
+import com.adamk33n3r.nodegraph.nodes.constants.PluginVar;
 import com.adamk33n3r.runelite.watchdog.alerts.*;
 import com.adamk33n3r.runelite.watchdog.alerts.InventoryAlert.InventoryAlertType;
 import com.adamk33n3r.runelite.watchdog.ui.panels.HistoryPanel;
@@ -16,7 +19,9 @@ import net.runelite.api.gameval.VarbitID;
 import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.NotificationFired;
+import net.runelite.client.events.PluginChanged;
 import net.runelite.client.events.PluginMessage;
+import net.runelite.client.plugins.PluginManager;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.util.Text;
 
@@ -62,6 +67,9 @@ public class EventHandler {
     private Provider<HistoryPanel> historyPanelProvider;
 
     @Inject
+    private PluginManager pluginManager;
+
+    @Inject
     private WatchdogPlugin plugin;
 
     private final Map<Alert, Instant> lastTriggered = new HashMap<>();
@@ -70,6 +78,8 @@ public class EventHandler {
     private final Map<Skill, Integer> previousSkillXPTable = new EnumMap<>(Skill.class);
     private final Map<Integer, ItemComposition> itemCompositionCache = new ConcurrentHashMap<>();
     private Map<Integer, InventoryItemData> previousItemsTable = new ConcurrentHashMap<>();
+    private volatile long currentInventoryItemCount = 0;
+    private volatile Map<Integer, InventoryItemData> currentItemsSnapshot = new ConcurrentHashMap<>();
     private WorldPoint previousLocation = null;
 
     private boolean firedByWatchdog = false;
@@ -291,13 +301,13 @@ public class EventHandler {
                     .quantity(orig.quantity + other.quantity)
                     .build());
             });
+        long itemCount = Arrays.stream(items).filter(item -> item.getId() > -1).count();
         // Skip firing alerts if there are no previous items, since we just logged in. Even an empty inventory will have a map of -1 itemIds.
         if (!this.previousItemsTable.isEmpty()) {
             Map<Integer, InventoryItemData> itemMap = new HashMap<>(currentItems);
             this.previousItemsTable.forEach((itemID, data) -> itemMap.putIfAbsent(itemID, InventoryItemData.builder()
                 .itemComposition(data.itemComposition)
                 .build()));
-            long itemCount = Arrays.stream(items).filter(item -> item.getId() > -1).count();
             this.alertManager.getAllEnabledAlertsOfType(InventoryAlert.class)
                 .forEach(inventoryAlert -> {
                     InventoryAlertType alertType = inventoryAlert.getInventoryAlertType();
@@ -358,6 +368,8 @@ public class EventHandler {
                     })
             );
         }
+        this.currentInventoryItemCount = itemCount;
+        this.currentItemsSnapshot = currentItems;
         this.previousItemsTable = currentItems;
     }
 
@@ -577,6 +589,61 @@ public class EventHandler {
             a -> new String[]{ String.valueOf(worldLocation.getX()), String.valueOf(worldLocation.getY()) });
 
         this.previousLocation = worldLocation;
+
+        // Push game state into variable nodes in AdvancedAlert graphs
+        this.updateVariableNodes(worldLocation);
+    }
+
+    @Subscribe
+    private void onPluginChanged(PluginChanged event) {
+        String changedPluginName = event.getPlugin().getName();
+        boolean isLoaded = event.isLoaded();
+        this.alertManager.getAllEnabledAlertsOfType(AdvancedAlert.class).forEach(adv ->
+            adv.getGraph().getNodesOfType(PluginVar.class)
+                .filter(pv -> changedPluginName.equals(pv.getPluginName()))
+                .forEach(pv -> pv.setValue(isLoaded))
+        );
+    }
+
+    private void updateVariableNodes(WorldPoint worldLocation) {
+        this.alertManager.getAllEnabledAlertsOfType(AdvancedAlert.class).forEach(adv -> {
+            // Location variable nodes: push current WorldPoint
+            adv.getGraph().getNodesOfType(Location.class)
+                .forEach(loc -> loc.setValue(worldLocation));
+
+            // Inventory variable nodes: evaluate continuous state
+            long itemCount = this.currentInventoryItemCount;
+            Map<Integer, InventoryItemData> itemSnapshot = this.currentItemsSnapshot;
+            adv.getGraph().getNodesOfType(InventoryVar.class).forEach(inv -> {
+                boolean result = this.evaluateInventoryVar(inv, itemCount, itemSnapshot);
+                inv.setValue(result);
+            });
+        });
+    }
+
+    private boolean evaluateInventoryVar(InventoryVar inv, long itemCount, Map<Integer, InventoryItemData> itemMap) {
+        switch (inv.getInventoryAlertType()) {
+            case FULL:
+                return itemCount == 28;
+            case EMPTY:
+                return itemCount == 0;
+            case SLOTS:
+                return inv.getQuantityComparator().compare((int) itemCount, inv.getItemQuantity());
+            case ITEM:
+            case ITEM_CHANGE:
+                // For continuous state, ITEM_CHANGE behaves the same as ITEM (no delta tracking)
+                return itemMap.entrySet().stream()
+                    .filter(e -> inv.getInventoryMatchType() == InventoryAlert.InventoryMatchType.BOTH
+                        || (inv.getInventoryMatchType() == InventoryAlert.InventoryMatchType.NOTED && e.getValue().isNoted())
+                        || (inv.getInventoryMatchType() == InventoryAlert.InventoryMatchType.UN_NOTED && !e.getValue().isNoted()))
+                    .anyMatch(e -> {
+                        String[] groups = Util.matchPattern(inv, e.getValue().itemComposition.getName());
+                        if (groups == null) return false;
+                        return inv.getQuantityComparator().compare(e.getValue().quantity, inv.getItemQuantity());
+                    });
+            default:
+                return false;
+        }
     }
 
     private final Map<AdvancedAlert, Map<TriggerNode, Instant>> lastTriggeredAdvanced = new ConcurrentHashMap<>();

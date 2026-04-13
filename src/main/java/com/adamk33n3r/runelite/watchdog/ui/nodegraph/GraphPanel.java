@@ -2,9 +2,13 @@ package com.adamk33n3r.runelite.watchdog.ui.nodegraph;
 
 import com.adamk33n3r.nodegraph.VarOutput;
 import com.adamk33n3r.nodegraph.nodes.ContinuousTriggerNode;
+import com.adamk33n3r.nodegraph.nodes.constants.InventoryVar;
+import com.adamk33n3r.nodegraph.nodes.constants.Location;
 import com.adamk33n3r.nodegraph.nodes.constants.Num;
+import com.adamk33n3r.nodegraph.nodes.constants.PluginVar;
 import com.adamk33n3r.nodegraph.nodes.logic.BooleanGate;
 import com.adamk33n3r.nodegraph.nodes.logic.Equality;
+import com.adamk33n3r.nodegraph.nodes.logic.LocationCompare;
 import com.adamk33n3r.runelite.watchdog.NotificationType;
 import com.adamk33n3r.runelite.watchdog.TriggerType;
 import com.adamk33n3r.runelite.watchdog.Util;
@@ -381,12 +385,21 @@ public class GraphPanel extends JLayeredPane {
                             this.add(equalityPanel, NODE_LAYER, 0);
                             onSelect.accept(equalityPanel);
                             break;
+                        case LOCATION_COMPARE:
+                            LocationCompare locCompare = new LocationCompare();
+                            locCompare.setX(px);
+                            locCompare.setY(py);
+                            this.graph.add(locCompare);
+                            NodePanel locComparePanel = new LocationCompareNodePanel(this, locCompare, px, py, logicNodeType.getName(), NODE_LOGIC_COLOR, injector.getInstance(net.runelite.api.Client.class));
+                            this.add(locComparePanel, NODE_LAYER, 0);
+                            onSelect.accept(locComparePanel);
+                            break;
                     }
                 } else if (selected instanceof VariableNodeType) {
                     VariableNodeType variableNodeType = (VariableNodeType) selected;
                     NodePanel nodePanel;
                     switch (variableNodeType) {
-                        case BOOLEAN:
+                        case BOOLEAN: {
                             Bool boolNode = new Bool();
                             boolNode.setX(px);
                             boolNode.setY(py);
@@ -395,7 +408,8 @@ public class GraphPanel extends JLayeredPane {
                             this.add(nodePanel, NODE_LAYER, 0);
                             onSelect.accept(nodePanel);
                             break;
-                        case NUMBER:
+                        }
+                        case NUMBER: {
                             Num numNode = new Num();
                             numNode.setX(px);
                             numNode.setY(py);
@@ -404,6 +418,37 @@ public class GraphPanel extends JLayeredPane {
                             this.add(nodePanel, NODE_LAYER, 0);
                             onSelect.accept(nodePanel);
                             break;
+                        }
+                        case LOCATION: {
+                            Location locNode = new Location();
+                            locNode.setX(px);
+                            locNode.setY(py);
+                            this.graph.add(locNode);
+                            nodePanel = this.createNodePanel(locNode);
+                            this.add(nodePanel, NODE_LAYER, 0);
+                            onSelect.accept(nodePanel);
+                            break;
+                        }
+                        case PLUGIN: {
+                            PluginVar pluginNode = new PluginVar();
+                            pluginNode.setX(px);
+                            pluginNode.setY(py);
+                            this.graph.add(pluginNode);
+                            nodePanel = this.createNodePanel(pluginNode);
+                            this.add(nodePanel, NODE_LAYER, 0);
+                            onSelect.accept(nodePanel);
+                            break;
+                        }
+                        case INVENTORY: {
+                            InventoryVar invNode = new InventoryVar();
+                            invNode.setX(px);
+                            invNode.setY(py);
+                            this.graph.add(invNode);
+                            nodePanel = this.createNodePanel(invNode);
+                            this.add(nodePanel, NODE_LAYER, 0);
+                            onSelect.accept(nodePanel);
+                            break;
+                        }
                     }
                 }
                 this.revalidate();
@@ -482,6 +527,21 @@ public class GraphPanel extends JLayeredPane {
         } else if (node instanceof Equality) {
             Equality eq = (Equality) node;
             return new EqualityNodePanel(this, eq, eq.getX(), eq.getY(), LogicNodeType.EQUALITY.getName(), NODE_LOGIC_COLOR);
+        } else if (node instanceof Location) {
+            Location locNode = (Location) node;
+            String locName = !locNode.getNameOut().getValue().isEmpty() ? locNode.getNameOut().getValue() : "Location";
+            return new com.adamk33n3r.runelite.watchdog.ui.nodegraph.variables.LocationNodePanel(this, locNode, node.getX(), node.getY(), locName, NODE_CONSTANT_COLOR);
+        } else if (node instanceof PluginVar) {
+            PluginVar pvNode = (PluginVar) node;
+            String pvName = !pvNode.getNameOut().getValue().isEmpty() ? pvNode.getNameOut().getValue() : "Plugin";
+            return new com.adamk33n3r.runelite.watchdog.ui.nodegraph.variables.PluginNodePanel(this, pvNode, node.getX(), node.getY(), pvName, NODE_CONSTANT_COLOR, injector.getInstance(net.runelite.client.plugins.PluginManager.class));
+        } else if (node instanceof InventoryVar) {
+            InventoryVar invNode = (InventoryVar) node;
+            String invName = !invNode.getNameOut().getValue().isEmpty() ? invNode.getNameOut().getValue() : "Inventory";
+            return new com.adamk33n3r.runelite.watchdog.ui.nodegraph.variables.InventoryNodePanel(this, invNode, node.getX(), node.getY(), invName, NODE_CONSTANT_COLOR);
+        } else if (node instanceof LocationCompare) {
+            LocationCompare lc = (LocationCompare) node;
+            return new LocationCompareNodePanel(this, lc, lc.getX(), lc.getY(), LogicNodeType.LOCATION_COMPARE.getName(), NODE_LOGIC_COLOR, injector.getInstance(net.runelite.api.Client.class));
         }
         return null;
     }

@@ -15,6 +15,7 @@ import net.runelite.client.config.ConfigManager;
 import net.runelite.client.config.RuneLiteConfig;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.plugins.Plugin;
+import net.runelite.client.plugins.PluginManager;
 import net.runelite.client.ui.ClientUI;
 import net.runelite.client.ui.MultiplexingPluginPanel;
 import net.runelite.http.api.RuneLiteAPI;
@@ -121,6 +122,9 @@ public abstract class TestBase {
     @Mock
     @Bind
     ChatMessageManager chatMessageManager;
+    @Mock
+    @Bind
+    PluginManager pluginManager;
 
     @Before
     public void before() throws NoSuchFieldException {
