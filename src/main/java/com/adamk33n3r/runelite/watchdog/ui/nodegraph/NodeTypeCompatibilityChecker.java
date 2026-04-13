@@ -2,6 +2,8 @@ package com.adamk33n3r.runelite.watchdog.ui.nodegraph;
 
 import com.adamk33n3r.nodegraph.Node;
 
+import javax.inject.Inject;
+
 /**
  * Checks whether a node-type enum entry has at least one {@code VarInput} compatible with a given drag type.
  * <p>
@@ -10,9 +12,11 @@ import com.adamk33n3r.nodegraph.Node;
  * node class automatically updates compatibility filtering without changing this class.
  */
 public class NodeTypeCompatibilityChecker {
+    @Inject
+    private NodeProbeFactory nodeProbeFactory;
 
-    public static boolean hasCompatibleInput(Enum<?> nodeType, Class<?> dragType) {
-        Node probe = NodeProbeFactory.create(nodeType);
+    public boolean hasCompatibleInput(Enum<?> nodeType, Class<?> dragType) {
+        Node probe = this.nodeProbeFactory.create(nodeType);
         if (probe == null) return false;
         return probe.getInputs().values().stream()
             .anyMatch(input -> input.getType() == dragType);

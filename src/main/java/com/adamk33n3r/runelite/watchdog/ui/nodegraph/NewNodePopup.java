@@ -72,14 +72,8 @@ public class NewNodePopup extends JPopupMenu {
         VariableNodeType.class, "Variable"
     );
 
-    @SafeVarargs
-    public NewNodePopup(Class<? extends Enum<?>>... items) {
-        this(e -> true, items);
-    }
-
-    @SafeVarargs
-    public NewNodePopup(Predicate<Enum<?>> itemFilter, Class<? extends Enum<?>>... items) {
-        this.items = (items == null ? DEFAULT_ITEMS.stream() : Arrays.stream(items))
+    public NewNodePopup(Predicate<Enum<?>> itemFilter) {
+        this.items = DEFAULT_ITEMS.stream()
             .map((item) -> new CustomList.Items(
                 item,
                 enumToCategory.get(item),

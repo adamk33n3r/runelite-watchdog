@@ -1,5 +1,6 @@
 package com.adamk33n3r.runelite.watchdog.ui.nodegraph;
 
+import com.adamk33n3r.nodegraph.VarOutput;
 import com.adamk33n3r.nodegraph.nodes.ContinuousTriggerNode;
 import com.adamk33n3r.nodegraph.nodes.constants.Num;
 import com.adamk33n3r.nodegraph.nodes.logic.BooleanGate;
@@ -25,6 +26,8 @@ import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.Connection;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.ConnectionPointIn;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.ConnectionPointOut;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.NodeConnection;
+import com.adamk33n3r.runelite.watchdog.ui.panels.AlertPanelContentFactory;
+import com.adamk33n3r.runelite.watchdog.ui.panels.NotificationPanelFactory;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.client.ui.ColorScheme;
@@ -81,10 +84,13 @@ public class GraphPanel extends JLayeredPane {
     private ColorPickerManager colorPickerManager;
 
     @Inject
-    private com.adamk33n3r.runelite.watchdog.ui.panels.NotificationPanelFactory notificationPanelFactory;
+    private AlertPanelContentFactory alertPanelContentFactory;
 
     @Inject
-    private com.adamk33n3r.runelite.watchdog.ui.panels.AlertPanelContentFactory alertPanelContentFactory;
+    private NotificationPanelFactory notificationPanelFactory;
+
+    @Inject
+    private NodeTypeCompatibilityChecker compatibilityChecker;
 
     private void setUpExample1() {
         /*
@@ -314,96 +320,93 @@ public class GraphPanel extends JLayeredPane {
             });
     }
 
-    public void createNode(Component parent, int x, int y, Class<? extends Enum<?>>[] filter, Consumer<NodePanel> onSelect) {
-        this.createNode(parent, x, y, filter, e -> true, onSelect);
-    }
-
-    public void createNode(Component parent, int x, int y, Class<? extends Enum<?>>[] filter, Predicate<Enum<?>> itemFilter, Consumer<NodePanel> onSelect) {
+    public void createNode(Component parent, int x, int y, VarOutput<?> outputVar, Consumer<NodePanel> onSelect) {
         this.popupLocation = SwingUtilities.convertPoint(parent, new Point(x, y), this);
 
-        new NewNodePopup(itemFilter, filter).show(parent, x, y, (selected) -> {
-            int px = this.popupLocation.x;
-            int py = this.popupLocation.y;
-            if (selected instanceof TriggerType) {
-                TriggerType triggerType = (TriggerType) selected;
-                Alert alert;
-                try {
-                    alert = injector.getInstance(triggerType.getImplClass());
-                } catch (Exception e) {
-                    alert = new ChatAlert();
+        new NewNodePopup(enumVal -> this.compatibilityChecker.hasCompatibleInput(enumVal, outputVar.getType()))
+            .show(parent, x, y, (selected) -> {
+                int px = this.popupLocation.x;
+                int py = this.popupLocation.y;
+                if (selected instanceof TriggerType) {
+                    TriggerType triggerType = (TriggerType) selected;
+                    Alert alert;
+                    try {
+                        alert = injector.getInstance(triggerType.getImplClass());
+                    } catch (Exception e) {
+                        alert = new ChatAlert();
+                    }
+                    TriggerNode triggerNode = new TriggerNode(alert);
+                    triggerNode.setX(px);
+                    triggerNode.setY(py);
+                    this.graph.add(triggerNode);
+                    NodePanel nodePanel = new AlertNodePanel(this, px, py, triggerType.getName(), NODE_TRIGGER_COLOR, triggerNode, alertPanelContentFactory);
+                    this.add(nodePanel, NODE_LAYER, 0);
+                    onSelect.accept(nodePanel);
+                } else if (selected instanceof NotificationType) {
+                    NotificationType notificationType = (NotificationType) selected;
+                    com.adamk33n3r.runelite.watchdog.notifications.Notification notification;
+                    try {
+                        notification = injector.getInstance(notificationType.getImplClass());
+                    } catch (Exception e) {
+                        notification = new TextToSpeech();
+                    }
+                    NotificationNode notificationNode = new NotificationNode(notification);
+                    notificationNode.setX(px);
+                    notificationNode.setY(py);
+                    this.graph.add(notificationNode);
+                    NodePanel nodePanel = new NotificationNodePanel(this, px, py, notificationType.getName(), NODE_NOTIFICATION_COLOR, notificationNode, notificationPanelFactory);
+                    this.add(nodePanel, NODE_LAYER, 0);
+                    onSelect.accept(nodePanel);
+                } else if (selected instanceof LogicNodeType) {
+                    LogicNodeType logicNodeType = (LogicNodeType) selected;
+                    switch (logicNodeType) {
+                        case BOOLEAN:
+                            BooleanGate boolGate = new BooleanGate();
+                            boolGate.setX(px);
+                            boolGate.setY(py);
+                            this.graph.add(boolGate);
+                            NodePanel boolGatePanel = new BooleanGateNodePanel(this, boolGate, px, py, logicNodeType.getName(), NODE_LOGIC_COLOR);
+                            this.add(boolGatePanel, NODE_LAYER, 0);
+                            onSelect.accept(boolGatePanel);
+                            break;
+                        case EQUALITY:
+                            Equality equalityNode = new Equality();
+                            equalityNode.setX(px);
+                            equalityNode.setY(py);
+                            this.graph.add(equalityNode);
+                            NodePanel equalityPanel = new EqualityNodePanel(this, equalityNode, px, py, logicNodeType.getName(), NODE_LOGIC_COLOR);
+                            this.add(equalityPanel, NODE_LAYER, 0);
+                            onSelect.accept(equalityPanel);
+                            break;
+                    }
+                } else if (selected instanceof VariableNodeType) {
+                    VariableNodeType variableNodeType = (VariableNodeType) selected;
+                    NodePanel nodePanel;
+                    switch (variableNodeType) {
+                        case BOOLEAN:
+                            Bool boolNode = new Bool();
+                            boolNode.setX(px);
+                            boolNode.setY(py);
+                            this.graph.add(boolNode);
+                            nodePanel = this.createNodePanel(boolNode);
+                            this.add(nodePanel, NODE_LAYER, 0);
+                            onSelect.accept(nodePanel);
+                            break;
+                        case NUMBER:
+                            Num numNode = new Num();
+                            numNode.setX(px);
+                            numNode.setY(py);
+                            this.graph.add(numNode);
+                            nodePanel = this.createNodePanel(numNode);
+                            this.add(nodePanel, NODE_LAYER, 0);
+                            onSelect.accept(nodePanel);
+                            break;
+                    }
                 }
-                TriggerNode triggerNode = new TriggerNode(alert);
-                triggerNode.setX(px);
-                triggerNode.setY(py);
-                this.graph.add(triggerNode);
-                NodePanel nodePanel = new AlertNodePanel(this, px, py, triggerType.getName(), NODE_TRIGGER_COLOR, triggerNode, alertPanelContentFactory);
-                this.add(nodePanel, NODE_LAYER, 0);
-                onSelect.accept(nodePanel);
-            } else if (selected instanceof NotificationType) {
-                NotificationType notificationType = (NotificationType) selected;
-                com.adamk33n3r.runelite.watchdog.notifications.Notification notification;
-                try {
-                    notification = injector.getInstance(notificationType.getImplClass());
-                } catch (Exception e) {
-                    notification = new TextToSpeech();
-                }
-                NotificationNode notificationNode = new NotificationNode(notification);
-                notificationNode.setX(px);
-                notificationNode.setY(py);
-                this.graph.add(notificationNode);
-                NodePanel nodePanel = new NotificationNodePanel(this, px, py, notificationType.getName(), NODE_NOTIFICATION_COLOR, notificationNode, notificationPanelFactory);
-                this.add(nodePanel, NODE_LAYER, 0);
-                onSelect.accept(nodePanel);
-            } else if (selected instanceof LogicNodeType) {
-                LogicNodeType logicNodeType = (LogicNodeType) selected;
-                switch (logicNodeType) {
-                    case BOOLEAN:
-                        BooleanGate boolGate = new BooleanGate();
-                        boolGate.setX(px);
-                        boolGate.setY(py);
-                        this.graph.add(boolGate);
-                        NodePanel boolGatePanel = new BooleanGateNodePanel(this, boolGate, px, py, logicNodeType.getName(), NODE_LOGIC_COLOR);
-                        this.add(boolGatePanel, NODE_LAYER, 0);
-                        onSelect.accept(boolGatePanel);
-                        break;
-                    case EQUALITY:
-                        Equality equalityNode = new Equality();
-                        equalityNode.setX(px);
-                        equalityNode.setY(py);
-                        this.graph.add(equalityNode);
-                        NodePanel equalityPanel = new EqualityNodePanel(this, equalityNode, px, py, logicNodeType.getName(), NODE_LOGIC_COLOR);
-                        this.add(equalityPanel, NODE_LAYER, 0);
-                        onSelect.accept(equalityPanel);
-                        break;
-                }
-            } else if (selected instanceof VariableNodeType) {
-                VariableNodeType variableNodeType = (VariableNodeType) selected;
-                NodePanel nodePanel;
-                switch (variableNodeType) {
-                    case BOOLEAN:
-                        Bool boolNode = new Bool();
-                        boolNode.setX(px);
-                        boolNode.setY(py);
-                        this.graph.add(boolNode);
-                        nodePanel = this.createNodePanel(boolNode);
-                        this.add(nodePanel, NODE_LAYER, 0);
-                        onSelect.accept(nodePanel);
-                        break;
-                    case NUMBER:
-                        Num numNode = new Num();
-                        numNode.setX(px);
-                        numNode.setY(py);
-                        this.graph.add(numNode);
-                        nodePanel = this.createNodePanel(numNode);
-                        this.add(nodePanel, NODE_LAYER, 0);
-                        onSelect.accept(nodePanel);
-                        break;
-                }
-            }
-            this.revalidate();
-            this.repaint();
-            this.notifyChange();
-        }, () -> onSelect.accept(null));
+                this.revalidate();
+                this.repaint();
+                this.notifyChange();
+            }, () -> onSelect.accept(null));
     }
 
     /**

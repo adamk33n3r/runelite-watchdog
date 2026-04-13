@@ -53,9 +53,7 @@ public class ConnectionPointOut<T> extends ConnectionPoint {
                     //                System.out.println(deepestComponentAt);
                     if (deepestComponentAt.equals(nodePanel.getGraphPanel()) || (deepestComponentAt instanceof Connection && deepestComponentAt.getParent().equals(nodePanel.getGraphPanel()))) {
                         nodePanel.getGraphPanel().createNode(
-                            e.getComponent(), e.getX(), e.getY(),
-                            null, // show all categories; item predicate handles filtering
-                            enumVal -> NodeTypeCompatibilityChecker.hasCompatibleInput(enumVal, outputVar.getType()),
+                            e.getComponent(), e.getX(), e.getY(), outputVar,
                             (newNode) -> {
                                 if (newNode != null) {
                                     List<VarInput<?>> candidateVars = newNode.getAllInputPoints().stream()
