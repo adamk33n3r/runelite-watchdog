@@ -70,6 +70,10 @@ Alerts are serialized to JSON via Gson with `RuntimeTypeAdapterFactory` for poly
 
 A visual node-based editor is being built in `com.adamk33n3r.nodegraph` and `ui/nodegraph/`. `NodeGraphLauncher` in test sources can launch the editor standalone for development.
 
+## Style
+
+Always use `this.` when referring to instance properties/methods/etc
+
 ## Testing
 
 Tests use JUnit 4 + Mockito + Guice's `BoundFieldModule`. `TestBase` wires up all required RuneLite mocks and creates a Guice injector. `AlertTestBase` extends this with `EventBus` and `HistoryPanel` mocks.

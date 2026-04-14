@@ -17,9 +17,10 @@ public class LocationNodePanel extends VariableNodePanel {
     public LocationNodePanel(GraphPanel graphPanel, Location node, int x, int y, String name, Color color) {
         super(graphPanel, node, x, y, name, color, false);
 
-        this.locationOut = new ConnectionPointOut<>(this, node.getValue());
+        this.locationOut = new ConnectionPointOut<>(this, node.getValueOut());
 
-        ViewInput<WorldPoint> locationView = new ViewInput<>("Location", node.getValue().getValue());
+        ViewInput<WorldPoint> locationView = new ViewInput<>("Location", node.getValueOut().getValue());
+        addDisposer(node.getValue().onChange(a -> locationView.setValue(node.getValue().getValue())));
         this.items.add(new ConnectionLine<>(null, locationView, this.locationOut));
 
         this.pack();

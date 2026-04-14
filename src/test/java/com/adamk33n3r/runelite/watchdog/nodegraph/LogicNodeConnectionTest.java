@@ -190,7 +190,7 @@ public class LogicNodeConnectionTest {
         Location locA = new Location();
         locA.setValue(new WorldPoint(3200, 3200, 0));
         LocationCompare lc = new LocationCompare();
-        new Connection<>(locA.getValue(), lc.getA());
+        new Connection<>(locA.getValueOut(), lc.getA());
     }
 
     // 13. LocationCompare auto-recomputes when input changes via connection
@@ -203,8 +203,8 @@ public class LogicNodeConnectionTest {
 
         LocationCompare lc = new LocationCompare();
         lc.setDistance(0);
-        new Connection<>(locA.getValue(), lc.getA());
-        new Connection<>(locB.getValue(), lc.getB());
+        new Connection<>(locA.getValueOut(), lc.getA());
+        new Connection<>(locB.getValueOut(), lc.getB());
 
         // Same point → true
         assertTrue(lc.getResult().getValue());

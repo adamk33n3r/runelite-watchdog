@@ -37,9 +37,6 @@ import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -683,7 +680,7 @@ public class EventHandler {
     }
 
     private void fireAdvancedAlertTriggerNode(AdvancedAlert alert, TriggerNode triggerNode, String[] triggerValues) {
-        if (!alert.isEnabled()) return;
+        if (!alert.isAllEnabled()) return;
 
         Map<TriggerNode, Instant> nodeLastTriggered = this.lastTriggeredAdvanced.computeIfAbsent(alert, k -> new ConcurrentHashMap<>());
         int debounce = alert.getDebounceTime();
@@ -707,7 +704,7 @@ public class EventHandler {
 
     private void fireAlert(Alert alert, String[] triggerValues) {
         // Don't fire if it is disabled
-        if (!alert.isEnabled()) return;
+        if (!alert.isAllEnabled()) return;
 
         List<AlertGroup> ancestors = alert.getAncestors();
         // Don't fire if any of the ancestors are disabled

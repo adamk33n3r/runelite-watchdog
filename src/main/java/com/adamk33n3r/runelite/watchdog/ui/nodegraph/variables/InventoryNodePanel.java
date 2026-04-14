@@ -13,6 +13,7 @@ import lombok.Getter;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Arrays;
 
 @Getter
 public class InventoryNodePanel extends VariableNodePanel {
@@ -31,7 +32,11 @@ public class InventoryNodePanel extends VariableNodePanel {
         this.items.add(matchSelect);
 
         JComboBox<InventoryAlert.InventoryAlertType> typeSelect = PanelUtils.createSelect(
-            InventoryAlert.InventoryAlertType.values(), node.getInventoryAlertType(), selected -> {
+            Arrays.stream(InventoryAlert.InventoryAlertType.values())
+                .filter(iat -> iat != InventoryAlert.InventoryAlertType.ITEM_CHANGE)
+                .toArray(InventoryAlert.InventoryAlertType[]::new),
+            node.getInventoryAlertType(),
+            selected -> {
                 node.setInventoryAlertType(selected);
                 this.notifyChange();
                 this.rebuildContent();
@@ -40,9 +45,10 @@ public class InventoryNodePanel extends VariableNodePanel {
 
         this.addConditionalControls(node);
 
-        this.valueOut = new ConnectionPointOut<>(this, node.getValue());
+        this.valueOut = new ConnectionPointOut<>(this, node.getValueOut());
 
-        ViewInput<Boolean> valueView = new ViewInput<>("Match", node.getValue().getValue());
+        ViewInput<Boolean> valueView = new ViewInput<>("Match", node.getValueOut().getValue());
+        addDisposer(node.getValue().onChange(v -> valueView.setValue(node.getValueOut().getValue())));
         this.items.add(new ConnectionLine<>(null, valueView, this.valueOut));
 
         this.pack();
@@ -95,7 +101,7 @@ public class InventoryNodePanel extends VariableNodePanel {
         this.addConditionalControls(this.inventoryVar);
 
         // Re-add the output line
-        ViewInput<Boolean> valueView = new ViewInput<>("Match", this.inventoryVar.getValue().getValue());
+        ViewInput<Boolean> valueView = new ViewInput<>("Match", this.inventoryVar.getValueOut().getValue());
         this.items.add(new ConnectionLine<>(null, valueView, this.valueOut));
 
         this.pack();

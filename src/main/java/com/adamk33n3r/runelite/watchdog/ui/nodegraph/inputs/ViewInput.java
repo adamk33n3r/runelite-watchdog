@@ -26,7 +26,6 @@ public class ViewInput<T> extends AbstractInput<T> {
 
     @Override
     public void setValue(T value) {
-        System.out.println("ViewInput.setValue: " + value);
         this.value = value;
         this.valueLabel.setText(this.getStringRepresentation());
         this.onChangeListeners.forEach(onChange -> onChange.accept(value));

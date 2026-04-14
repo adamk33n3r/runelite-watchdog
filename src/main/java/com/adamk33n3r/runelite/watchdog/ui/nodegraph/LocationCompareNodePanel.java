@@ -40,7 +40,7 @@ public class LocationCompareNodePanel extends NodePanel {
             if (client.getLocalPlayer() != null) {
                 WorldPoint wp = WorldPoint.fromLocalInstance(client, client.getLocalPlayer().getLocalLocation());
                 node.getA().setValue(wp);
-                updateSpinners(pointPanelA, wp);
+                this.updateSpinners(pointPanelA, wp);
                 this.notifyChange();
             }
         });
@@ -61,7 +61,7 @@ public class LocationCompareNodePanel extends NodePanel {
             if (client.getLocalPlayer() != null) {
                 WorldPoint wp = WorldPoint.fromLocalInstance(client, client.getLocalPlayer().getLocalLocation());
                 node.getB().setValue(wp);
-                updateSpinners(pointPanelB, wp);
+                this.updateSpinners(pointPanelB, wp);
                 this.notifyChange();
             }
         });
@@ -87,8 +87,14 @@ public class LocationCompareNodePanel extends NodePanel {
         this.items.add(cardinalOnlyBox);
 
         // Wire result view to update when A or B input values change
-        addDisposer(node.getA().onChange(a -> resultView.setValue(node.getResult().getValue())));
-        addDisposer(node.getB().onChange(b -> resultView.setValue(node.getResult().getValue())));
+        addDisposer(node.getA().onChange(a -> {
+            this.updateSpinners(pointPanelA, a);
+            resultView.setValue(node.getResult().getValue());
+        }));
+        addDisposer(node.getB().onChange(b -> {
+            this.updateSpinners(pointPanelB, b);
+            resultView.setValue(node.getResult().getValue());
+        }));
         this.items.add(new ConnectionLine<>(null, resultView, this.resultOut));
 
         this.pack();

@@ -75,6 +75,13 @@ public abstract class Alert {
             .orElse(null);
     }
 
+    public boolean isAllEnabled() {
+        if (!this.isEnabled()) return false;
+        List<AlertGroup> ancestors = this.getAncestors();
+        // Not if any of the ancestors are disabled
+        return ancestors == null || ancestors.stream().allMatch(Alert::isEnabled);
+    }
+
     public void moveNotificationTo(Notification notification, int pos) {
         if (this.notifications == null) {
             return;
