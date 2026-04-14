@@ -72,6 +72,7 @@ public class NodePanel extends JPanel {
 
     @Getter
     private final Color titleColor;
+    private final String typeName;
     private JLabel nameLabel;
     private final Border border;
 
@@ -82,6 +83,7 @@ public class NodePanel extends JPanel {
         this.graphPanel = graphPanel;
         this.node = node;
         this.titleColor = color;
+        this.typeName = name;
         this.setName(name);
         this.setBounds(x, y, PANEL_WIDTH, PANEL_HEIGHT);
         this.setOpaque(false);
@@ -190,7 +192,11 @@ public class NodePanel extends JPanel {
     }
 
     public void updateHeaderLabel(String newName) {
-        this.nameLabel.setText(newName);
+        if (newName == null || newName.isBlank()) {
+            this.nameLabel.setText(this.typeName);
+        } else {
+            this.nameLabel.setText(newName + " - " + this.typeName);
+        }
     }
 
     protected void notifyChange() {

@@ -5,7 +5,7 @@ import com.adamk33n3r.nodegraph.VarOutput;
 import lombok.Getter;
 
 /**
- * Abstract base for user-named variable nodes (Bool, Num, and future condition nodes).
+ * Abstract base for user-named variable nodes (Bool, Num, and future variable nodes).
  * Provides a persisted nameOut output that stores the user-assigned display name.
  */
 @Getter

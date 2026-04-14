@@ -32,6 +32,7 @@ public class AlertNodePanel extends NodePanel {
 
     public AlertNodePanel(GraphPanel graphPanel, int x, int y, String name, Color color, TriggerNode triggerNode, AlertPanelContentFactory alertPanelContentFactory) {
         super(graphPanel, triggerNode, x, y, name, color);
+        this.updateHeaderLabel(triggerNode.getAlert().getName());
         this.triggerNode = triggerNode;
         Alert alert = triggerNode.getAlert();
 
@@ -85,10 +86,5 @@ public class AlertNodePanel extends NodePanel {
         this.items.add(testBtn);
 
         this.pack();
-    }
-
-    public void updateHeaderLabel(String newName) {
-        String name = String.format("%s - %s", newName, this.triggerNode.getAlert().getType().getName());
-        super.updateHeaderLabel(name);
     }
 }

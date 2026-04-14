@@ -14,7 +14,7 @@ import lombok.Getter;
 public enum LogicNodeType implements Displayable {
     BOOLEAN("Boolean Gate", "Boolean logic e.g. and/or", BooleanGate.class, BooleanGateNodePanel.class),
     EQUALITY("Equality", "Equality logic e.g. ==/!=/>/<", Equality.class, EqualityNodePanel.class),
-    LOCATION_COMPARE("Location", "Location comparison", LocationCompare.class, LocationCompareNodePanel.class),
+    LOCATION_COMPARE("Location Compare", "Location comparison", LocationCompare.class, LocationCompareNodePanel.class),
     ;
 
     private final String name;

@@ -2,10 +2,8 @@ package com.adamk33n3r.runelite.watchdog.ui.nodegraph.variables;
 
 import com.adamk33n3r.nodegraph.nodes.constants.PluginVar;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.GraphPanel;
-import com.adamk33n3r.runelite.watchdog.ui.nodegraph.NodePanel;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.ConnectionLine;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.ConnectionPointOut;
-import com.adamk33n3r.runelite.watchdog.ui.nodegraph.inputs.TextInput;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.inputs.ViewInput;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
 import lombok.Getter;
@@ -17,15 +15,11 @@ import java.awt.*;
 import java.util.Comparator;
 
 @Getter
-public class PluginNodePanel extends NodePanel {
+public class PluginNodePanel extends VariableNodePanel {
     private final ConnectionPointOut<Boolean> valueOut;
 
     public PluginNodePanel(GraphPanel graphPanel, PluginVar node, int x, int y, String name, Color color, PluginManager pluginManager) {
-        super(graphPanel, node, x, y, name, color);
-
-        TextInput nameInput = new TextInput("Name", node.getNameOut());
-        nameInput.registerOnType(this::updateHeaderLabel);
-        this.items.add(nameInput);
+        super(graphPanel, node, x, y, name, color, false);
 
         Plugin[] plugins = pluginManager.getPlugins()
             .stream().sorted(Comparator.comparing(Plugin::getName))

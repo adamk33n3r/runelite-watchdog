@@ -4,7 +4,6 @@ import com.adamk33n3r.nodegraph.nodes.constants.InventoryVar;
 import com.adamk33n3r.runelite.watchdog.alerts.InventoryAlert;
 import com.adamk33n3r.runelite.watchdog.ui.ComparableNumber;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.GraphPanel;
-import com.adamk33n3r.runelite.watchdog.ui.nodegraph.NodePanel;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.ConnectionLine;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.ConnectionPointOut;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.inputs.TextInput;
@@ -16,17 +15,13 @@ import javax.swing.*;
 import java.awt.*;
 
 @Getter
-public class InventoryNodePanel extends NodePanel {
+public class InventoryNodePanel extends VariableNodePanel {
     private final ConnectionPointOut<Boolean> valueOut;
     private final InventoryVar inventoryVar;
 
     public InventoryNodePanel(GraphPanel graphPanel, InventoryVar node, int x, int y, String name, Color color) {
         super(graphPanel, node, x, y, name, color);
         this.inventoryVar = node;
-
-        TextInput nameInput = new TextInput("Name", node.getNameOut());
-        nameInput.registerOnType(this::updateHeaderLabel);
-        this.items.add(nameInput);
 
         JComboBox<InventoryAlert.InventoryMatchType> matchSelect = PanelUtils.createSelect(
             InventoryAlert.InventoryMatchType.values(), node.getInventoryMatchType(), selected -> {
