@@ -12,6 +12,7 @@ import com.adamk33n3r.nodegraph.nodes.logic.LocationCompare;
 import net.runelite.api.coords.WorldPoint;
 import org.junit.Test;
 
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.Assert.*;
@@ -211,5 +212,61 @@ public class LogicNodeConnectionTest {
         // Push new location → different point → false
         locB.setValue(new WorldPoint(3205, 3205, 0));
         assertFalse(lc.getResult().getValue());
+    }
+
+    // Bug fix 1: VarInput.onConnectChange fires true when a Connection is added and false when removed.
+    // This is the mechanism LocationCompareNodePanel's inA::setConnected hook relies on to fill the arrow.
+    @Test
+    public void test_varInput_onConnectChange_fires_on_add_and_remove() {
+        VarOutput<WorldPoint> output = new VarOutput<>(null, "out", WorldPoint.class, new WorldPoint(0, 0, 0));
+        VarInput<WorldPoint> input = new VarInput<>(null, "in", WorldPoint.class, new WorldPoint(0, 0, 0));
+
+        AtomicBoolean lastConnectState = new AtomicBoolean(false);
+        AtomicInteger changeCount = new AtomicInteger(0);
+        input.onConnectChange(connected -> {
+            lastConnectState.set(connected);
+            changeCount.incrementAndGet();
+        });
+
+        Connection<WorldPoint> conn = new Connection<>(output, input);
+        assertEquals("onConnectChange should fire once on add", 1, changeCount.get());
+        assertTrue("should report connected=true on add", lastConnectState.get());
+
+        conn.remove();
+        assertEquals("onConnectChange should fire again on remove", 2, changeCount.get());
+        assertFalse("should report connected=false on remove", lastConnectState.get());
+    }
+
+    // Bug fix 2a: LocationCompare.result reflects new distance immediately after setDistance + process().
+    // This covers the panel fix where distance spinner now calls process() + updates resultView.
+    @Test
+    public void test_locationCompare_result_updates_after_distance_change() {
+        LocationCompare lc = new LocationCompare();
+        lc.getA().setValue(new WorldPoint(3200, 3200, 0));
+        lc.getB().setValue(new WorldPoint(3205, 3205, 0)); // ~7 tiles away
+        lc.setDistance(0);
+        lc.process();
+        assertFalse("out of range at distance=0", lc.getResult().getValue());
+
+        lc.setDistance(10);
+        lc.process();
+        assertTrue("within range after distance increased to 10", lc.getResult().getValue());
+    }
+
+    // Bug fix 2b: LocationCompare.result reflects cardinalOnly toggle immediately after process().
+    // This covers the panel fix where cardinalOnly checkbox now calls process() + updates resultView.
+    @Test
+    public void test_locationCompare_result_updates_after_cardinalOnly_change() {
+        LocationCompare lc = new LocationCompare();
+        lc.getA().setValue(new WorldPoint(3200, 3200, 0));
+        lc.getB().setValue(new WorldPoint(3201, 3201, 0)); // diagonal, 1 tile each axis
+        lc.setDistance(10);
+        lc.setCardinalOnly(false);
+        lc.process();
+        assertTrue("diagonal within distance without cardinalOnly restriction", lc.getResult().getValue());
+
+        lc.setCardinalOnly(true);
+        lc.process();
+        assertFalse("diagonal rejected after cardinalOnly enabled", lc.getResult().getValue());
     }
 }

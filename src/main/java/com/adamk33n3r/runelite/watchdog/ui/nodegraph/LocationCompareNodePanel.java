@@ -21,12 +21,16 @@ public class LocationCompareNodePanel extends NodePanel {
     public LocationCompareNodePanel(GraphPanel graphPanel, LocationCompare node, int x, int y, String name, Color color, Client client) {
         super(graphPanel, node, x, y, name, color);
 
+        // Declare resultView early so distance/cardinalOnly callbacks can reference it
+        this.resultOut = new ConnectionPointOut<>(this, node.getResult());
+        ViewInput<Boolean> resultView = new ViewInput<>("Result", node.getResult().getValue());
+
         // Input A: WorldPoint with spinners when not connected
         ConnectionPointIn<WorldPoint> inA = new ConnectionPointIn<>(this, node.getA());
+        // Wire setConnected so the arrow fills when a connection is made (bypasses ConnectionLine)
+        addDisposer(node.getA().onConnectChange(inA::setConnected));
         JPanel pointPanelA = createWorldPointPanel("A", node.getA().getValue(), wp -> node.getA().setValue(wp));
-        addDisposer(node.getA().onConnectChange(connected -> {
-            setChildrenEnabled(pointPanelA, !connected);
-        }));
+        addDisposer(node.getA().onConnectChange(connected -> setChildrenEnabled(pointPanelA, !connected)));
         JPanel labeledA = PanelUtils.createLabeledComponent("A", "Location A", pointPanelA);
         this.items.add(wrapWithConnectionPoint(inA, labeledA));
 
@@ -44,10 +48,10 @@ public class LocationCompareNodePanel extends NodePanel {
 
         // Input B: WorldPoint with spinners when not connected
         ConnectionPointIn<WorldPoint> inB = new ConnectionPointIn<>(this, node.getB());
+        // Wire setConnected so the arrow fills when a connection is made (bypasses ConnectionLine)
+        addDisposer(node.getB().onConnectChange(inB::setConnected));
         JPanel pointPanelB = createWorldPointPanel("B", node.getB().getValue(), wp -> node.getB().setValue(wp));
-        addDisposer(node.getB().onConnectChange(connected -> {
-            setChildrenEnabled(pointPanelB, !connected);
-        }));
+        addDisposer(node.getB().onConnectChange(connected -> setChildrenEnabled(pointPanelB, !connected)));
         JPanel labeledB = PanelUtils.createLabeledComponent("B", "Location B", pointPanelB);
         this.items.add(wrapWithConnectionPoint(inB, labeledB));
 
@@ -63,26 +67,26 @@ public class LocationCompareNodePanel extends NodePanel {
         });
         this.items.add(setCurrentB);
 
-        // Distance spinner
+        // Distance spinner — calls process() and updates resultView directly
         JSpinner distanceSpinner = PanelUtils.createSpinner(node.getDistance(), 0, Integer.MAX_VALUE, 1, val -> {
             node.setDistance(val);
             node.process();
+            resultView.setValue(node.getResult().getValue());
             this.notifyChange();
         });
         this.items.add(PanelUtils.createLabeledComponent("Distance", "Max distance between points", distanceSpinner));
 
-        // Cardinal Only checkbox
+        // Cardinal Only checkbox — calls process() and updates resultView directly
         JCheckBox cardinalOnlyBox = new JCheckBox("Cardinal Only", node.isCardinalOnly());
         cardinalOnlyBox.addActionListener(e -> {
             node.setCardinalOnly(cardinalOnlyBox.isSelected());
             node.process();
+            resultView.setValue(node.getResult().getValue());
             this.notifyChange();
         });
         this.items.add(cardinalOnlyBox);
 
-        // Result output
-        this.resultOut = new ConnectionPointOut<>(this, node.getResult());
-        ViewInput<Boolean> resultView = new ViewInput<>("Result", node.getResult().getValue());
+        // Wire result view to update when A or B input values change
         addDisposer(node.getA().onChange(a -> resultView.setValue(node.getResult().getValue())));
         addDisposer(node.getB().onChange(b -> resultView.setValue(node.getResult().getValue())));
         this.items.add(new ConnectionLine<>(null, resultView, this.resultOut));

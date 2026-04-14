@@ -17,7 +17,7 @@ public class ConnectionPointIn<T> extends ConnectionPoint {
 
     @Override
     protected boolean shouldFill() {
-        if (isExec() || !hovered) return false;
+        if (!hovered) return false;
         Class<?> dragType = getNodePanel().getGraphPanel().getActiveDragType();
         return dragType != null && dragType == getType();
     }
