@@ -28,15 +28,18 @@ public class PluginNodePanel extends VariableNodePanel {
             .filter(p -> p.getName().equals(node.getPluginName()))
             .findFirst()
             .orElse(null);
+        // Set initial value
+        node.setValue(pluginManager.isPluginEnabled(selectedPlugin));
         JComboBox<Plugin> pluginSelect = PanelUtils.createSelect(plugins, selectedPlugin, Plugin::getName, "Select a plugin...", selected -> {
             node.setPluginName(selected.getName());
+            node.setValue(pluginManager.isPluginEnabled(selected));
             this.notifyChange();
         });
         this.items.add(pluginSelect);
 
-        this.valueOut = new ConnectionPointOut<>(this, node.getValue());
-
+        this.valueOut = new ConnectionPointOut<>(this, node.getValueOut());
         ViewInput<Boolean> valueView = new ViewInput<>("Active", node.getValue().getValue());
+        addDisposer(node.getValue().onChange(a -> valueView.setValue(node.getValue().getValue())));
         this.items.add(new ConnectionLine<>(null, valueView, this.valueOut));
 
         this.pack();

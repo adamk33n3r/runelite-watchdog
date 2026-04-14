@@ -11,6 +11,8 @@ import com.adamk33n3r.nodegraph.nodes.math.Add;
 import org.junit.Test;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import static org.junit.Assert.assertEquals;
 
 public class GraphTest {
@@ -86,5 +88,45 @@ public class GraphTest {
         dummy.process();
 
         assertEquals(15, dummy.getOutput().getValue().intValue());
+    }
+
+    @Test
+    public void test_varOutput_setValue_fires_connected_input_onChange() {
+        VarOutput<Integer> output = new VarOutput<>(null, "output", Integer.class, 0);
+        VarInput<Integer> input = new VarInput<>(null, "input", Integer.class, 0);
+        new Connection<>(output, input);
+
+        AtomicInteger fireCount = new AtomicInteger(0);
+        AtomicInteger lastSeen = new AtomicInteger(-1);
+        input.onChange(v -> {
+            fireCount.incrementAndGet();
+            lastSeen.set(v);
+        });
+
+        output.setValue(42);
+        assertEquals(1, fireCount.get());
+        assertEquals(42, lastSeen.get());
+
+        output.setValue(99);
+        assertEquals(2, fireCount.get());
+        assertEquals(99, lastSeen.get());
+    }
+
+    @Test
+    public void test_varOutput_setValue_doesnt_fire_after_connection_removed() {
+        VarOutput<Integer> output = new VarOutput<>(null, "output", Integer.class, 0);
+        VarInput<Integer> input = new VarInput<>(null, "input", Integer.class, 0);
+        Connection<Integer> connection = new Connection<>(output, input);
+
+        AtomicInteger fireCount = new AtomicInteger(0);
+        input.onChange(v -> fireCount.incrementAndGet());
+
+        output.setValue(1);
+        assertEquals("should fire before removal", 1, fireCount.get());
+
+        connection.remove();
+
+        output.setValue(2);
+        assertEquals("must NOT fire after connection removed", 1, fireCount.get());
     }
 }
