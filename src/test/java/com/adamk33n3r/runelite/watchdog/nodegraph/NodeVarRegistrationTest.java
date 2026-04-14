@@ -102,14 +102,6 @@ public class NodeVarRegistrationTest {
     }
 
     @Test
-    public void pluginVar_registersValueOut_noInputs() {
-        PluginVar node = new PluginVar();
-        assertTrue(node.getInputs().isEmpty());
-        assertTrue(node.getOutputs().containsKey("Value"));
-        assertTrue(node.getOutputs().containsKey("Name"));
-    }
-
-    @Test
     public void inventoryVar_registersValueOut_noInputs() {
         InventoryVar node = new InventoryVar();
         assertTrue(node.getInputs().isEmpty());

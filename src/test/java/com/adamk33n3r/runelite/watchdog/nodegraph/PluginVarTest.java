@@ -16,7 +16,7 @@ public class PluginVarTest {
     public void test_setValue_true_reflects_in_getValue() {
         PluginVar node = new PluginVar();
         node.setValue(true);
-        assertTrue(node.getValue().getValue());
+        assertTrue(node.getValueOut().getValue());
     }
 
     @Test
@@ -24,7 +24,7 @@ public class PluginVarTest {
         PluginVar node = new PluginVar();
         node.setValue(true);
         node.setValue(false);
-        assertFalse(node.getValue().getValue());
+        assertFalse(node.getValueOut().getValue());
     }
 
     @Test

@@ -75,3 +75,7 @@ A visual node-based editor is being built in `com.adamk33n3r.nodegraph` and `ui/
 Tests use JUnit 4 + Mockito + Guice's `BoundFieldModule`. `TestBase` wires up all required RuneLite mocks and creates a Guice injector. `AlertTestBase` extends this with `EventBus` and `HistoryPanel` mocks.
 
 Fields annotated `@Bind` in test classes are automatically bound in the Guice injector. `@Mock` / `@Spy` (Mockito) can be combined with `@Bind` (Guice).
+
+- Always include unit tests in plans for any new feature or bug fix
+- Write tests before implementation (TDD)
+- Do not write tests for Swing components directly since, but for the code that it uses

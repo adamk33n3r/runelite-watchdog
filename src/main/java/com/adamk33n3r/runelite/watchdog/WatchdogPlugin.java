@@ -218,6 +218,7 @@ public class WatchdogPlugin extends Plugin {
         this.screenMarkerUtil.startUp();
 
         this.alertManager.loadAlerts();
+        this.eventHandler.initializePluginVars();
 
         this.icon = this.itemManager.getImage(ItemID.WIN05_BELLBAUBLE_UNPAINTED);
         this.iconDisabled = this.itemManager.getImage(ItemID.WIN05_BELLBAUBLE_RED);

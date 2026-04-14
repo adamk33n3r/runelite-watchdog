@@ -594,6 +594,19 @@ public class EventHandler {
         this.updateVariableNodes(worldLocation);
     }
 
+    public void initializePluginVars() {
+        this.alertManager.getAllEnabledAlertsOfType(AdvancedAlert.class).forEach(adv ->
+            adv.getGraph().getNodesOfType(PluginVar.class)
+                .filter(pv -> pv.getPluginName() != null)
+                .forEach(pv ->
+                    this.pluginManager.getPlugins().stream()
+                        .filter(p -> p.getName().equals(pv.getPluginName()))
+                        .findFirst()
+                        .ifPresent(plugin -> pv.setValue(this.pluginManager.isPluginEnabled(plugin)))
+                )
+        );
+    }
+
     @Subscribe
     private void onPluginChanged(PluginChanged event) {
         String changedPluginName = event.getPlugin().getName();

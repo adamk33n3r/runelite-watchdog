@@ -18,10 +18,10 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public enum VariableNodeType implements Displayable {
-    BOOLEAN("Boolean", "Boolean", Bool.class, BoolNodePanel.class),
-    NUMBER("Number", "Number", Num.class, NumberNodePanel.class),
-    LOCATION("Location", "Location", Location.class, LocationNodePanel.class),
-    PLUGIN("Plugin", "Plugin", PluginVar.class, PluginNodePanel.class),
+    BOOLEAN("Boolean", "Constant boolean", Bool.class, BoolNodePanel.class),
+    NUMBER("Number", "Constant number", Num.class, NumberNodePanel.class),
+    LOCATION("Current Location", "Outputs your current location", Location.class, LocationNodePanel.class),
+    PLUGIN("Plugin State", "Outputs true/false if a plugin is on/off", PluginVar.class, PluginNodePanel.class),
     INVENTORY("Inventory", "Inventory", InventoryVar.class, InventoryNodePanel.class),
     ;
 

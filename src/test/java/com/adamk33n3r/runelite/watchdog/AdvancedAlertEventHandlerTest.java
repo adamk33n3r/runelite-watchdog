@@ -1,6 +1,7 @@
 package com.adamk33n3r.runelite.watchdog;
 
 import com.adamk33n3r.nodegraph.nodes.TriggerNode;
+import com.adamk33n3r.nodegraph.nodes.constants.PluginVar;
 import com.adamk33n3r.runelite.watchdog.alerts.AdvancedAlert;
 import com.adamk33n3r.runelite.watchdog.alerts.ChatAlert;
 import com.adamk33n3r.runelite.watchdog.ui.panels.HistoryPanel;
@@ -10,6 +11,8 @@ import net.runelite.api.Client;
 import net.runelite.api.events.ChatMessage;
 import net.runelite.client.eventbus.EventBus;
 import net.runelite.client.game.ItemManager;
+import net.runelite.client.plugins.Plugin;
+import net.runelite.client.plugins.PluginManager;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -22,6 +25,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import javax.inject.Provider;
 
+import java.util.List;
 import java.util.stream.Stream;
 
 import static org.junit.Assert.*;
@@ -36,6 +40,7 @@ public class AdvancedAlertEventHandlerTest {
     @Mock Provider<HistoryPanel> historyPanelProvider;
     @Mock WatchdogPlugin plugin;
     @Mock HistoryPanel historyPanel;
+    @Mock PluginManager pluginManager;
 
     @InjectMocks
     EventHandler eventHandler;
@@ -143,5 +148,65 @@ public class AdvancedAlertEventHandlerTest {
             .fireTriggerNode(Mockito.eq(triggerNode), Mockito.any());
         Mockito.verify(advSpy, Mockito.never())
             .fireTriggerNode(Mockito.eq(triggerNode2), Mockito.any());
+    }
+
+    @Test
+    public void initializePluginVars_enabledPlugin_setsTrue() {
+        Plugin mockPlugin = Mockito.mock(Plugin.class);
+        Mockito.when(mockPlugin.getName()).thenReturn("Bank");
+        Mockito.when(pluginManager.getPlugins()).thenReturn(List.of(mockPlugin));
+        Mockito.when(pluginManager.isPluginEnabled(mockPlugin)).thenReturn(true);
+
+        PluginVar pv = new PluginVar();
+        pv.setPluginName("Bank");
+        advSpy.getGraph().add(pv);
+
+        eventHandler.initializePluginVars();
+
+        assertTrue(pv.getValueOut().getValue());
+    }
+
+    @Test
+    public void initializePluginVars_disabledPlugin_setsFalse() {
+        Plugin mockPlugin = Mockito.mock(Plugin.class);
+        Mockito.when(mockPlugin.getName()).thenReturn("Bank");
+        Mockito.when(pluginManager.getPlugins()).thenReturn(List.of(mockPlugin));
+        Mockito.when(pluginManager.isPluginEnabled(mockPlugin)).thenReturn(false);
+
+        PluginVar pv = new PluginVar();
+        pv.setPluginName("Bank");
+        pv.setValue(true); // start true to confirm it gets corrected to false
+        advSpy.getGraph().add(pv);
+
+        eventHandler.initializePluginVars();
+
+        assertFalse(pv.getValueOut().getValue());
+    }
+
+    @Test
+    public void initializePluginVars_nullPluginName_skipped() {
+        PluginVar pv = new PluginVar(); // pluginName is null by default
+        advSpy.getGraph().add(pv);
+
+        eventHandler.initializePluginVars();
+
+        Mockito.verify(pluginManager, Mockito.never()).isPluginEnabled(Mockito.any());
+        Mockito.verify(pluginManager, Mockito.never()).getPlugins();
+    }
+
+    @Test
+    public void initializePluginVars_unknownPluginName_notUpdated() {
+        Plugin mockPlugin = Mockito.mock(Plugin.class);
+        Mockito.when(mockPlugin.getName()).thenReturn("OtherPlugin");
+        Mockito.when(pluginManager.getPlugins()).thenReturn(List.of(mockPlugin));
+
+        PluginVar pv = new PluginVar();
+        pv.setPluginName("NonExistentPlugin");
+        advSpy.getGraph().add(pv);
+
+        eventHandler.initializePluginVars();
+
+        Mockito.verify(pluginManager, Mockito.never()).isPluginEnabled(Mockito.any());
+        assertFalse(pv.getValueOut().getValue());
     }
 }
