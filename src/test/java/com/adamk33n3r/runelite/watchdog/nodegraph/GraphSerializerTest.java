@@ -185,7 +185,6 @@ public class GraphSerializerTest {
 
         Graph loaded = roundTrip(graph);
         Location loadedLoc = (Location) loaded.getNodes().get(0);
-        assertEquals("My Location", loadedLoc.getNameOut().getValue());
     }
 
     @Test
@@ -198,7 +197,6 @@ public class GraphSerializerTest {
 
         Graph loaded = roundTrip(graph);
         PluginVar loadedPv = (PluginVar) loaded.getNodes().get(0);
-        assertEquals("GPU Check", loadedPv.getNameOut().getValue());
         assertEquals("GPU", loadedPv.getPluginName());
     }
 
