@@ -37,6 +37,9 @@ public class NodeProbeFactory {
         for (var lnt : LogicNodeType.values()) {
             this.probes.put(lnt, () -> injector.getInstance(lnt.getImplClass()));
         }
+        for (var mnt : MathNodeType.values()) {
+            this.probes.put(mnt, () -> injector.getInstance(mnt.getImplClass()));
+        }
 //        for (var vnt : VariableNodeType.values()) {
 //            PROBES.put(vnt, () -> injector.getInstance(vnt.getImplClass()));
 //        }

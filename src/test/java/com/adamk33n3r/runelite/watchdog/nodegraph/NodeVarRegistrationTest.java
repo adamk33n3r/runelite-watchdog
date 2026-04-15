@@ -4,10 +4,7 @@ import com.adamk33n3r.nodegraph.nodes.ContinuousTriggerNode;
 import com.adamk33n3r.nodegraph.nodes.NotificationNode;
 import com.adamk33n3r.nodegraph.nodes.TriggerNode;
 import com.adamk33n3r.nodegraph.nodes.constants.Bool;
-import com.adamk33n3r.nodegraph.nodes.constants.InventoryVar;
-import com.adamk33n3r.nodegraph.nodes.constants.Location;
 import com.adamk33n3r.nodegraph.nodes.constants.Num;
-import com.adamk33n3r.nodegraph.nodes.constants.PluginVar;
 import com.adamk33n3r.nodegraph.nodes.logic.LocationCompare;
 import com.adamk33n3r.nodegraph.nodes.math.Add;
 import com.adamk33n3r.runelite.watchdog.alerts.ChatAlert;
@@ -91,22 +88,6 @@ public class NodeVarRegistrationTest {
         TriggerNode a = new TriggerNode(new ChatAlert("a"));
         TriggerNode b = new TriggerNode(new ChatAlert("b"));
         assertNotEquals(a.getId(), b.getId());
-    }
-
-    @Test
-    public void location_registersValueOut_noInputs() {
-        Location node = new Location();
-        assertTrue(node.getInputs().isEmpty());
-        assertTrue(node.getOutputs().containsKey("Value"));
-        assertTrue(node.getOutputs().containsKey("Name"));
-    }
-
-    @Test
-    public void inventoryVar_registersValueOut_noInputs() {
-        InventoryVar node = new InventoryVar();
-        assertTrue(node.getInputs().isEmpty());
-        assertTrue(node.getOutputs().containsKey("Value"));
-        assertTrue(node.getOutputs().containsKey("Name"));
     }
 
     @Test

@@ -73,7 +73,7 @@ public class NodePanel extends JPanel {
     @Getter
     private final Color titleColor;
     private final String typeName;
-    private JLabel nameLabel;
+    private final JLabel nameLabel;
     private final Border border;
 
 //    protected JPanel inConnectionPoints;
@@ -90,7 +90,8 @@ public class NodePanel extends JPanel {
         this.border = BorderFactory.createEmptyBorder(5, 5, 5, 5);
         this.setLayout(new BorderLayout());
         this.nameLabel = new JLabel(name);
-        nameLabel.setForeground(Util.textColorForBG(color));
+//        nameLabel.setForeground(Util.textColorForBG(color));
+        nameLabel.setForeground(Color.WHITE);
         nameLabel.setPreferredSize(new Dimension(0, TITLE_HEIGHT));
         nameLabel.setBorder(new EmptyBorder(0, 5, 0, 0));
         JPanel topPanel = new JPanel(new BorderLayout());

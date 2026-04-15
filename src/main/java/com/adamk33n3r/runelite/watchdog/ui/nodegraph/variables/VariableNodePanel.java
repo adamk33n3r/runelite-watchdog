@@ -18,7 +18,7 @@ public abstract class VariableNodePanel extends NodePanel {
         if (showName) {
             this.updateHeaderLabel(node.getNameOut().getValue());
 
-            TextInput nameInput = new TextInput("Name", node.getNameOut());
+            TextInput nameInput = new TextInput("Name", "Name", node.getNameOut());
             nameInput.registerOnType(this::updateHeaderLabel);
             this.items.add(nameInput);
         }

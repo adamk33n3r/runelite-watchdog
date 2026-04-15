@@ -2,11 +2,8 @@ package com.adamk33n3r.runelite.watchdog.alerts;
 
 import com.adamk33n3r.nodegraph.*;
 import com.adamk33n3r.nodegraph.nodes.*;
-import com.adamk33n3r.nodegraph.nodes.constants.Bool;
-import com.adamk33n3r.nodegraph.nodes.constants.InventoryVar;
-import com.adamk33n3r.nodegraph.nodes.constants.Location;
-import com.adamk33n3r.nodegraph.nodes.constants.Num;
-import com.adamk33n3r.nodegraph.nodes.constants.PluginVar;
+import com.adamk33n3r.nodegraph.nodes.constants.*;
+import com.adamk33n3r.nodegraph.nodes.logic.InventoryCheck;
 import com.adamk33n3r.nodegraph.nodes.logic.BooleanGate;
 import com.adamk33n3r.nodegraph.nodes.logic.Equality;
 import com.adamk33n3r.nodegraph.nodes.logic.LocationCompare;
@@ -82,13 +79,13 @@ public class GraphSerializer implements JsonSerializer<Graph>, JsonDeserializer<
                 nodeObj.addProperty("b", ((Equality) node).getB().getValue());
             } else if (node instanceof Location) {
                 nodeObj.addProperty("type", "Location");
-                nodeObj.addProperty("name", ((Location) node).getNameOut().getValue());
             } else if (node instanceof PluginVar) {
                 nodeObj.addProperty("type", "PluginVar");
-                nodeObj.addProperty("name", ((PluginVar) node).getNameOut().getValue());
                 nodeObj.addProperty("pluginName", ((PluginVar) node).getPluginName());
-            } else if (node instanceof InventoryVar) {
-                InventoryVar inv = (InventoryVar) node;
+            } else if (node instanceof Inventory) {
+                nodeObj.addProperty("type", "Inventory");
+            } else if (node instanceof InventoryCheck) {
+                InventoryCheck inv = (InventoryCheck) node;
                 nodeObj.addProperty("type", "InventoryVar");
                 nodeObj.addProperty("name", inv.getNameOut().getValue());
                 nodeObj.addProperty("inventoryAlertType", inv.getInventoryAlertType().name());
@@ -229,8 +226,12 @@ public class GraphSerializer implements JsonSerializer<Graph>, JsonDeserializer<
                             node = pv;
                             break;
                         }
+                        case "Inventory": {
+                            node = new Inventory();
+                            break;
+                        }
                         case "InventoryVar": {
-                            InventoryVar inv = new InventoryVar();
+                            InventoryCheck inv = new InventoryCheck();
                             if (nodeObj.has("name")) {
                                 inv.getNameOut().setValue(nodeObj.get("name").getAsString());
                             }

@@ -5,7 +5,7 @@ import com.adamk33n3r.nodegraph.Graph;
 import com.adamk33n3r.nodegraph.nodes.NotificationNode;
 import com.adamk33n3r.nodegraph.nodes.TriggerNode;
 import com.adamk33n3r.nodegraph.nodes.constants.Bool;
-import com.adamk33n3r.nodegraph.nodes.constants.InventoryVar;
+import com.adamk33n3r.nodegraph.nodes.logic.InventoryCheck;
 import com.adamk33n3r.nodegraph.nodes.constants.Location;
 import com.adamk33n3r.nodegraph.nodes.constants.Num;
 import com.adamk33n3r.nodegraph.nodes.constants.PluginVar;
@@ -205,7 +205,7 @@ public class GraphSerializerTest {
     @Test
     public void roundTrip_preservesInventoryVarConfig() {
         Graph graph = new Graph();
-        InventoryVar inv = new InventoryVar();
+        InventoryCheck inv = new InventoryCheck();
         inv.getNameOut().setValue("Lobster Check");
         inv.setInventoryAlertType(InventoryAlert.InventoryAlertType.ITEM);
         inv.setInventoryMatchType(InventoryAlert.InventoryMatchType.UN_NOTED);
@@ -216,7 +216,7 @@ public class GraphSerializerTest {
         graph.add(inv);
 
         Graph loaded = roundTrip(graph);
-        InventoryVar loadedInv = (InventoryVar) loaded.getNodes().get(0);
+        InventoryCheck loadedInv = (InventoryCheck) loaded.getNodes().get(0);
         assertEquals("Lobster Check", loadedInv.getNameOut().getValue());
         assertEquals(InventoryAlert.InventoryAlertType.ITEM, loadedInv.getInventoryAlertType());
         assertEquals(InventoryAlert.InventoryMatchType.UN_NOTED, loadedInv.getInventoryMatchType());

@@ -31,16 +31,7 @@ import java.util.stream.Stream;
 import static org.junit.Assert.*;
 
 @RunWith(MockitoJUnitRunner.class)
-public class AdvancedAlertEventHandlerTest {
-
-    @Mock Client client;
-    @Mock ItemManager itemManager;
-    @Mock AlertManager alertManager;
-    @Mock EventBus eventBus;
-    @Mock Provider<HistoryPanel> historyPanelProvider;
-    @Mock WatchdogPlugin plugin;
-    @Mock HistoryPanel historyPanel;
-    @Mock PluginManager pluginManager;
+public class AdvancedAlertEventHandlerTest extends AlertTestBase {
 
     @InjectMocks
     EventHandler eventHandler;
@@ -51,9 +42,6 @@ public class AdvancedAlertEventHandlerTest {
 
     @Before
     public void setup() {
-        Mockito.when(plugin.getName()).thenReturn("Watchdog");
-        Mockito.when(historyPanelProvider.get()).thenReturn(historyPanel);
-
         chatAlert = new ChatAlert("chat test");
         chatAlert.setMessage("hello *");
         triggerNode = new TriggerNode(chatAlert);
@@ -62,11 +50,11 @@ public class AdvancedAlertEventHandlerTest {
         advSpy.getGraph().add(triggerNode);
 
         // Return the spy AdvancedAlert for AdvancedAlert queries, empty for everything else
-        Mockito.when(alertManager.getAllEnabledAlertsOfType(Mockito.any())).thenAnswer(inv -> {
+        Mockito.doAnswer(inv -> {
             Class<?> clazz = inv.getArgument(0);
             if (clazz == AdvancedAlert.class) return Stream.of(advSpy);
             return Stream.empty();
-        });
+        }).when(alertManager).getAllEnabledAlertsOfType(Mockito.any());
     }
 
     private ChatMessage mockGameMessage(String text) {

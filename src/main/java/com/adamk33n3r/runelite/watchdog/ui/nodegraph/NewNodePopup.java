@@ -24,7 +24,8 @@ public class NewNodePopup extends JPopupMenu {
         TriggerType.class,
         NotificationType.class,
         VariableNodeType.class,
-        LogicNodeType.class
+        LogicNodeType.class,
+        MathNodeType.class
     );
     private final JList<Object> itemList;
     private final static Splitter SPLITTER = Splitter.on(' ').trimResults().omitEmptyStrings();
@@ -69,7 +70,8 @@ public class NewNodePopup extends JPopupMenu {
         TriggerType.class, "Alert",
         NotificationType.class, "Notification",
         LogicNodeType.class, "Condition",
-        VariableNodeType.class, "Variable"
+        VariableNodeType.class, "Variable",
+        MathNodeType.class, "Math"
     );
 
     public NewNodePopup(Predicate<Enum<?>> itemFilter) {

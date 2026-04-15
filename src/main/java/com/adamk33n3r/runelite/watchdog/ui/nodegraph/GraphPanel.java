@@ -2,13 +2,12 @@ package com.adamk33n3r.runelite.watchdog.ui.nodegraph;
 
 import com.adamk33n3r.nodegraph.VarOutput;
 import com.adamk33n3r.nodegraph.nodes.ContinuousTriggerNode;
-import com.adamk33n3r.nodegraph.nodes.constants.InventoryVar;
-import com.adamk33n3r.nodegraph.nodes.constants.Location;
-import com.adamk33n3r.nodegraph.nodes.constants.Num;
-import com.adamk33n3r.nodegraph.nodes.constants.PluginVar;
+import com.adamk33n3r.nodegraph.nodes.constants.*;
 import com.adamk33n3r.nodegraph.nodes.logic.BooleanGate;
 import com.adamk33n3r.nodegraph.nodes.logic.Equality;
+import com.adamk33n3r.nodegraph.nodes.logic.InventoryCheck;
 import com.adamk33n3r.nodegraph.nodes.logic.LocationCompare;
+import com.adamk33n3r.nodegraph.nodes.math.Add;
 import com.adamk33n3r.runelite.watchdog.NotificationType;
 import com.adamk33n3r.runelite.watchdog.TriggerType;
 import com.adamk33n3r.runelite.watchdog.Util;
@@ -21,7 +20,6 @@ import com.adamk33n3r.nodegraph.Graph;
 import com.adamk33n3r.nodegraph.Node;
 import com.adamk33n3r.nodegraph.nodes.NotificationNode;
 import com.adamk33n3r.nodegraph.nodes.TriggerNode;
-import com.adamk33n3r.nodegraph.nodes.constants.Bool;
 import com.adamk33n3r.runelite.watchdog.alerts.StatChangedAlert;
 import com.adamk33n3r.runelite.watchdog.notifications.ScreenFlash;
 import com.adamk33n3r.runelite.watchdog.notifications.SoundEffect;
@@ -30,11 +28,17 @@ import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.Connection;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.ConnectionPointIn;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.ConnectionPointOut;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.NodeConnection;
+import com.adamk33n3r.runelite.watchdog.ui.nodegraph.logic.BooleanGateNodePanel;
+import com.adamk33n3r.runelite.watchdog.ui.nodegraph.logic.EqualityNodePanel;
+import com.adamk33n3r.runelite.watchdog.ui.nodegraph.logic.InventoryCheckNodePanel;
+import com.adamk33n3r.runelite.watchdog.ui.nodegraph.logic.LocationCompareNodePanel;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.variables.*;
 import com.adamk33n3r.runelite.watchdog.ui.panels.AlertPanelContentFactory;
 import com.adamk33n3r.runelite.watchdog.ui.panels.NotificationPanelFactory;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import net.runelite.api.Client;
+import net.runelite.client.plugins.PluginManager;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.components.colorpicker.ColorPickerManager;
 import net.runelite.client.util.ImageUtil;
@@ -345,7 +349,7 @@ public class GraphPanel extends JLayeredPane {
                     triggerNode.setX(px);
                     triggerNode.setY(py);
                     this.graph.add(triggerNode);
-                    NodePanel nodePanel = this.createNodePanel(triggerNode);
+                    NodePanel nodePanel = this.createNodePanel(triggerNode, triggerNode.getAlert().getType().getName());
                     this.add(nodePanel, NODE_LAYER, 0);
                     onSelect.accept(nodePanel);
                 } else if (selected instanceof NotificationType) {
@@ -360,10 +364,11 @@ public class GraphPanel extends JLayeredPane {
                     notificationNode.setX(px);
                     notificationNode.setY(py);
                     this.graph.add(notificationNode);
-                    NodePanel nodePanel = this.createNodePanel(notificationNode);
+                    NodePanel nodePanel = this.createNodePanel(notificationNode, notificationNode.getNotification().getType().getName());
                     this.add(nodePanel, NODE_LAYER, 0);
                     onSelect.accept(nodePanel);
                 } else if (selected instanceof LogicNodeType) {
+                    NodePanel nodePanel;
                     LogicNodeType logicNodeType = (LogicNodeType) selected;
                     switch (logicNodeType) {
                         case BOOLEAN:
@@ -371,7 +376,7 @@ public class GraphPanel extends JLayeredPane {
                             boolGate.setX(px);
                             boolGate.setY(py);
                             this.graph.add(boolGate);
-                            NodePanel boolGatePanel = new BooleanGateNodePanel(this, boolGate, px, py, logicNodeType.getName(), NODE_LOGIC_COLOR);
+                            NodePanel boolGatePanel = this.createNodePanel(boolGate, logicNodeType.getName());
                             this.add(boolGatePanel, NODE_LAYER, 0);
                             onSelect.accept(boolGatePanel);
                             break;
@@ -380,7 +385,7 @@ public class GraphPanel extends JLayeredPane {
                             equalityNode.setX(px);
                             equalityNode.setY(py);
                             this.graph.add(equalityNode);
-                            NodePanel equalityPanel = new EqualityNodePanel(this, equalityNode, px, py, logicNodeType.getName(), NODE_LOGIC_COLOR);
+                            NodePanel equalityPanel = this.createNodePanel(equalityNode, logicNodeType.getName());
                             this.add(equalityPanel, NODE_LAYER, 0);
                             onSelect.accept(equalityPanel);
                             break;
@@ -389,9 +394,32 @@ public class GraphPanel extends JLayeredPane {
                             locCompare.setX(px);
                             locCompare.setY(py);
                             this.graph.add(locCompare);
-                            NodePanel locComparePanel = new LocationCompareNodePanel(this, locCompare, px, py, logicNodeType.getName(), NODE_LOGIC_COLOR, injector.getInstance(net.runelite.api.Client.class));
+                            NodePanel locComparePanel = this.createNodePanel(locCompare, logicNodeType.getName());
                             this.add(locComparePanel, NODE_LAYER, 0);
                             onSelect.accept(locComparePanel);
+                            break;
+                        case INVENTORY_CHECK: {
+                            InventoryCheck invNode = new InventoryCheck();
+                            invNode.setX(px);
+                            invNode.setY(py);
+                            this.graph.add(invNode);
+                            nodePanel = this.createNodePanel(invNode, logicNodeType.getName());
+                            this.add(nodePanel, NODE_LAYER, 0);
+                            onSelect.accept(nodePanel);
+                            break;
+                        }
+                    }
+                } else if (selected instanceof MathNodeType) {
+                    MathNodeType mathNodeType = (MathNodeType) selected;
+                    switch (mathNodeType) {
+                        case ADD:
+                            Add addNode = new Add();
+                            addNode.setX(px);
+                            addNode.setY(py);
+                            this.graph.add(addNode);
+                            NodePanel addPanel = this.createNodePanel(addNode, mathNodeType.getName());
+                            this.add(addPanel, NODE_LAYER, 0);
+                            onSelect.accept(addPanel);
                             break;
                     }
                 } else if (selected instanceof VariableNodeType) {
@@ -403,7 +431,7 @@ public class GraphPanel extends JLayeredPane {
                             boolNode.setX(px);
                             boolNode.setY(py);
                             this.graph.add(boolNode);
-                            nodePanel = this.createNodePanel(boolNode);
+                            nodePanel = this.createNodePanel(boolNode, variableNodeType.getName());
                             this.add(nodePanel, NODE_LAYER, 0);
                             onSelect.accept(nodePanel);
                             break;
@@ -413,7 +441,7 @@ public class GraphPanel extends JLayeredPane {
                             numNode.setX(px);
                             numNode.setY(py);
                             this.graph.add(numNode);
-                            nodePanel = this.createNodePanel(numNode);
+                            nodePanel = this.createNodePanel(numNode, variableNodeType.getName());
                             this.add(nodePanel, NODE_LAYER, 0);
                             onSelect.accept(nodePanel);
                             break;
@@ -423,7 +451,7 @@ public class GraphPanel extends JLayeredPane {
                             locNode.setX(px);
                             locNode.setY(py);
                             this.graph.add(locNode);
-                            nodePanel = this.createNodePanel(locNode);
+                            nodePanel = this.createNodePanel(locNode, variableNodeType.getName());
                             this.add(nodePanel, NODE_LAYER, 0);
                             onSelect.accept(nodePanel);
                             break;
@@ -433,17 +461,17 @@ public class GraphPanel extends JLayeredPane {
                             pluginNode.setX(px);
                             pluginNode.setY(py);
                             this.graph.add(pluginNode);
-                            nodePanel = this.createNodePanel(pluginNode);
+                            nodePanel = this.createNodePanel(pluginNode, variableNodeType.getName());
                             this.add(nodePanel, NODE_LAYER, 0);
                             onSelect.accept(nodePanel);
                             break;
                         }
                         case INVENTORY: {
-                            InventoryVar invNode = new InventoryVar();
+                            Inventory invNode = new Inventory();
                             invNode.setX(px);
                             invNode.setY(py);
                             this.graph.add(invNode);
-                            nodePanel = this.createNodePanel(invNode);
+                            nodePanel = this.createNodePanel(invNode, variableNodeType.getName());
                             this.add(nodePanel, NODE_LAYER, 0);
                             onSelect.accept(nodePanel);
                             break;
@@ -463,7 +491,7 @@ public class GraphPanel extends JLayeredPane {
     public void loadFromGraph(Graph g) {
         Map<Node, NodePanel> nodePanelMap = new java.util.IdentityHashMap<>();
         for (Node node : g.getNodes()) {
-            NodePanel panel = createNodePanel(node);
+            NodePanel panel = this.createNodePanel(node, node.getClass().getSimpleName());
             if (panel != null) {
                 nodePanelMap.put(node, panel);
                 this.add(panel, NODE_LAYER);
@@ -491,45 +519,51 @@ public class GraphPanel extends JLayeredPane {
     private static final Color NODE_NOTIFICATION_COLOR = new java.awt.Color(210, 90, 30);
     private static final Color NODE_CONSTANT_COLOR = new java.awt.Color(50, 165, 50);
     private static final Color NODE_LOGIC_COLOR = new java.awt.Color(145, 60, 210);
+    private static final Color NODE_MATH_COLOR = new java.awt.Color(219, 195, 34);
 
     /**
      * Creates the appropriate NodePanel for a given Node instance.
      */
-    public NodePanel createNodePanel(Node node) {
+    public NodePanel createNodePanel(Node node, String name) {
         if (node instanceof ContinuousTriggerNode) {
             ContinuousTriggerNode tn = (ContinuousTriggerNode) node;
-            return new AlertNodePanel(this, tn.getX(), tn.getY(), tn.getAlert().getType().getName(), NODE_TRIGGER_COLOR, tn, alertPanelContentFactory);
+            return new AlertNodePanel(this, tn.getX(), tn.getY(), name, NODE_TRIGGER_COLOR, tn, alertPanelContentFactory);
         } else if (node instanceof TriggerNode) {
             TriggerNode tn = (TriggerNode) node;
-            return new AlertNodePanel(this, tn.getX(), tn.getY(), tn.getAlert().getType().getName(), NODE_TRIGGER_COLOR, tn, alertPanelContentFactory);
+            return new AlertNodePanel(this, tn.getX(), tn.getY(), name, NODE_TRIGGER_COLOR, tn, alertPanelContentFactory);
         } else if (node instanceof NotificationNode) {
             NotificationNode nn = (NotificationNode) node;
-            String name = nn.getNotification().getType().getName();
             return new NotificationNodePanel(this, nn.getX(), nn.getY(), name, NODE_NOTIFICATION_COLOR, nn, notificationPanelFactory);
         } else if (node instanceof Bool) {
             Bool boolNode = (Bool) node;
-            return new BoolNodePanel(this, boolNode, node.getX(), node.getY(), VariableNodeType.BOOLEAN.getName(), NODE_CONSTANT_COLOR);
+            return new BoolNodePanel(this, boolNode, node.getX(), node.getY(), name, NODE_CONSTANT_COLOR);
         } else if (node instanceof Num) {
             Num numNode = (Num) node;
-            return new NumberNodePanel(this, numNode, node.getX(), node.getY(), VariableNodeType.NUMBER.getName(), NODE_CONSTANT_COLOR);
+            return new NumberNodePanel(this, numNode, node.getX(), node.getY(), name, NODE_CONSTANT_COLOR);
         } else if (node instanceof BooleanGate) {
             BooleanGate bg = (BooleanGate) node;
-            return new BooleanGateNodePanel(this, bg, bg.getX(), bg.getY(), LogicNodeType.BOOLEAN.getName(), NODE_LOGIC_COLOR);
+            return new BooleanGateNodePanel(this, bg, bg.getX(), bg.getY(), name, NODE_LOGIC_COLOR);
         } else if (node instanceof Equality) {
             Equality eq = (Equality) node;
-            return new EqualityNodePanel(this, eq, eq.getX(), eq.getY(), LogicNodeType.EQUALITY.getName(), NODE_LOGIC_COLOR);
+            return new EqualityNodePanel(this, eq, eq.getX(), eq.getY(), name, NODE_LOGIC_COLOR);
         } else if (node instanceof Location) {
             Location locNode = (Location) node;
-            return new LocationNodePanel(this, locNode, node.getX(), node.getY(), VariableNodeType.LOCATION.getName(), NODE_CONSTANT_COLOR);
+            return new LocationNodePanel(this, locNode, node.getX(), node.getY(), name, NODE_CONSTANT_COLOR);
         } else if (node instanceof PluginVar) {
             PluginVar pvNode = (PluginVar) node;
-            return new PluginNodePanel(this, pvNode, node.getX(), node.getY(), VariableNodeType.PLUGIN.getName(), NODE_CONSTANT_COLOR, injector.getInstance(net.runelite.client.plugins.PluginManager.class));
-        } else if (node instanceof InventoryVar) {
-            InventoryVar invNode = (InventoryVar) node;
-            return new InventoryNodePanel(this, invNode, node.getX(), node.getY(), VariableNodeType.INVENTORY.getName(), NODE_CONSTANT_COLOR);
+            return new PluginNodePanel(this, pvNode, node.getX(), node.getY(), name, NODE_CONSTANT_COLOR, injector.getInstance(PluginManager.class));
+        } else if (node instanceof Inventory) {
+            Inventory invNode = (Inventory) node;
+            return new InventoryVariableNodePanel(this, invNode, node.getX(), node.getY(), name, NODE_CONSTANT_COLOR);
         } else if (node instanceof LocationCompare) {
             LocationCompare lc = (LocationCompare) node;
-            return new LocationCompareNodePanel(this, lc, lc.getX(), lc.getY(), LogicNodeType.LOCATION_COMPARE.getName(), NODE_LOGIC_COLOR, injector.getInstance(net.runelite.api.Client.class));
+            return new LocationCompareNodePanel(this, lc, lc.getX(), lc.getY(), name, NODE_LOGIC_COLOR, injector.getInstance(Client.class));
+        } else if (node instanceof InventoryCheck) {
+            InventoryCheck invNode = (InventoryCheck) node;
+            return new InventoryCheckNodePanel(this, invNode, node.getX(), node.getY(), name, NODE_LOGIC_COLOR);
+        } else if (node instanceof Add) {
+            Add addNode = (Add) node;
+            return new AddNodePanel(this, addNode, addNode.getX(), addNode.getY(), name, NODE_MATH_COLOR);
         }
         return null;
     }

@@ -1,10 +1,11 @@
-package com.adamk33n3r.runelite.watchdog.ui.nodegraph;
+package com.adamk33n3r.runelite.watchdog.ui.nodegraph.logic;
 
 import com.adamk33n3r.nodegraph.nodes.logic.LocationCompare;
+import com.adamk33n3r.runelite.watchdog.ui.nodegraph.GraphPanel;
+import com.adamk33n3r.runelite.watchdog.ui.nodegraph.NodePanel;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.ConnectionLine;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.ConnectionPointIn;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.ConnectionPointOut;
-import com.adamk33n3r.runelite.watchdog.ui.nodegraph.inputs.NumberInput;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.inputs.ViewInput;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
 import lombok.Getter;

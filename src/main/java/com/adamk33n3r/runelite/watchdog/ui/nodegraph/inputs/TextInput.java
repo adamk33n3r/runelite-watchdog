@@ -15,15 +15,13 @@ import java.util.function.Consumer;
 public class TextInput extends AbstractInput<String> {
     private final FlatTextArea textField;
 
-    public TextInput(String label, String text) {
-        JLabel labelComp = new JLabel(label);
-        this.textField = PanelUtils.createTextArea(label, label, text, (v) -> {});
-        this.add(labelComp, BorderLayout.WEST);
+    public TextInput(String placeholder, String tooltip, String text) {
+        this.textField = PanelUtils.createTextArea(placeholder, tooltip, text, (v) -> {});
         this.add(this.textField);
     }
 
-    public TextInput(String label, Var<String> value) {
-        this(label, value.getValue() != null ? value.getValue() : "");
+    public TextInput(String placeholder, String tooltip, Var<String> value) {
+        this(placeholder, tooltip, value.getValue() != null ? value.getValue() : "");
         this.registerOnChange(value::setValue);
     }
 

@@ -1,24 +1,23 @@
 package com.adamk33n3r.nodegraph.nodes.math;
 
-import com.adamk33n3r.nodegraph.Node;
 import com.adamk33n3r.nodegraph.VarInput;
-import com.adamk33n3r.nodegraph.VarOutput;
 import lombok.Getter;
 
 @Getter
-public class Add extends Node {
+public class Add extends MathNode {
     private final VarInput<Number> a = new VarInput<>(this, "A", Number.class, 0);
-    private final VarInput<Number> b = new VarInput<>(this, "B",Number.class, 0);
-    private final VarOutput<Number> result = new VarOutput<>(this, "Result", Number.class, 0);
+    private final VarInput<Number> b = new VarInput<>(this, "B", Number.class, 0);
 
     public Add() {
+        this.a.onChange(a -> this.process());
+        this.b.onChange(b -> this.process());
+
         reg(this.a);
         reg(this.b);
-        reg(this.result);
     }
 
     @Override
     public void process() {
-        this.result.setValue(this.a.getValue().doubleValue() + this.b.getValue().doubleValue());
+        this.getResult().setValue(this.a.getValue().doubleValue() + this.b.getValue().doubleValue());
     }
 }

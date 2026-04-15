@@ -16,14 +16,15 @@ public class InventoryAlertPanel extends AlertContentPanel<InventoryAlert> {
     public void buildTypeContent() {
         InventoryAlert.InventoryAlertType alertType = this.alert.getInventoryAlertType();
         boolean isItemChange = alertType == InventoryAlert.InventoryAlertType.ITEM_CHANGE;
-        this.addSelect("Match", "Match on noted or un-noted", InventoryAlert.InventoryMatchType.class, this.alert.getInventoryMatchType(), this.alert::setInventoryMatchType)
-            .addSelect("Type", "Type of inventory alert", InventoryAlert.InventoryAlertType.class, alertType, val -> {
+        this.addSelect("Type", "Type of inventory alert", InventoryAlert.InventoryAlertType.class, alertType,
+            val -> {
                 this.alert.setInventoryAlertType(val);
                 this.rebuild();
             })
             .addIf(
                 b -> b
                     .addRegexMatcher(this.alert, "Enter the name of the item to trigger on...", "The name to trigger on. Supports glob (*)")
+                    .addSelect("Match", "Match on noted or un-noted", InventoryAlert.InventoryMatchType.class, this.alert.getInventoryMatchType(), this.alert::setInventoryMatchType)
                     .addSubPanelControl(PanelUtils.createLabeledComponent(
                         isItemChange ? "Change" : "Quantity",
                         isItemChange ? "The quantity change of the item (in one tick) to trigger on. Negative for loss, positive for gain, 0 for no change" : "The quantity of item to trigger on",
