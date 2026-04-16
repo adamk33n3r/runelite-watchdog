@@ -54,9 +54,9 @@ public class GraphSerializer implements JsonSerializer<Graph>, JsonDeserializer<
             } else if (node instanceof TriggerNode) {
                 nodeObj.addProperty("type", "TriggerNode");
                 nodeObj.add("alert", subGson.toJsonTree(((TriggerNode) node).getAlert(), Alert.class));
-            } else if (node instanceof NotificationNode) {
-                nodeObj.addProperty("type", "NotificationNode");
-                nodeObj.add("notification", subGson.toJsonTree(((NotificationNode) node).getNotification(), Notification.class));
+            } else if (node instanceof ActionNode) {
+                nodeObj.addProperty("type", "ActionNode");
+                nodeObj.add("notification", subGson.toJsonTree(((ActionNode) node).getNotification(), Notification.class));
             } else if (node instanceof Num) {
                 nodeObj.addProperty("type", "Num");
                 nodeObj.addProperty("value", ((Num) node).getValue().getValue().doubleValue());
@@ -157,9 +157,10 @@ public class GraphSerializer implements JsonSerializer<Graph>, JsonDeserializer<
                             node = new ContinuousTriggerNode(alert);
                             break;
                         }
-                        case "NotificationNode": {
+                        case "ActionNode":
+                        case "NotificationNode": { // backwards-compat: old saves used "NotificationNode"
                             Notification notif = subGson.fromJson(nodeObj.get("notification"), Notification.class);
-                            node = new NotificationNode(notif);
+                            node = new ActionNode(notif);
                             break;
                         }
                         case "Num": {

@@ -7,7 +7,7 @@ import com.adamk33n3r.runelite.watchdog.notifications.Notification;
 import lombok.*;
 
 @Getter
-public class NotificationNode extends Node {
+public class ActionNode extends Node {
     private final Notification notification;
 
     private final VarInput<Boolean> enabled = new VarInput<>(this, "Enabled", Boolean.class, true);
@@ -20,7 +20,7 @@ public class NotificationNode extends Node {
 
     // Could maybe output "if fired" or something
 
-    public NotificationNode(Notification notification) {
+    public ActionNode(Notification notification) {
         this.notification = notification;
         this.exec.setAllowMultipleConnections(true);
 

@@ -1,7 +1,7 @@
 package com.adamk33n3r.runelite.watchdog;
 
 import com.adamk33n3r.nodegraph.Graph;
-import com.adamk33n3r.nodegraph.nodes.NotificationNode;
+import com.adamk33n3r.nodegraph.nodes.ActionNode;
 import com.adamk33n3r.nodegraph.nodes.TriggerNode;
 import com.adamk33n3r.runelite.watchdog.alerts.AdvancedAlert;
 import com.adamk33n3r.runelite.watchdog.alerts.Alert;
@@ -59,7 +59,7 @@ public class AdvancedAlertTest extends TestBase {
     public void gson_roundTrip_preservesConnection() {
         AdvancedAlert alert = new AdvancedAlert("Graph Alert");
         TriggerNode trigger = new TriggerNode(new ChatAlert("test"));
-        NotificationNode notifNode = new NotificationNode(new ScreenFlash());
+        ActionNode notifNode = new ActionNode(new ScreenFlash());
         alert.getGraph().add(trigger);
         alert.getGraph().add(notifNode);
         alert.getGraph().connect(trigger.getExec(), notifNode.getExec());

@@ -2,7 +2,7 @@ package com.adamk33n3r.runelite.watchdog.nodegraph;
 
 import com.adamk33n3r.nodegraph.Connection;
 import com.adamk33n3r.nodegraph.Graph;
-import com.adamk33n3r.nodegraph.nodes.NotificationNode;
+import com.adamk33n3r.nodegraph.nodes.ActionNode;
 import com.adamk33n3r.nodegraph.nodes.TriggerNode;
 import com.adamk33n3r.nodegraph.nodes.constants.Bool;
 import com.adamk33n3r.nodegraph.nodes.logic.InventoryCheck;
@@ -77,7 +77,7 @@ public class GraphSerializerTest {
         Graph graph = new Graph();
         TriggerNode trigger = new TriggerNode(new ChatAlert("test"));
         ScreenFlash notif = new ScreenFlash();
-        NotificationNode notifNode = new NotificationNode(notif);
+        ActionNode notifNode = new ActionNode(notif);
         graph.add(trigger);
         graph.add(notifNode);
         graph.connect(trigger.getExec(), notifNode.getExec());
@@ -145,7 +145,7 @@ public class GraphSerializerTest {
         Graph graph = new Graph();
         TriggerNode trigger = new TriggerNode(new ChatAlert("test"));
         ScreenFlash notif = new ScreenFlash();
-        NotificationNode notifNode = new NotificationNode(notif);
+        ActionNode notifNode = new ActionNode(notif);
         graph.add(trigger);
         graph.add(notifNode);
         graph.connect(trigger.getExec(), notifNode.getExec());
@@ -153,8 +153,8 @@ public class GraphSerializerTest {
         Graph loaded = roundTrip(graph);
         TriggerNode loadedTrigger = (TriggerNode) loaded.getNodes().stream()
             .filter(n -> n instanceof TriggerNode).findFirst().get();
-        NotificationNode loadedNotif = (NotificationNode) loaded.getNodes().stream()
-            .filter(n -> n instanceof NotificationNode).findFirst().get();
+        ActionNode loadedNotif = (ActionNode) loaded.getNodes().stream()
+            .filter(n -> n instanceof ActionNode).findFirst().get();
 
         String[] groups = new String[]{"hello"};
         loadedTrigger.getCaptureGroupsIn().setValue(groups);
@@ -168,7 +168,7 @@ public class GraphSerializerTest {
         Graph graph = new Graph();
         graph.add(new TriggerNode(new ChatAlert("trigger1")));
         graph.add(new TriggerNode(new ChatAlert("trigger2")));
-        graph.add(new NotificationNode(new ScreenFlash()));
+        graph.add(new ActionNode(new ScreenFlash()));
         graph.add(new Num());
         graph.add(new Bool());
 

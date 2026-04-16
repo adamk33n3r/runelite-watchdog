@@ -1,7 +1,7 @@
 package com.adamk33n3r.runelite.watchdog.nodegraph;
 
 import com.adamk33n3r.nodegraph.nodes.ContinuousTriggerNode;
-import com.adamk33n3r.nodegraph.nodes.NotificationNode;
+import com.adamk33n3r.nodegraph.nodes.ActionNode;
 import com.adamk33n3r.nodegraph.nodes.TriggerNode;
 import com.adamk33n3r.nodegraph.nodes.constants.Bool;
 import com.adamk33n3r.nodegraph.nodes.constants.Num;
@@ -38,7 +38,7 @@ public class NodeVarRegistrationTest {
     @Test
     public void notificationNode_registersAllInputs() {
         Notification mockNotif = Mockito.mock(Notification.class);
-        NotificationNode node = new NotificationNode(mockNotif);
+        ActionNode node = new ActionNode(mockNotif);
         assertTrue(node.getInputs().containsKey("Enabled"));
         assertTrue(node.getInputs().containsKey("Fire When Focused"));
         assertTrue(node.getInputs().containsKey("Fire When AFK"));
@@ -48,7 +48,7 @@ public class NodeVarRegistrationTest {
     @Test
     public void notificationNode_hasNoOutputs() {
         Notification mockNotif = Mockito.mock(Notification.class);
-        NotificationNode node = new NotificationNode(mockNotif);
+        ActionNode node = new ActionNode(mockNotif);
         assertTrue(node.getOutputs().isEmpty());
     }
 

@@ -1,7 +1,7 @@
 package com.adamk33n3r.runelite.watchdog;
 
 import com.adamk33n3r.nodegraph.Graph;
-import com.adamk33n3r.nodegraph.nodes.NotificationNode;
+import com.adamk33n3r.nodegraph.nodes.ActionNode;
 import com.adamk33n3r.nodegraph.nodes.TriggerNode;
 import com.adamk33n3r.runelite.watchdog.alerts.*;
 import com.adamk33n3r.runelite.watchdog.elevenlabs.ElevenLabs;
@@ -461,8 +461,8 @@ public class AlertManager {
             advancedAlert.getGraph().getNodes().forEach(node -> {
                 if (node instanceof TriggerNode) {
                     this.setUpAlert(((TriggerNode) node).getAlert(), overrideWithDefaults);
-                } else if (node instanceof NotificationNode) {
-                    Notification notification = ((NotificationNode) node).getNotification();
+                } else if (node instanceof ActionNode) {
+                    Notification notification = ((ActionNode) node).getNotification();
                     if (notification instanceof TextToSpeech) {
                         TextToSpeech tts = (TextToSpeech) notification;
                         if (tts.getSource() == TTSSource.ELEVEN_LABS && tts.getElevenLabsVoiceId() != null) {

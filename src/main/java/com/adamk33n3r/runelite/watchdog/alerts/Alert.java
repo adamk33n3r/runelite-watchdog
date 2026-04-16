@@ -1,6 +1,6 @@
 package com.adamk33n3r.runelite.watchdog.alerts;
 
-import com.adamk33n3r.nodegraph.nodes.NotificationNode;
+import com.adamk33n3r.nodegraph.nodes.ActionNode;
 import com.adamk33n3r.nodegraph.nodes.TriggerNode;
 import com.adamk33n3r.runelite.watchdog.TriggerType;
 import com.adamk33n3r.runelite.watchdog.WatchdogPlugin;
@@ -164,8 +164,8 @@ public abstract class Alert {
             return Stream.concat(selfKeywords, ((AdvancedAlert) this).getGraph().getNodes().stream().flatMap(node -> {
                 if (node instanceof TriggerNode) {
                     return ((TriggerNode) node).getAlert().getKeywords().stream();
-                } else if (node instanceof NotificationNode) {
-                    Notification notification = ((NotificationNode) node).getNotification();
+                } else if (node instanceof ActionNode) {
+                    Notification notification = ((ActionNode) node).getNotification();
                     if (notification instanceof MessageNotification) {
                         return Stream.of(notification.getType().getName(), ((MessageNotification) notification).getMessage());
                     }

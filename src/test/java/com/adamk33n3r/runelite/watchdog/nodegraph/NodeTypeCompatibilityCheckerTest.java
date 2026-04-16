@@ -18,7 +18,7 @@ import static org.junit.Assert.*;
 /**
  * Verifies the probe-based compatibility checker.
  * These tests implicitly validate that each node class registers the expected VarInputs
- * (e.g. NotificationNode registers an ExecSignal input, BooleanGate registers Boolean inputs).
+ * (e.g. ActionNode registers an ExecSignal input, BooleanGate registers Boolean inputs).
  */
 @RunWith(MockitoJUnitRunner.class)
 public class NodeTypeCompatibilityCheckerTest extends TestBase {

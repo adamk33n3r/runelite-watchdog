@@ -1,6 +1,6 @@
 package com.adamk33n3r.nodegraph;
 
-import com.adamk33n3r.nodegraph.nodes.NotificationNode;
+import com.adamk33n3r.nodegraph.nodes.ActionNode;
 import com.adamk33n3r.nodegraph.nodes.TriggerNode;
 import com.adamk33n3r.runelite.watchdog.alerts.Alert;
 import lombok.Getter;
@@ -143,14 +143,14 @@ public class Graph {
      * Finds and returns all notifications recursively reachable from triggerNode
      * via connections to the enabled input.
      */
-    public List<NotificationNode> getReachableNotificationsFromTrigger(TriggerNode triggerNode) {
-        List<NotificationNode> reachableNotifications = new ArrayList<>();
+    public List<ActionNode> getReachableActionsFromTrigger(TriggerNode triggerNode) {
+        List<ActionNode> reachableNotifications = new ArrayList<>();
         List<Node> nodesToProcess = new ArrayList<>();
         nodesToProcess.add(triggerNode);
         while (!nodesToProcess.isEmpty()) {
             Node node = nodesToProcess.remove(0);
-            if (node instanceof NotificationNode) {
-                NotificationNode notification = ((NotificationNode) node);
+            if (node instanceof ActionNode) {
+                ActionNode notification = ((ActionNode) node);
                 if (notification.getEnabled().getValue()) {
                     reachableNotifications.add(notification);
                 }

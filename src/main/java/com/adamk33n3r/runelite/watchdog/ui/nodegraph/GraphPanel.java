@@ -18,7 +18,7 @@ import com.adamk33n3r.runelite.watchdog.alerts.SpawnedAlert;
 
 import com.adamk33n3r.nodegraph.Graph;
 import com.adamk33n3r.nodegraph.Node;
-import com.adamk33n3r.nodegraph.nodes.NotificationNode;
+import com.adamk33n3r.nodegraph.nodes.ActionNode;
 import com.adamk33n3r.nodegraph.nodes.TriggerNode;
 import com.adamk33n3r.runelite.watchdog.alerts.StatChangedAlert;
 import com.adamk33n3r.runelite.watchdog.notifications.ScreenFlash;
@@ -128,9 +128,9 @@ public class GraphPanel extends JLayeredPane {
          */
         TriggerNode triggerNode = new TriggerNode(alert);
         this.graph.add(triggerNode);
-        NotificationNode notificationNode = new NotificationNode(tts);
+        ActionNode notificationNode = new ActionNode(tts);
         this.graph.add(notificationNode);
-        NotificationNode screenFlashNode = new NotificationNode(screenFlash);
+        ActionNode screenFlashNode = new ActionNode(screenFlash);
         this.graph.add(screenFlashNode);
         Bool boolNode = new Bool();
         boolNode.setValue(false);
@@ -147,10 +147,10 @@ public class GraphPanel extends JLayeredPane {
         AlertNodePanel test = new AlertNodePanel(this, 425, 165, "Test", Color.RED, triggerNode, alertPanelContentFactory);
         this.add(test, NODE_LAYER);
 
-        NotificationNodePanel testTEST = new NotificationNodePanel(this, 815, 365, "Text to Speech", Color.PINK, notificationNode, notificationPanelFactory);
+        ActionNodePanel testTEST = new ActionNodePanel(this, 815, 365, "Text to Speech", Color.PINK, notificationNode, notificationPanelFactory);
         this.add(testTEST, NODE_LAYER);
 
-        NotificationNodePanel screenFlashNodePanel = new NotificationNodePanel(this, 815, 65, "Screen Flash", Color.PINK, screenFlashNode, notificationPanelFactory);
+        ActionNodePanel screenFlashNodePanel = new ActionNodePanel(this, 815, 65, "Screen Flash", Color.PINK, screenFlashNode, notificationPanelFactory);
         this.add(screenFlashNodePanel, NODE_LAYER);
 
         BoolNodePanel boolNodePanel = new BoolNodePanel(this, boolNode, 15, 15, "Bool Node", Color.CYAN);
@@ -173,14 +173,14 @@ public class GraphPanel extends JLayeredPane {
         AlertNodePanel nmzTriggerNodePanel = new AlertNodePanel(this, 15, 15, "Inside NMZ", Color.RED, nmzTriggerNode, alertPanelContentFactory);
         this.add(nmzTriggerNodePanel, NODE_LAYER);
 
-        NotificationNode soundEffectNode = new NotificationNode(new SoundEffect());
+        ActionNode soundEffectNode = new ActionNode(new SoundEffect());
         this.graph.add(soundEffectNode);
-        NotificationNodePanel soundEffectNodePanel = new NotificationNodePanel(this, 815, 300, "Sound Effect", Color.PINK, soundEffectNode, notificationPanelFactory);
+        ActionNodePanel soundEffectNodePanel = new ActionNodePanel(this, 815, 300, "Sound Effect", Color.PINK, soundEffectNode, notificationPanelFactory);
         this.add(soundEffectNodePanel, NODE_LAYER);
 
-        NotificationNode screenFlashNode = new NotificationNode(new ScreenFlash());
+        ActionNode screenFlashNode = new ActionNode(new ScreenFlash());
         this.graph.add(screenFlashNode);
-        NotificationNodePanel screenFlashNodePanel = new NotificationNodePanel(this, 815, 15, "Screen Flash", Color.PINK, screenFlashNode, notificationPanelFactory);
+        ActionNodePanel screenFlashNodePanel = new ActionNodePanel(this, 815, 15, "Screen Flash", Color.PINK, screenFlashNode, notificationPanelFactory);
         this.add(screenFlashNodePanel, NODE_LAYER);
 
         TriggerNode statChangedTriggerNode = new TriggerNode(new StatChangedAlert());
@@ -360,7 +360,7 @@ public class GraphPanel extends JLayeredPane {
                     } catch (Exception e) {
                         notification = new TextToSpeech();
                     }
-                    NotificationNode notificationNode = new NotificationNode(notification);
+                    ActionNode notificationNode = new ActionNode(notification);
                     notificationNode.setX(px);
                     notificationNode.setY(py);
                     this.graph.add(notificationNode);
@@ -516,7 +516,7 @@ public class GraphPanel extends JLayeredPane {
     }
 
     private static final Color NODE_TRIGGER_COLOR = new java.awt.Color(50, 120, 200);
-    private static final Color NODE_NOTIFICATION_COLOR = new java.awt.Color(210, 90, 30);
+    private static final Color NODE_ACTION_COLOR = new java.awt.Color(210, 90, 30);
     private static final Color NODE_CONSTANT_COLOR = new java.awt.Color(50, 165, 50);
     private static final Color NODE_LOGIC_COLOR = new java.awt.Color(145, 60, 210);
     private static final Color NODE_MATH_COLOR = new java.awt.Color(219, 195, 34);
@@ -531,9 +531,9 @@ public class GraphPanel extends JLayeredPane {
         } else if (node instanceof TriggerNode) {
             TriggerNode tn = (TriggerNode) node;
             return new AlertNodePanel(this, tn.getX(), tn.getY(), name, NODE_TRIGGER_COLOR, tn, alertPanelContentFactory);
-        } else if (node instanceof NotificationNode) {
-            NotificationNode nn = (NotificationNode) node;
-            return new NotificationNodePanel(this, nn.getX(), nn.getY(), name, NODE_NOTIFICATION_COLOR, nn, notificationPanelFactory);
+        } else if (node instanceof ActionNode) {
+            ActionNode nn = (ActionNode) node;
+            return new ActionNodePanel(this, nn.getX(), nn.getY(), name, NODE_ACTION_COLOR, nn, notificationPanelFactory);
         } else if (node instanceof Bool) {
             Bool boolNode = (Bool) node;
             return new BoolNodePanel(this, boolNode, node.getX(), node.getY(), name, NODE_CONSTANT_COLOR);
@@ -718,7 +718,7 @@ public class GraphPanel extends JLayeredPane {
     public void trigger(TriggerNode triggerNode, String[] triggerValues) {
         triggerNode.getCaptureGroupsIn().setValue(triggerValues);
         this.graph.process(triggerNode);
-        this.graph.getReachableNotificationsFromTrigger(triggerNode)
-            .forEach(NotificationNode::fire);
+        this.graph.getReachableActionsFromTrigger(triggerNode)
+            .forEach(ActionNode::fire);
     }
 }

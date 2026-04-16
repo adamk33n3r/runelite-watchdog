@@ -1,7 +1,7 @@
 package com.adamk33n3r.runelite.watchdog.nodegraph;
 
 import com.adamk33n3r.nodegraph.Graph;
-import com.adamk33n3r.nodegraph.nodes.NotificationNode;
+import com.adamk33n3r.nodegraph.nodes.ActionNode;
 import com.adamk33n3r.nodegraph.nodes.TriggerNode;
 import com.adamk33n3r.nodegraph.nodes.constants.Num;
 import com.adamk33n3r.nodegraph.nodes.math.Add;
@@ -52,27 +52,27 @@ public class AdvancedAlertGraphTest {
         alert.setEnabled(false);
         TriggerNode trigger = new TriggerNode(alert);
         Notification mockNotif = Mockito.mock(Notification.class);
-        NotificationNode notifNode = new NotificationNode(mockNotif);
+        ActionNode notifNode = new ActionNode(mockNotif);
         graph.add(trigger);
         graph.add(notifNode);
         graph.connect(trigger.getExec(), notifNode.getExec());
 
-        List<NotificationNode> result = graph.getReachableNotificationsFromTrigger(trigger);
+        List<ActionNode> result = graph.getReachableActionsFromTrigger(trigger);
         assertTrue(result.isEmpty());
     }
 
     @Test
-    public void getReachableNotifications_skipsDisabledNotificationNode() {
+    public void getReachableNotifications_skipsDisabledActionNode() {
         Graph graph = new Graph();
         TriggerNode trigger = new TriggerNode(new ChatAlert("enabled"));
         Notification mockNotif = Mockito.mock(Notification.class);
-        NotificationNode notifNode = new NotificationNode(mockNotif);
+        ActionNode notifNode = new ActionNode(mockNotif);
         notifNode.getEnabled().setValue(false);
         graph.add(trigger);
         graph.add(notifNode);
         graph.connect(trigger.getExec(), notifNode.getExec());
 
-        List<NotificationNode> result = graph.getReachableNotificationsFromTrigger(trigger);
+        List<ActionNode> result = graph.getReachableActionsFromTrigger(trigger);
         assertTrue(result.isEmpty());
     }
 
@@ -81,12 +81,12 @@ public class AdvancedAlertGraphTest {
         Graph graph = new Graph();
         TriggerNode trigger = new TriggerNode(new ChatAlert("enabled"));
         Notification mockNotif = Mockito.mock(Notification.class);
-        NotificationNode notifNode = new NotificationNode(mockNotif);
+        ActionNode notifNode = new ActionNode(mockNotif);
         graph.add(trigger);
         graph.add(notifNode);
         graph.connect(trigger.getExec(), notifNode.getExec());
 
-        List<NotificationNode> result = graph.getReachableNotificationsFromTrigger(trigger);
+        List<ActionNode> result = graph.getReachableActionsFromTrigger(trigger);
         assertEquals(1, result.size());
         assertSame(notifNode, result.get(0));
     }
@@ -98,7 +98,7 @@ public class AdvancedAlertGraphTest {
 
         TriggerNode trigger = new TriggerNode(new ChatAlert("test"));
         Notification mockNotif = Mockito.mock(Notification.class);
-        NotificationNode notifNode = new NotificationNode(mockNotif);
+        ActionNode notifNode = new ActionNode(mockNotif);
         graph.add(trigger);
         graph.add(notifNode);
         graph.connect(trigger.getExec(), notifNode.getExec());
@@ -116,7 +116,7 @@ public class AdvancedAlertGraphTest {
 
         TriggerNode trigger = new TriggerNode(new ChatAlert("test"));
         Notification mockNotif = Mockito.mock(Notification.class);
-        NotificationNode notifNode = new NotificationNode(mockNotif);
+        ActionNode notifNode = new ActionNode(mockNotif);
         graph.add(trigger);
         graph.add(notifNode);
         // no connection between trigger and notifNode
@@ -134,8 +134,8 @@ public class AdvancedAlertGraphTest {
         TriggerNode trigger = new TriggerNode(new ChatAlert("test"));
         Notification mockNotif1 = Mockito.mock(Notification.class);
         Notification mockNotif2 = Mockito.mock(Notification.class);
-        NotificationNode notifNode1 = new NotificationNode(mockNotif1);
-        NotificationNode notifNode2 = new NotificationNode(mockNotif2);
+        ActionNode notifNode1 = new ActionNode(mockNotif1);
+        ActionNode notifNode2 = new ActionNode(mockNotif2);
         graph.add(trigger);
         graph.add(notifNode1);
         graph.add(notifNode2);

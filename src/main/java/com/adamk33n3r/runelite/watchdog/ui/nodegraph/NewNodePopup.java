@@ -1,6 +1,7 @@
 package com.adamk33n3r.runelite.watchdog.ui.nodegraph;
 
 import com.adamk33n3r.runelite.watchdog.Displayable;
+import com.adamk33n3r.runelite.watchdog.NotificationCategory;
 import com.adamk33n3r.runelite.watchdog.NotificationType;
 import com.adamk33n3r.runelite.watchdog.TriggerType;
 import com.google.common.base.Splitter;
@@ -17,6 +18,7 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.LinkedHashMap;
 
 public class NewNodePopup extends JPopupMenu {
     public static final List<Class<? extends Enum<?>>> DEFAULT_ITEMS = Arrays.asList(
@@ -34,7 +36,7 @@ public class NewNodePopup extends JPopupMenu {
 
     private static final Map<Class<? extends Enum<?>>, String> enumToCategory = ImmutableMap.of(
         TriggerType.class, "Alert",
-        NotificationType.class, "Notification",
+        NotificationType.class, "Action",
         LogicNodeType.class, "Condition",
         VariableNodeType.class, "Variable",
         MathNodeType.class, "Math"
@@ -96,11 +98,35 @@ public class NewNodePopup extends JPopupMenu {
         this.categoryMenus = Arrays.stream(this.items)
             .map(categoryItems -> {
                 JMenu menu = new JMenu(categoryItems.getCategory());
-                for (Enum<?> item : categoryItems.getItems()) {
-                    JMenuItem menuItem = new JMenuItem(((Displayable) item).getName());
-                    menuItem.setToolTipText(((Displayable) item).getTooltip());
-                    menuItem.addActionListener(e -> this.selectItem(item));
-                    menu.add(menuItem);
+                boolean isNotificationType = categoryItems.getItems().length > 0
+                    && categoryItems.getItems()[0] instanceof NotificationType;
+                if (isNotificationType) {
+                    // Group Action items into NotificationCategory sub-menus
+                    Map<NotificationCategory, JMenu> subMenus = new LinkedHashMap<>();
+                    for (NotificationCategory cat : NotificationCategory.values()) {
+                        JMenu subMenu = new JMenu(cat.getName());
+                        subMenu.setToolTipText(cat.getTooltip());
+                        subMenus.put(cat, subMenu);
+                    }
+                    for (Enum<?> item : categoryItems.getItems()) {
+                        NotificationType nt = (NotificationType) item;
+                        JMenuItem menuItem = new JMenuItem(nt.getName());
+                        menuItem.setToolTipText(nt.getTooltip());
+                        menuItem.addActionListener(e -> this.selectItem(item));
+                        subMenus.get(nt.getCategory()).add(menuItem);
+                    }
+                    for (JMenu subMenu : subMenus.values()) {
+                        if (subMenu.getItemCount() > 0) {
+                            menu.add(subMenu);
+                        }
+                    }
+                } else {
+                    for (Enum<?> item : categoryItems.getItems()) {
+                        JMenuItem menuItem = new JMenuItem(((Displayable) item).getName());
+                        menuItem.setToolTipText(((Displayable) item).getTooltip());
+                        menuItem.addActionListener(e -> this.selectItem(item));
+                        menu.add(menuItem);
+                    }
                 }
                 return menu;
             })
