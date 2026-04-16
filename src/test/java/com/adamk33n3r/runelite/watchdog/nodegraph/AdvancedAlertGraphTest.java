@@ -95,7 +95,7 @@ public class AdvancedAlertGraphTest {
     }
 
     @Test
-    public void fireTriggerNode_propagatesCaptureGroupsAndFiresNotification() {
+    public void fireTriggerNode_propagatesCaptureGroupsAndFiresNotification() throws InterruptedException {
         AdvancedAlert adv = new AdvancedAlert("test");
         Graph graph = adv.getGraph();
 
@@ -108,12 +108,13 @@ public class AdvancedAlertGraphTest {
 
         String[] groups = new String[]{"hello", "world"};
         adv.fireTriggerNode(trigger, groups);
+        Thread.sleep(100);
 
         Mockito.verify(mockNotif).fire(groups);
     }
 
     @Test
-    public void fireTriggerNode_doesNotFireUnconnectedNotification() {
+    public void fireTriggerNode_doesNotFireUnconnectedNotification() throws InterruptedException {
         AdvancedAlert adv = new AdvancedAlert("test");
         Graph graph = adv.getGraph();
 
@@ -125,12 +126,13 @@ public class AdvancedAlertGraphTest {
         // no connection between trigger and notifNode
 
         adv.fireTriggerNode(trigger, new String[0]);
+        Thread.sleep(100);
 
         Mockito.verify(mockNotif, Mockito.never()).fire(Mockito.any());
     }
 
     @Test
-    public void fireTriggerNode_firesMultipleConnectedNotifications() {
+    public void fireTriggerNode_firesMultipleConnectedNotifications() throws InterruptedException {
         AdvancedAlert adv = new AdvancedAlert("test");
         Graph graph = adv.getGraph();
 
@@ -146,6 +148,7 @@ public class AdvancedAlertGraphTest {
         graph.connect(trigger.getExec(), notifNode2.getExec());
 
         adv.fireTriggerNode(trigger, new String[]{"test"});
+        Thread.sleep(100);
 
         Mockito.verify(mockNotif1).fire(Mockito.any());
         Mockito.verify(mockNotif2).fire(Mockito.any());

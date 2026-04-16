@@ -30,6 +30,8 @@ public class AdvancedAlert extends Alert {
     public void fireTriggerNode(TriggerNode triggerNode, String[] triggerValues) {
         triggerNode.getCaptureGroupsIn().setValue(triggerValues);
         this.graph.process(triggerNode);
-        this.graph.executeExecChain(triggerNode, triggerValues);
+        Thread t = new Thread(() -> this.graph.executeExecChain(triggerNode, triggerValues));
+        t.setDaemon(true);
+        t.start();
     }
 }
