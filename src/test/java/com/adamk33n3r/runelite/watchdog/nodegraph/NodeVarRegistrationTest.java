@@ -46,10 +46,10 @@ public class NodeVarRegistrationTest {
     }
 
     @Test
-    public void notificationNode_hasNoOutputs() {
+    public void notificationNode_registersExecOutput() {
         Notification mockNotif = Mockito.mock(Notification.class);
         ActionNode node = new ActionNode(mockNotif);
-        assertTrue(node.getOutputs().isEmpty());
+        assertTrue(node.getOutputs().containsKey("Exec"));
     }
 
     @Test

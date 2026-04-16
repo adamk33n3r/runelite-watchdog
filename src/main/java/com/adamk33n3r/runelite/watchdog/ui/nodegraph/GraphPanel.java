@@ -19,6 +19,7 @@ import com.adamk33n3r.runelite.watchdog.alerts.SpawnedAlert;
 import com.adamk33n3r.nodegraph.Graph;
 import com.adamk33n3r.nodegraph.Node;
 import com.adamk33n3r.nodegraph.nodes.ActionNode;
+import com.adamk33n3r.nodegraph.nodes.DelayNode;
 import com.adamk33n3r.nodegraph.nodes.TriggerNode;
 import com.adamk33n3r.runelite.watchdog.alerts.StatChangedAlert;
 import com.adamk33n3r.runelite.watchdog.notifications.ScreenFlash;
@@ -422,6 +423,20 @@ public class GraphPanel extends JLayeredPane {
                             onSelect.accept(addPanel);
                             break;
                     }
+                } else if (selected instanceof FlowNodeType) {
+                    FlowNodeType flowNodeType = (FlowNodeType) selected;
+                    switch (flowNodeType) {
+                        case DELAY: {
+                            DelayNode delayNode = new DelayNode();
+                            delayNode.setX(px);
+                            delayNode.setY(py);
+                            this.graph.add(delayNode);
+                            NodePanel nodePanel = this.createNodePanel(delayNode, flowNodeType.getName());
+                            this.add(nodePanel, NODE_LAYER, 0);
+                            onSelect.accept(nodePanel);
+                            break;
+                        }
+                    }
                 } else if (selected instanceof VariableNodeType) {
                     VariableNodeType variableNodeType = (VariableNodeType) selected;
                     NodePanel nodePanel;
@@ -531,6 +546,9 @@ public class GraphPanel extends JLayeredPane {
         for (MathNodeType type : MathNodeType.values()) {
             if (type.getImplClass() == nodeClass) return type.getName();
         }
+        for (FlowNodeType type : FlowNodeType.values()) {
+            if (type.getImplClass() == nodeClass) return type.getName();
+        }
         return node.getClass().getSimpleName();
     }
 
@@ -583,6 +601,9 @@ public class GraphPanel extends JLayeredPane {
         } else if (node instanceof Add) {
             Add addNode = (Add) node;
             return new AddNodePanel(this, addNode, addNode.getX(), addNode.getY(), name, NODE_MATH_COLOR);
+        } else if (node instanceof DelayNode) {
+            DelayNode delayNode = (DelayNode) node;
+            return new DelayNodePanel(this, delayNode.getX(), delayNode.getY(), delayNode);
         }
         return null;
     }
@@ -737,7 +758,6 @@ public class GraphPanel extends JLayeredPane {
     public void trigger(TriggerNode triggerNode, String[] triggerValues) {
         triggerNode.getCaptureGroupsIn().setValue(triggerValues);
         this.graph.process(triggerNode);
-        this.graph.getReachableActionsFromTrigger(triggerNode)
-            .forEach(ActionNode::fire);
+        this.graph.executeExecChain(triggerNode, triggerValues);
     }
 }

@@ -2,6 +2,7 @@ package com.adamk33n3r.runelite.watchdog.alerts;
 
 import com.adamk33n3r.nodegraph.*;
 import com.adamk33n3r.nodegraph.nodes.*;
+import com.adamk33n3r.nodegraph.nodes.DelayNode;
 import com.adamk33n3r.nodegraph.nodes.constants.*;
 import com.adamk33n3r.nodegraph.nodes.logic.InventoryCheck;
 import com.adamk33n3r.nodegraph.nodes.logic.BooleanGate;
@@ -94,6 +95,9 @@ public class GraphSerializer implements JsonSerializer<Graph>, JsonDeserializer<
                 nodeObj.addProperty("isRegexEnabled", inv.isRegexEnabled());
                 nodeObj.addProperty("itemQuantity", inv.getItemQuantity());
                 nodeObj.addProperty("quantityComparator", inv.getQuantityComparator().name());
+            } else if (node instanceof DelayNode) {
+                nodeObj.addProperty("type", "Delay");
+                nodeObj.addProperty("delayMs", ((DelayNode) node).getDelayMs().getValue().doubleValue());
             } else if (node instanceof LocationCompare) {
                 LocationCompare lc = (LocationCompare) node;
                 nodeObj.addProperty("type", "LocationCompare");
@@ -183,6 +187,14 @@ public class GraphSerializer implements JsonSerializer<Graph>, JsonDeserializer<
                                 bool.getNameOut().setValue(nodeObj.get("name").getAsString());
                             }
                             node = bool;
+                            break;
+                        }
+                        case "Delay": {
+                            DelayNode delay = new DelayNode();
+                            if (nodeObj.has("delayMs")) {
+                                delay.getDelayMs().setValue(nodeObj.get("delayMs").getAsDouble());
+                            }
+                            node = delay;
                             break;
                         }
                         case "Add":

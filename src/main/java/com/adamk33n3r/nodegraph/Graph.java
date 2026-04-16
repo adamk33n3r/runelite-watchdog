@@ -1,6 +1,7 @@
 package com.adamk33n3r.nodegraph;
 
 import com.adamk33n3r.nodegraph.nodes.ActionNode;
+import com.adamk33n3r.nodegraph.nodes.DelayNode;
 import com.adamk33n3r.nodegraph.nodes.TriggerNode;
 import com.adamk33n3r.runelite.watchdog.alerts.Alert;
 import lombok.Getter;
@@ -141,7 +142,7 @@ public class Graph {
 
     /**
      * Finds and returns all notifications recursively reachable from triggerNode
-     * via connections to the enabled input.
+     * via exec connections, including those behind ActionNodes and DelayNodes.
      */
     public List<ActionNode> getReachableActionsFromTrigger(TriggerNode triggerNode) {
         List<ActionNode> reachableNotifications = new ArrayList<>();
@@ -149,22 +150,72 @@ public class Graph {
         nodesToProcess.add(triggerNode);
         while (!nodesToProcess.isEmpty()) {
             Node node = nodesToProcess.remove(0);
-            if (node instanceof ActionNode) {
-                ActionNode notification = ((ActionNode) node);
-                if (notification.getEnabled().getValue()) {
-                    reachableNotifications.add(notification);
-                }
-                continue;
-            }
             if (node instanceof TriggerNode && !((TriggerNode) node).getEnabled().getValue()) {
                 continue;
             }
-            this.connections.stream()
-                .filter(c -> c.getOutput().getNode() == node && c.getOutput().getType() == ExecSignal.class)
-                .map(c -> c.getInput().getNode())
-                .distinct()
-                .forEach(nodesToProcess::add);
+            if (node instanceof ActionNode) {
+                ActionNode action = (ActionNode) node;
+                if (action.getEnabled().getValue()) {
+                    reachableNotifications.add(action);
+                }
+                // Fall through to also follow this node's exec output
+            }
+            nodesToProcess.addAll(this.getExecDownstream(node));
         }
         return reachableNotifications;
+    }
+
+    /**
+     * Traverses the exec chain starting from startNode, firing enabled ActionNodes
+     * immediately and spawning daemon threads to handle DelayNodes.
+     */
+    public void executeExecChain(Node startNode, String[] captureGroups) {
+        List<Node> nodesToProcess = new ArrayList<>();
+        nodesToProcess.add(startNode);
+
+        while (!nodesToProcess.isEmpty()) {
+            Node node = nodesToProcess.remove(0);
+
+            if (node instanceof TriggerNode && !((TriggerNode) node).getEnabled().getValue()) {
+                continue;
+            }
+
+            if (node instanceof ActionNode) {
+                ActionNode action = (ActionNode) node;
+                if (action.getEnabled().getValue()) {
+                    action.fire(captureGroups);
+                }
+                // Fall through to follow exec downstream from this action
+            }
+
+            if (node instanceof DelayNode) {
+                int delayMs = ((DelayNode) node).getDelayMs().getValue().intValue();
+                if (delayMs > 0) {
+                    List<Node> downstream = this.getExecDownstream(node);
+                    Thread t = new Thread(() -> {
+                        try {
+                            Thread.sleep(delayMs);
+                        } catch (InterruptedException e) {
+                            return;
+                        }
+                        downstream.forEach(n -> this.executeExecChain(n, captureGroups));
+                    });
+                    t.setDaemon(true);
+                    t.start();
+                    continue; // Don't add downstream to the immediate BFS queue
+                }
+                // delayMs == 0: fall through and add downstream immediately
+            }
+
+            nodesToProcess.addAll(this.getExecDownstream(node));
+        }
+    }
+
+    private List<Node> getExecDownstream(Node node) {
+        return this.connections.stream()
+            .filter(c -> c.getOutput().getNode() == node && c.getOutput().getType() == ExecSignal.class)
+            .map(c -> c.getInput().getNode())
+            .distinct()
+            .collect(Collectors.toList());
     }
 }

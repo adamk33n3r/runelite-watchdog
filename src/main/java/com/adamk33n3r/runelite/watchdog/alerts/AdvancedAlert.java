@@ -1,7 +1,6 @@
 package com.adamk33n3r.runelite.watchdog.alerts;
 
 import com.adamk33n3r.nodegraph.Graph;
-import com.adamk33n3r.nodegraph.nodes.ActionNode;
 import com.adamk33n3r.nodegraph.nodes.TriggerNode;
 import lombok.Getter;
 import lombok.Setter;
@@ -31,7 +30,6 @@ public class AdvancedAlert extends Alert {
     public void fireTriggerNode(TriggerNode triggerNode, String[] triggerValues) {
         triggerNode.getCaptureGroupsIn().setValue(triggerValues);
         this.graph.process(triggerNode);
-        this.graph.getReachableActionsFromTrigger(triggerNode)
-            .forEach(ActionNode::fire);
+        this.graph.executeExecChain(triggerNode, triggerValues);
     }
 }

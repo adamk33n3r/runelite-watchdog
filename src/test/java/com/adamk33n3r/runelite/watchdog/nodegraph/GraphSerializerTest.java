@@ -3,6 +3,7 @@ package com.adamk33n3r.runelite.watchdog.nodegraph;
 import com.adamk33n3r.nodegraph.Connection;
 import com.adamk33n3r.nodegraph.Graph;
 import com.adamk33n3r.nodegraph.nodes.ActionNode;
+import com.adamk33n3r.nodegraph.nodes.DelayNode;
 import com.adamk33n3r.nodegraph.nodes.TriggerNode;
 import com.adamk33n3r.nodegraph.nodes.constants.Bool;
 import com.adamk33n3r.nodegraph.nodes.logic.InventoryCheck;
@@ -240,6 +241,44 @@ public class GraphSerializerTest {
         assertEquals(new WorldPoint(3210, 3210, 1), loadedLc.getB().getValue());
         assertEquals(5, loadedLc.getDistance());
         assertTrue(loadedLc.isCardinalOnly());
+    }
+
+    @Test
+    public void roundTrip_delayNode_preservesDelayMs() {
+        Graph graph = new Graph();
+        DelayNode delay = new DelayNode();
+        delay.getDelayMs().setValue(750);
+        graph.add(delay);
+
+        Graph loaded = roundTrip(graph);
+
+        assertEquals(1, loaded.getNodes().size());
+        assertTrue(loaded.getNodes().get(0) instanceof DelayNode);
+        DelayNode loadedDelay = (DelayNode) loaded.getNodes().get(0);
+        assertEquals(750, loadedDelay.getDelayMs().getValue().intValue());
+    }
+
+    @Test
+    public void roundTrip_delayNode_withConnections() {
+        Graph graph = new Graph();
+        TriggerNode trigger = new TriggerNode(new ChatAlert("test"));
+        DelayNode delay = new DelayNode();
+        delay.getDelayMs().setValue(250);
+        ScreenFlash notif = new ScreenFlash();
+        ActionNode action = new ActionNode(notif);
+
+        graph.add(trigger);
+        graph.add(delay);
+        graph.add(action);
+        graph.connect(trigger.getExec(), delay.getExec());
+        graph.connect(delay.getExecOut(), action.getExec());
+
+        Graph loaded = roundTrip(graph);
+
+        assertEquals(3, loaded.getNodes().size());
+        assertEquals(2, loaded.getConnections().size());
+        long delayCount = loaded.getNodes().stream().filter(n -> n instanceof DelayNode).count();
+        assertEquals(1, delayCount);
     }
 
     private Graph roundTrip(Graph graph) {

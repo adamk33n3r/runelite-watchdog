@@ -3,6 +3,7 @@ package com.adamk33n3r.nodegraph.nodes;
 import com.adamk33n3r.nodegraph.Node;
 import com.adamk33n3r.nodegraph.ExecSignal;
 import com.adamk33n3r.nodegraph.VarInput;
+import com.adamk33n3r.nodegraph.VarOutput;
 import com.adamk33n3r.runelite.watchdog.notifications.Notification;
 import lombok.*;
 
@@ -17,6 +18,7 @@ public class ActionNode extends Node {
 //    private final VarInput<Number> delayMilliseconds = new VarInput<>(this, "Delay (ms)", Number.class, 0);
 //    private final VarInput<String> alertName = new VarInput<>(this, "Alert Name", String.class, "");
     private final VarInput<ExecSignal> exec = new VarInput<>(this, "Exec", ExecSignal.class, new ExecSignal(new String[0]));
+    private final VarOutput<ExecSignal> execOut = new VarOutput<>(this, "Exec", ExecSignal.class, new ExecSignal(new String[0]));
 
     // Could maybe output "if fired" or something
 
@@ -40,6 +42,7 @@ public class ActionNode extends Node {
 //        reg(this.delayMilliseconds);
 //        reg(this.alertName);
         reg(this.exec);
+        reg(this.execOut);
     }
 
     @Override
@@ -51,6 +54,11 @@ public class ActionNode extends Node {
     }
 
     public void fire() {
-        this.notification.fire(this.exec.getValue().getCaptureGroups());
+        this.fire(this.exec.getValue().getCaptureGroups());
+    }
+
+    public void fire(String[] captureGroups) {
+        this.notification.fire(captureGroups);
+        this.execOut.setValue(new ExecSignal(captureGroups));
     }
 }

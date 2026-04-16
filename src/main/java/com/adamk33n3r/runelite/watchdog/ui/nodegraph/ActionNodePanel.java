@@ -5,6 +5,7 @@ import com.adamk33n3r.nodegraph.nodes.ActionNode;
 import com.adamk33n3r.runelite.watchdog.notifications.Notification;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.ConnectionLine;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.ConnectionPointIn;
+import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.ConnectionPointOut;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.inputs.BoolInput;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.inputs.NumberInput;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.inputs.ViewInput;
@@ -20,6 +21,7 @@ import java.awt.Color;
 public class ActionNodePanel extends NodePanel {
     private final ConnectionPointIn<Boolean> enabledIn;
     private final ConnectionPointIn<ExecSignal> execIn;
+    private final ConnectionPointOut<ExecSignal> execOut;
 //    private final ConnectionPointIn<String> alertNameIn;
 //    private final ConnectionPointIn<Number> delayMillisecondsIn;
     private final ConnectionPointIn<Boolean> fireWhenFocusedIn;
@@ -31,7 +33,8 @@ public class ActionNodePanel extends NodePanel {
         Notification notification = actionNode.getNotification();
 
         this.execIn = new ConnectionPointIn<>(this, actionNode.getExec());
-        this.items.add(new ConnectionLine<>(this.execIn, new ViewInput<>("Exec", actionNode.getExec().getValue()), null));
+        this.execOut = new ConnectionPointOut<>(this, actionNode.getExecOut());
+        this.items.add(new ConnectionLine<>(this.execIn, new ViewInput<>("Exec", actionNode.getExec().getValue()), this.execOut));
         this.enabledIn = new ConnectionPointIn<>(this, actionNode.getEnabled());
         this.items.add(new ConnectionLine<>(this.enabledIn, new BoolInput("Enabled", actionNode.getEnabled()), null));
 //        this.alertNameIn = new ConnectionPointIn<>(this, actionNode.getAlertName());

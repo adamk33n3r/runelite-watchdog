@@ -2,6 +2,7 @@ package com.adamk33n3r.runelite.watchdog.ui.nodegraph;
 
 import com.adamk33n3r.nodegraph.Node;
 import com.adamk33n3r.nodegraph.nodes.ActionNode;
+import com.adamk33n3r.nodegraph.nodes.DelayNode;
 import com.adamk33n3r.nodegraph.nodes.TriggerNode;
 import com.adamk33n3r.runelite.watchdog.NotificationType;
 import com.adamk33n3r.runelite.watchdog.TriggerType;
@@ -39,6 +40,9 @@ public class NodeProbeFactory {
         }
         for (var mnt : MathNodeType.values()) {
             this.probes.put(mnt, () -> injector.getInstance(mnt.getImplClass()));
+        }
+        for (var fnt : FlowNodeType.values()) {
+            this.probes.put(fnt, () -> injector.getInstance(fnt.getImplClass()));
         }
 //        for (var vnt : VariableNodeType.values()) {
 //            PROBES.put(vnt, () -> injector.getInstance(vnt.getImplClass()));
