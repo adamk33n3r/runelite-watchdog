@@ -491,7 +491,7 @@ public class GraphPanel extends JLayeredPane {
     public void loadFromGraph(Graph g) {
         Map<Node, NodePanel> nodePanelMap = new java.util.IdentityHashMap<>();
         for (Node node : g.getNodes()) {
-            NodePanel panel = this.createNodePanel(node, node.getClass().getSimpleName());
+            NodePanel panel = this.createNodePanel(node, this.getNodeDisplayName(node));
             if (panel != null) {
                 nodePanelMap.put(node, panel);
                 this.add(panel, NODE_LAYER);
@@ -513,6 +513,25 @@ public class GraphPanel extends JLayeredPane {
         }
         this.revalidate();
         this.repaint();
+    }
+
+    private String getNodeDisplayName(Node node) {
+        if (node instanceof TriggerNode) {
+            return ((TriggerNode) node).getAlert().getType().getName();
+        } else if (node instanceof ActionNode) {
+            return ((ActionNode) node).getNotification().getType().getName();
+        }
+        Class<? extends Node> nodeClass = node.getClass();
+        for (VariableNodeType type : VariableNodeType.values()) {
+            if (type.getImplClass() == nodeClass) return type.getName();
+        }
+        for (LogicNodeType type : LogicNodeType.values()) {
+            if (type.getImplClass() == nodeClass) return type.getName();
+        }
+        for (MathNodeType type : MathNodeType.values()) {
+            if (type.getImplClass() == nodeClass) return type.getName();
+        }
+        return node.getClass().getSimpleName();
     }
 
     private static final Color NODE_TRIGGER_COLOR = new java.awt.Color(50, 120, 200);
