@@ -23,9 +23,11 @@ public class VarOutput<T> extends Var<T> {
 
     public void removeConnection(Connection<T> connection) {
         this.connections.remove(connection);
-        if (this.connections.isEmpty()) {
-            this.fireConnectChange(false);
-        }
+        this.fireConnectChange(false);
+    }
+
+    public boolean isConnected() {
+        return !this.connections.isEmpty();
     }
 
     public void fireConnectChange(boolean connect) {

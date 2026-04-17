@@ -25,7 +25,8 @@ public class ConnectionLine<T> extends JPanel {
                     this.out.getOutputVar().setValue(newValue);
                 }
             }));
-            disposers.add(this.in.getInputVar().onConnectChange((connected) -> {
+            disposers.add(this.in.getInputVar().onConnectChange((_c) -> {
+                boolean connected = this.in.getInputVar().isConnected();
                 this.in.setConnected(connected);
                 variable.setEnabled(!connected);
             }));
@@ -36,8 +37,8 @@ public class ConnectionLine<T> extends JPanel {
             variable.registerOnChange((newValue) -> {
                 this.out.getOutputVar().setValue(newValue);
             });
-            disposers.add(this.out.getOutputVar().onConnectChange((connected) -> {
-                this.out.setConnected(connected);
+            disposers.add(this.out.getOutputVar().onConnectChange((_c) -> {
+                this.out.setConnected(this.out.getOutputVar().isConnected());
             }));
         }
         this.add(variable.getComponent(), BorderLayout.CENTER);

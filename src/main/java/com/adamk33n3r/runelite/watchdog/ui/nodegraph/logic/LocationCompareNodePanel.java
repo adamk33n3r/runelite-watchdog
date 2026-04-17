@@ -29,9 +29,9 @@ public class LocationCompareNodePanel extends NodePanel {
         // Input A: WorldPoint with spinners when not connected
         ConnectionPointIn<WorldPoint> inA = new ConnectionPointIn<>(this, node.getA());
         // Wire setConnected so the arrow fills when a connection is made (bypasses ConnectionLine)
-        addDisposer(node.getA().onConnectChange(inA::setConnected));
+        addDisposer(node.getA().onConnectChange(_c -> inA.setConnected(node.getA().isConnected())));
         JPanel pointPanelA = createWorldPointPanel("A", node.getA().getValue(), wp -> node.getA().setValue(wp));
-        addDisposer(node.getA().onConnectChange(connected -> setChildrenEnabled(pointPanelA, !connected)));
+        addDisposer(node.getA().onConnectChange(_c -> setChildrenEnabled(pointPanelA, !node.getA().isConnected())));
         JPanel labeledA = PanelUtils.createLabeledComponent("A", "Location A", pointPanelA);
         this.items.add(wrapWithConnectionPoint(inA, labeledA));
 
@@ -50,9 +50,9 @@ public class LocationCompareNodePanel extends NodePanel {
         // Input B: WorldPoint with spinners when not connected
         ConnectionPointIn<WorldPoint> inB = new ConnectionPointIn<>(this, node.getB());
         // Wire setConnected so the arrow fills when a connection is made (bypasses ConnectionLine)
-        addDisposer(node.getB().onConnectChange(inB::setConnected));
+        addDisposer(node.getB().onConnectChange(_c -> inB.setConnected(node.getB().isConnected())));
         JPanel pointPanelB = createWorldPointPanel("B", node.getB().getValue(), wp -> node.getB().setValue(wp));
-        addDisposer(node.getB().onConnectChange(connected -> setChildrenEnabled(pointPanelB, !connected)));
+        addDisposer(node.getB().onConnectChange(_c -> setChildrenEnabled(pointPanelB, !node.getB().isConnected())));
         JPanel labeledB = PanelUtils.createLabeledComponent("B", "Location B", pointPanelB);
         this.items.add(wrapWithConnectionPoint(inB, labeledB));
 
