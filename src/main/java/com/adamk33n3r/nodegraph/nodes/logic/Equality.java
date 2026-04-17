@@ -39,6 +39,7 @@ public class Equality extends Node {
         this.a.onChange(a -> this.process());
         this.b.onChange(b -> this.process());
 
+        reg(this.op);
         reg(this.a);
         reg(this.b);
         reg(this.result);

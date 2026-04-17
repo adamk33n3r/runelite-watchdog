@@ -1,8 +1,9 @@
 package com.adamk33n3r.nodegraph;
 
 import com.adamk33n3r.nodegraph.nodes.ActionNode;
-import com.adamk33n3r.nodegraph.nodes.DelayNode;
+import com.adamk33n3r.nodegraph.nodes.flow.DelayNode;
 import com.adamk33n3r.nodegraph.nodes.TriggerNode;
+import com.adamk33n3r.nodegraph.nodes.flow.Branch;
 import com.adamk33n3r.runelite.watchdog.alerts.Alert;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -13,6 +14,7 @@ import java.util.Deque;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -22,6 +24,12 @@ public class Graph {
     private final List<Node> nodes = new ArrayList<>();
     @Getter
     private final List<Connection<?>> connections = new ArrayList<>();
+
+    private Consumer<Throwable> onError;
+
+    public void setOnError(Consumer<Throwable> onError) {
+        this.onError = onError;
+    }
 
     public void add(Node node) {
         this.nodes.add(node);
@@ -183,9 +191,26 @@ public class Graph {
             if (node instanceof ActionNode) {
                 ActionNode action = (ActionNode) node;
                 if (action.getEnabled().getValue()) {
-                    action.fire(captureGroups);
+                    try {
+                        action.fire(captureGroups);
+                    } catch (Throwable e) {
+                        log.error("Exception in ActionNode execution", e);
+                        if (this.onError != null) this.onError.accept(e);
+                    }
                 }
                 // Fall through to follow exec downstream from this action
+            }
+
+            if (node instanceof Branch) {
+                Branch branch = (Branch) node;
+                boolean cond = branch.getCondition().getValue();
+                VarOutput<ExecSignal> activeOut = cond ? branch.getExecTrue() : branch.getExecFalse();
+                this.connections.stream()
+                    .filter(c -> c.getOutput() == activeOut)
+                    .map(c -> c.getInput().getNode())
+                    .distinct()
+                    .forEach(nodesToProcess::add);
+                continue;
             }
 
             if (node instanceof DelayNode) {
@@ -198,7 +223,12 @@ public class Graph {
                         } catch (InterruptedException e) {
                             return;
                         }
-                        downstream.forEach(n -> this.executeExecChain(n, captureGroups));
+                        try {
+                            downstream.forEach(n -> this.executeExecChain(n, captureGroups));
+                        } catch (Throwable e) {
+                            log.error("Exception in delayed exec chain", e);
+                            if (this.onError != null) this.onError.accept(e);
+                        }
                     });
                     t.setDaemon(true);
                     t.start();

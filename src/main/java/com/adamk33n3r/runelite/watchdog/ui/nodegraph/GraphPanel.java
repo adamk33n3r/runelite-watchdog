@@ -1,29 +1,26 @@
 package com.adamk33n3r.runelite.watchdog.ui.nodegraph;
 
 import com.adamk33n3r.nodegraph.VarOutput;
-import com.adamk33n3r.nodegraph.nodes.ContinuousTriggerNode;
 import com.adamk33n3r.nodegraph.nodes.constants.*;
 import com.adamk33n3r.nodegraph.nodes.logic.BooleanGate;
 import com.adamk33n3r.nodegraph.nodes.logic.Equality;
 import com.adamk33n3r.nodegraph.nodes.logic.InventoryCheck;
 import com.adamk33n3r.nodegraph.nodes.logic.LocationCompare;
-import com.adamk33n3r.nodegraph.nodes.math.Add;
+import com.adamk33n3r.nodegraph.nodes.utility.DisplayNode;
+import com.adamk33n3r.nodegraph.nodes.utility.NoteNode;
+import com.adamk33n3r.nodegraph.nodes.flow.Branch;
+import com.adamk33n3r.nodegraph.nodes.math.*;
 import com.adamk33n3r.runelite.watchdog.NotificationType;
 import com.adamk33n3r.runelite.watchdog.TriggerType;
 import com.adamk33n3r.runelite.watchdog.Util;
 import com.adamk33n3r.runelite.watchdog.alerts.Alert;
 import com.adamk33n3r.runelite.watchdog.alerts.ChatAlert;
-import com.adamk33n3r.runelite.watchdog.alerts.LocationAlert;
-import com.adamk33n3r.runelite.watchdog.alerts.SpawnedAlert;
 
 import com.adamk33n3r.nodegraph.Graph;
 import com.adamk33n3r.nodegraph.Node;
 import com.adamk33n3r.nodegraph.nodes.ActionNode;
-import com.adamk33n3r.nodegraph.nodes.DelayNode;
+import com.adamk33n3r.nodegraph.nodes.flow.DelayNode;
 import com.adamk33n3r.nodegraph.nodes.TriggerNode;
-import com.adamk33n3r.runelite.watchdog.alerts.StatChangedAlert;
-import com.adamk33n3r.runelite.watchdog.notifications.ScreenFlash;
-import com.adamk33n3r.runelite.watchdog.notifications.SoundEffect;
 import com.adamk33n3r.runelite.watchdog.notifications.TextToSpeech;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.Connection;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.ConnectionPointIn;
@@ -103,96 +100,6 @@ public class GraphPanel extends JLayeredPane {
 
     @Inject
     private NodeTypeCompatibilityChecker compatibilityChecker;
-
-    private void setUpExample1() {
-        /*
-         * Alerts
-         */
-
-        ChatAlert alert = new ChatAlert("Test Chat Alert");
-        alert.setMessage("This is a test message");
-        ScreenFlash screenFlash = new ScreenFlash();
-        TextToSpeech tts = new TextToSpeech();
-        tts.setDelayMilliseconds(37);
-//        tts.setSource(TTSSource.ELEVEN_LABS);
-
-        SpawnedAlert spawnedAlert = new SpawnedAlert("Spawned Alert");
-        spawnedAlert.setPattern("Henry");
-        spawnedAlert.setSpawnedDespawned(SpawnedAlert.SpawnedDespawned.SPAWNED);
-        spawnedAlert.setSpawnedType(SpawnedAlert.SpawnedType.NPC);
-
-
-
-
-        /*
-         * Nodes
-         */
-        TriggerNode triggerNode = new TriggerNode(alert);
-        this.graph.add(triggerNode);
-        ActionNode notificationNode = new ActionNode(tts);
-        this.graph.add(notificationNode);
-        ActionNode screenFlashNode = new ActionNode(screenFlash);
-        this.graph.add(screenFlashNode);
-        Bool boolNode = new Bool();
-        boolNode.setValue(false);
-        this.graph.add(boolNode);
-
-        Num numNode = new Num();
-        numNode.setValue(27);
-        this.graph.add(numNode);
-
-
-        /*
-         * Node Panels
-         */
-        AlertNodePanel test = new AlertNodePanel(this, 425, 165, "Test", Color.RED, triggerNode, alertPanelContentFactory);
-        this.add(test, NODE_LAYER);
-
-        ActionNodePanel testTEST = new ActionNodePanel(this, 815, 365, "Text to Speech", Color.PINK, notificationNode, notificationPanelFactory);
-        this.add(testTEST, NODE_LAYER);
-
-        ActionNodePanel screenFlashNodePanel = new ActionNodePanel(this, 815, 65, "Screen Flash", Color.PINK, screenFlashNode, notificationPanelFactory);
-        this.add(screenFlashNodePanel, NODE_LAYER);
-
-        BoolNodePanel boolNodePanel = new BoolNodePanel(this, boolNode, 15, 15, "Bool Node", Color.CYAN);
-        this.add(boolNodePanel, NODE_LAYER);
-
-        NumberNodePanel numNodePanel = new NumberNodePanel(this, numNode, 15, 215, "Num Node", Color.CYAN);
-        this.add(numNodePanel, NODE_LAYER);
-
-        this.connect(test.getExecOut(), testTEST.getExecIn());
-//        this.connect(test.getAlertName(), testTEST.getAlertNameIn());
-        this.connect(test.getExecOut(), screenFlashNodePanel.getExecIn());
-        this.connect(boolNodePanel.getBoolValueOut(), screenFlashNodePanel.getEnabledIn());
-    }
-
-    public void setUpExample2() {
-        LocationAlert insideNMZ = this.injector.getInstance(LocationAlert.class);
-        insideNMZ.shouldFire();
-        TriggerNode nmzTriggerNode = new ContinuousTriggerNode(insideNMZ);
-        this.graph.add(nmzTriggerNode);
-        AlertNodePanel nmzTriggerNodePanel = new AlertNodePanel(this, 15, 15, "Inside NMZ", Color.RED, nmzTriggerNode, alertPanelContentFactory);
-        this.add(nmzTriggerNodePanel, NODE_LAYER);
-
-        ActionNode soundEffectNode = new ActionNode(new SoundEffect());
-        this.graph.add(soundEffectNode);
-        ActionNodePanel soundEffectNodePanel = new ActionNodePanel(this, 815, 300, "Sound Effect", Color.PINK, soundEffectNode, notificationPanelFactory);
-        this.add(soundEffectNodePanel, NODE_LAYER);
-
-        ActionNode screenFlashNode = new ActionNode(new ScreenFlash());
-        this.graph.add(screenFlashNode);
-        ActionNodePanel screenFlashNodePanel = new ActionNodePanel(this, 815, 15, "Screen Flash", Color.PINK, screenFlashNode, notificationPanelFactory);
-        this.add(screenFlashNodePanel, NODE_LAYER);
-
-        TriggerNode statChangedTriggerNode = new TriggerNode(new StatChangedAlert());
-        this.graph.add(statChangedTriggerNode);
-        AlertNodePanel statChangedTriggerNodePanel = new AlertNodePanel(this, 425, 15, "Stat Changed", Color.RED, statChangedTriggerNode, alertPanelContentFactory);
-        this.add(statChangedTriggerNodePanel, NODE_LAYER);
-
-        this.connect(nmzTriggerNodePanel.getIsTriggered(), statChangedTriggerNodePanel.getEnabled());
-        this.connect(statChangedTriggerNodePanel.getExecOut(), soundEffectNodePanel.getExecIn());
-        this.connect(statChangedTriggerNodePanel.getExecOut(), screenFlashNodePanel.getExecIn());
-    }
 
     public void init() {
         this.init(new Graph());
@@ -412,17 +319,23 @@ public class GraphPanel extends JLayeredPane {
                     }
                 } else if (selected instanceof MathNodeType) {
                     MathNodeType mathNodeType = (MathNodeType) selected;
+                    MathNode mathNode;
                     switch (mathNodeType) {
-                        case ADD:
-                            Add addNode = new Add();
-                            addNode.setX(px);
-                            addNode.setY(py);
-                            this.graph.add(addNode);
-                            NodePanel addPanel = this.createNodePanel(addNode, mathNodeType.getName());
-                            this.add(addPanel, NODE_LAYER, 0);
-                            onSelect.accept(addPanel);
-                            break;
+                        case ADD: mathNode = new Add(); break;
+                        case SUBTRACT: mathNode = new Subtract(); break;
+                        case MULTIPLY: mathNode = new Multiply(); break;
+                        case DIVIDE: mathNode = new Divide(); break;
+                        case MIN: mathNode = new Min(); break;
+                        case MAX: mathNode = new Max(); break;
+                        case CLAMP: mathNode = new Clamp(); break;
+                        default: mathNode = new Add(); break;
                     }
+                    mathNode.setX(px);
+                    mathNode.setY(py);
+                    this.graph.add(mathNode);
+                    NodePanel mathPanel = this.createNodePanel(mathNode, mathNodeType.getName());
+                    this.add(mathPanel, NODE_LAYER, 0);
+                    onSelect.accept(mathPanel);
                 } else if (selected instanceof FlowNodeType) {
                     FlowNodeType flowNodeType = (FlowNodeType) selected;
                     switch (flowNodeType) {
@@ -431,9 +344,19 @@ public class GraphPanel extends JLayeredPane {
                             delayNode.setX(px);
                             delayNode.setY(py);
                             this.graph.add(delayNode);
-                            NodePanel nodePanel = this.createNodePanel(delayNode, flowNodeType.getName());
-                            this.add(nodePanel, NODE_LAYER, 0);
-                            onSelect.accept(nodePanel);
+                            NodePanel delayPanel = this.createNodePanel(delayNode, flowNodeType.getName());
+                            this.add(delayPanel, NODE_LAYER, 0);
+                            onSelect.accept(delayPanel);
+                            break;
+                        }
+                        case BRANCH: {
+                            Branch branchNode = new Branch();
+                            branchNode.setX(px);
+                            branchNode.setY(py);
+                            this.graph.add(branchNode);
+                            NodePanel branchPanel = this.createNodePanel(branchNode, flowNodeType.getName());
+                            this.add(branchPanel, NODE_LAYER, 0);
+                            onSelect.accept(branchPanel);
                             break;
                         }
                     }
@@ -489,6 +412,30 @@ public class GraphPanel extends JLayeredPane {
                             nodePanel = this.createNodePanel(invNode, variableNodeType.getName());
                             this.add(nodePanel, NODE_LAYER, 0);
                             onSelect.accept(nodePanel);
+                            break;
+                        }
+                    }
+                } else if (selected instanceof UtilityNodeType) {
+                    UtilityNodeType utilityNodeType = (UtilityNodeType) selected;
+                    switch (utilityNodeType) {
+                        case NOTE: {
+                            NoteNode noteNode = new NoteNode();
+                            noteNode.setX(px);
+                            noteNode.setY(py);
+                            this.graph.add(noteNode);
+                            NodePanel notePanel = this.createNodePanel(noteNode, utilityNodeType.getName());
+                            this.add(notePanel, NODE_LAYER, 0);
+                            onSelect.accept(notePanel);
+                            break;
+                        }
+                        case DISPLAY: {
+                            DisplayNode displayNode = new DisplayNode();
+                            displayNode.setX(px);
+                            displayNode.setY(py);
+                            this.graph.add(displayNode);
+                            NodePanel displayPanel = this.createNodePanel(displayNode, utilityNodeType.getName());
+                            this.add(displayPanel, NODE_LAYER, 0);
+                            onSelect.accept(displayPanel);
                             break;
                         }
                     }
@@ -549,23 +496,25 @@ public class GraphPanel extends JLayeredPane {
         for (FlowNodeType type : FlowNodeType.values()) {
             if (type.getImplClass() == nodeClass) return type.getName();
         }
+        for (UtilityNodeType type : UtilityNodeType.values()) {
+            if (type.getImplClass() == nodeClass) return type.getName();
+        }
         return node.getClass().getSimpleName();
     }
 
     private static final Color NODE_TRIGGER_COLOR = new java.awt.Color(50, 120, 200);
     private static final Color NODE_ACTION_COLOR = new java.awt.Color(210, 90, 30);
-    private static final Color NODE_CONSTANT_COLOR = new java.awt.Color(50, 165, 50);
+    private static final Color NODE_VARIABLE_COLOR = new java.awt.Color(50, 165, 50);
     private static final Color NODE_LOGIC_COLOR = new java.awt.Color(145, 60, 210);
     private static final Color NODE_MATH_COLOR = new java.awt.Color(219, 195, 34);
+    private static final Color NODE_UTILITY_COLOR = new java.awt.Color(150, 150, 150);
+    private static final Color NODE_FLOW_COLOR = new java.awt.Color(229, 73, 97);
 
     /**
      * Creates the appropriate NodePanel for a given Node instance.
      */
     public NodePanel createNodePanel(Node node, String name) {
-        if (node instanceof ContinuousTriggerNode) {
-            ContinuousTriggerNode tn = (ContinuousTriggerNode) node;
-            return new AlertNodePanel(this, tn.getX(), tn.getY(), name, NODE_TRIGGER_COLOR, tn, alertPanelContentFactory);
-        } else if (node instanceof TriggerNode) {
+        if (node instanceof TriggerNode) {
             TriggerNode tn = (TriggerNode) node;
             return new AlertNodePanel(this, tn.getX(), tn.getY(), name, NODE_TRIGGER_COLOR, tn, alertPanelContentFactory);
         } else if (node instanceof ActionNode) {
@@ -573,10 +522,10 @@ public class GraphPanel extends JLayeredPane {
             return new ActionNodePanel(this, nn.getX(), nn.getY(), name, NODE_ACTION_COLOR, nn, notificationPanelFactory);
         } else if (node instanceof Bool) {
             Bool boolNode = (Bool) node;
-            return new BoolNodePanel(this, boolNode, node.getX(), node.getY(), name, NODE_CONSTANT_COLOR);
+            return new BoolNodePanel(this, boolNode, node.getX(), node.getY(), name, NODE_VARIABLE_COLOR);
         } else if (node instanceof Num) {
             Num numNode = (Num) node;
-            return new NumberNodePanel(this, numNode, node.getX(), node.getY(), name, NODE_CONSTANT_COLOR);
+            return new NumberNodePanel(this, numNode, node.getX(), node.getY(), name, NODE_VARIABLE_COLOR);
         } else if (node instanceof BooleanGate) {
             BooleanGate bg = (BooleanGate) node;
             return new BooleanGateNodePanel(this, bg, bg.getX(), bg.getY(), name, NODE_LOGIC_COLOR);
@@ -585,13 +534,13 @@ public class GraphPanel extends JLayeredPane {
             return new EqualityNodePanel(this, eq, eq.getX(), eq.getY(), name, NODE_LOGIC_COLOR);
         } else if (node instanceof Location) {
             Location locNode = (Location) node;
-            return new LocationNodePanel(this, locNode, node.getX(), node.getY(), name, NODE_CONSTANT_COLOR);
+            return new LocationNodePanel(this, locNode, node.getX(), node.getY(), name, NODE_VARIABLE_COLOR);
         } else if (node instanceof PluginVar) {
             PluginVar pvNode = (PluginVar) node;
-            return new PluginNodePanel(this, pvNode, node.getX(), node.getY(), name, NODE_CONSTANT_COLOR, injector.getInstance(PluginManager.class));
+            return new PluginNodePanel(this, pvNode, node.getX(), node.getY(), name, NODE_VARIABLE_COLOR, injector.getInstance(PluginManager.class));
         } else if (node instanceof Inventory) {
             Inventory invNode = (Inventory) node;
-            return new InventoryVariableNodePanel(this, invNode, node.getX(), node.getY(), name, NODE_CONSTANT_COLOR);
+            return new InventoryVariableNodePanel(this, invNode, node.getX(), node.getY(), name, NODE_VARIABLE_COLOR);
         } else if (node instanceof LocationCompare) {
             LocationCompare lc = (LocationCompare) node;
             return new LocationCompareNodePanel(this, lc, lc.getX(), lc.getY(), name, NODE_LOGIC_COLOR, injector.getInstance(Client.class));
@@ -599,11 +548,31 @@ public class GraphPanel extends JLayeredPane {
             InventoryCheck invNode = (InventoryCheck) node;
             return new InventoryCheckNodePanel(this, invNode, node.getX(), node.getY(), name, NODE_LOGIC_COLOR);
         } else if (node instanceof Add) {
-            Add addNode = (Add) node;
-            return new AddNodePanel(this, addNode, addNode.getX(), addNode.getY(), name, NODE_MATH_COLOR);
+            return new AddNodePanel(this, (Add) node, node.getX(), node.getY(), name, NODE_MATH_COLOR);
+        } else if (node instanceof Subtract) {
+            return new SubtractNodePanel(this, (Subtract) node, node.getX(), node.getY(), name, NODE_MATH_COLOR);
+        } else if (node instanceof Multiply) {
+            return new MultiplyNodePanel(this, (Multiply) node, node.getX(), node.getY(), name, NODE_MATH_COLOR);
+        } else if (node instanceof Divide) {
+            return new DivideNodePanel(this, (Divide) node, node.getX(), node.getY(), name, NODE_MATH_COLOR);
+        } else if (node instanceof Min) {
+            return new MinNodePanel(this, (Min) node, node.getX(), node.getY(), name, NODE_MATH_COLOR);
+        } else if (node instanceof Max) {
+            return new MaxNodePanel(this, (Max) node, node.getX(), node.getY(), name, NODE_MATH_COLOR);
+        } else if (node instanceof Clamp) {
+            return new ClampNodePanel(this, (Clamp) node, node.getX(), node.getY(), name, NODE_MATH_COLOR);
         } else if (node instanceof DelayNode) {
             DelayNode delayNode = (DelayNode) node;
-            return new DelayNodePanel(this, delayNode.getX(), delayNode.getY(), delayNode);
+            return new DelayNodePanel(this, delayNode.getX(), delayNode.getY(), delayNode, NODE_FLOW_COLOR);
+        } else if (node instanceof Branch) {
+            Branch branchNode = (Branch) node;
+            return new BranchNodePanel(this, branchNode.getX(), branchNode.getY(), branchNode, NODE_FLOW_COLOR);
+        } else if (node instanceof NoteNode) {
+            NoteNode noteNode = (NoteNode) node;
+            return new NoteNodePanel(this, noteNode, noteNode.getX(), noteNode.getY(), NODE_UTILITY_COLOR);
+        } else if (node instanceof DisplayNode) {
+            DisplayNode displayNode = (DisplayNode) node;
+            return new DisplayNodePanel(this, displayNode, displayNode.getX(), displayNode.getY(), NODE_UTILITY_COLOR);
         }
         return null;
     }

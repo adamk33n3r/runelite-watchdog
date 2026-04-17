@@ -2,7 +2,7 @@ package com.adamk33n3r.runelite.watchdog.nodegraph;
 
 import com.adamk33n3r.nodegraph.Graph;
 import com.adamk33n3r.nodegraph.nodes.ActionNode;
-import com.adamk33n3r.nodegraph.nodes.DelayNode;
+import com.adamk33n3r.nodegraph.nodes.flow.DelayNode;
 import com.adamk33n3r.nodegraph.nodes.TriggerNode;
 import com.adamk33n3r.nodegraph.nodes.constants.Num;
 import com.adamk33n3r.nodegraph.nodes.math.Add;
@@ -10,21 +10,27 @@ import com.adamk33n3r.runelite.watchdog.alerts.AdvancedAlert;
 import com.adamk33n3r.runelite.watchdog.alerts.ChatAlert;
 import com.adamk33n3r.runelite.watchdog.alerts.StatChangedAlert;
 import com.adamk33n3r.runelite.watchdog.notifications.Notification;
+import com.adamk33n3r.runelite.watchdog.ui.panels.HistoryPanel;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AdvancedAlertGraphTest {
+
+    @Mock
+    private HistoryPanel historyPanel;
 
     @Test
     public void getTriggerNodesOfType_returnsChatAlertNodes() {
@@ -267,5 +273,81 @@ public class AdvancedAlertGraphTest {
         graph.process(num);
 
         assertEquals(84, add.getResult().getValue().intValue());
+    }
+
+    @Test
+    public void graph_executeExecChain_exceptionInActionNode_doesNotKillOtherActions() {
+        Graph graph = new Graph();
+        TriggerNode trigger = new TriggerNode(new ChatAlert("test"));
+        Notification throwingNotif = Mockito.mock(Notification.class);
+        Mockito.doThrow(new RuntimeException("boom")).when(throwingNotif).fire(Mockito.any());
+        Notification goodNotif = Mockito.mock(Notification.class);
+        ActionNode throwingAction = new ActionNode(throwingNotif);
+        ActionNode goodAction = new ActionNode(goodNotif);
+
+        graph.add(trigger);
+        graph.add(throwingAction);
+        graph.add(goodAction);
+        graph.connect(trigger.getExec(), throwingAction.getExec());
+        graph.connect(trigger.getExec(), goodAction.getExec());
+
+        AtomicReference<Throwable> captured = new AtomicReference<>();
+        graph.setOnError(captured::set);
+
+        graph.executeExecChain(trigger, new String[0]);
+
+        Mockito.verify(goodNotif).fire(Mockito.any());
+        assertNotNull("onError should have been called", captured.get());
+        assertEquals("boom", captured.get().getMessage());
+    }
+
+    @Test
+    public void advancedAlert_fireTriggerNode_exception_logsToHistoryPanel() throws InterruptedException {
+        AdvancedAlert adv = new AdvancedAlert("test");
+        Graph graph = adv.getGraph();
+
+        TriggerNode trigger = new TriggerNode(new ChatAlert("test"));
+        Notification throwingNotif = Mockito.mock(Notification.class);
+        Mockito.doThrow(new RuntimeException("notif-boom")).when(throwingNotif).fire(Mockito.any());
+        ActionNode action = new ActionNode(throwingNotif);
+
+        graph.add(trigger);
+        graph.add(action);
+        graph.connect(trigger.getExec(), action.getExec());
+
+        adv.setErrorHandler((alert, t) -> historyPanel.addError(alert, t));
+        adv.fireTriggerNode(trigger, new String[0]);
+        Thread.sleep(200);
+
+        Mockito.verify(historyPanel).addError(Mockito.eq(adv), Mockito.any(RuntimeException.class));
+    }
+
+    @Test
+    public void graph_executeExecChain_exceptionInDelayThread_loggedNotPropagated() throws InterruptedException {
+        Graph graph = new Graph();
+        TriggerNode trigger = new TriggerNode(new ChatAlert("test"));
+        DelayNode delay = new DelayNode();
+        delay.getDelayMs().setValue(50);
+        Notification throwingNotif = Mockito.mock(Notification.class);
+        Mockito.doThrow(new RuntimeException("delay-boom")).when(throwingNotif).fire(Mockito.any());
+        ActionNode action = new ActionNode(throwingNotif);
+
+        graph.add(trigger);
+        graph.add(delay);
+        graph.add(action);
+        graph.connect(trigger.getExec(), delay.getExec());
+        graph.connect(delay.getExecOut(), action.getExec());
+
+        CountDownLatch errorLatch = new CountDownLatch(1);
+        AtomicReference<Throwable> captured = new AtomicReference<>();
+        graph.setOnError(t -> {
+            captured.set(t);
+            errorLatch.countDown();
+        });
+
+        graph.executeExecChain(trigger, new String[0]);
+
+        assertTrue("onError should be called after delay", errorLatch.await(500, TimeUnit.MILLISECONDS));
+        assertEquals("delay-boom", captured.get().getMessage());
     }
 }

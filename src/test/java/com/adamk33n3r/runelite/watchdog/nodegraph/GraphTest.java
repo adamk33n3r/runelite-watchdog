@@ -13,7 +13,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
+
 
 public class GraphTest {
     private static final org.slf4j.Logger log = LoggerFactory.getLogger(GraphTest.class);
@@ -128,5 +129,49 @@ public class GraphTest {
 
         output.setValue(2);
         assertEquals("must NOT fire after connection removed", 1, fireCount.get());
+    }
+
+    @Test
+    public void varOutput_send_doesNotPushToStaleInput_afterOverwrite() {
+        Graph graph = new Graph();
+        Num outA = new Num();
+        Num outB = new Num();
+        Add inX = new Add();
+        graph.add(outA);
+        graph.add(outB);
+        graph.add(inX);
+
+        graph.connect(outA.getValue(), inX.getA());
+        // outB overwrites outA on inX.a
+        graph.connect(outB.getValue(), inX.getA());
+
+        outA.setValue(42);
+        // inX.a should NOT be 42 (outA→inX was disconnected)
+        assertNotEquals(42.0, inX.getA().getValue().doubleValue(), 0.001);
+    }
+
+    @Test
+    public void varOutput_isConnected_reflectsGraphTruth() {
+        Graph graph = new Graph();
+        Num outA = new Num();
+        Add inX = new Add();
+        graph.add(outA);
+        graph.add(inX);
+
+        graph.connect(outA.getValue(), inX.getA());
+        assertTrue(outA.getValue().isConnected());
+
+        graph.disconnect(outA.getValue(), inX.getA());
+        assertFalse(outA.getValue().isConnected());
+    }
+
+    @Test
+    public void varOutput_send_fromOrphanedOutput_doesNotCrash() {
+        Graph graph = new Graph();
+        Num num = new Num();
+        graph.add(num);
+        graph.remove(num);
+        // Should not throw
+        num.setValue(99);
     }
 }

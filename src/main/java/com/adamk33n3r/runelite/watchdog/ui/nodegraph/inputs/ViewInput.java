@@ -43,6 +43,10 @@ public class ViewInput<T> extends AbstractInput<T> {
     }
 
     private String getStringRepresentation() {
+        if (this.value == null) {
+            return "";
+        }
+
         if (this.value.getClass().isArray()) {
             int length = ((Object[]) this.value).length;
             return "[" + this.value.getClass().getComponentType().getSimpleName() + "...][" + length + "]";

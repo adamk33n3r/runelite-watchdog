@@ -1,7 +1,6 @@
 package com.adamk33n3r.runelite.watchdog.ui.nodegraph;
 
 import com.adamk33n3r.nodegraph.ExecSignal;
-import com.adamk33n3r.nodegraph.nodes.ContinuousTriggerNode;
 import com.adamk33n3r.runelite.watchdog.alerts.Alert;
 import com.adamk33n3r.nodegraph.nodes.TriggerNode;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.ConnectionLine;
@@ -20,8 +19,6 @@ import java.util.Random;
 
 @Getter
 public class AlertNodePanel extends NodePanel {
-    private ConnectionPointOut<Boolean> isTriggered;
-
     private final ConnectionPointOut<ExecSignal> execOut;
 //    private final ConnectionPointOut<String> alertName;
 //    private final ConnectionPointOut<Number> debounceOut;
@@ -35,17 +32,6 @@ public class AlertNodePanel extends NodePanel {
         this.updateHeaderLabel(triggerNode.getAlert().getName());
         this.triggerNode = triggerNode;
         Alert alert = triggerNode.getAlert();
-
-        if (triggerNode instanceof ContinuousTriggerNode) {
-            ContinuousTriggerNode continuousTriggerNode = (ContinuousTriggerNode) triggerNode;
-            this.isTriggered = new ConnectionPointOut<>(this, continuousTriggerNode.getIsTriggered());
-            ViewInput<Boolean> isTriggeredView = new ViewInput<>("Is Triggered", continuousTriggerNode.getIsTriggered().getValue());
-            this.items.add(new ConnectionLine<>(null, isTriggeredView, this.isTriggered));
-
-            JButton toggleIsTriggered = new JButton("Toggle Is Triggered");
-            toggleIsTriggered.addActionListener((ev) -> isTriggeredView.setValue(!isTriggeredView.getValue()));
-            this.items.add(toggleIsTriggered);
-        }
 
         this.execOut = new ConnectionPointOut<>(this, triggerNode.getExec());
         ViewInput<ExecSignal> exec = new ViewInput<>("Exec", triggerNode.getExec().getValue());

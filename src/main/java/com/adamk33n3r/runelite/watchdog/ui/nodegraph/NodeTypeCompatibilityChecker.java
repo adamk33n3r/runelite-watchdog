@@ -19,6 +19,6 @@ public class NodeTypeCompatibilityChecker {
         Node probe = this.nodeProbeFactory.create(nodeType);
         if (probe == null) return false;
         return probe.getInputs().values().stream()
-            .anyMatch(input -> input.getType() == dragType);
+            .anyMatch(input -> input.getType() == dragType || input.getType() == Object.class);
     }
 }

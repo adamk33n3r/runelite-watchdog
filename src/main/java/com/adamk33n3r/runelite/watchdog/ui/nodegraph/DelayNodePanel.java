@@ -1,7 +1,7 @@
 package com.adamk33n3r.runelite.watchdog.ui.nodegraph;
 
 import com.adamk33n3r.nodegraph.ExecSignal;
-import com.adamk33n3r.nodegraph.nodes.DelayNode;
+import com.adamk33n3r.nodegraph.nodes.flow.DelayNode;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.ConnectionLine;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.ConnectionPointIn;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.ConnectionPointOut;
@@ -14,14 +14,12 @@ import java.awt.Color;
 
 @Getter
 public class DelayNodePanel extends NodePanel {
-    private static final Color DELAY_COLOR = new Color(30, 165, 180);
-
     private final ConnectionPointIn<ExecSignal> execIn;
     private final ConnectionPointOut<ExecSignal> execOut;
     private final ConnectionPointIn<Number> delayMsIn;
 
-    public DelayNodePanel(GraphPanel graphPanel, int x, int y, DelayNode delayNode) {
-        super(graphPanel, delayNode, x, y, "Delay", DELAY_COLOR);
+    public DelayNodePanel(GraphPanel graphPanel, int x, int y, DelayNode delayNode, Color color) {
+        super(graphPanel, delayNode, x, y, "Delay", color);
 
         this.execIn = new ConnectionPointIn<>(this, delayNode.getExec());
         this.execOut = new ConnectionPointOut<>(this, delayNode.getExecOut());

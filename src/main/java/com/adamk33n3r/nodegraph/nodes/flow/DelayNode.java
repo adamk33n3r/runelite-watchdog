@@ -1,4 +1,4 @@
-package com.adamk33n3r.nodegraph.nodes;
+package com.adamk33n3r.nodegraph.nodes.flow;
 
 import com.adamk33n3r.nodegraph.ExecSignal;
 import com.adamk33n3r.nodegraph.Node;

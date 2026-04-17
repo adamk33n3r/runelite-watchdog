@@ -18,6 +18,7 @@ public final class TypeColorRegistry {
         COLORS.put(WorldPoint.class, new Color(200, 175, 0));   // muted yellow/gold
         COLORS.put(String.class,     new Color(210, 120, 30));  // muted orange
         COLORS.put(InventoryItemData.InventoryItemDataMap.class, new Color(0, 102, 204)); // my fave blue
+        COLORS.put(Object.class,     new Color(150, 150, 150)); // grey
     }
 
     public static Color getColor(Class<?> type) {

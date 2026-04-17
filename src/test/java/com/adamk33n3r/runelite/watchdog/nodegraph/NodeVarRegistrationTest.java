@@ -1,6 +1,5 @@
 package com.adamk33n3r.runelite.watchdog.nodegraph;
 
-import com.adamk33n3r.nodegraph.nodes.ContinuousTriggerNode;
 import com.adamk33n3r.nodegraph.nodes.ActionNode;
 import com.adamk33n3r.nodegraph.nodes.TriggerNode;
 import com.adamk33n3r.nodegraph.nodes.constants.Bool;
@@ -8,7 +7,6 @@ import com.adamk33n3r.nodegraph.nodes.constants.Num;
 import com.adamk33n3r.nodegraph.nodes.logic.LocationCompare;
 import com.adamk33n3r.nodegraph.nodes.math.Add;
 import com.adamk33n3r.runelite.watchdog.alerts.ChatAlert;
-import com.adamk33n3r.runelite.watchdog.alerts.ContinuousAlert;
 import com.adamk33n3r.runelite.watchdog.notifications.Notification;
 
 import org.junit.Test;
@@ -72,15 +70,6 @@ public class NodeVarRegistrationTest {
         assertTrue(node.getInputs().containsKey("A"));
         assertTrue(node.getInputs().containsKey("B"));
         assertTrue(node.getOutputs().containsKey("Result"));
-    }
-
-    @Test
-    public void continuousTriggerNode_registersIsTriggeredOutput() {
-        ContinuousAlert alert = Mockito.mock(ContinuousAlert.class);
-        ContinuousTriggerNode node = new ContinuousTriggerNode(alert);
-        assertTrue(node.getOutputs().containsKey("Is Triggered"));
-        // Also inherits TriggerNode outputs
-        assertTrue(node.getOutputs().containsKey("Exec"));
     }
 
     @Test

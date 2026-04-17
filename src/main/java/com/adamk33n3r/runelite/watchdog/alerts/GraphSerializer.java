@@ -2,13 +2,16 @@ package com.adamk33n3r.runelite.watchdog.alerts;
 
 import com.adamk33n3r.nodegraph.*;
 import com.adamk33n3r.nodegraph.nodes.*;
-import com.adamk33n3r.nodegraph.nodes.DelayNode;
+import com.adamk33n3r.nodegraph.nodes.flow.DelayNode;
 import com.adamk33n3r.nodegraph.nodes.constants.*;
 import com.adamk33n3r.nodegraph.nodes.logic.InventoryCheck;
 import com.adamk33n3r.nodegraph.nodes.logic.BooleanGate;
 import com.adamk33n3r.nodegraph.nodes.logic.Equality;
 import com.adamk33n3r.nodegraph.nodes.logic.LocationCompare;
-import com.adamk33n3r.nodegraph.nodes.math.Add;
+import com.adamk33n3r.nodegraph.nodes.flow.Branch;
+import com.adamk33n3r.nodegraph.nodes.math.*;
+import com.adamk33n3r.nodegraph.nodes.utility.DisplayNode;
+import com.adamk33n3r.nodegraph.nodes.utility.NoteNode;
 import com.adamk33n3r.runelite.watchdog.RuntimeTypeAdapterFactory;
 import com.adamk33n3r.runelite.watchdog.notifications.Notification;
 import com.adamk33n3r.runelite.watchdog.ui.ComparableNumber;
@@ -49,10 +52,7 @@ public class GraphSerializer implements JsonSerializer<Graph>, JsonDeserializer<
             nodeObj.addProperty("x", node.getX());
             nodeObj.addProperty("y", node.getY());
 
-            if (node instanceof ContinuousTriggerNode) {
-                nodeObj.addProperty("type", "ContinuousTriggerNode");
-                nodeObj.add("alert", subGson.toJsonTree(((TriggerNode) node).getAlert(), Alert.class));
-            } else if (node instanceof TriggerNode) {
+            if (node instanceof TriggerNode) {
                 nodeObj.addProperty("type", "TriggerNode");
                 nodeObj.add("alert", subGson.toJsonTree(((TriggerNode) node).getAlert(), Alert.class));
             } else if (node instanceof ActionNode) {
@@ -68,6 +68,18 @@ public class GraphSerializer implements JsonSerializer<Graph>, JsonDeserializer<
                 nodeObj.addProperty("name", ((Bool) node).getNameOut().getValue());
             } else if (node instanceof Add) {
                 nodeObj.addProperty("type", "Add");
+            } else if (node instanceof Subtract) {
+                nodeObj.addProperty("type", "Subtract");
+            } else if (node instanceof Multiply) {
+                nodeObj.addProperty("type", "Multiply");
+            } else if (node instanceof Divide) {
+                nodeObj.addProperty("type", "Divide");
+            } else if (node instanceof Min) {
+                nodeObj.addProperty("type", "Min");
+            } else if (node instanceof Max) {
+                nodeObj.addProperty("type", "Max");
+            } else if (node instanceof Clamp) {
+                nodeObj.addProperty("type", "Clamp");
             } else if (node instanceof BooleanGate) {
                 nodeObj.addProperty("type", "BooleanGate");
                 nodeObj.addProperty("op", ((BooleanGate) node).getOp().getValue().name());
@@ -98,6 +110,8 @@ public class GraphSerializer implements JsonSerializer<Graph>, JsonDeserializer<
             } else if (node instanceof DelayNode) {
                 nodeObj.addProperty("type", "Delay");
                 nodeObj.addProperty("delayMs", ((DelayNode) node).getDelayMs().getValue().doubleValue());
+            } else if (node instanceof Branch) {
+                nodeObj.addProperty("type", "Branch");
             } else if (node instanceof LocationCompare) {
                 LocationCompare lc = (LocationCompare) node;
                 nodeObj.addProperty("type", "LocationCompare");
@@ -111,6 +125,19 @@ public class GraphSerializer implements JsonSerializer<Graph>, JsonDeserializer<
                 nodeObj.addProperty("bPlane", b.getPlane());
                 nodeObj.addProperty("distance", lc.getDistance());
                 nodeObj.addProperty("cardinalOnly", lc.isCardinalOnly());
+            } else if (node instanceof DisplayNode) {
+                nodeObj.addProperty("type", "DisplayNode");
+            } else if (node instanceof NoteNode) {
+                NoteNode note = (NoteNode) node;
+                if (note.getOriginalType() != null && note.getOriginalJson() != null) {
+                    // Lossless resave: re-emit the original JSON payload with original type
+                    for (Map.Entry<String, com.google.gson.JsonElement> entry : note.getOriginalJson().entrySet()) {
+                        nodeObj.add(entry.getKey(), entry.getValue());
+                    }
+                } else {
+                    nodeObj.addProperty("type", "NoteNode");
+                    nodeObj.addProperty("note", note.getNote());
+                }
             } else {
                 log.warn("Unknown node type during serialization: {}", node.getClass().getSimpleName());
                 continue;
@@ -156,11 +183,6 @@ public class GraphSerializer implements JsonSerializer<Graph>, JsonDeserializer<
                             node = new TriggerNode(alert);
                             break;
                         }
-                        case "ContinuousTriggerNode": {
-                            ContinuousAlert alert = (ContinuousAlert) subGson.fromJson(nodeObj.get("alert"), Alert.class);
-                            node = new ContinuousTriggerNode(alert);
-                            break;
-                        }
                         case "ActionNode":
                         case "NotificationNode": { // backwards-compat: old saves used "NotificationNode"
                             Notification notif = subGson.fromJson(nodeObj.get("notification"), Notification.class);
@@ -197,8 +219,29 @@ public class GraphSerializer implements JsonSerializer<Graph>, JsonDeserializer<
                             node = delay;
                             break;
                         }
+                        case "Branch":
+                            node = new Branch();
+                            break;
                         case "Add":
                             node = new Add();
+                            break;
+                        case "Subtract":
+                            node = new Subtract();
+                            break;
+                        case "Multiply":
+                            node = new Multiply();
+                            break;
+                        case "Divide":
+                            node = new Divide();
+                            break;
+                        case "Min":
+                            node = new Min();
+                            break;
+                        case "Max":
+                            node = new Max();
+                            break;
+                        case "Clamp":
+                            node = new Clamp();
                             break;
                         case "BooleanGate": {
                             BooleanGate gate = new BooleanGate();
@@ -292,9 +335,25 @@ public class GraphSerializer implements JsonSerializer<Graph>, JsonDeserializer<
                             node = lc;
                             break;
                         }
-                        default:
-                            log.warn("Unknown node type during deserialization: {}", nodeType);
-                            continue;
+                        case "DisplayNode":
+                            node = new DisplayNode();
+                            break;
+                        case "NoteNode": {
+                            NoteNode note = new NoteNode();
+                            if (nodeObj.has("note")) {
+                                note.setNote(nodeObj.get("note").getAsString());
+                            }
+                            node = note;
+                            break;
+                        }
+                        default: {
+                            log.warn("Unknown node type during deserialization, creating placeholder: {}", nodeType);
+                            NoteNode placeholder = new NoteNode();
+                            placeholder.setOriginalType(nodeType);
+                            placeholder.setOriginalJson(nodeObj.deepCopy());
+                            node = placeholder;
+                            break;
+                        }
                     }
                 } catch (Exception e) {
                     log.warn("Failed to deserialize node of type {}: {}", nodeType, e.getMessage());

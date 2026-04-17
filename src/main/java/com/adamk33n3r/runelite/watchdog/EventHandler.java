@@ -659,11 +659,11 @@ public class EventHandler {
         if (!alert.isAllEnabled()) return;
 
         Map<TriggerNode, Instant> nodeLastTriggered = this.lastTriggeredAdvanced.computeIfAbsent(alert, k -> new ConcurrentHashMap<>());
-        int debounce = alert.getDebounceTime();
+        int debounce = triggerNode.getAlert().getDebounceTime();
         if (debounce > 0) {
             Instant last = nodeLastTriggered.get(triggerNode);
             if (last != null && Instant.now().compareTo(last.plusMillis(debounce)) < 0) {
-                if (alert.isDebounceResetTime()) {
+                if (triggerNode.getAlert().isDebounceResetTime()) {
                     nodeLastTriggered.put(triggerNode, Instant.now());
                 }
                 return;
@@ -671,6 +671,7 @@ public class EventHandler {
         }
         nodeLastTriggered.put(triggerNode, Instant.now());
         SwingUtilities.invokeLater(() -> this.historyPanelProvider.get().addEntry(alert, triggerValues));
+        alert.setErrorHandler((adv, t) -> SwingUtilities.invokeLater(() -> this.historyPanelProvider.get().addError(adv, t)));
         alert.fireTriggerNode(triggerNode, triggerValues);
     }
 

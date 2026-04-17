@@ -197,4 +197,33 @@ public class AdvancedAlertEventHandlerTest extends AlertTestBase {
         Mockito.verify(pluginManager, Mockito.never()).isPluginEnabled(Mockito.any());
         assertFalse(pv.getValueOut().getValue());
     }
+
+    @Test
+    public void advancedAlert_debounce_usesTriggerNodeAlertValue() throws InterruptedException {
+        // triggerNode's embedded chatAlert has 500ms debounce; AdvancedAlert has none
+        chatAlert.setDebounceTime(500);
+        advSpy.setDebounceTime(0);
+
+        eventHandler.onChatMessage(mockGameMessage("hello world"));
+        eventHandler.onChatMessage(mockGameMessage("hello world"));
+
+        // Second fire should be debounced because triggerNode.alert.debounceTime=500ms
+        Mockito.verify(advSpy, Mockito.times(1)).fireTriggerNode(Mockito.eq(triggerNode), Mockito.any());
+    }
+
+    @Test
+    public void advancedAlert_debounceReset_usesTriggerNodeAlertValue() throws InterruptedException {
+        // triggerNode's alert has debounce + reset; AdvancedAlert has neither
+        chatAlert.setDebounceTime(500);
+        chatAlert.setDebounceResetTime(true);
+        advSpy.setDebounceTime(0);
+        advSpy.setDebounceResetTime(false);
+
+        eventHandler.onChatMessage(mockGameMessage("hello world")); // sets lastTriggered
+        eventHandler.onChatMessage(mockGameMessage("hello world")); // within debounce → reset lastTriggered, no fire
+        // After reset the window is extended — a third immediate call is still debounced
+        eventHandler.onChatMessage(mockGameMessage("hello world"));
+
+        Mockito.verify(advSpy, Mockito.times(1)).fireTriggerNode(Mockito.eq(triggerNode), Mockito.any());
+    }
 }

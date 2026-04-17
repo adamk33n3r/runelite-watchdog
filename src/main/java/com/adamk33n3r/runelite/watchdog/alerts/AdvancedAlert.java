@@ -6,11 +6,14 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 
+import java.util.function.BiConsumer;
+
 @Getter
 @Setter
 @Accessors(chain = true)
 public class AdvancedAlert extends Alert {
     private Graph graph = new Graph();
+    private transient BiConsumer<AdvancedAlert, Throwable> errorHandler;
 
     public AdvancedAlert() {
         this("New Advanced Alert");
@@ -30,6 +33,9 @@ public class AdvancedAlert extends Alert {
     public void fireTriggerNode(TriggerNode triggerNode, String[] triggerValues) {
         triggerNode.getCaptureGroupsIn().setValue(triggerValues);
         this.graph.process(triggerNode);
+        if (this.errorHandler != null) {
+            this.graph.setOnError(t -> this.errorHandler.accept(this, t));
+        }
         Thread t = new Thread(() -> this.graph.executeExecChain(triggerNode, triggerValues));
         t.setDaemon(true);
         t.start();

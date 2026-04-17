@@ -27,7 +27,8 @@ public class NewNodePopup extends JPopupMenu {
         VariableNodeType.class,
         LogicNodeType.class,
         MathNodeType.class,
-        FlowNodeType.class
+        FlowNodeType.class,
+        UtilityNodeType.class
     );
 
     private static final int MAX_RECENT = 5;
@@ -36,12 +37,13 @@ public class NewNodePopup extends JPopupMenu {
     private static final Splitter SPLITTER = Splitter.on(' ').trimResults().omitEmptyStrings();
 
     private static final Map<Class<? extends Enum<?>>, String> enumToCategory = ImmutableMap.<Class<? extends Enum<?>>, String>builder()
-        .put(TriggerType.class, "Alert")
+        .put(TriggerType.class, "Trigger")
         .put(NotificationType.class, "Action")
-        .put(LogicNodeType.class, "Condition")
+        .put(LogicNodeType.class, "Logic")
         .put(VariableNodeType.class, "Variable")
         .put(MathNodeType.class, "Math")
         .put(FlowNodeType.class, "Flow")
+        .put(UtilityNodeType.class, "Utility")
         .build();
 
     private Consumer<Object> onSelectCallback = obj -> {};
