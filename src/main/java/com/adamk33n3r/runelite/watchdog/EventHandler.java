@@ -75,6 +75,7 @@ public class EventHandler {
     private final Map<Skill, Integer> previousSkillXPTable = new EnumMap<>(Skill.class);
     private final Map<Integer, ItemComposition> itemCompositionCache = new ConcurrentHashMap<>();
     private Map<Integer, InventoryItemData> previousItemsTable = new ConcurrentHashMap<>();
+    private boolean hasInitializedInventory = false;
 //    private volatile long currentInventoryItemCount = 0;
 //    private volatile Map<Integer, InventoryItemData> currentItemsSnapshot = new ConcurrentHashMap<>();
     private WorldPoint previousLocation = null;
@@ -174,6 +175,7 @@ public class EventHandler {
             this.previousSkillLevelTable.clear();
             this.previousSkillXPTable.clear();
             this.previousItemsTable.clear();
+            this.hasInitializedInventory = false;
         }
     }
 
@@ -279,7 +281,7 @@ public class EventHandler {
 
     //region Inventory
     @Subscribe
-    private void onItemContainerChanged(ItemContainerChanged itemContainerChanged) {
+    void onItemContainerChanged(ItemContainerChanged itemContainerChanged) {
         // Ignore everything but inventory
         if (itemContainerChanged.getItemContainer().getId() != InventoryID.INV)
             return;
@@ -306,8 +308,8 @@ public class EventHandler {
             });
         });
 
-        // Skip firing alerts if there are no previous items, since we just logged in. Even an empty inventory will have a map of -1 itemIds.
-        if (!this.previousItemsTable.isEmpty()) {
+        // Skip firing alerts on the very first inventory event after login (no valid previous state yet).
+        if (this.hasInitializedInventory) {
             var itemMap = new InventoryItemData.InventoryItemDataMap(currentItems);
             this.previousItemsTable.forEach((itemID, data) -> itemMap.getItems()
                 .putIfAbsent(itemID, InventoryItemData.builder()
@@ -374,6 +376,7 @@ public class EventHandler {
             );
         }
         this.previousItemsTable = currentItems.getItems();
+        this.hasInitializedInventory = true;
     }
 
     private Optional<MatchedItem> getMatchedItems(InventoryAlert inventoryAlert, Map<Integer, InventoryItemData> allItems) {
