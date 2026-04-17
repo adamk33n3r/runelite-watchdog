@@ -79,7 +79,7 @@ public class ConnectionPointOut<T> extends ConnectionPoint {
                         removeNewConnection();
                         ConnectionPointIn<?> droppedNode = (ConnectionPointIn<?>) deepestComponentAt;
                         // Disallow connecting of incompatible types
-                        if (droppedNode.getInputVar().getType() != ConnectionPointOut.this.outputVar.getType()) {
+                        if (!droppedNode.getInputVar().getType().isAssignableFrom(ConnectionPointOut.this.outputVar.getType())) {
                             System.err.print("Incompatible connection points: ");
                             System.err.println(ConnectionPointOut.this.outputVar.getType() + " -> " + droppedNode.getInputVar().getType());
                             return;

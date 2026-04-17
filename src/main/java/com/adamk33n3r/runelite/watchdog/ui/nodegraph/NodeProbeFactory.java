@@ -5,6 +5,7 @@ import com.adamk33n3r.nodegraph.nodes.ActionNode;
 import com.adamk33n3r.nodegraph.nodes.TriggerNode;
 import com.adamk33n3r.runelite.watchdog.NotificationType;
 import com.adamk33n3r.runelite.watchdog.TriggerType;
+import com.adamk33n3r.runelite.watchdog.ui.nodegraph.UtilityNodeType;
 import com.google.inject.Injector;
 
 import javax.annotation.Nullable;
@@ -19,7 +20,9 @@ import java.util.function.Supplier;
  * no Guice injection needed since we only read var metadata, not invoke plugin services.
  *
  * <p>{@code VariableNodeType} entries are intentionally omitted: Bool/Num are source-only nodes
- * whose panels do not expose {@code ConnectionPointIn} instances.
+ * whose panels do not expose {@code ConnectionPointIn} instances. {@code UtilityNodeType.NOTE}
+ * is similarly source-only (no VarInputs), so it will always return {@code false} from
+ * {@link NodeTypeCompatibilityChecker}, but is registered so it can appear in the popup.
  * {@code TriggerType.ALERT_GROUP} and {@code TriggerType.ADVANCED_ALERT} are also omitted
  * (they are already filtered from the popup by existing exclusion logic).
  */
@@ -42,6 +45,9 @@ public class NodeProbeFactory {
         }
         for (var fnt : FlowNodeType.values()) {
             this.probes.put(fnt, () -> injector.getInstance(fnt.getImplClass()));
+        }
+        for (var ut : UtilityNodeType.values()) {
+            this.probes.put(ut, () -> injector.getInstance(ut.getImplClass()));
         }
 //        for (var vnt : VariableNodeType.values()) {
 //            PROBES.put(vnt, () -> injector.getInstance(vnt.getImplClass()));

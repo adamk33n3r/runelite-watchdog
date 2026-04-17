@@ -6,6 +6,7 @@ import com.adamk33n3r.runelite.watchdog.TestBase;
 import com.adamk33n3r.runelite.watchdog.TriggerType;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.LogicNodeType;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.NodeTypeCompatibilityChecker;
+import com.adamk33n3r.runelite.watchdog.ui.nodegraph.UtilityNodeType;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.VariableNodeType;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -124,5 +125,34 @@ public class NodeTypeCompatibilityCheckerTest extends TestBase {
         // VariableNodeType has no probe — source-only nodes; always returns false
         assertFalse(checker.hasCompatibleInput(VariableNodeType.BOOLEAN, Boolean.class));
         assertFalse(checker.hasCompatibleInput(VariableNodeType.NUMBER, Number.class));
+    }
+
+    // ── UtilityNodeType ───────────────────────────────────────────────────────
+
+    @Test
+    public void test_display_accepts_any_data_type() {
+        // Display has VarInput<Object> — Object.isAssignableFrom(anything) is always true
+        assertTrue(checker.hasCompatibleInput(UtilityNodeType.DISPLAY, Number.class));
+        assertTrue(checker.hasCompatibleInput(UtilityNodeType.DISPLAY, Boolean.class));
+        assertTrue(checker.hasCompatibleInput(UtilityNodeType.DISPLAY, String.class));
+        assertTrue(checker.hasCompatibleInput(UtilityNodeType.DISPLAY, Object.class));
+        assertTrue(checker.hasCompatibleInput(UtilityNodeType.DISPLAY, ExecSignal.class));
+    }
+
+    @Test
+    public void test_note_has_no_compatible_input() {
+        // NoteNode is a source-only sticky-note with no VarInputs
+        assertFalse(checker.hasCompatibleInput(UtilityNodeType.NOTE, Number.class));
+        assertFalse(checker.hasCompatibleInput(UtilityNodeType.NOTE, Boolean.class));
+        assertFalse(checker.hasCompatibleInput(UtilityNodeType.NOTE, ExecSignal.class));
+    }
+
+    // ── Subtype acceptance ────────────────────────────────────────────────────
+
+    @Test
+    public void test_subtype_accepted_for_number_input() {
+        // Integer and Double are subtypes of Number — Equality has Number inputs
+        assertTrue(checker.hasCompatibleInput(LogicNodeType.EQUALITY, Integer.class));
+        assertTrue(checker.hasCompatibleInput(LogicNodeType.EQUALITY, Double.class));
     }
 }

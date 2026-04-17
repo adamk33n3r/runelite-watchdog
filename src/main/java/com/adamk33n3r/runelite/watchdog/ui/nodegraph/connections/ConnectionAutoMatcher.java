@@ -23,14 +23,14 @@ public class ConnectionAutoMatcher {
 
         // Priority 1: same type + name (case-insensitive)
         for (VarInput<?> input : candidates) {
-            if (input.getType() == type && input.getName().equalsIgnoreCase(name)) {
+            if (input.getType().isAssignableFrom(type) && input.getName().equalsIgnoreCase(name)) {
                 return (VarInput<T>) input;
             }
         }
 
-        // Priority 2: first input with matching type
+        // Priority 2: first input with compatible type
         for (VarInput<?> input : candidates) {
-            if (input.getType() == type) {
+            if (input.getType().isAssignableFrom(type)) {
                 return (VarInput<T>) input;
             }
         }

@@ -129,4 +129,30 @@ public class ConnectionAutoMatcherTest {
 
         assertSame(numIn, result);
     }
+
+    // 9. Subtype: Integer output → Number input (isAssignableFrom)
+    @SuppressWarnings("unchecked")
+    @Test
+    public void test_matches_on_subtype() {
+        VarOutput<Integer> output = out("Score", Integer.class);
+        VarInput<Number> numIn = in("Amount", Number.class);
+
+        VarInput<?> result = ConnectionAutoMatcher.findBestMatchingInput(output,
+            Collections.singletonList(numIn));
+
+        assertSame(numIn, result);
+    }
+
+    // 10. Object input accepts any output type
+    @SuppressWarnings("unchecked")
+    @Test
+    public void test_matches_on_object_input() {
+        VarOutput<Number> output = out("Score", Number.class);
+        VarInput<Object> objectIn = in("Value", Object.class);
+
+        VarInput<?> result = ConnectionAutoMatcher.findBestMatchingInput(output,
+            Collections.singletonList(objectIn));
+
+        assertSame(objectIn, result);
+    }
 }
