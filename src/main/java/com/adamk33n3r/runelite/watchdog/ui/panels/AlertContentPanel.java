@@ -106,6 +106,14 @@ public abstract class AlertContentPanel<T extends Alert> extends JPanel {
         return true;
     }
 
+    protected boolean hasSubsection() {
+        return false;
+    }
+
+    protected JComponent getSubsection() {
+        return null;
+    }
+
     /**
      * Called when the sidebar's back button is pressed. Override for cleanup
      * (e.g. AdvancedAlert disposes its graph editor frame here).
@@ -249,11 +257,7 @@ public abstract class AlertContentPanel<T extends Alert> extends JPanel {
         return this;
     }
 
-    public AlertContentPanel<T> addSubPanel(JPanel sub) {
-        this.add(sub);
-        return this;
-    }
-
+    // to top area for alert controls
     public AlertContentPanel<T> addSubPanelControl(JPanel sub) {
         this.add(sub);
         return this;

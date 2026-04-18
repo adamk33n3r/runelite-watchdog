@@ -7,9 +7,7 @@ import com.adamk33n3r.runelite.watchdog.ui.panels.AlertContentPanel;
 import com.adamk33n3r.runelite.watchdog.ui.panels.AlertListPanel;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
 
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
+import javax.swing.*;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import java.awt.BorderLayout;
@@ -25,6 +23,25 @@ public class AlertGroupPanel extends AlertContentPanel<AlertGroup> {
 
     @Override
     public void buildTypeContent() {
+    }
+
+    @Override
+    protected boolean isAlertGroup() {
+        return true;
+    }
+
+    @Override
+    protected boolean includeNotifications() {
+        return false;
+    }
+
+    @Override
+    protected boolean hasSubsection() {
+        return true;
+    }
+
+    @Override
+    protected JComponent getSubsection() {
         JPanel buttonPanel = new JPanel(new BorderLayout());
         buttonPanel.add(new JLabel("Alerts"), BorderLayout.WEST);
         buttonPanel.setBorder(new EmptyBorder(0, 5, 8, 0));
@@ -44,16 +61,6 @@ public class AlertGroupPanel extends AlertContentPanel<AlertGroup> {
         AlertListPanel alertListPanel = new AlertListPanel(this.alert.getAlerts(), this.alert, this::rebuild);
 
         subGroupPanel.add(alertListPanel);
-        this.addSubPanel(subGroupPanel);
-    }
-
-    @Override
-    protected boolean isAlertGroup() {
-        return true;
-    }
-
-    @Override
-    protected boolean includeNotifications() {
-        return false;
+        return subGroupPanel;
     }
 }

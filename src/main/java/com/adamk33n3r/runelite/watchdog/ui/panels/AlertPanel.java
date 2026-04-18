@@ -40,6 +40,8 @@ public class AlertPanel<T extends Alert> extends PluginPanel {
         this.plugin = WatchdogPlugin.getInstance();
         this.alertManager = plugin.getAlertManager();
 
+        this.contentPanel.setOnRebuild(() -> this.rebuild(true));
+
         this.setLayout(new BorderLayout());
         this.buildChrome();
     }
@@ -150,6 +152,10 @@ public class AlertPanel<T extends Alert> extends PluginPanel {
         this.centerContainer = new JPanel(new BorderLayout());
         this.add(this.centerContainer, BorderLayout.CENTER);
 
+        if (this.contentPanel.hasSubsection()) {
+            this.centerContainer.add(this.contentPanel.getSubsection());
+        }
+
         if (this.contentPanel.includeNotifications()) {
             this.addNotifications(alert);
         }
@@ -163,8 +169,14 @@ public class AlertPanel<T extends Alert> extends PluginPanel {
     }
 
     public void rebuild() {
+        this.rebuild(false);
+    }
+
+    public void rebuild(boolean skipContent) {
         this.removeAll();
-        this.contentPanel.rebuild();
+        if (!skipContent) {
+            this.contentPanel.rebuild();
+        }
         this.buildChrome();
         this.revalidate();
         this.repaint();
