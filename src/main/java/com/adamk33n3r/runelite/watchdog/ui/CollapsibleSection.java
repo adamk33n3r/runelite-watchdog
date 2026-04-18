@@ -14,6 +14,7 @@ public class CollapsibleSection extends JPanel {
     private final JButton header;
     private final JComponent content;
     private final String title;
+    private Runnable onExpand;
 
     public CollapsibleSection(String title, JComponent content, boolean expandedByDefault) {
         this.title = title;
@@ -36,10 +37,24 @@ public class CollapsibleSection extends JPanel {
         this.add(content, BorderLayout.CENTER);
     }
 
+    public void setOnExpand(Runnable onExpand) {
+        this.onExpand = onExpand;
+    }
+
+    public void collapse() {
+        if (!this.expanded) return;
+        this.expanded = false;
+        this.content.setVisible(false);
+        this.header.setText(ARROW_COLLAPSED + this.title);
+    }
+
     private void toggle() {
         this.expanded = !this.expanded;
         this.content.setVisible(this.expanded);
         this.header.setText((this.expanded ? ARROW_EXPANDED : ARROW_COLLAPSED) + this.title);
+        if (this.expanded && this.onExpand != null) {
+            this.onExpand.run();
+        }
         Container parent = this.getParent();
         if (parent != null) {
             parent.revalidate();

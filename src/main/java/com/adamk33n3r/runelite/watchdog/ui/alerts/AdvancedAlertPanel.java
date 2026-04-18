@@ -15,6 +15,8 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.ArrayList;
+import java.util.List;
 
 public class AdvancedAlertPanel extends AlertContentPanel<AdvancedAlert> {
     private JFrame graphEditorFrame;
@@ -88,7 +90,9 @@ public class AdvancedAlertPanel extends AlertContentPanel<AdvancedAlert> {
         subPanel.setScrollableWidth(ScrollablePanel.ScrollableSizeHint.FIT);
         subPanel.setScrollableHeight(ScrollablePanel.ScrollableSizeHint.STRETCH);
         subPanel.setScrollableBlockIncrement(ScrollablePanel.VERTICAL, ScrollablePanel.IncrementType.PERCENT, 10);
-        subPanel.add(new CollapsibleSection("Navigation & Input", helpPane(
+        List<CollapsibleSection> sections = new ArrayList<>();
+
+        sections.add(new CollapsibleSection("Navigation & Input", helpPane(
             "<html>"
                 + "<b>Left-click drag</b> on empty canvas &#8212; pan the view<br>"
                 + "<b>Mouse wheel</b> &#8212; zoom in / out (zooming out enters an overview;"
@@ -97,7 +101,7 @@ public class AdvancedAlertPanel extends AlertContentPanel<AdvancedAlert> {
                 + "</html>"
         ), true));
 
-        subPanel.add(new CollapsibleSection("Node Types", helpPane(
+        sections.add(new CollapsibleSection("Node Types", helpPane(
             "<html>"
                 + "<b>Trigger</b> &#8212; fires the graph when a game event occurs (chat message, stat change,"
                 + " XP drop, inventory, location, etc.). Every graph needs a Trigger.<br><br>"
@@ -113,7 +117,7 @@ public class AdvancedAlertPanel extends AlertContentPanel<AdvancedAlert> {
                 + "</html>"
         ), false));
 
-        subPanel.add(new CollapsibleSection("Connecting Nodes", helpPane(
+        sections.add(new CollapsibleSection("Connecting Nodes", helpPane(
             "<html>"
                 + "<b>Exec connections</b> (triangle ports, thick grey wire) control <i>when</i> something runs."
                 + " Chain Trigger &#8594; Action &#8594; Action by wiring exec outputs to exec inputs.<br><br>"
@@ -126,7 +130,7 @@ public class AdvancedAlertPanel extends AlertContentPanel<AdvancedAlert> {
                 + "</html>"
         ), false));
 
-        subPanel.add(new CollapsibleSection("Data Types & Colors", helpPane(
+        sections.add(new CollapsibleSection("Data Types & Colors", helpPane(
             "<html>"
                 + "<font color='#00B4C8'>&#9632;</font> <b>Cyan</b> &#8212; Number<br>"
                 + "<font color='#3CB43C'>&#9632;</font> <b>Green</b> &#8212; Boolean (true / false)<br>"
@@ -139,7 +143,7 @@ public class AdvancedAlertPanel extends AlertContentPanel<AdvancedAlert> {
                 + "</html>"
         ), false));
 
-        subPanel.add(new CollapsibleSection("Tips", helpPane(
+        sections.add(new CollapsibleSection("Tips", helpPane(
             "<html>"
                 + "&#8226; Start with a <b>Trigger</b> node, then chain <b>Actions</b> via exec connections.<br>"
                 + "&#8226; Add a <b>Display</b> (Utility) node to inspect a wire&#39;s value while debugging.<br>"
@@ -148,6 +152,14 @@ public class AdvancedAlertPanel extends AlertContentPanel<AdvancedAlert> {
                 + "&#8226; <b>Note</b> nodes (Utility) are free-form labels &#8212; they don&#39;t affect execution."
                 + "</html>"
         ), false));
+
+        for (CollapsibleSection section : sections) {
+            section.setOnExpand(() -> sections.stream()
+                .filter(s -> s != section)
+                .forEach(CollapsibleSection::collapse));
+            subPanel.add(section);
+        }
+
         return new JScrollPane(subPanel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
     }
 
