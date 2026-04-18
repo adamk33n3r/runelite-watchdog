@@ -15,6 +15,13 @@ public class Branch extends Node {
 
     public Branch() {
         this.exec.setAllowMultipleConnections(true);
+
+        this.exec.onChange(exec -> {
+            boolean cond = this.getCondition().getValue();
+            VarOutput<ExecSignal> activeOut = cond ? this.execTrue : this.execFalse;
+            activeOut.setValue(exec);
+        });
+
         reg(this.exec);
         reg(this.condition);
         reg(this.execTrue);
