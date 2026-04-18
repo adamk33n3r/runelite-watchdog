@@ -287,20 +287,22 @@ public class EventHandler {
             return;
         Item[] items = itemContainerChanged.getItemContainer().getItems();
         long itemCount = Arrays.stream(items).filter(item -> item.getId() > -1).count();
-        var currentItems = new InventoryItemData.InventoryItemDataMap(itemCount);
-        Arrays.stream(items)
-            .filter(item -> item.getId() > -1)
-            .forEach(item -> {
-                ItemComposition itemComposition = this.itemCompositionCache.computeIfAbsent(item.getId(), id -> this.itemManager.getItemComposition(id));
-                InventoryItemData inventoryItemData = InventoryItemData.builder()
-                    .itemComposition(itemComposition)
-                    .quantity(item.getQuantity())
-                    .build();
-                currentItems.getItems().merge(item.getId(), inventoryItemData, (orig, other) -> InventoryItemData.builder()
-                    .itemComposition(itemComposition)
-                    .quantity(orig.getQuantity() + other.getQuantity())
-                    .build());
-            });
+        InventoryItemData[] slots = new InventoryItemData[items.length];
+        var currentItems = new InventoryItemData.InventoryItemDataMap(itemCount, slots);
+        for (int i = 0; i < items.length; i++) {
+            Item item = items[i];
+            if (item.getId() == -1) continue;
+            ItemComposition itemComposition = this.itemCompositionCache.computeIfAbsent(item.getId(), id -> this.itemManager.getItemComposition(id));
+            InventoryItemData inventoryItemData = InventoryItemData.builder()
+                .itemComposition(itemComposition)
+                .quantity(item.getQuantity())
+                .build();
+            slots[i] = inventoryItemData;
+            currentItems.getItems().merge(item.getId(), inventoryItemData, (orig, other) -> InventoryItemData.builder()
+                .itemComposition(itemComposition)
+                .quantity(orig.getQuantity() + other.getQuantity())
+                .build());
+        }
 
         this.alertManager.getAllEnabledAlertsOfType(AdvancedAlert.class).forEach(adv -> {
             adv.getGraph().getNodesOfType(Inventory.class).forEach(inv -> {

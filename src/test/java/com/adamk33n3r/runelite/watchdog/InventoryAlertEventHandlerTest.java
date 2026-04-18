@@ -1,5 +1,6 @@
 package com.adamk33n3r.runelite.watchdog;
 
+import com.adamk33n3r.nodegraph.nodes.constants.Inventory;
 import com.adamk33n3r.runelite.watchdog.alerts.AdvancedAlert;
 import com.adamk33n3r.runelite.watchdog.alerts.InventoryAlert;
 import com.adamk33n3r.runelite.watchdog.alerts.InventoryAlert.InventoryAlertType;
@@ -20,6 +21,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.stream.Stream;
 
+import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 
@@ -141,5 +143,68 @@ public class InventoryAlertEventHandlerTest extends AlertTestBase {
         this.eventHandler.onItemContainerChanged(this.inventoryEvent(fullInventory)); // first tick: must be skipped
 
         Mockito.verify(this.watchdogPlugin, Mockito.never()).processAlert(any(), any(), anyBoolean());
+    }
+
+    // ── slot preservation ─────────────────────────────────────────────────────
+
+    @Test
+    public void slots_preserved_at_original_indices() {
+        // Create a real AdvancedAlert with an Inventory node so we can inspect the pushed map
+        Inventory invNode = new Inventory();
+        AdvancedAlert adv = new AdvancedAlert("slot-test");
+        adv.getGraph().add(invNode);
+
+        Mockito.doAnswer(inv -> {
+            Class<?> clazz = inv.getArgument(0);
+            if (clazz == AdvancedAlert.class) return Stream.of(adv);
+            if (clazz == InventoryAlert.class) return Stream.empty();
+            return Stream.empty();
+        }).when(this.alertManager).getAllEnabledAlertsOfType(any());
+
+        // slot 0 = itemA, slot 1 = empty, slot 2 = itemB
+        Item itemA = this.item(100, 5);
+        Item empty = new Item(-1, 0);
+        Item itemB = this.item(200, 3);
+
+        this.eventHandler.onItemContainerChanged(this.inventoryEvent(itemA, empty, itemB));
+
+        InventoryItemData[] slots = invNode.getValue().getValue().getSlots();
+        assertNotNull("slot 0 should have itemA", slots[0]);
+        assertEquals("Item_100", slots[0].getItemComposition().getName());
+        assertEquals(5, slots[0].getQuantity());
+
+        assertNull("slot 1 should be empty", slots[1]);
+
+        assertNotNull("slot 2 should have itemB", slots[2]);
+        assertEquals("Item_200", slots[2].getItemComposition().getName());
+        assertEquals(3, slots[2].getQuantity());
+    }
+
+    @Test
+    public void same_item_id_in_multiple_slots_each_has_own_slot_entry() {
+        // Two cakes (id=1) in separate slots — items map merges them, slots keep them separate
+        Inventory invNode = new Inventory();
+        AdvancedAlert adv = new AdvancedAlert("multi-slot-test");
+        adv.getGraph().add(invNode);
+
+        Mockito.doAnswer(inv -> {
+            Class<?> clazz = inv.getArgument(0);
+            if (clazz == AdvancedAlert.class) return Stream.of(adv);
+            if (clazz == InventoryAlert.class) return Stream.empty();
+            return Stream.empty();
+        }).when(this.alertManager).getAllEnabledAlertsOfType(any());
+
+        Item cake0 = this.item(1, 1);
+        Item cake2 = this.item(1, 1);
+
+        this.eventHandler.onItemContainerChanged(this.inventoryEvent(cake0, new Item(-1, 0), cake2));
+
+        InventoryItemData[] slots = invNode.getValue().getValue().getSlots();
+        assertNotNull("slot 0 should have cake", slots[0]);
+        assertNull("slot 1 should be empty", slots[1]);
+        assertNotNull("slot 2 should have cake", slots[2]);
+
+        // Items map should have merged quantity = 2
+        assertEquals(2, invNode.getValue().getValue().getItems().get(1).getQuantity());
     }
 }

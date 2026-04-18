@@ -36,6 +36,7 @@ import com.adamk33n3r.runelite.watchdog.ui.panels.NotificationPanelFactory;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
+import net.runelite.client.game.ItemManager;
 import net.runelite.client.plugins.PluginManager;
 import net.runelite.client.ui.ColorScheme;
 import net.runelite.client.ui.components.colorpicker.ColorPickerManager;
@@ -572,7 +573,13 @@ public class GraphPanel extends JLayeredPane {
             return new NoteNodePanel(this, noteNode, noteNode.getX(), noteNode.getY(), NODE_UTILITY_COLOR);
         } else if (node instanceof DisplayNode) {
             DisplayNode displayNode = (DisplayNode) node;
-            return new DisplayNodePanel(this, displayNode, displayNode.getX(), displayNode.getY(), NODE_UTILITY_COLOR);
+            ItemManager itemManager;
+            try {
+                itemManager = this.injector.getInstance(ItemManager.class);
+            } catch (Exception e) {
+                itemManager = null;
+            }
+            return new DisplayNodePanel(this, displayNode, displayNode.getX(), displayNode.getY(), NODE_UTILITY_COLOR, itemManager);
         }
         return null;
     }
@@ -588,6 +595,9 @@ public class GraphPanel extends JLayeredPane {
 
     public void moveNodeToTop(NodePanel nodePanel) {
         this.setLayer(nodePanel, NODE_LAYER, 0);
+        for (var connection : nodePanel.getConnections()) {
+            this.setLayer(connection, CONNECTION_LAYER, 0);
+        }
         this.revalidate();
         this.repaint();
     }

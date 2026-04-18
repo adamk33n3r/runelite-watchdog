@@ -7,7 +7,6 @@ import lombok.Getter;
 
 @Getter
 public class DisplayNode extends Node {
-    @SuppressWarnings("unchecked")
     private final VarInput<Object> value = new VarInput<>(this, "Value", Object.class, "");
 
     public DisplayNode() {

@@ -181,8 +181,8 @@ public class NodePanel extends JPanel {
     public void pack() {
         SwingUtilities.invokeLater(() -> {
             int totalHeight = Arrays.stream(this.items.getComponents())
-                .map(Component::getHeight)
-                .reduce(0, Integer::sum);
+                .mapToInt(c -> c.getPreferredSize().height)
+                .sum();
             int padding = 5 * (this.items.getComponentCount() - 1);
             Insets borderInsets = this.border.getBorderInsets(this);
             this.setBounds(this.getX(), this.getY(), PANEL_WIDTH + borderInsets.left + borderInsets.right, totalHeight + TITLE_HEIGHT + padding + 2 + borderInsets.top + borderInsets.bottom); // idk why it's +2
