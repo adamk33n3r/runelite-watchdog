@@ -138,7 +138,9 @@ public class Util {
         Supplier<Boolean> regexEnabled,
         String input
     ) {
-        String regex = regexEnabled.get() ? pattern.get() : Util.createRegexFromGlob(pattern.get());
+        String rawPattern = pattern.get();
+        if (rawPattern == null || rawPattern.isEmpty()) return null;
+        String regex = regexEnabled.get() ? rawPattern : Util.createRegexFromGlob(rawPattern);
         Matcher matcher = Pattern.compile(regex, regexEnabled.get() ? 0 : Pattern.CASE_INSENSITIVE).matcher(input);
         if (!matcher.find()) return null;
 
