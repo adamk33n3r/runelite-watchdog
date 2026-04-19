@@ -9,6 +9,7 @@ import com.adamk33n3r.nodegraph.nodes.logic.LocationCompare;
 import com.adamk33n3r.nodegraph.nodes.utility.DisplayNode;
 import com.adamk33n3r.nodegraph.nodes.utility.NoteNode;
 import com.adamk33n3r.nodegraph.nodes.flow.Branch;
+import com.adamk33n3r.nodegraph.nodes.flow.Counter;
 import com.adamk33n3r.nodegraph.nodes.math.*;
 import com.adamk33n3r.runelite.watchdog.NotificationType;
 import com.adamk33n3r.runelite.watchdog.TriggerType;
@@ -147,7 +148,13 @@ public class GraphPanel extends JLayeredPane {
             @Override
             public void mouseReleased(MouseEvent e) {
                 if (!overviewMode && SwingUtilities.isRightMouseButton(e)) {
-                    GraphPanel.this.createNode(e.getComponent(), e.getX(), e.getY(), null, (s) -> {});
+                    GraphPanel.this.createNode(e.getComponent(), e.getX(), e.getY(), null, (s) -> {
+                        if (s == null) {
+                            log.error("could not create node panel for");
+                        } else {
+                            log.debug("created new node panel");
+                        }
+                    });
                 }
             }
         });
@@ -360,6 +367,16 @@ public class GraphPanel extends JLayeredPane {
                             onSelect.accept(branchPanel);
                             break;
                         }
+                        case COUNTER: {
+                            Counter counterNode = new Counter();
+                            counterNode.setX(px);
+                            counterNode.setY(py);
+                            this.graph.add(counterNode);
+                            NodePanel counterPanel = this.createNodePanel(counterNode, flowNodeType.getName());
+                            this.add(counterPanel, NODE_LAYER, 0);
+                            onSelect.accept(counterPanel);
+                            break;
+                        }
                     }
                 } else if (selected instanceof VariableNodeType) {
                     VariableNodeType variableNodeType = (VariableNodeType) selected;
@@ -568,6 +585,9 @@ public class GraphPanel extends JLayeredPane {
         } else if (node instanceof Branch) {
             Branch branchNode = (Branch) node;
             return new BranchNodePanel(this, branchNode.getX(), branchNode.getY(), branchNode, NODE_FLOW_COLOR);
+        } else if (node instanceof Counter) {
+            Counter counterNode = (Counter) node;
+            return new CounterNodePanel(this, counterNode.getX(), counterNode.getY(), counterNode, NODE_FLOW_COLOR);
         } else if (node instanceof NoteNode) {
             NoteNode noteNode = (NoteNode) node;
             return new NoteNodePanel(this, noteNode, noteNode.getX(), noteNode.getY(), NODE_UTILITY_COLOR);

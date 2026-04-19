@@ -9,6 +9,7 @@ import com.adamk33n3r.nodegraph.nodes.logic.BooleanGate;
 import com.adamk33n3r.nodegraph.nodes.logic.Equality;
 import com.adamk33n3r.nodegraph.nodes.logic.LocationCompare;
 import com.adamk33n3r.nodegraph.nodes.flow.Branch;
+import com.adamk33n3r.nodegraph.nodes.flow.Counter;
 import com.adamk33n3r.nodegraph.nodes.math.*;
 import com.adamk33n3r.nodegraph.nodes.utility.DisplayNode;
 import com.adamk33n3r.nodegraph.nodes.utility.NoteNode;
@@ -110,6 +111,9 @@ public class GraphSerializer implements JsonSerializer<Graph>, JsonDeserializer<
             } else if (node instanceof DelayNode) {
                 nodeObj.addProperty("type", "Delay");
                 nodeObj.addProperty("delayMs", ((DelayNode) node).getDelayMs().getValue().doubleValue());
+            } else if (node instanceof Counter) {
+                nodeObj.addProperty("type", "Counter");
+                nodeObj.addProperty("value", ((Counter) node).getValue());
             } else if (node instanceof Branch) {
                 nodeObj.addProperty("type", "Branch");
             } else if (node instanceof LocationCompare) {
@@ -217,6 +221,14 @@ public class GraphSerializer implements JsonSerializer<Graph>, JsonDeserializer<
                                 delay.getDelayMs().setValue(nodeObj.get("delayMs").getAsDouble());
                             }
                             node = delay;
+                            break;
+                        }
+                        case "Counter": {
+                            Counter counter = new Counter();
+                            if (nodeObj.has("value")) {
+                                counter.initValue(nodeObj.get("value").getAsInt());
+                            }
+                            node = counter;
                             break;
                         }
                         case "Branch":

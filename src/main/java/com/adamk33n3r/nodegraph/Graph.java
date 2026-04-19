@@ -1,6 +1,7 @@
 package com.adamk33n3r.nodegraph;
 
 import com.adamk33n3r.nodegraph.nodes.ActionNode;
+import com.adamk33n3r.nodegraph.nodes.flow.Counter;
 import com.adamk33n3r.nodegraph.nodes.flow.DelayNode;
 import com.adamk33n3r.nodegraph.nodes.TriggerNode;
 import com.adamk33n3r.nodegraph.nodes.flow.Branch;
@@ -8,11 +9,13 @@ import com.adamk33n3r.runelite.watchdog.alerts.Alert;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.AbstractMap;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -176,16 +179,37 @@ public class Graph {
     /**
      * Traverses the exec chain starting from startNode, firing enabled ActionNodes
      * immediately and spawning daemon threads to handle DelayNodes.
+     *
+     * The BFS queue carries (node, arrivingInput) pairs so that stateful nodes like
+     * Counter can distinguish which of their exec inputs was triggered.
+     * arrivingInput is null only for the startNode entry.
      */
     public void executeExecChain(Node startNode, String[] captureGroups) {
-        List<Node> nodesToProcess = new ArrayList<>();
-        nodesToProcess.add(startNode);
+        List<Map.Entry<Node, VarInput<ExecSignal>>> nodesToProcess = new ArrayList<>();
+        nodesToProcess.add(new AbstractMap.SimpleEntry<>(startNode, null));
+        this.executeExecChainBFS(nodesToProcess, captureGroups);
+    }
 
+    @SuppressWarnings("unchecked")
+    private void executeExecChainBFS(List<Map.Entry<Node, VarInput<ExecSignal>>> nodesToProcess, String[] captureGroups) {
         while (!nodesToProcess.isEmpty()) {
-            Node node = nodesToProcess.remove(0);
+            Map.Entry<Node, VarInput<ExecSignal>> entry = nodesToProcess.remove(0);
+            Node node = entry.getKey();
+            VarInput<ExecSignal> arrivingInput = entry.getValue();
 
             if (node instanceof TriggerNode && !((TriggerNode) node).getEnabled().getValue()) {
                 continue;
+            }
+
+            if (node instanceof Counter) {
+                Counter counter = (Counter) node;
+                if (arrivingInput == counter.getReset()) {
+                    counter.reset();
+                    continue;  // reset is terminal — no exec output
+                } else {
+                    counter.increment();
+                    // fall through to add exec-downstream
+                }
             }
 
             if (node instanceof ActionNode) {
@@ -207,8 +231,8 @@ public class Graph {
                 VarOutput<ExecSignal> activeOut = cond ? branch.getExecTrue() : branch.getExecFalse();
                 this.connections.stream()
                     .filter(c -> c.getOutput() == activeOut)
-                    .map(c -> c.getInput().getNode())
-                    .distinct()
+                    .map(c -> (Map.Entry<Node, VarInput<ExecSignal>>) new AbstractMap.SimpleEntry<>(
+                        c.getInput().getNode(), (VarInput<ExecSignal>) c.getInput()))
                     .forEach(nodesToProcess::add);
                 continue;
             }
@@ -216,7 +240,7 @@ public class Graph {
             if (node instanceof DelayNode) {
                 int delayMs = ((DelayNode) node).getDelayMs().getValue().intValue();
                 if (delayMs > 0) {
-                    List<Node> downstream = this.getExecDownstream(node);
+                    List<Map.Entry<Node, VarInput<ExecSignal>>> downstream = this.getExecEntriesDownstream(node);
                     Thread t = new Thread(() -> {
                         try {
                             Thread.sleep(delayMs);
@@ -224,7 +248,7 @@ public class Graph {
                             return;
                         }
                         try {
-                            downstream.forEach(n -> this.executeExecChain(n, captureGroups));
+                            this.executeExecChainBFS(downstream, captureGroups);
                         } catch (Throwable e) {
                             log.error("Exception in delayed exec chain", e);
                             if (this.onError != null) this.onError.accept(e);
@@ -237,7 +261,7 @@ public class Graph {
                 // delayMs == 0: fall through and add downstream immediately
             }
 
-            nodesToProcess.addAll(this.getExecDownstream(node));
+            nodesToProcess.addAll(this.getExecEntriesDownstream(node));
         }
     }
 
@@ -246,6 +270,15 @@ public class Graph {
             .filter(c -> c.getOutput().getNode() == node && c.getOutput().getType() == ExecSignal.class)
             .map(c -> c.getInput().getNode())
             .distinct()
+            .collect(Collectors.toList());
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<Map.Entry<Node, VarInput<ExecSignal>>> getExecEntriesDownstream(Node node) {
+        return this.connections.stream()
+            .filter(c -> c.getOutput().getNode() == node && c.getOutput().getType() == ExecSignal.class)
+            .map(c -> (Map.Entry<Node, VarInput<ExecSignal>>) new AbstractMap.SimpleEntry<>(
+                c.getInput().getNode(), (VarInput<ExecSignal>) c.getInput()))
             .collect(Collectors.toList());
     }
 }

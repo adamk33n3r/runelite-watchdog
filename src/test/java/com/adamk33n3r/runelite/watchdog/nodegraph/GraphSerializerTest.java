@@ -3,6 +3,7 @@ package com.adamk33n3r.runelite.watchdog.nodegraph;
 import com.adamk33n3r.nodegraph.Connection;
 import com.adamk33n3r.nodegraph.Graph;
 import com.adamk33n3r.nodegraph.nodes.ActionNode;
+import com.adamk33n3r.nodegraph.nodes.flow.Counter;
 import com.adamk33n3r.nodegraph.nodes.flow.DelayNode;
 import com.adamk33n3r.nodegraph.nodes.TriggerNode;
 import com.adamk33n3r.nodegraph.nodes.constants.Bool;
@@ -279,6 +280,22 @@ public class GraphSerializerTest {
         assertEquals(2, loaded.getConnections().size());
         long delayCount = loaded.getNodes().stream().filter(n -> n instanceof DelayNode).count();
         assertEquals(1, delayCount);
+    }
+
+    @Test
+    public void roundTrip_counterNode_preservesValue() {
+        Graph graph = new Graph();
+        Counter counter = new Counter();
+        counter.initValue(42);
+        graph.add(counter);
+
+        Graph loaded = roundTrip(graph);
+
+        assertEquals(1, loaded.getNodes().size());
+        assertTrue(loaded.getNodes().get(0) instanceof Counter);
+        Counter loadedCounter = (Counter) loaded.getNodes().get(0);
+        assertEquals(42, loadedCounter.getValue());
+        assertEquals(42, loadedCounter.getCount().getValue().intValue());
     }
 
     private Graph roundTrip(Graph graph) {

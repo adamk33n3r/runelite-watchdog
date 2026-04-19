@@ -57,7 +57,10 @@ public class ConnectionPointOut<T> extends ConnectionPoint {
                         nodePanel.getGraphPanel().createNode(
                             e.getComponent(), e.getX(), e.getY(), outputVar,
                             (newNode) -> {
-                                if (newNode != null) {
+                                if (newNode == null) {
+                                    log.error("could not create node panel for");
+                                } else {
+                                    log.debug("created new node panel");
                                     List<VarInput<?>> candidateVars = newNode.getAllInputPoints().stream()
                                         .map(ConnectionPointIn::getInputVar)
                                         .collect(Collectors.toList());
@@ -67,6 +70,8 @@ public class ConnectionPointOut<T> extends ConnectionPoint {
                                         if (bestCp != null) {
                                             nodePanel.getGraphPanel().connect(ConnectionPointOut.this, bestCp);
                                         }
+                                    } else {
+                                        log.warn("could not find pin to connect to");
                                     }
                                 }
                                 removeNewConnection();

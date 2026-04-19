@@ -64,7 +64,7 @@ public class NewNodePopup extends JPopupMenu {
             .map(item -> new CustomList.Items(
                 item,
                 enumToCategory.get(item),
-                e -> !(e == TriggerType.ALERT_GROUP || e == TriggerType.ADVANCED_ALERT) && itemFilter.test(e)))
+                e -> !(e == TriggerType.ALERT_GROUP || e == TriggerType.ADVANCED_ALERT || e == NotificationType.COUNTER) && itemFilter.test(e)))
             .toArray(CustomList.Items[]::new);
 
         // Search field
@@ -146,7 +146,7 @@ public class NewNodePopup extends JPopupMenu {
         // Rebuild recent menu, applying the same exclusions as the category items
         this.recentMenu.removeAll();
         recentNodes.stream()
-            .filter(item -> !(item == TriggerType.ALERT_GROUP || item == TriggerType.ADVANCED_ALERT)
+            .filter(item -> !(item == TriggerType.ALERT_GROUP || item == TriggerType.ADVANCED_ALERT || item == NotificationType.COUNTER)
                 && this.itemFilter.test(item))
             .forEach(item -> {
                 JMenuItem mi = new JMenuItem(((Displayable) item).getName());
