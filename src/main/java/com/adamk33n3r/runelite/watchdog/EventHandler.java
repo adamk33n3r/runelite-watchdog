@@ -104,6 +104,12 @@ public class EventHandler {
         if (PlayerChatType.ANY.isOfType(chatMessage.getType())) {
             this.alertManager.getAllEnabledAlertsOfType(PlayerChatAlert.class)
                 .filter(chatAlert -> chatAlert.getPlayerChatType() == PlayerChatType.ANY || chatAlert.getPlayerChatType().isOfType(chatMessage.getType()))
+                .filter(chatAlert -> {
+                    return chatAlert.getPlayerChatType() != PlayerChatType.PRIVATE ||
+                        chatAlert.getChatDirection() == PlayerChatAlert.ChatDirection.BOTH ||
+                        (chatAlert.getChatDirection() == PlayerChatAlert.ChatDirection.SENT_ONLY && chatMessage.getType() == ChatMessageType.PRIVATECHATOUT) ||
+                        (chatAlert.getChatDirection() == PlayerChatAlert.ChatDirection.RECEIVED_ONLY && chatMessage.getType() == ChatMessageType.PRIVATECHAT);
+                })
                 .forEach(chatAlert -> {
                     var message = unformattedMessage;
                     if (chatAlert.isPrependSender()) {

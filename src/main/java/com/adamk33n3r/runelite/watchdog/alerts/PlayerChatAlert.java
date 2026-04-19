@@ -1,7 +1,9 @@
 package com.adamk33n3r.runelite.watchdog.alerts;
 
+import com.adamk33n3r.runelite.watchdog.Displayable;
 import com.adamk33n3r.runelite.watchdog.PlayerChatType;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
@@ -15,6 +17,7 @@ public class PlayerChatAlert extends Alert implements RegexMatcher {
     private String message = "";
     private PlayerChatType playerChatType = PlayerChatType.ANY;
     private boolean prependSender = false;
+    private ChatDirection chatDirection = ChatDirection.BOTH;
 
     @Override
     public String getPattern() {
@@ -32,5 +35,17 @@ public class PlayerChatAlert extends Alert implements RegexMatcher {
 
     public PlayerChatAlert(String name) {
         super(name);
+    }
+
+    @Getter
+    @AllArgsConstructor
+    public enum ChatDirection implements Displayable {
+        BOTH("Both", "Both directions"),
+        SENT_ONLY("Sent Only", "Only trigger on sent messages"),
+        RECEIVED_ONLY("Received Only", "Only trigger on received messages"),
+        ;
+
+        private final String name;
+        private final String tooltip;
     }
 }
