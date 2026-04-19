@@ -1,8 +1,9 @@
 package com.adamk33n3r.nodegraph.nodes.logic;
 
+import com.adamk33n3r.nodegraph.Node;
 import com.adamk33n3r.nodegraph.VarInput;
 import com.adamk33n3r.nodegraph.VarOutput;
-import com.adamk33n3r.nodegraph.nodes.VariableNode;
+import com.adamk33n3r.nodegraph.nodes.constants.VariableNode;
 import com.adamk33n3r.runelite.watchdog.InventoryItemData;
 import com.adamk33n3r.runelite.watchdog.Util;
 import com.adamk33n3r.runelite.watchdog.alerts.InventoryAlert;
@@ -15,7 +16,7 @@ import java.util.Map;
 
 @Getter
 @Setter
-public class InventoryCheck extends VariableNode implements RegexMatcher {
+public class InventoryCheck extends Node implements RegexMatcher {
     private static final InventoryItemData.InventoryItemDataMap EMPTY_INVENTORY = new InventoryItemData.InventoryItemDataMap(0);
     private final VarInput<InventoryItemData.InventoryItemDataMap> inventory =
         new VarInput<>(this, "Inventory", InventoryItemData.InventoryItemDataMap.class, EMPTY_INVENTORY);

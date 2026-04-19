@@ -179,21 +179,9 @@ public class GraphSerializerTest {
     }
 
     @Test
-    public void roundTrip_preservesLocationName() {
-        Graph graph = new Graph();
-        Location loc = new Location();
-        loc.getNameOut().setValue("My Location");
-        graph.add(loc);
-
-        Graph loaded = roundTrip(graph);
-        Location loadedLoc = (Location) loaded.getNodes().get(0);
-    }
-
-    @Test
     public void roundTrip_preservesPluginVarConfig() {
         Graph graph = new Graph();
         PluginVar pv = new PluginVar();
-        pv.getNameOut().setValue("GPU Check");
         pv.setPluginName("GPU");
         graph.add(pv);
 
@@ -206,7 +194,6 @@ public class GraphSerializerTest {
     public void roundTrip_preservesInventoryVarConfig() {
         Graph graph = new Graph();
         InventoryCheck inv = new InventoryCheck();
-        inv.getNameOut().setValue("Lobster Check");
         inv.setInventoryAlertType(InventoryAlert.InventoryAlertType.ITEM);
         inv.setInventoryMatchType(InventoryAlert.InventoryMatchType.UN_NOTED);
         inv.setItemName("Lobster");
@@ -217,7 +204,6 @@ public class GraphSerializerTest {
 
         Graph loaded = roundTrip(graph);
         InventoryCheck loadedInv = (InventoryCheck) loaded.getNodes().get(0);
-        assertEquals("Lobster Check", loadedInv.getNameOut().getValue());
         assertEquals(InventoryAlert.InventoryAlertType.ITEM, loadedInv.getInventoryAlertType());
         assertEquals(InventoryAlert.InventoryMatchType.UN_NOTED, loadedInv.getInventoryMatchType());
         assertEquals("Lobster", loadedInv.getItemName());

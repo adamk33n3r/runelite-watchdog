@@ -56,10 +56,10 @@ public class DisplayNodeTest {
     public void displayNode_rendersBoolean_asCheckmark() {
         DisplayNode node = new DisplayNode();
         node.getValue().setValue(true);
-        assertEquals("✔️", node.getStringRepresentation());
+        assertEquals("✔", node.getStringRepresentation());
 
         node.getValue().setValue(false);
-        assertEquals("✖️", node.getStringRepresentation());
+        assertEquals("✖", node.getStringRepresentation());
     }
 
     @Test

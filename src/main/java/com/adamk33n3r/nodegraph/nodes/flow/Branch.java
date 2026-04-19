@@ -27,4 +27,8 @@ public class Branch extends Node {
         reg(this.execTrue);
         reg(this.execFalse);
     }
+
+    @Override
+    public void process() {
+    }
 }

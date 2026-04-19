@@ -6,6 +6,7 @@ import com.adamk33n3r.runelite.watchdog.alerts.InventoryAlert;
 import com.adamk33n3r.runelite.watchdog.ui.ComparableNumber;
 import com.adamk33n3r.runelite.watchdog.ui.alerts.InventoryAlertPanel;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.GraphPanel;
+import com.adamk33n3r.runelite.watchdog.ui.nodegraph.NodePanel;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.ConnectionLine;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.ConnectionPointIn;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.ConnectionPointOut;
@@ -20,14 +21,14 @@ import java.awt.*;
 import java.util.Arrays;
 
 @Getter
-public class InventoryCheckNodePanel extends VariableNodePanel {
+public class InventoryCheckNodePanel extends NodePanel {
     private final ConnectionPointIn<InventoryItemData.InventoryItemDataMap> inventoryIn;
     private final ConnectionPointOut<Boolean> valueOut;
     private final InventoryCheck inventoryCheck;
     private final ViewInput<Boolean> matchView;
 
     public InventoryCheckNodePanel(GraphPanel graphPanel, InventoryCheck node, int x, int y, String name, Color color) {
-        super(graphPanel, node, x, y, name, color, false);
+        super(graphPanel, node, x, y, name, color);
         this.inventoryCheck = node;
 
         this.inventoryIn = new ConnectionPointIn<>(this, node.getInventory());

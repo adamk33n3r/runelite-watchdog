@@ -27,9 +27,11 @@ public class CounterNodePanel extends NodePanel {
         this.resetIn = new ConnectionPointIn<>(this, node.getReset());
         this.items.add(new ConnectionLine<>(this.resetIn, new ViewInput<>("Reset", null), null));
 
-        this.countOut = new ConnectionPointOut<>(this, node.getCount());
-        ViewInput<Number> resultView = new ViewInput<>("Count", node.getCount().getValue());
-        addDisposer(node.getExec().onChange(a -> resultView.setValue(node.getCount().getValue())));
+        this.countOut = new ConnectionPointOut<>(this, node.getCountOut());
+        ViewInput<Number> resultView = new ViewInput<>("Count", node.getCountOut().getValue());
+        addDisposer(node.getExec().onChange(a -> resultView.setValue(node.getCountOut().getValue())));
+        addDisposer(node.getCount().onChange(a -> resultView.setValue(node.getCountOut().getValue())));
+        addDisposer(node.getReset().onChange(a -> resultView.setValue(node.getCountOut().getValue())));
         this.items.add(new ConnectionLine<>(null, resultView, this.countOut));
 
         this.pack();

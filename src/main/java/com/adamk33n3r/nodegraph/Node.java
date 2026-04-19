@@ -34,5 +34,5 @@ public abstract class Node {
         outputs.put(v.getName(), v);
     }
 
-    public void process() {}
+    public abstract void process();
 }

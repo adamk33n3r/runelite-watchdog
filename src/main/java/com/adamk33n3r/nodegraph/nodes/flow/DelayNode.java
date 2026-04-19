@@ -18,4 +18,9 @@ public class DelayNode extends Node {
         reg(this.delayMs);
         reg(this.execOut);
     }
+
+    @Override
+    public void process() {
+
+    }
 }

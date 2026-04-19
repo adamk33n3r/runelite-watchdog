@@ -161,7 +161,7 @@ Registration:
 
 ## Stage 7 — DisplayNode
 
-Viewer node — takes an `Object` input, renders a human-readable string via `ViewInput`-style rendering (arrays, `InventoryItemDataMap`, Boolean → ✔️/✖️, otherwise `toString`).
+Viewer node — takes an `Object` input, renders a human-readable string via `ViewInput`-style rendering (arrays, `InventoryItemDataMap`, Boolean → ✔/✖, otherwise `toString`).
 
 New class: `com.adamk33n3r.nodegraph.nodes.utility.DisplayNode.java`
 - `VarInput<Object> value` (type: `Object.class` so accepts any output). Confirm `NodeTypeCompatibilityChecker` allows this — may need a tweak for "Object-typed inputs accept any output type".

@@ -10,7 +10,7 @@ import lombok.Getter;
 import java.awt.*;
 
 @Getter
-public class BoolNodePanel extends VariableNodePanel {
+public class BoolNodePanel extends ConstantNodePanel {
 //    private final ConnectionPointIn<Boolean> boolValueIn;
     private final ConnectionPointOut<Boolean> boolValueOut;
 

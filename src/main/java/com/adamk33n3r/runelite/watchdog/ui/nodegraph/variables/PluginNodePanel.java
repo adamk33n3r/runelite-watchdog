@@ -19,7 +19,7 @@ public class PluginNodePanel extends VariableNodePanel {
     private final ConnectionPointOut<Boolean> valueOut;
 
     public PluginNodePanel(GraphPanel graphPanel, PluginVar node, int x, int y, String name, Color color, PluginManager pluginManager) {
-        super(graphPanel, node, x, y, name, color, false);
+        super(graphPanel, node, x, y, name, color);
 
         Plugin[] plugins = pluginManager.getPlugins()
             .stream().sorted(Comparator.comparing(Plugin::getName))

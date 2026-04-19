@@ -71,7 +71,7 @@ public class DisplayValueView extends JPanel {
     }
 
     private JLabel boolView(boolean value) {
-        JLabel label = new JLabel(value ? "\u2714" : "\u2716");
+        JLabel label = new JLabel(value ? "✔" : "✖");
         label.setFont(label.getFont().deriveFont(Font.BOLD, 20f));
         label.setForeground(value ? new Color(60, 180, 60) : new Color(210, 60, 60));
         label.setHorizontalAlignment(SwingConstants.CENTER);

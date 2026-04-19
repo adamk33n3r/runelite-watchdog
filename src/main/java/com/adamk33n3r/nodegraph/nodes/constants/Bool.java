@@ -2,11 +2,10 @@ package com.adamk33n3r.nodegraph.nodes.constants;
 
 import com.adamk33n3r.nodegraph.VarInput;
 import com.adamk33n3r.nodegraph.VarOutput;
-import com.adamk33n3r.nodegraph.nodes.VariableNode;
 import lombok.Getter;
 
 @Getter
-public class Bool extends VariableNode {
+public class Bool extends ConstantNode {
     private final VarInput<Boolean> valueIn = new VarInput<>(this, "Value", Boolean.class, true);
     private final VarOutput<Boolean> valueOut = new VarOutput<>(this, "Value", Boolean.class, true);
 

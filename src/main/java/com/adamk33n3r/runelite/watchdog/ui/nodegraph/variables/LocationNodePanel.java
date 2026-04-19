@@ -15,7 +15,7 @@ public class LocationNodePanel extends VariableNodePanel {
     private final ConnectionPointOut<WorldPoint> locationOut;
 
     public LocationNodePanel(GraphPanel graphPanel, Location node, int x, int y, String name, Color color) {
-        super(graphPanel, node, x, y, name, color, false);
+        super(graphPanel, node, x, y, name, color);
 
         this.locationOut = new ConnectionPointOut<>(this, node.getValueOut());
 

@@ -17,7 +17,7 @@ public class InventoryVariableNodePanel extends VariableNodePanel {
     private final Inventory inventoryVar;
 
     public InventoryVariableNodePanel(GraphPanel graphPanel, Inventory node, int x, int y, String name, Color color) {
-        super(graphPanel, node, x, y, name, color, false);
+        super(graphPanel, node, x, y, name, color);
         this.inventoryVar = node;
 
         this.valueOut = new ConnectionPointOut<>(this, node.getValueOut());

@@ -16,7 +16,6 @@ import java.awt.Color;
 public class DisplayNodePanel extends NodePanel {
     private final ConnectionPointIn<Object> valueIn;
 
-    @SuppressWarnings("unchecked")
     public DisplayNodePanel(GraphPanel graphPanel, DisplayNode node, int x, int y, Color color, ItemManager itemManager) {
         super(graphPanel, node, x, y, "Display", color);
 

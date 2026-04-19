@@ -1,12 +1,12 @@
 package com.adamk33n3r.nodegraph.nodes.utility;
 
-import com.adamk33n3r.nodegraph.Node;
 import com.adamk33n3r.nodegraph.VarInput;
+import com.adamk33n3r.nodegraph.nodes.NoProcessNode;
 import com.adamk33n3r.runelite.watchdog.InventoryItemData;
 import lombok.Getter;
 
 @Getter
-public class DisplayNode extends Node {
+public class DisplayNode extends NoProcessNode {
     private final VarInput<Object> value = new VarInput<>(this, "Value", Object.class, "");
 
     public DisplayNode() {
@@ -33,7 +33,7 @@ public class DisplayNode extends Node {
             else if (!invMap.getItems().isEmpty()) sb.deleteCharAt(sb.length() - 1);
             return sb.toString();
         } else if (v instanceof Boolean) {
-            return (Boolean) v ? "✔️" : "✖️";
+            return (Boolean) v ? "✔" : "✖";
         } else {
             return v.toString();
         }

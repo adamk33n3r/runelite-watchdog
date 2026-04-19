@@ -10,7 +10,7 @@ import lombok.Getter;
 import java.awt.*;
 
 @Getter
-public class NumberNodePanel extends VariableNodePanel {
+public class NumberNodePanel extends ConstantNodePanel {
 
     private final ConnectionPointOut<Number> numValue;
 

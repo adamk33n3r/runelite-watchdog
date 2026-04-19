@@ -2,7 +2,6 @@ package com.adamk33n3r.nodegraph.nodes.constants;
 
 import com.adamk33n3r.nodegraph.VarInput;
 import com.adamk33n3r.nodegraph.VarOutput;
-import com.adamk33n3r.nodegraph.nodes.VariableNode;
 import lombok.Getter;
 import lombok.Setter;
 

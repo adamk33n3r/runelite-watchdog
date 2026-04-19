@@ -100,8 +100,7 @@ public class GraphSerializer implements JsonSerializer<Graph>, JsonDeserializer<
                 nodeObj.addProperty("type", "Inventory");
             } else if (node instanceof InventoryCheck) {
                 InventoryCheck inv = (InventoryCheck) node;
-                nodeObj.addProperty("type", "InventoryVar");
-                nodeObj.addProperty("name", inv.getNameOut().getValue());
+                nodeObj.addProperty("type", "InventoryCheck");
                 nodeObj.addProperty("inventoryAlertType", inv.getInventoryAlertType().name());
                 nodeObj.addProperty("inventoryMatchType", inv.getInventoryMatchType().name());
                 nodeObj.addProperty("itemName", inv.getItemName());
@@ -277,17 +276,11 @@ public class GraphSerializer implements JsonSerializer<Graph>, JsonDeserializer<
                         }
                         case "Location": {
                             Location loc = new Location();
-                            if (nodeObj.has("name")) {
-                                loc.getNameOut().setValue(nodeObj.get("name").getAsString());
-                            }
                             node = loc;
                             break;
                         }
                         case "PluginVar": {
                             PluginVar pv = new PluginVar();
-                            if (nodeObj.has("name")) {
-                                pv.getNameOut().setValue(nodeObj.get("name").getAsString());
-                            }
                             if (nodeObj.has("pluginName")) {
                                 pv.setPluginName(nodeObj.get("pluginName").getAsString());
                             }
@@ -298,11 +291,9 @@ public class GraphSerializer implements JsonSerializer<Graph>, JsonDeserializer<
                             node = new Inventory();
                             break;
                         }
-                        case "InventoryVar": {
+                        case "InventoryVar":
+                        case "InventoryCheck": {
                             InventoryCheck inv = new InventoryCheck();
-                            if (nodeObj.has("name")) {
-                                inv.getNameOut().setValue(nodeObj.get("name").getAsString());
-                            }
                             if (nodeObj.has("inventoryAlertType")) {
                                 inv.setInventoryAlertType(InventoryAlert.InventoryAlertType.valueOf(nodeObj.get("inventoryAlertType").getAsString()));
                             }

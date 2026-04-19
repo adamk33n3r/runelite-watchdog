@@ -97,7 +97,7 @@ public class CounterNodeTest {
 
         graph.connect(trigger.getExec(), counter.getExec());
         graph.connect(counter.getExecOut(), action.getExec());
-        graph.connect(counter.getCount(), equality.getA());
+        graph.connect(counter.getCountOut(), equality.getA());
         graph.connect(threshold.getValue(), equality.getB());
         graph.connect(equality.getResult(), action.getEnabled());
 

@@ -73,7 +73,7 @@ public class ViewInput<T> extends AbstractInput<T> {
             }
             return stringBuilder.toString();
         } else if (this.value instanceof Boolean) {
-            return (Boolean) this.value ? "✔️" : "✖️";
+            return (Boolean) this.value ? "✔" : "✖";
         } else {
             return this.value.toString();
         }
