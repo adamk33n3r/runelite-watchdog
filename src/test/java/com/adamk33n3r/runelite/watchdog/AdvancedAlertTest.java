@@ -1,8 +1,8 @@
 package com.adamk33n3r.runelite.watchdog;
 
-import com.adamk33n3r.nodegraph.Graph;
 import com.adamk33n3r.nodegraph.nodes.ActionNode;
 import com.adamk33n3r.nodegraph.nodes.TriggerNode;
+import com.adamk33n3r.nodegraph.nodes.utility.NoteNode;
 import com.adamk33n3r.runelite.watchdog.alerts.AdvancedAlert;
 import com.adamk33n3r.runelite.watchdog.alerts.Alert;
 import com.adamk33n3r.runelite.watchdog.alerts.ChatAlert;
@@ -15,6 +15,9 @@ import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import javax.inject.Inject;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AdvancedAlertTest extends TestBase {
@@ -109,5 +112,28 @@ public class AdvancedAlertTest extends TestBase {
         Assert.assertEquals(2, alertManager.getAlerts().size());
         Assert.assertTrue(alertManager.getAlerts().get(0) instanceof AdvancedAlert);
         Assert.assertTrue(alertManager.getAlerts().get(1) instanceof ChatAlert);
+    }
+
+    @Test
+    public void newAdvancedAlert_hasExactlyOneWelcomeNote() {
+        AdvancedAlert alert = this.alertManager.createAlert(AdvancedAlert.class);
+        long noteCount = alert.getGraph().getNodesOfType(NoteNode.class).count();
+        assertEquals(1, noteCount);
+    }
+
+    @Test
+    public void welcomeNote_hasNonEmptyText() {
+        AdvancedAlert alert = this.alertManager.createAlert(AdvancedAlert.class);
+        NoteNode note = alert.getGraph().getNodesOfType(NoteNode.class).findFirst().orElseThrow();
+        assertFalse(note.getNote().isEmpty());
+    }
+
+    @Test
+    public void deserializedAdvancedAlert_doesNotDuplicateNote() {
+        AdvancedAlert alert = this.alertManager.createAlert(AdvancedAlert.class);
+        String json = this.alertManager.getGson().toJson(alert, AdvancedAlert.class);
+        AdvancedAlert reloaded = this.alertManager.getGson().fromJson(json, AdvancedAlert.class);
+        long noteCount = reloaded.getGraph().getNodesOfType(NoteNode.class).count();
+        assertEquals(1, noteCount);
     }
 }

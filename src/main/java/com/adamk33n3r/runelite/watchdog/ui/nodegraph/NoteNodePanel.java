@@ -14,7 +14,7 @@ public class NoteNodePanel extends NodePanel {
             label.setForeground(Color.ORANGE);
             this.items.add(label);
         } else {
-            JTextArea textArea = new JTextArea(node.getNote(), 3, 16);
+            JTextArea textArea = new JTextArea(node.getNote(), 8, 16);
             textArea.setLineWrap(true);
             textArea.setWrapStyleWord(true);
             textArea.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {

@@ -10,6 +10,7 @@ import com.adamk33n3r.nodegraph.nodes.utility.DisplayNode;
 import com.adamk33n3r.nodegraph.nodes.utility.NoteNode;
 import com.adamk33n3r.nodegraph.nodes.flow.Branch;
 import com.adamk33n3r.nodegraph.nodes.flow.Counter;
+import com.adamk33n3r.nodegraph.nodes.flow.TimerNode;
 import com.adamk33n3r.nodegraph.nodes.math.*;
 import com.adamk33n3r.runelite.watchdog.NotificationType;
 import com.adamk33n3r.runelite.watchdog.TriggerType;
@@ -378,6 +379,16 @@ public class GraphPanel extends JLayeredPane {
                             onSelect.accept(counterPanel);
                             break;
                         }
+                        case TIMER: {
+                            TimerNode timerNode = new TimerNode();
+                            timerNode.setX(px);
+                            timerNode.setY(py);
+                            this.graph.add(timerNode);
+                            NodePanel timerPanel = this.createNodePanel(timerNode, flowNodeType.getName());
+                            this.add(timerPanel, NODE_LAYER, 0);
+                            onSelect.accept(timerPanel);
+                            break;
+                        }
                     }
                 } else if (selected instanceof VariableNodeType) {
                     VariableNodeType variableNodeType = (VariableNodeType) selected;
@@ -600,6 +611,9 @@ public class GraphPanel extends JLayeredPane {
         } else if (node instanceof Counter) {
             Counter counterNode = (Counter) node;
             return new CounterNodePanel(this, counterNode.getX(), counterNode.getY(), counterNode, NODE_FLOW_COLOR);
+        } else if (node instanceof TimerNode) {
+            TimerNode timerNode = (TimerNode) node;
+            return new TimerNodePanel(this, timerNode.getX(), timerNode.getY(), timerNode, NODE_FLOW_COLOR);
         } else if (node instanceof NoteNode) {
             NoteNode noteNode = (NoteNode) node;
             return new NoteNodePanel(this, noteNode, noteNode.getX(), noteNode.getY(), NODE_UTILITY_COLOR);

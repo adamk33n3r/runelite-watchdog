@@ -404,7 +404,7 @@ public class PanelUtils {
         ActionListener actionListener = e -> {
             JMenuItem menuItem = (JMenuItem) e.getSource();
             TriggerType tType = (TriggerType) menuItem.getClientProperty(TriggerType.class);
-            Alert createdAlert = WatchdogPlugin.getInstance().getInjector().getInstance(tType.getImplClass());
+            Alert createdAlert = WatchdogPlugin.getInstance().getAlertManager().createAlert(tType.getImplClass());
             onCreate.accept(createdAlert);
         };
 

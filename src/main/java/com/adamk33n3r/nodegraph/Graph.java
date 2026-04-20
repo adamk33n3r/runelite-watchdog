@@ -3,6 +3,7 @@ package com.adamk33n3r.nodegraph;
 import com.adamk33n3r.nodegraph.nodes.ActionNode;
 import com.adamk33n3r.nodegraph.nodes.flow.Counter;
 import com.adamk33n3r.nodegraph.nodes.flow.DelayNode;
+import com.adamk33n3r.nodegraph.nodes.flow.TimerNode;
 import com.adamk33n3r.nodegraph.nodes.TriggerNode;
 import com.adamk33n3r.nodegraph.nodes.flow.Branch;
 import com.adamk33n3r.runelite.watchdog.alerts.Alert;
@@ -17,6 +18,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -29,6 +33,31 @@ public class Graph {
     private final List<Connection<?>> connections = new ArrayList<>();
 
     private Consumer<Throwable> onError;
+
+    // Lazy-initialised, daemon-threaded scheduler — shared across all async nodes in this graph.
+    private ScheduledExecutorService scheduler;
+
+    private ScheduledExecutorService getScheduler() {
+        if (this.scheduler == null) {
+            this.scheduler = Executors.newScheduledThreadPool(1, r -> {
+                Thread t = new Thread(r, "nodegraph-timer");
+                t.setDaemon(true);
+                return t;
+            });
+        }
+        return this.scheduler;
+    }
+
+    private Runnable wrap(Runnable r) {
+        return () -> {
+            try {
+                r.run();
+            } catch (Throwable e) {
+                log.error("Exception in timer exec chain", e);
+                if (this.onError != null) this.onError.accept(e);
+            }
+        };
+    }
 
     public void setOnError(Consumer<Throwable> onError) {
         this.onError = onError;
@@ -212,6 +241,39 @@ public class Graph {
                 }
             }
 
+            if (node instanceof TimerNode) {
+                TimerNode timer = (TimerNode) node;
+                if (arrivingInput == timer.getReset()) {
+                    timer.cancelCurrentFuture();
+                    continue; // reset is terminal — no exec output
+                }
+                // Exec arrival — cancel any running future (restart semantics) then schedule
+                timer.cancelCurrentFuture();
+                timer.getCancelled().set(false);
+                int durationMs = timer.getDurationMs().getValue().intValue();
+                boolean pulse = Boolean.TRUE.equals(timer.getPulse().getValue());
+                if (durationMs <= 0) {
+                    // degenerate: fire execOut immediately as a pass-through
+                    this.executeFromOutput(timer.getExecOut(), captureGroups);
+                    continue;
+                }
+                ScheduledExecutorService sched = this.getScheduler();
+                Runnable fireExec = this.wrap(() -> this.executeFromOutput(timer.getExecOut(), captureGroups));
+                Runnable firePulse = this.wrap(() -> this.executeFromOutput(timer.getPulseOut(), captureGroups));
+                if (!pulse) {
+                    timer.setCurrentFuture(sched.schedule(fireExec, durationMs, TimeUnit.MILLISECONDS));
+                } else {
+                    timer.setCurrentFuture(sched.schedule(this.wrap(() -> {
+                        fireExec.run();
+                        // Guard against Reset arriving between fireExec and scheduleAtFixedRate.
+                        if (!timer.getCancelled().get()) {
+                            timer.setCurrentFuture(sched.scheduleAtFixedRate(firePulse, durationMs, durationMs, TimeUnit.MILLISECONDS));
+                        }
+                    }), durationMs, TimeUnit.MILLISECONDS));
+                }
+                continue;
+            }
+
             if (node instanceof ActionNode) {
                 ActionNode action = (ActionNode) node;
                 if (action.getEnabled().getValue()) {
@@ -280,5 +342,16 @@ public class Graph {
             .map(c -> (Map.Entry<Node, VarInput<ExecSignal>>) new AbstractMap.SimpleEntry<>(
                 c.getInput().getNode(), (VarInput<ExecSignal>) c.getInput()))
             .collect(Collectors.toList());
+    }
+
+    // Routes execution through a specific exec output pin — used by TimerNode which has two exec outputs.
+    @SuppressWarnings("unchecked")
+    private void executeFromOutput(VarOutput<ExecSignal> output, String[] captureGroups) {
+        List<Map.Entry<Node, VarInput<ExecSignal>>> entries = this.connections.stream()
+            .filter(c -> c.getOutput() == output)
+            .map(c -> (Map.Entry<Node, VarInput<ExecSignal>>) new AbstractMap.SimpleEntry<>(
+                c.getInput().getNode(), (VarInput<ExecSignal>) c.getInput()))
+            .collect(Collectors.toList());
+        this.executeExecChainBFS(entries, captureGroups);
     }
 }

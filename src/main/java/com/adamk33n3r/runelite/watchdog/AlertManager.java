@@ -330,7 +330,11 @@ public class AlertManager {
     }
 
     public <T extends Alert> T createAlert(Class<T> alertClass) {
-        return this.plugin.getInjector().getInstance(alertClass);
+        T alert = this.plugin.getInjector().getInstance(alertClass);
+        if (alert instanceof AdvancedAlert) {
+            ((AdvancedAlert) alert).addWelcomeNote();
+        }
+        return alert;
     }
 
     public void addAlert(Alert alert, boolean overrideWithDefaults) {

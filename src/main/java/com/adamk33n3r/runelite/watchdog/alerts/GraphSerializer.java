@@ -10,6 +10,7 @@ import com.adamk33n3r.nodegraph.nodes.logic.Equality;
 import com.adamk33n3r.nodegraph.nodes.logic.LocationCompare;
 import com.adamk33n3r.nodegraph.nodes.flow.Branch;
 import com.adamk33n3r.nodegraph.nodes.flow.Counter;
+import com.adamk33n3r.nodegraph.nodes.flow.TimerNode;
 import com.adamk33n3r.nodegraph.nodes.math.*;
 import com.adamk33n3r.nodegraph.nodes.utility.DisplayNode;
 import com.adamk33n3r.nodegraph.nodes.utility.NoteNode;
@@ -113,6 +114,11 @@ public class GraphSerializer implements JsonSerializer<Graph>, JsonDeserializer<
             } else if (node instanceof Counter) {
                 nodeObj.addProperty("type", "Counter");
                 nodeObj.addProperty("value", ((Counter) node).getValue());
+            } else if (node instanceof TimerNode) {
+                TimerNode tn = (TimerNode) node;
+                nodeObj.addProperty("type", "Timer");
+                nodeObj.addProperty("durationMs", tn.getDurationMs().getValue().doubleValue());
+                nodeObj.addProperty("pulse", tn.getPulse().getValue());
             } else if (node instanceof Branch) {
                 nodeObj.addProperty("type", "Branch");
             } else if (node instanceof LocationCompare) {
@@ -228,6 +234,17 @@ public class GraphSerializer implements JsonSerializer<Graph>, JsonDeserializer<
                                 counter.initValue(nodeObj.get("value").getAsInt());
                             }
                             node = counter;
+                            break;
+                        }
+                        case "Timer": {
+                            TimerNode timer = new TimerNode();
+                            if (nodeObj.has("durationMs")) {
+                                timer.getDurationMs().setValue(nodeObj.get("durationMs").getAsDouble());
+                            }
+                            if (nodeObj.has("pulse")) {
+                                timer.getPulse().setValue(nodeObj.get("pulse").getAsBoolean());
+                            }
+                            node = timer;
                             break;
                         }
                         case "Branch":

@@ -4,26 +4,18 @@ import com.adamk33n3r.nodegraph.nodes.TriggerNode;
 import com.adamk33n3r.nodegraph.nodes.constants.PluginVar;
 import com.adamk33n3r.runelite.watchdog.alerts.AdvancedAlert;
 import com.adamk33n3r.runelite.watchdog.alerts.ChatAlert;
-import com.adamk33n3r.runelite.watchdog.ui.panels.HistoryPanel;
 
 import net.runelite.api.ChatMessageType;
-import net.runelite.api.Client;
 import net.runelite.api.events.ChatMessage;
-import net.runelite.client.eventbus.EventBus;
-import net.runelite.client.game.ItemManager;
 import net.runelite.client.plugins.Plugin;
-import net.runelite.client.plugins.PluginManager;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
-
-import javax.inject.Provider;
 
 import java.util.List;
 import java.util.stream.Stream;
