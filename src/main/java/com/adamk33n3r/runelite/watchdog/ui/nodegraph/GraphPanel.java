@@ -73,6 +73,7 @@ public class GraphPanel extends JLayeredPane {
     private static final BufferedImage BACKGROUND_IMG = ImageUtil.loadImageResource(GraphPanel.class, "graph-bg.png");
     private double zoomLevel = 1.0;
     private boolean overviewMode = false;
+    private boolean suppressScroll = false;
     private Point popupLocation;
     @Getter
     private Graph graph;
@@ -469,6 +470,7 @@ public class GraphPanel extends JLayeredPane {
      * for each node and NodeConnections for each connection.
      */
     public void loadFromGraph(Graph g) {
+        this.suppressScroll = true;
         Map<Node, NodePanel> nodePanelMap = new java.util.IdentityHashMap<>();
         for (Node node : g.getNodes()) {
             NodePanel panel = this.createNodePanel(node, this.getNodeDisplayName(node));
@@ -493,6 +495,16 @@ public class GraphPanel extends JLayeredPane {
         }
         this.revalidate();
         this.repaint();
+        SwingUtilities.invokeLater(() -> SwingUtilities.invokeLater(() ->
+            this.suppressScroll = false
+        ));
+    }
+
+    @Override
+    public void scrollRectToVisible(Rectangle aRect) {
+        if (!this.suppressScroll) {
+            super.scrollRectToVisible(aRect);
+        }
     }
 
     private String getNodeDisplayName(Node node) {
