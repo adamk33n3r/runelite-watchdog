@@ -425,7 +425,7 @@ public class GraphPanel extends JLayeredPane {
                             break;
                         }
                         case PLUGIN: {
-                            PluginVar pluginNode = new PluginVar();
+                            PluginState pluginNode = new PluginState();
                             pluginNode.setX(px);
                             pluginNode.setY(py);
                             this.graph.add(pluginNode);
@@ -576,8 +576,8 @@ public class GraphPanel extends JLayeredPane {
         } else if (node instanceof Location) {
             Location locNode = (Location) node;
             return new LocationNodePanel(this, locNode, node.getX(), node.getY(), name, NODE_VARIABLE_COLOR);
-        } else if (node instanceof PluginVar) {
-            PluginVar pvNode = (PluginVar) node;
+        } else if (node instanceof PluginState) {
+            PluginState pvNode = (PluginState) node;
             return new PluginNodePanel(this, pvNode, node.getX(), node.getY(), name, NODE_VARIABLE_COLOR, injector.getInstance(PluginManager.class));
         } else if (node instanceof Inventory) {
             Inventory invNode = (Inventory) node;

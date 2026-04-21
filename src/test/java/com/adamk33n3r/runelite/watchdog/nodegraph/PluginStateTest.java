@@ -2,7 +2,7 @@ package com.adamk33n3r.runelite.watchdog.nodegraph;
 
 import com.adamk33n3r.nodegraph.Connection;
 import com.adamk33n3r.nodegraph.VarInput;
-import com.adamk33n3r.nodegraph.nodes.constants.PluginVar;
+import com.adamk33n3r.nodegraph.nodes.constants.PluginState;
 import org.junit.Test;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -10,18 +10,18 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.Assert.*;
 
-public class PluginVarTest {
+public class PluginStateTest {
 
     @Test
     public void test_setValue_true_reflects_in_getValue() {
-        PluginVar node = new PluginVar();
+        PluginState node = new PluginState();
         node.setValue(true);
         assertTrue(node.getValueOut().getValue());
     }
 
     @Test
     public void test_setValue_false_reflects_in_getValue() {
-        PluginVar node = new PluginVar();
+        PluginState node = new PluginState();
         node.setValue(true);
         node.setValue(false);
         assertFalse(node.getValueOut().getValue());
@@ -29,7 +29,7 @@ public class PluginVarTest {
 
     @Test
     public void test_onChange_fires_via_connected_input() {
-        PluginVar node = new PluginVar();
+        PluginState node = new PluginState();
         VarInput<Boolean> watcher = new VarInput<>(null, "watcher", Boolean.class, false);
         new Connection<>(node.getValueOut(), watcher);
 
@@ -51,7 +51,7 @@ public class PluginVarTest {
 
     @Test
     public void test_onChange_not_fired_after_connection_removed() {
-        PluginVar node = new PluginVar();
+        PluginState node = new PluginState();
         VarInput<Boolean> watcher = new VarInput<>(null, "watcher", Boolean.class, false);
         Connection<Boolean> conn = new Connection<>(node.getValueOut(), watcher);
 

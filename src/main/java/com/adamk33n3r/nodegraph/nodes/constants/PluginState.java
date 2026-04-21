@@ -7,12 +7,12 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class PluginVar extends VariableNode {
+public class PluginState extends VariableNode {
     private final VarInput<Boolean> value = new VarInput<>(this, "Value", Boolean.class, false);
     private final VarOutput<Boolean> valueOut = new VarOutput<>(this, "Value", Boolean.class, false);
     private String pluginName;
 
-    public PluginVar() {
+    public PluginState() {
         this.value.onChange(val -> this.process());
 
         reg(this.value);

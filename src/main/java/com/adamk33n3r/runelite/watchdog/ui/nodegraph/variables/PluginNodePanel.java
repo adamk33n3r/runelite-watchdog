@@ -1,6 +1,6 @@
 package com.adamk33n3r.runelite.watchdog.ui.nodegraph.variables;
 
-import com.adamk33n3r.nodegraph.nodes.constants.PluginVar;
+import com.adamk33n3r.nodegraph.nodes.constants.PluginState;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.GraphPanel;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.ConnectionLine;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.ConnectionPointOut;
@@ -18,7 +18,7 @@ import java.util.Comparator;
 public class PluginNodePanel extends VariableNodePanel {
     private final ConnectionPointOut<Boolean> valueOut;
 
-    public PluginNodePanel(GraphPanel graphPanel, PluginVar node, int x, int y, String name, Color color, PluginManager pluginManager) {
+    public PluginNodePanel(GraphPanel graphPanel, PluginState node, int x, int y, String name, Color color, PluginManager pluginManager) {
         super(graphPanel, node, x, y, name, color);
 
         Plugin[] plugins = pluginManager.getPlugins()

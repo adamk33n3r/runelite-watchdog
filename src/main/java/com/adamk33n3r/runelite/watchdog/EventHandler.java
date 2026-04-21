@@ -2,9 +2,8 @@ package com.adamk33n3r.runelite.watchdog;
 
 import com.adamk33n3r.nodegraph.nodes.TriggerNode;
 import com.adamk33n3r.nodegraph.nodes.constants.Inventory;
-import com.adamk33n3r.nodegraph.nodes.logic.InventoryCheck;
 import com.adamk33n3r.nodegraph.nodes.constants.Location;
-import com.adamk33n3r.nodegraph.nodes.constants.PluginVar;
+import com.adamk33n3r.nodegraph.nodes.constants.PluginState;
 import com.adamk33n3r.runelite.watchdog.alerts.*;
 import com.adamk33n3r.runelite.watchdog.alerts.InventoryAlert.InventoryAlertType;
 import com.adamk33n3r.runelite.watchdog.ui.panels.HistoryPanel;
@@ -610,7 +609,7 @@ public class EventHandler {
 
     public void initializePluginVars() {
         this.alertManager.getAllEnabledAlertsOfType(AdvancedAlert.class).forEach(adv ->
-            adv.getGraph().getNodesOfType(PluginVar.class)
+            adv.getGraph().getNodesOfType(PluginState.class)
                 .filter(pv -> pv.getPluginName() != null)
                 .forEach(pv ->
                     this.pluginManager.getPlugins().stream()
@@ -626,7 +625,7 @@ public class EventHandler {
         String changedPluginName = event.getPlugin().getName();
         boolean isLoaded = event.isLoaded();
         this.alertManager.getAllEnabledAlertsOfType(AdvancedAlert.class).forEach(adv ->
-            adv.getGraph().getNodesOfType(PluginVar.class)
+            adv.getGraph().getNodesOfType(PluginState.class)
                 .filter(pv -> changedPluginName.equals(pv.getPluginName()))
                 .forEach(pv -> pv.setValue(isLoaded))
         );

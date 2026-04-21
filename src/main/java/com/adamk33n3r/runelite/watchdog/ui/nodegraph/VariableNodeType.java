@@ -13,7 +13,7 @@ public enum VariableNodeType implements Displayable {
     BOOLEAN("Boolean", "Constant boolean", Bool.class, BoolNodePanel.class),
     NUMBER("Number", "Constant number", Num.class, NumberNodePanel.class),
     LOCATION("Current Location", "Outputs your current location", Location.class, LocationNodePanel.class),
-    PLUGIN("Plugin State", "Outputs true/false if a plugin is on/off", PluginVar.class, PluginNodePanel.class),
+    PLUGIN("Plugin State", "Outputs true/false if a plugin is on/off", PluginState.class, PluginNodePanel.class),
     INVENTORY("Inventory", "Inventory", Inventory.class, InventoryVariableNodePanel.class),
     ;
 

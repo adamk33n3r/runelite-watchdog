@@ -94,9 +94,9 @@ public class GraphSerializer implements JsonSerializer<Graph>, JsonDeserializer<
                 nodeObj.addProperty("b", ((Equality) node).getB().getValue());
             } else if (node instanceof Location) {
                 nodeObj.addProperty("type", "Location");
-            } else if (node instanceof PluginVar) {
+            } else if (node instanceof PluginState) {
                 nodeObj.addProperty("type", "PluginVar");
-                nodeObj.addProperty("pluginName", ((PluginVar) node).getPluginName());
+                nodeObj.addProperty("pluginName", ((PluginState) node).getPluginName());
             } else if (node instanceof Inventory) {
                 nodeObj.addProperty("type", "Inventory");
             } else if (node instanceof InventoryCheck) {
@@ -297,7 +297,7 @@ public class GraphSerializer implements JsonSerializer<Graph>, JsonDeserializer<
                             break;
                         }
                         case "PluginVar": {
-                            PluginVar pv = new PluginVar();
+                            PluginState pv = new PluginState();
                             if (nodeObj.has("pluginName")) {
                                 pv.setPluginName(nodeObj.get("pluginName").getAsString());
                             }

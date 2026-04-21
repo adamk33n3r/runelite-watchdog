@@ -8,6 +8,7 @@ import com.adamk33n3r.nodegraph.nodes.TriggerNode;
 import com.adamk33n3r.nodegraph.nodes.flow.Branch;
 import com.adamk33n3r.runelite.watchdog.alerts.Alert;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.AbstractMap;
@@ -32,9 +33,10 @@ public class Graph {
     @Getter
     private final List<Connection<?>> connections = new ArrayList<>();
 
+    @Setter
     private Consumer<Throwable> onError;
 
-    // Lazy-initialised, daemon-threaded scheduler — shared across all async nodes in this graph.
+    // Lazy-initialized, daemon-threaded scheduler — shared across all async nodes in this graph.
     private ScheduledExecutorService scheduler;
 
     private ScheduledExecutorService getScheduler() {
@@ -57,10 +59,6 @@ public class Graph {
                 if (this.onError != null) this.onError.accept(e);
             }
         };
-    }
-
-    public void setOnError(Consumer<Throwable> onError) {
-        this.onError = onError;
     }
 
     public void add(Node node) {
@@ -249,7 +247,7 @@ public class Graph {
                 }
                 // Exec arrival — cancel any running future (restart semantics) then schedule
                 timer.cancelCurrentFuture();
-                timer.getCancelled().set(false);
+                timer.getCanceled().set(false);
                 int durationMs = timer.getDurationMs().getValue().intValue();
                 boolean pulse = Boolean.TRUE.equals(timer.getPulse().getValue());
                 if (durationMs <= 0) {
@@ -266,7 +264,7 @@ public class Graph {
                     timer.setCurrentFuture(sched.schedule(this.wrap(() -> {
                         fireExec.run();
                         // Guard against Reset arriving between fireExec and scheduleAtFixedRate.
-                        if (!timer.getCancelled().get()) {
+                        if (!timer.getCanceled().get()) {
                             timer.setCurrentFuture(sched.scheduleAtFixedRate(firePulse, durationMs, durationMs, TimeUnit.MILLISECONDS));
                         }
                     }), durationMs, TimeUnit.MILLISECONDS));

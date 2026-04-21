@@ -1,7 +1,7 @@
 package com.adamk33n3r.runelite.watchdog;
 
 import com.adamk33n3r.nodegraph.nodes.TriggerNode;
-import com.adamk33n3r.nodegraph.nodes.constants.PluginVar;
+import com.adamk33n3r.nodegraph.nodes.constants.PluginState;
 import com.adamk33n3r.runelite.watchdog.alerts.AdvancedAlert;
 import com.adamk33n3r.runelite.watchdog.alerts.ChatAlert;
 
@@ -137,7 +137,7 @@ public class AdvancedAlertEventHandlerTest extends AlertTestBase {
         Mockito.when(pluginManager.getPlugins()).thenReturn(List.of(mockPlugin));
         Mockito.when(pluginManager.isPluginEnabled(mockPlugin)).thenReturn(true);
 
-        PluginVar pv = new PluginVar();
+        PluginState pv = new PluginState();
         pv.setPluginName("Bank");
         advSpy.getGraph().add(pv);
 
@@ -153,7 +153,7 @@ public class AdvancedAlertEventHandlerTest extends AlertTestBase {
         Mockito.when(pluginManager.getPlugins()).thenReturn(List.of(mockPlugin));
         Mockito.when(pluginManager.isPluginEnabled(mockPlugin)).thenReturn(false);
 
-        PluginVar pv = new PluginVar();
+        PluginState pv = new PluginState();
         pv.setPluginName("Bank");
         pv.setValue(true); // start true to confirm it gets corrected to false
         advSpy.getGraph().add(pv);
@@ -165,7 +165,7 @@ public class AdvancedAlertEventHandlerTest extends AlertTestBase {
 
     @Test
     public void initializePluginVars_nullPluginName_skipped() {
-        PluginVar pv = new PluginVar(); // pluginName is null by default
+        PluginState pv = new PluginState(); // pluginName is null by default
         advSpy.getGraph().add(pv);
 
         eventHandler.initializePluginVars();
@@ -180,7 +180,7 @@ public class AdvancedAlertEventHandlerTest extends AlertTestBase {
         Mockito.when(mockPlugin.getName()).thenReturn("OtherPlugin");
         Mockito.when(pluginManager.getPlugins()).thenReturn(List.of(mockPlugin));
 
-        PluginVar pv = new PluginVar();
+        PluginState pv = new PluginState();
         pv.setPluginName("NonExistentPlugin");
         advSpy.getGraph().add(pv);
 
