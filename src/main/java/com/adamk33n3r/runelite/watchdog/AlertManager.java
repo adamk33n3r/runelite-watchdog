@@ -1,9 +1,33 @@
 package com.adamk33n3r.runelite.watchdog;
 
 import com.adamk33n3r.nodegraph.Graph;
+import com.adamk33n3r.nodegraph.GraphSerializer;
+import com.adamk33n3r.nodegraph.NodeTypeRegistry;
 import com.adamk33n3r.nodegraph.nodes.ActionNode;
 import com.adamk33n3r.nodegraph.nodes.TriggerNode;
+import com.adamk33n3r.nodegraph.nodes.constants.Bool;
+import com.adamk33n3r.nodegraph.nodes.constants.Inventory;
+import com.adamk33n3r.nodegraph.nodes.constants.Location;
+import com.adamk33n3r.nodegraph.nodes.constants.Num;
+import com.adamk33n3r.nodegraph.nodes.constants.PluginState;
+import com.adamk33n3r.nodegraph.nodes.flow.Branch;
+import com.adamk33n3r.nodegraph.nodes.flow.DelayNode;
+import com.adamk33n3r.nodegraph.nodes.flow.TimerNode;
+import com.adamk33n3r.nodegraph.nodes.logic.BooleanGate;
+import com.adamk33n3r.nodegraph.nodes.logic.Equality;
+import com.adamk33n3r.nodegraph.nodes.logic.InventoryCheck;
+import com.adamk33n3r.nodegraph.nodes.logic.LocationCompare;
+import com.adamk33n3r.nodegraph.nodes.math.Add;
+import com.adamk33n3r.nodegraph.nodes.math.Clamp;
+import com.adamk33n3r.nodegraph.nodes.math.Divide;
+import com.adamk33n3r.nodegraph.nodes.math.Max;
+import com.adamk33n3r.nodegraph.nodes.math.Min;
+import com.adamk33n3r.nodegraph.nodes.math.Multiply;
+import com.adamk33n3r.nodegraph.nodes.math.Subtract;
+import com.adamk33n3r.nodegraph.nodes.utility.DisplayNode;
+import com.adamk33n3r.nodegraph.nodes.utility.NoteNode;
 import com.adamk33n3r.runelite.watchdog.alerts.*;
+
 import com.adamk33n3r.runelite.watchdog.elevenlabs.ElevenLabs;
 import com.adamk33n3r.runelite.watchdog.hub.AlertHubCategory;
 import com.adamk33n3r.runelite.watchdog.notifications.*;
@@ -120,12 +144,96 @@ public class AlertManager {
             .registerSubtype(DismissObjectMarker.class)
             .registerSubtype(DismissOverlay.class)
             .registerSubtype(DismissScreenMarker.class);
-        GraphSerializer graphSerializer = new GraphSerializer(alertTypeFactory, notificationTypeFactory, this.clientGson);
-        this.gson = this.clientGson.newBuilder()
+        // Add new nodes here
+        NodeTypeRegistry nodeRegistry = new NodeTypeRegistry()
+            // Trigger and action nodes (complex — carry domain objects outside of vars)
+            .registerSubtype(TriggerNode.class,
+                (json, gson) -> new TriggerNode(gson.fromJson(json.get("alert"), Alert.class)),
+                (node, obj, gson) -> obj.add("alert", gson.toJsonTree(node.getAlert(), Alert.class)))
+            .registerSubtype(ActionNode.class,
+                (json, gson) -> new ActionNode(gson.fromJson(json.get("notification"), com.adamk33n3r.runelite.watchdog.notifications.Notification.class)),
+                (node, obj, gson) -> obj.add("notification", gson.toJsonTree(node.getNotification(), com.adamk33n3r.runelite.watchdog.notifications.Notification.class)))
+            .registerAlias("NotificationNode", ActionNode.class)
+            // Math nodes (simple — all state in registered vars)
+            .registerSubtype(Add.class, Add::new)
+            .registerSubtype(Subtract.class, Subtract::new)
+            .registerSubtype(Multiply.class, Multiply::new)
+            .registerSubtype(Divide.class, Divide::new)
+            .registerSubtype(Min.class, Min::new)
+            .registerSubtype(Max.class, Max::new)
+            .registerSubtype(Clamp.class, Clamp::new)
+            // Logic nodes (simple)
+            .registerSubtype(BooleanGate.class, BooleanGate::new)
+            .registerSubtype(Equality.class, Equality::new)
+            // Constant nodes (simple)
+            .registerSubtype(Bool.class, Bool::new)
+            .registerSubtype(Num.class, Num::new)
+            .registerSubtype(Location.class, Location::new)
+            .registerSubtype(Inventory.class, Inventory::new)
+            // Variable nodes with extra non-var state
+            .registerSubtype(PluginState.class,
+                (json, gson) -> {
+                    PluginState ps = new PluginState();
+                    if (json.has("pluginName")) ps.setPluginName(json.get("pluginName").getAsString());
+                    return ps;
+                },
+                (ps, obj, gson) -> { if (ps.getPluginName() != null) obj.addProperty("pluginName", ps.getPluginName()); })
+            .registerAlias("PluginVar", PluginState.class)
+            .registerSubtype(InventoryCheck.class,
+                (json, gson) -> {
+                    InventoryCheck inv = new InventoryCheck();
+                    if (json.has("inventoryAlertType")) inv.setInventoryAlertType(InventoryAlert.InventoryAlertType.valueOf(json.get("inventoryAlertType").getAsString()));
+                    if (json.has("inventoryMatchType")) inv.setInventoryMatchType(InventoryAlert.InventoryMatchType.valueOf(json.get("inventoryMatchType").getAsString()));
+                    if (json.has("itemName")) inv.setItemName(json.get("itemName").getAsString());
+                    if (json.has("isRegexEnabled")) inv.setRegexEnabled(json.get("isRegexEnabled").getAsBoolean());
+                    if (json.has("itemQuantity")) inv.setItemQuantity(json.get("itemQuantity").getAsInt());
+                    if (json.has("quantityComparator")) inv.setQuantityComparator(ComparableNumber.Comparator.valueOf(json.get("quantityComparator").getAsString()));
+                    return inv;
+                },
+                (inv, obj, gson) -> {
+                    obj.addProperty("inventoryAlertType", inv.getInventoryAlertType().name());
+                    obj.addProperty("inventoryMatchType", inv.getInventoryMatchType().name());
+                    obj.addProperty("itemName", inv.getItemName());
+                    obj.addProperty("isRegexEnabled", inv.isRegexEnabled());
+                    obj.addProperty("itemQuantity", inv.getItemQuantity());
+                    obj.addProperty("quantityComparator", inv.getQuantityComparator().name());
+                })
+            .registerAlias("InventoryVar", InventoryCheck.class)
+            .registerSubtype(LocationCompare.class,
+                (json, gson) -> {
+                    LocationCompare lc = new LocationCompare();
+                    if (json.has("distance")) lc.setDistance(json.get("distance").getAsInt());
+                    if (json.has("cardinalOnly")) lc.setCardinalOnly(json.get("cardinalOnly").getAsBoolean());
+                    return lc;
+                },
+                (lc, obj, gson) -> {
+                    obj.addProperty("distance", lc.getDistance());
+                    obj.addProperty("cardinalOnly", lc.isCardinalOnly());
+                })
+            // Flow nodes
+            .registerSubtype(DelayNode.class, DelayNode::new)
+            .registerAlias("Delay", DelayNode.class)
+            .registerSubtype(com.adamk33n3r.nodegraph.nodes.flow.Counter.class, com.adamk33n3r.nodegraph.nodes.flow.Counter::new)
+            .registerSubtype(TimerNode.class, TimerNode::new)
+            .registerAlias("Timer", TimerNode.class)
+            .registerSubtype(Branch.class, Branch::new)
+            // Utility nodes
+            .registerSubtype(DisplayNode.class, DisplayNode::new)
+            .registerSubtype(NoteNode.class,
+                (json, gson) -> {
+                    NoteNode n = new NoteNode();
+                    if (json.has("note")) n.setNote(json.get("note").getAsString());
+                    return n;
+                },
+                (note, obj, gson) -> obj.addProperty("note", note.getNote()));
+        Gson intermediateGson = this.clientGson.newBuilder()
 //            .serializeNulls()
             .registerTypeAdapterFactory(alertTypeFactory)
             .registerTypeAdapterFactory(notificationTypeFactory)
             .registerTypeAdapter(AlertHubCategory.class, new MixedCaseEnumAdapter())
+            .create();
+        GraphSerializer graphSerializer = new GraphSerializer(intermediateGson, nodeRegistry);
+        this.gson = intermediateGson.newBuilder()
             .registerTypeAdapter(Graph.class, graphSerializer)
             .create();
     }

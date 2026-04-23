@@ -14,8 +14,6 @@ public class Counter extends Node {
     private final VarOutput<ExecSignal> execOut = new VarOutput<>(this, "Exec", ExecSignal.class, new ExecSignal(new String[0]));
     private final VarOutput<Number> countOut = new VarOutput<>(this, "Count", Number.class, 0);
 
-    private int value = 0;
-
     public Counter() {
         this.exec.setAllowMultipleConnections(true);
         this.reset.setAllowMultipleConnections(true);
@@ -33,18 +31,15 @@ public class Counter extends Node {
 
     // Called by Graph.executeExecChainBFS when the exec input fires
     public void increment() {
-        this.value++;
-        this.count.setValue(this.value);
+        this.count.setValue(this.count.getValue().intValue() + 1);
     }
 
     // Called by Graph.executeExecChainBFS when the reset input fires
     public void reset() {
-        this.value = 0;
-        this.count.setValue(this.value);
+        this.count.setValue(0);
     }
 
     public void initValue(int v) {
-        this.value = v;
         this.count.setValue(v);
     }
 

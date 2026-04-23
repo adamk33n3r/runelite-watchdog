@@ -1,7 +1,9 @@
 package com.adamk33n3r.runelite.watchdog.nodegraph;
 
 import com.adamk33n3r.nodegraph.Graph;
+import com.adamk33n3r.nodegraph.NodeTypeRegistry;
 import com.adamk33n3r.nodegraph.nodes.ActionNode;
+import com.adamk33n3r.nodegraph.nodes.TriggerNode;
 import com.adamk33n3r.nodegraph.nodes.logic.BooleanGate;
 import com.adamk33n3r.nodegraph.nodes.logic.Equality;
 import com.adamk33n3r.nodegraph.nodes.flow.Branch;
@@ -10,7 +12,7 @@ import com.adamk33n3r.runelite.watchdog.RuntimeTypeAdapterFactory;
 import com.adamk33n3r.runelite.watchdog.alerts.Alert;
 import com.adamk33n3r.runelite.watchdog.alerts.AdvancedAlert;
 import com.adamk33n3r.runelite.watchdog.alerts.ChatAlert;
-import com.adamk33n3r.runelite.watchdog.alerts.GraphSerializer;
+import com.adamk33n3r.nodegraph.GraphSerializer;
 import com.adamk33n3r.runelite.watchdog.notifications.Notification;
 import com.adamk33n3r.runelite.watchdog.notifications.ScreenFlash;
 
@@ -34,10 +36,29 @@ public class NodeSerializationRoundTripTest {
             .registerSubtype(AdvancedAlert.class);
         RuntimeTypeAdapterFactory<Notification> notifFactory = RuntimeTypeAdapterFactory.of(Notification.class)
             .registerSubtype(ScreenFlash.class);
-        GraphSerializer serializer = new GraphSerializer(alertFactory, notifFactory, RuneLiteAPI.GSON);
-        this.gson = RuneLiteAPI.GSON.newBuilder()
+        Gson intermediateGson = RuneLiteAPI.GSON.newBuilder()
             .registerTypeAdapterFactory(alertFactory)
             .registerTypeAdapterFactory(notifFactory)
+            .create();
+        NodeTypeRegistry registry = new NodeTypeRegistry()
+            .registerSubtype(TriggerNode.class,
+                (json, gson) -> new TriggerNode(intermediateGson.fromJson(json.get("alert"), Alert.class)),
+                (node, obj, gson) -> obj.add("alert", intermediateGson.toJsonTree(node.getAlert(), Alert.class)))
+            .registerSubtype(ActionNode.class,
+                (json, gson) -> new ActionNode(intermediateGson.fromJson(json.get("notification"), Notification.class)),
+                (node, obj, gson) -> obj.add("notification", intermediateGson.toJsonTree(node.getNotification(), Notification.class)))
+            .registerSubtype(Add.class, Add::new)
+            .registerSubtype(Subtract.class, Subtract::new)
+            .registerSubtype(Multiply.class, Multiply::new)
+            .registerSubtype(Divide.class, Divide::new)
+            .registerSubtype(Min.class, Min::new)
+            .registerSubtype(Max.class, Max::new)
+            .registerSubtype(Clamp.class, Clamp::new)
+            .registerSubtype(BooleanGate.class, BooleanGate::new)
+            .registerSubtype(Equality.class, Equality::new)
+            .registerSubtype(Branch.class, Branch::new);
+        GraphSerializer serializer = new GraphSerializer(intermediateGson, registry);
+        this.gson = intermediateGson.newBuilder()
             .registerTypeAdapter(Graph.class, serializer)
             .create();
     }
