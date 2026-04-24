@@ -1,6 +1,9 @@
 package com.adamk33n3r.runelite.watchdog.ui.nodegraph;
 
 import com.adamk33n3r.nodegraph.nodes.utility.NoteNode;
+import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.ConnectionLine;
+import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.ConnectionPointIn;
+import com.adamk33n3r.runelite.watchdog.ui.nodegraph.inputs.TextInput;
 
 import javax.swing.*;
 import java.awt.*;
@@ -14,15 +17,10 @@ public class NoteNodePanel extends NodePanel {
             label.setForeground(Color.ORANGE);
             this.items.add(label);
         } else {
-            JTextArea textArea = new JTextArea(node.getNote(), 8, 16);
-            textArea.setLineWrap(true);
-            textArea.setWrapStyleWord(true);
-            textArea.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
-                public void insertUpdate(javax.swing.event.DocumentEvent e) { node.setNote(textArea.getText()); graphPanel.notifyChange(); }
-                public void removeUpdate(javax.swing.event.DocumentEvent e) { node.setNote(textArea.getText()); graphPanel.notifyChange(); }
-                public void changedUpdate(javax.swing.event.DocumentEvent e) {}
-            });
-            this.items.add(new JScrollPane(textArea));
+            ConnectionPointIn<String> noteIn = new ConnectionPointIn<>(this, node.getNote());
+            TextInput textInput = new TextInput("Enter note...", "Note text", node.getNote());
+            this.items.add(new ConnectionLine<>(noteIn, textInput, null));
+            this.watchDirty(node.getNote());
         }
 
         this.pack();

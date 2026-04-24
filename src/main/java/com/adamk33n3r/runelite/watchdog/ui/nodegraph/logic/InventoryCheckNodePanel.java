@@ -4,16 +4,16 @@ import com.adamk33n3r.nodegraph.nodes.logic.InventoryCheck;
 import com.adamk33n3r.runelite.watchdog.InventoryItemData;
 import com.adamk33n3r.runelite.watchdog.alerts.InventoryAlert;
 import com.adamk33n3r.runelite.watchdog.ui.ComparableNumber;
-import com.adamk33n3r.runelite.watchdog.ui.alerts.InventoryAlertPanel;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.GraphPanel;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.NodePanel;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.ConnectionLine;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.ConnectionPointIn;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.ConnectionPointOut;
+import com.adamk33n3r.runelite.watchdog.ui.nodegraph.inputs.BoolInput;
+import com.adamk33n3r.runelite.watchdog.ui.nodegraph.inputs.EnumInput;
+import com.adamk33n3r.runelite.watchdog.ui.nodegraph.inputs.NumberInput;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.inputs.TextInput;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.inputs.ViewInput;
-import com.adamk33n3r.runelite.watchdog.ui.nodegraph.variables.VariableNodePanel;
-import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
 import lombok.Getter;
 
 import javax.swing.*;
@@ -26,104 +26,115 @@ public class InventoryCheckNodePanel extends NodePanel {
     private final ConnectionPointOut<Boolean> valueOut;
     private final InventoryCheck inventoryCheck;
     private final ViewInput<Boolean> matchView;
+    // Index after which conditional controls are inserted (alertType row is at index 1)
+    private int conditionalStartIndex;
 
     public InventoryCheckNodePanel(GraphPanel graphPanel, InventoryCheck node, int x, int y, String name, Color color) {
         super(graphPanel, node, x, y, name, color);
         this.inventoryCheck = node;
 
+        // Inventory input row
         this.inventoryIn = new ConnectionPointIn<>(this, node.getInventory());
-
         ViewInput<InventoryItemData.InventoryItemDataMap> invView = new ViewInput<>("Inventory", node.getInventory().getValue());
-//        addDisposer(node.getInventory().onChange(invView::setValue));
         this.items.add(new ConnectionLine<>(this.inventoryIn, invView, null));
 
-        JComboBox<InventoryAlert.InventoryAlertType> typeSelect = PanelUtils.createSelect(
-            Arrays.stream(InventoryAlert.InventoryAlertType.values())
-                .filter(iat -> iat != InventoryAlert.InventoryAlertType.ITEM_CHANGE)
-                .toArray(InventoryAlert.InventoryAlertType[]::new),
-            node.getInventoryAlertType(),
-            selected -> {
-                node.setInventoryAlertType(selected);
-                this.updateResult();
-                this.rebuildContent();
-            });
-        this.items.add(typeSelect);
+        // Alert Type — filtered to exclude ITEM_CHANGE (matches original UI)
+        InventoryAlert.InventoryAlertType[] visibleTypes = Arrays.stream(InventoryAlert.InventoryAlertType.values())
+            .filter(t -> t != InventoryAlert.InventoryAlertType.ITEM_CHANGE)
+            .toArray(InventoryAlert.InventoryAlertType[]::new);
+        ConnectionPointIn<InventoryAlert.InventoryAlertType> typeIn = new ConnectionPointIn<>(this, node.getInventoryAlertType());
+        this.items.add(new ConnectionLine<>(typeIn, new EnumInput<>("Alert Type", node.getInventoryAlertType(), visibleTypes), null));
 
+        // Record where conditional controls begin
+        this.conditionalStartIndex = this.items.getComponentCount();
         this.addConditionalControls(node);
 
+        // Result output row
         this.valueOut = new ConnectionPointOut<>(this, node.getResultOut());
-
         this.matchView = new ViewInput<>("Match", node.getResultOut().getValue());
         addDisposer(node.getInventory().onChange(v -> this.matchView.setValue(node.getResultOut().getValue())));
         this.items.add(new ConnectionLine<>(null, this.matchView, this.valueOut));
+
+        // Rebuild conditional controls when alert type changes
+        // Panel is constructed after graph load, so deserialization onChange has already fired.
+        addDisposer(node.getInventoryAlertType().onChange(v -> {
+            this.updateResult();
+            SwingUtilities.invokeLater(this::rebuildContent);
+        }));
+
+        this.watchDirty(
+            node.getInventoryAlertType(),
+            node.getInventoryMatchType(),
+            node.getItemName(),
+            node.getRegexEnabled(),
+            node.getItemQuantity(),
+            node.getQuantityComparator()
+        );
 
         this.pack();
     }
 
     private void addConditionalControls(InventoryCheck node) {
-        InventoryAlert.InventoryAlertType alertType = node.getInventoryAlertType();
-        boolean isItemChange = alertType == InventoryAlert.InventoryAlertType.ITEM_CHANGE;
+        InventoryAlert.InventoryAlertType alertType = node.getInventoryAlertType().getValue();
 
-        if (alertType == InventoryAlert.InventoryAlertType.ITEM || isItemChange) {
-            TextInput itemNameInput = new TextInput(
-                "Enter the name of the item to trigger on...",
-                "The name to trigger on. Supports glob (*)",
-                node.getItemName()
-            );
-            itemNameInput.registerOnChange(val -> {
-                node.setItemName(val);
-                this.updateResult();
-            });
-            this.items.add(itemNameInput);
+        if (alertType == InventoryAlert.InventoryAlertType.ITEM
+            || alertType == InventoryAlert.InventoryAlertType.ITEM_CHANGE) {
 
-            JComboBox<InventoryAlert.InventoryMatchType> matchSelect = PanelUtils.createSelect(
-                InventoryAlert.InventoryMatchType.values(), node.getInventoryMatchType(), selected -> {
-                    node.setInventoryMatchType(selected);
-                    this.updateResult();
-                });
-            this.items.add(matchSelect);
+            ConnectionPointIn<String> nameIn = new ConnectionPointIn<>(this, node.getItemName());
+            this.items.add(new ConnectionLine<>(nameIn,
+                new TextInput("Enter item name...", "Item name, supports glob (*)", node.getItemName()), null));
+            addDisposer(node.getItemName().onChange(_v -> this.updateResult()));
 
-            JCheckBox regexCheckbox = new JCheckBox("Regex", node.isRegexEnabled());
-            regexCheckbox.addActionListener(e -> {
-                node.setRegexEnabled(regexCheckbox.isSelected());
-                this.updateResult();
-            });
-            this.items.add(regexCheckbox);
+            ConnectionPointIn<InventoryAlert.InventoryMatchType> matchIn = new ConnectionPointIn<>(this, node.getInventoryMatchType());
+            this.items.add(new ConnectionLine<>(matchIn,
+                new EnumInput<>("Match Type", node.getInventoryMatchType()), null));
+            addDisposer(node.getInventoryMatchType().onChange(_v -> this.updateResult()));
 
-            String quantityLabel = isItemChange ? "Change" : "Quantity";
-            int min = isItemChange ? Integer.MIN_VALUE : 0;
-            ComparableNumber comparableNumber = new ComparableNumber(
-                node.getItemQuantity(), val -> { node.setItemQuantity(val); this.updateResult(); },
-                min, Integer.MAX_VALUE, 1,
-                node.getQuantityComparator(), val -> { node.setQuantityComparator(val); this.updateResult(); });
-            JPanel quantityPanel = PanelUtils.createLabeledComponent(quantityLabel,
-                isItemChange ? "Quantity change to trigger on" : "Item quantity to trigger on", comparableNumber);
-            this.items.add(quantityPanel);
+            ConnectionPointIn<Boolean> regexIn = new ConnectionPointIn<>(this, node.getRegexEnabled());
+            this.items.add(new ConnectionLine<>(regexIn,
+                new BoolInput("Regex", node.getRegexEnabled()), null));
+            addDisposer(node.getRegexEnabled().onChange(_v -> this.updateResult()));
+
+            ConnectionPointIn<Number> qtyIn = new ConnectionPointIn<>(this, node.getItemQuantity());
+            this.items.add(new ConnectionLine<>(qtyIn,
+                new NumberInput("Quantity", node.getItemQuantity()), null));
+            addDisposer(node.getItemQuantity().onChange(_v -> this.updateResult()));
+
+            ConnectionPointIn<ComparableNumber.Comparator> cmpIn = new ConnectionPointIn<>(this, node.getQuantityComparator());
+            this.items.add(new ConnectionLine<>(cmpIn,
+                new EnumInput<>("Comparator", node.getQuantityComparator()), null));
+            addDisposer(node.getQuantityComparator().onChange(_v -> this.updateResult()));
+
         } else if (alertType == InventoryAlert.InventoryAlertType.SLOTS) {
-            ComparableNumber comparableNumber = new ComparableNumber(
-                node.getItemQuantity(), val -> { node.setItemQuantity(val); this.updateResult(); },
-                0, Integer.MAX_VALUE, 1,
-                node.getQuantityComparator(), val -> { node.setQuantityComparator(val); this.updateResult(); });
-            JPanel quantityPanel = PanelUtils.createLabeledComponent("Quantity", "Slot count to trigger on", comparableNumber);
-            this.items.add(quantityPanel);
+            ConnectionPointIn<Number> qtyIn = new ConnectionPointIn<>(this, node.getItemQuantity());
+            this.items.add(new ConnectionLine<>(qtyIn,
+                new NumberInput("Quantity", node.getItemQuantity()), null));
+            addDisposer(node.getItemQuantity().onChange(_v -> this.updateResult()));
+
+            ConnectionPointIn<ComparableNumber.Comparator> cmpIn = new ConnectionPointIn<>(this, node.getQuantityComparator());
+            this.items.add(new ConnectionLine<>(cmpIn,
+                new EnumInput<>("Comparator", node.getQuantityComparator()), null));
+            addDisposer(node.getQuantityComparator().onChange(_v -> this.updateResult()));
         }
     }
 
     private void updateResult() {
         this.inventoryCheck.process();
-        this.matchView.setValue(this.inventoryCheck.getResultOut().getValue());
+        if (this.matchView != null) {
+            this.matchView.setValue(this.inventoryCheck.getResultOut().getValue());
+        }
         this.notifyChange();
     }
 
     private void rebuildContent() {
-        // Remove everything after the type select (index 1) and before the output line
-        // Items layout: [0]=matchSelect, [1]=typeSelect, [2..n-1]=conditional, [n]=connectionLine
-        while (this.items.getComponentCount() > 2) {
-            this.items.remove(2);
+        // Remove all conditional controls and the result row (everything from conditionalStartIndex onward)
+        while (this.items.getComponentCount() > this.conditionalStartIndex) {
+            this.items.remove(this.conditionalStartIndex);
         }
+
         this.addConditionalControls(this.inventoryCheck);
 
-        // Re-add the output line
+        // Re-add result row
         ViewInput<Boolean> valueView = new ViewInput<>("Match", this.inventoryCheck.getResultOut().getValue());
         this.items.add(new ConnectionLine<>(null, valueView, this.valueOut));
 

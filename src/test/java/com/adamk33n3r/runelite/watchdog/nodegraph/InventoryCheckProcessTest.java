@@ -36,7 +36,7 @@ public class InventoryCheckProcessTest {
     @Test
     public void full_28Items_isTrue() {
         InventoryCheck ic = new InventoryCheck();
-        ic.setInventoryAlertType(InventoryAlert.InventoryAlertType.FULL);
+        ic.getInventoryAlertType().setValue(InventoryAlert.InventoryAlertType.FULL);
         ic.getInventory().setValue(makeMap(28));
         ic.process();
         assertTrue(ic.getResultOut().getValue());
@@ -45,7 +45,7 @@ public class InventoryCheckProcessTest {
     @Test
     public void full_27Items_isFalse() {
         InventoryCheck ic = new InventoryCheck();
-        ic.setInventoryAlertType(InventoryAlert.InventoryAlertType.FULL);
+        ic.getInventoryAlertType().setValue(InventoryAlert.InventoryAlertType.FULL);
         ic.getInventory().setValue(makeMap(27));
         ic.process();
         assertFalse(ic.getResultOut().getValue());
@@ -56,7 +56,7 @@ public class InventoryCheckProcessTest {
     @Test
     public void empty_0Items_isTrue() {
         InventoryCheck ic = new InventoryCheck();
-        ic.setInventoryAlertType(InventoryAlert.InventoryAlertType.EMPTY);
+        ic.getInventoryAlertType().setValue(InventoryAlert.InventoryAlertType.EMPTY);
         ic.getInventory().setValue(makeMap(0));
         ic.process();
         assertTrue(ic.getResultOut().getValue());
@@ -65,7 +65,7 @@ public class InventoryCheckProcessTest {
     @Test
     public void empty_1Item_isFalse() {
         InventoryCheck ic = new InventoryCheck();
-        ic.setInventoryAlertType(InventoryAlert.InventoryAlertType.EMPTY);
+        ic.getInventoryAlertType().setValue(InventoryAlert.InventoryAlertType.EMPTY);
         ic.getInventory().setValue(makeMap(1));
         ic.process();
         assertFalse(ic.getResultOut().getValue());
@@ -76,9 +76,9 @@ public class InventoryCheckProcessTest {
     @Test
     public void slots_greaterThanOrEquals_meetsThreshold_isTrue() {
         InventoryCheck ic = new InventoryCheck();
-        ic.setInventoryAlertType(InventoryAlert.InventoryAlertType.SLOTS);
-        ic.setItemQuantity(5);
-        ic.setQuantityComparator(ComparableNumber.Comparator.GREATER_THAN_OR_EQUALS);
+        ic.getInventoryAlertType().setValue(InventoryAlert.InventoryAlertType.SLOTS);
+        ic.getItemQuantity().setValue(5);
+        ic.getQuantityComparator().setValue(ComparableNumber.Comparator.GREATER_THAN_OR_EQUALS);
         ic.getInventory().setValue(makeMap(10));
         ic.process();
         assertTrue(ic.getResultOut().getValue());
@@ -87,9 +87,9 @@ public class InventoryCheckProcessTest {
     @Test
     public void slots_greaterThan_belowThreshold_isFalse() {
         InventoryCheck ic = new InventoryCheck();
-        ic.setInventoryAlertType(InventoryAlert.InventoryAlertType.SLOTS);
-        ic.setItemQuantity(10);
-        ic.setQuantityComparator(ComparableNumber.Comparator.GREATER_THAN);
+        ic.getInventoryAlertType().setValue(InventoryAlert.InventoryAlertType.SLOTS);
+        ic.getItemQuantity().setValue(10);
+        ic.getQuantityComparator().setValue(ComparableNumber.Comparator.GREATER_THAN);
         ic.getInventory().setValue(makeMap(5));
         ic.process();
         assertFalse(ic.getResultOut().getValue());
@@ -98,9 +98,9 @@ public class InventoryCheckProcessTest {
     @Test
     public void slots_lessThan_belowThreshold_isTrue() {
         InventoryCheck ic = new InventoryCheck();
-        ic.setInventoryAlertType(InventoryAlert.InventoryAlertType.SLOTS);
-        ic.setItemQuantity(10);
-        ic.setQuantityComparator(ComparableNumber.Comparator.LESS_THAN);
+        ic.getInventoryAlertType().setValue(InventoryAlert.InventoryAlertType.SLOTS);
+        ic.getItemQuantity().setValue(10);
+        ic.getQuantityComparator().setValue(ComparableNumber.Comparator.LESS_THAN);
         ic.getInventory().setValue(makeMap(5));
         ic.process();
         assertTrue(ic.getResultOut().getValue());
@@ -109,9 +109,9 @@ public class InventoryCheckProcessTest {
     @Test
     public void slots_lessThanOrEquals_atThreshold_isTrue() {
         InventoryCheck ic = new InventoryCheck();
-        ic.setInventoryAlertType(InventoryAlert.InventoryAlertType.SLOTS);
-        ic.setItemQuantity(5);
-        ic.setQuantityComparator(ComparableNumber.Comparator.LESS_THAN_OR_EQUALS);
+        ic.getInventoryAlertType().setValue(InventoryAlert.InventoryAlertType.SLOTS);
+        ic.getItemQuantity().setValue(5);
+        ic.getQuantityComparator().setValue(ComparableNumber.Comparator.LESS_THAN_OR_EQUALS);
         ic.getInventory().setValue(makeMap(5));
         ic.process();
         assertTrue(ic.getResultOut().getValue());
@@ -120,9 +120,9 @@ public class InventoryCheckProcessTest {
     @Test
     public void slots_equals_exact_isTrue() {
         InventoryCheck ic = new InventoryCheck();
-        ic.setInventoryAlertType(InventoryAlert.InventoryAlertType.SLOTS);
-        ic.setItemQuantity(7);
-        ic.setQuantityComparator(ComparableNumber.Comparator.EQUALS);
+        ic.getInventoryAlertType().setValue(InventoryAlert.InventoryAlertType.SLOTS);
+        ic.getItemQuantity().setValue(7);
+        ic.getQuantityComparator().setValue(ComparableNumber.Comparator.EQUALS);
         ic.getInventory().setValue(makeMap(7));
         ic.process();
         assertTrue(ic.getResultOut().getValue());
@@ -131,9 +131,9 @@ public class InventoryCheckProcessTest {
     @Test
     public void slots_notEquals_differentCount_isTrue() {
         InventoryCheck ic = new InventoryCheck();
-        ic.setInventoryAlertType(InventoryAlert.InventoryAlertType.SLOTS);
-        ic.setItemQuantity(7);
-        ic.setQuantityComparator(ComparableNumber.Comparator.NOT_EQUALS);
+        ic.getInventoryAlertType().setValue(InventoryAlert.InventoryAlertType.SLOTS);
+        ic.getItemQuantity().setValue(7);
+        ic.getQuantityComparator().setValue(ComparableNumber.Comparator.NOT_EQUALS);
         ic.getInventory().setValue(makeMap(3));
         ic.process();
         assertTrue(ic.getResultOut().getValue());
@@ -144,11 +144,11 @@ public class InventoryCheckProcessTest {
     @Test
     public void item_globMatch_found_isTrue() {
         InventoryCheck ic = new InventoryCheck();
-        ic.setInventoryAlertType(InventoryAlert.InventoryAlertType.ITEM);
-        ic.setInventoryMatchType(InventoryAlert.InventoryMatchType.BOTH);
-        ic.setItemName("Shark*");
-        ic.setItemQuantity(1);
-        ic.setQuantityComparator(ComparableNumber.Comparator.GREATER_THAN_OR_EQUALS);
+        ic.getInventoryAlertType().setValue(InventoryAlert.InventoryAlertType.ITEM);
+        ic.getInventoryMatchType().setValue(InventoryAlert.InventoryMatchType.BOTH);
+        ic.getItemName().setValue("Shark*");
+        ic.getItemQuantity().setValue(1);
+        ic.getQuantityComparator().setValue(ComparableNumber.Comparator.GREATER_THAN_OR_EQUALS);
         ic.getInventory().setValue(makeMapWithItem(1, "Shark", 3, false));
         ic.process();
         assertTrue(ic.getResultOut().getValue());
@@ -157,11 +157,11 @@ public class InventoryCheckProcessTest {
     @Test
     public void item_globMatch_notFound_isFalse() {
         InventoryCheck ic = new InventoryCheck();
-        ic.setInventoryAlertType(InventoryAlert.InventoryAlertType.ITEM);
-        ic.setInventoryMatchType(InventoryAlert.InventoryMatchType.BOTH);
-        ic.setItemName("Sword*");
-        ic.setItemQuantity(1);
-        ic.setQuantityComparator(ComparableNumber.Comparator.GREATER_THAN_OR_EQUALS);
+        ic.getInventoryAlertType().setValue(InventoryAlert.InventoryAlertType.ITEM);
+        ic.getInventoryMatchType().setValue(InventoryAlert.InventoryMatchType.BOTH);
+        ic.getItemName().setValue("Sword*");
+        ic.getItemQuantity().setValue(1);
+        ic.getQuantityComparator().setValue(ComparableNumber.Comparator.GREATER_THAN_OR_EQUALS);
         ic.getInventory().setValue(makeMapWithItem(1, "Shark", 3, false));
         ic.process();
         assertFalse(ic.getResultOut().getValue());
@@ -170,12 +170,12 @@ public class InventoryCheckProcessTest {
     @Test
     public void item_regexMatch_found_isTrue() {
         InventoryCheck ic = new InventoryCheck();
-        ic.setInventoryAlertType(InventoryAlert.InventoryAlertType.ITEM);
-        ic.setInventoryMatchType(InventoryAlert.InventoryMatchType.BOTH);
+        ic.getInventoryAlertType().setValue(InventoryAlert.InventoryAlertType.ITEM);
+        ic.getInventoryMatchType().setValue(InventoryAlert.InventoryMatchType.BOTH);
         ic.setRegexEnabled(true);
-        ic.setItemName("Sh.*k");
-        ic.setItemQuantity(1);
-        ic.setQuantityComparator(ComparableNumber.Comparator.GREATER_THAN_OR_EQUALS);
+        ic.getItemName().setValue("Sh.*k");
+        ic.getItemQuantity().setValue(1);
+        ic.getQuantityComparator().setValue(ComparableNumber.Comparator.GREATER_THAN_OR_EQUALS);
         ic.getInventory().setValue(makeMapWithItem(1, "Shark", 2, false));
         ic.process();
         assertTrue(ic.getResultOut().getValue());
@@ -184,11 +184,11 @@ public class InventoryCheckProcessTest {
     @Test
     public void item_quantityBelowThreshold_isFalse() {
         InventoryCheck ic = new InventoryCheck();
-        ic.setInventoryAlertType(InventoryAlert.InventoryAlertType.ITEM);
-        ic.setInventoryMatchType(InventoryAlert.InventoryMatchType.BOTH);
-        ic.setItemName("Shark");
-        ic.setItemQuantity(10);
-        ic.setQuantityComparator(ComparableNumber.Comparator.GREATER_THAN_OR_EQUALS);
+        ic.getInventoryAlertType().setValue(InventoryAlert.InventoryAlertType.ITEM);
+        ic.getInventoryMatchType().setValue(InventoryAlert.InventoryMatchType.BOTH);
+        ic.getItemName().setValue("Shark");
+        ic.getItemQuantity().setValue(10);
+        ic.getQuantityComparator().setValue(ComparableNumber.Comparator.GREATER_THAN_OR_EQUALS);
         ic.getInventory().setValue(makeMapWithItem(1, "Shark", 3, false));
         ic.process();
         assertFalse(ic.getResultOut().getValue());
@@ -199,11 +199,11 @@ public class InventoryCheckProcessTest {
     @Test
     public void item_notedFilter_noted_matches() {
         InventoryCheck ic = new InventoryCheck();
-        ic.setInventoryAlertType(InventoryAlert.InventoryAlertType.ITEM);
-        ic.setInventoryMatchType(InventoryAlert.InventoryMatchType.NOTED);
-        ic.setItemName("Shark");
-        ic.setItemQuantity(1);
-        ic.setQuantityComparator(ComparableNumber.Comparator.GREATER_THAN_OR_EQUALS);
+        ic.getInventoryAlertType().setValue(InventoryAlert.InventoryAlertType.ITEM);
+        ic.getInventoryMatchType().setValue(InventoryAlert.InventoryMatchType.NOTED);
+        ic.getItemName().setValue("Shark");
+        ic.getItemQuantity().setValue(1);
+        ic.getQuantityComparator().setValue(ComparableNumber.Comparator.GREATER_THAN_OR_EQUALS);
         ic.getInventory().setValue(makeMapWithItem(1, "Shark", 5, true));
         ic.process();
         assertTrue(ic.getResultOut().getValue());
@@ -212,11 +212,11 @@ public class InventoryCheckProcessTest {
     @Test
     public void item_notedFilter_unNoted_doesNotMatch() {
         InventoryCheck ic = new InventoryCheck();
-        ic.setInventoryAlertType(InventoryAlert.InventoryAlertType.ITEM);
-        ic.setInventoryMatchType(InventoryAlert.InventoryMatchType.NOTED);
-        ic.setItemName("Shark");
-        ic.setItemQuantity(1);
-        ic.setQuantityComparator(ComparableNumber.Comparator.GREATER_THAN_OR_EQUALS);
+        ic.getInventoryAlertType().setValue(InventoryAlert.InventoryAlertType.ITEM);
+        ic.getInventoryMatchType().setValue(InventoryAlert.InventoryMatchType.NOTED);
+        ic.getItemName().setValue("Shark");
+        ic.getItemQuantity().setValue(1);
+        ic.getQuantityComparator().setValue(ComparableNumber.Comparator.GREATER_THAN_OR_EQUALS);
         ic.getInventory().setValue(makeMapWithItem(1, "Shark", 5, false));
         ic.process();
         assertFalse(ic.getResultOut().getValue());
@@ -225,11 +225,11 @@ public class InventoryCheckProcessTest {
     @Test
     public void item_unNotedFilter_unNoted_matches() {
         InventoryCheck ic = new InventoryCheck();
-        ic.setInventoryAlertType(InventoryAlert.InventoryAlertType.ITEM);
-        ic.setInventoryMatchType(InventoryAlert.InventoryMatchType.UN_NOTED);
-        ic.setItemName("Shark");
-        ic.setItemQuantity(1);
-        ic.setQuantityComparator(ComparableNumber.Comparator.GREATER_THAN_OR_EQUALS);
+        ic.getInventoryAlertType().setValue(InventoryAlert.InventoryAlertType.ITEM);
+        ic.getInventoryMatchType().setValue(InventoryAlert.InventoryMatchType.UN_NOTED);
+        ic.getItemName().setValue("Shark");
+        ic.getItemQuantity().setValue(1);
+        ic.getQuantityComparator().setValue(ComparableNumber.Comparator.GREATER_THAN_OR_EQUALS);
         ic.getInventory().setValue(makeMapWithItem(1, "Shark", 5, false));
         ic.process();
         assertTrue(ic.getResultOut().getValue());
@@ -238,11 +238,11 @@ public class InventoryCheckProcessTest {
     @Test
     public void item_unNotedFilter_noted_doesNotMatch() {
         InventoryCheck ic = new InventoryCheck();
-        ic.setInventoryAlertType(InventoryAlert.InventoryAlertType.ITEM);
-        ic.setInventoryMatchType(InventoryAlert.InventoryMatchType.UN_NOTED);
-        ic.setItemName("Shark");
-        ic.setItemQuantity(1);
-        ic.setQuantityComparator(ComparableNumber.Comparator.GREATER_THAN_OR_EQUALS);
+        ic.getInventoryAlertType().setValue(InventoryAlert.InventoryAlertType.ITEM);
+        ic.getInventoryMatchType().setValue(InventoryAlert.InventoryMatchType.UN_NOTED);
+        ic.getItemName().setValue("Shark");
+        ic.getItemQuantity().setValue(1);
+        ic.getQuantityComparator().setValue(ComparableNumber.Comparator.GREATER_THAN_OR_EQUALS);
         ic.getInventory().setValue(makeMapWithItem(1, "Shark", 5, true));
         ic.process();
         assertFalse(ic.getResultOut().getValue());
@@ -253,11 +253,11 @@ public class InventoryCheckProcessTest {
     @Test
     public void itemChange_sameAsItem_found_isTrue() {
         InventoryCheck ic = new InventoryCheck();
-        ic.setInventoryAlertType(InventoryAlert.InventoryAlertType.ITEM_CHANGE);
-        ic.setInventoryMatchType(InventoryAlert.InventoryMatchType.BOTH);
-        ic.setItemName("Shark");
-        ic.setItemQuantity(1);
-        ic.setQuantityComparator(ComparableNumber.Comparator.GREATER_THAN_OR_EQUALS);
+        ic.getInventoryAlertType().setValue(InventoryAlert.InventoryAlertType.ITEM_CHANGE);
+        ic.getInventoryMatchType().setValue(InventoryAlert.InventoryMatchType.BOTH);
+        ic.getItemName().setValue("Shark");
+        ic.getItemQuantity().setValue(1);
+        ic.getQuantityComparator().setValue(ComparableNumber.Comparator.GREATER_THAN_OR_EQUALS);
         ic.getInventory().setValue(makeMapWithItem(1, "Shark", 2, false));
         ic.process();
         assertTrue(ic.getResultOut().getValue());

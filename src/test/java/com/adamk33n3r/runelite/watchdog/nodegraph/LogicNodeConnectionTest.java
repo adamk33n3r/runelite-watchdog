@@ -133,7 +133,7 @@ public class LogicNodeConnectionTest {
         LocationCompare lc = new LocationCompare();
         lc.getA().setValue(new WorldPoint(3200, 3200, 0));
         lc.getB().setValue(new WorldPoint(3200, 3200, 0));
-        lc.setDistance(0);
+        lc.getDistance().setValue(0);
         lc.process();
         assertTrue(lc.getResult().getValue());
     }
@@ -144,7 +144,7 @@ public class LogicNodeConnectionTest {
         LocationCompare lc = new LocationCompare();
         lc.getA().setValue(new WorldPoint(3200, 3200, 0));
         lc.getB().setValue(new WorldPoint(3210, 3210, 0));
-        lc.setDistance(0);
+        lc.getDistance().setValue(0);
         lc.process();
         assertFalse(lc.getResult().getValue());
     }
@@ -155,8 +155,8 @@ public class LogicNodeConnectionTest {
         LocationCompare lc = new LocationCompare();
         lc.getA().setValue(new WorldPoint(3200, 3200, 0));
         lc.getB().setValue(new WorldPoint(3201, 3201, 0));
-        lc.setDistance(10);
-        lc.setCardinalOnly(true);
+        lc.getDistance().setValue(10);
+        lc.getCardinalOnly().setValue(true);
         lc.process();
         assertFalse(lc.getResult().getValue());
     }
@@ -167,8 +167,8 @@ public class LogicNodeConnectionTest {
         LocationCompare lc = new LocationCompare();
         lc.getA().setValue(new WorldPoint(3200, 3200, 0));
         lc.getB().setValue(new WorldPoint(3200, 3203, 0));
-        lc.setDistance(5);
-        lc.setCardinalOnly(true);
+        lc.getDistance().setValue(5);
+        lc.getCardinalOnly().setValue(true);
         lc.process();
         assertTrue(lc.getResult().getValue());
     }
@@ -179,7 +179,7 @@ public class LogicNodeConnectionTest {
         LocationCompare lc = new LocationCompare();
         lc.getA().setValue(new WorldPoint(3200, 3200, 0));
         lc.getB().setValue(new WorldPoint(3203, 3204, 0));
-        lc.setDistance(5);
+        lc.getDistance().setValue(5);
         lc.process();
         assertTrue(lc.getResult().getValue());
     }
@@ -202,7 +202,7 @@ public class LogicNodeConnectionTest {
         locB.setValue(new WorldPoint(3200, 3200, 0));
 
         LocationCompare lc = new LocationCompare();
-        lc.setDistance(0);
+        lc.getDistance().setValue(0);
         new Connection<>(locA.getValueOut(), lc.getA());
         new Connection<>(locB.getValueOut(), lc.getB());
 
@@ -244,11 +244,11 @@ public class LogicNodeConnectionTest {
         LocationCompare lc = new LocationCompare();
         lc.getA().setValue(new WorldPoint(3200, 3200, 0));
         lc.getB().setValue(new WorldPoint(3205, 3205, 0)); // ~7 tiles away
-        lc.setDistance(0);
+        lc.getDistance().setValue(0);
         lc.process();
         assertFalse("out of range at distance=0", lc.getResult().getValue());
 
-        lc.setDistance(10);
+        lc.getDistance().setValue(10);
         lc.process();
         assertTrue("within range after distance increased to 10", lc.getResult().getValue());
     }
@@ -260,12 +260,12 @@ public class LogicNodeConnectionTest {
         LocationCompare lc = new LocationCompare();
         lc.getA().setValue(new WorldPoint(3200, 3200, 0));
         lc.getB().setValue(new WorldPoint(3201, 3201, 0)); // diagonal, 1 tile each axis
-        lc.setDistance(10);
-        lc.setCardinalOnly(false);
+        lc.getDistance().setValue(10);
+        lc.getCardinalOnly().setValue(false);
         lc.process();
         assertTrue("diagonal within distance without cardinalOnly restriction", lc.getResult().getValue());
 
-        lc.setCardinalOnly(true);
+        lc.getCardinalOnly().setValue(true);
         lc.process();
         assertFalse("diagonal rejected after cardinalOnly enabled", lc.getResult().getValue());
     }

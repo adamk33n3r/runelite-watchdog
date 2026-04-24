@@ -125,7 +125,7 @@ public class AdvancedAlertTest extends TestBase {
     public void welcomeNote_hasNonEmptyText() {
         AdvancedAlert alert = this.alertManager.createAlert(AdvancedAlert.class);
         NoteNode note = alert.getGraph().getNodesOfType(NoteNode.class).findFirst().orElseThrow();
-        assertFalse(note.getNote().isEmpty());
+        assertFalse(note.getNote().getValue().isEmpty());
     }
 
     @Test

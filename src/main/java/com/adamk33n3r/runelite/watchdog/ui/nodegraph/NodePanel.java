@@ -204,6 +204,12 @@ public class NodePanel extends JPanel {
         this.graphPanel.notifyChange();
     }
 
+    protected final void watchDirty(VarInput<?>... vars) {
+        for (VarInput<?> v : vars) {
+            this.addDisposer(v.onChange(_x -> this.notifyChange()));
+        }
+    }
+
     public void addConnection(NodeConnection connection) {
         this.connections.add(connection);
     }

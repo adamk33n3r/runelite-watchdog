@@ -610,10 +610,10 @@ public class EventHandler {
     public void initializePluginVars() {
         this.alertManager.getAllEnabledAlertsOfType(AdvancedAlert.class).forEach(adv ->
             adv.getGraph().getNodesOfType(PluginState.class)
-                .filter(pv -> pv.getPluginName() != null)
+                .filter(pv -> pv.getPluginName().getValue() != null)
                 .forEach(pv ->
                     this.pluginManager.getPlugins().stream()
-                        .filter(p -> p.getName().equals(pv.getPluginName()))
+                        .filter(p -> p.getName().equals(pv.getPluginName().getValue()))
                         .findFirst()
                         .ifPresent(plugin -> pv.setValue(this.pluginManager.isPluginEnabled(plugin)))
                 )
@@ -626,7 +626,7 @@ public class EventHandler {
         boolean isLoaded = event.isLoaded();
         this.alertManager.getAllEnabledAlertsOfType(AdvancedAlert.class).forEach(adv ->
             adv.getGraph().getNodesOfType(PluginState.class)
-                .filter(pv -> changedPluginName.equals(pv.getPluginName()))
+                .filter(pv -> changedPluginName.equals(pv.getPluginName().getValue()))
                 .forEach(pv -> pv.setValue(isLoaded))
         );
     }

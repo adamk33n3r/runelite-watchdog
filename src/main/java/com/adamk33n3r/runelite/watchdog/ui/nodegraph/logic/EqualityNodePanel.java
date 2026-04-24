@@ -6,11 +6,11 @@ import com.adamk33n3r.runelite.watchdog.ui.nodegraph.NodePanel;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.ConnectionLine;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.ConnectionPointIn;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.ConnectionPointOut;
+import com.adamk33n3r.runelite.watchdog.ui.nodegraph.inputs.EnumInput;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.inputs.NumberInput;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.inputs.ViewInput;
 import lombok.Getter;
 
-import javax.swing.*;
 import java.awt.*;
 
 @Getter
@@ -20,13 +20,9 @@ public class EqualityNodePanel extends NodePanel {
     public EqualityNodePanel(GraphPanel graphPanel, Equality node, int x, int y, String name, Color color) {
         super(graphPanel, node, x, y, name, color);
 
-        JComboBox<Equality.Op> opBox = new JComboBox<>(Equality.Op.values());
-        opBox.setSelectedItem(node.getOp().getValue());
-        opBox.addActionListener(e -> {
-            node.getOp().setValue((Equality.Op) opBox.getSelectedItem());
-            this.notifyChange();
-        });
-        this.items.add(opBox);
+        ConnectionPointIn<Equality.Op> opIn = new ConnectionPointIn<>(this, node.getOp());
+        this.items.add(new ConnectionLine<>(opIn, new EnumInput<>("Op", node.getOp()), null));
+        this.watchDirty(node.getOp());
 
         ConnectionPointIn<Number> inA = new ConnectionPointIn<>(this, node.getA());
         this.items.add(new ConnectionLine<>(inA, new NumberInput("A", node.getA()), null));

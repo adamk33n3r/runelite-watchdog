@@ -13,7 +13,7 @@ public class LocationCompareProcessTest {
         LocationCompare lc = new LocationCompare();
         lc.getA().setValue(null);
         lc.getB().setValue(new WorldPoint(3200, 3200, 0));
-        lc.setDistance(100);
+        lc.getDistance().setValue(100);
         lc.process();
         assertFalse(lc.getResult().getValue());
     }
@@ -23,7 +23,7 @@ public class LocationCompareProcessTest {
         LocationCompare lc = new LocationCompare();
         lc.getA().setValue(new WorldPoint(3200, 3200, 0));
         lc.getB().setValue(null);
-        lc.setDistance(100);
+        lc.getDistance().setValue(100);
         lc.process();
         assertFalse(lc.getResult().getValue());
     }
@@ -33,8 +33,8 @@ public class LocationCompareProcessTest {
         LocationCompare lc = new LocationCompare();
         lc.getA().setValue(new WorldPoint(3200, 3200, 0));
         lc.getB().setValue(new WorldPoint(3203, 3200, 0));
-        lc.setDistance(5);
-        lc.setCardinalOnly(true);
+        lc.getDistance().setValue(5);
+        lc.getCardinalOnly().setValue(true);
         lc.process();
         assertTrue(lc.getResult().getValue());
     }
@@ -44,8 +44,8 @@ public class LocationCompareProcessTest {
         LocationCompare lc = new LocationCompare();
         lc.getA().setValue(new WorldPoint(3200, 3200, 0));
         lc.getB().setValue(new WorldPoint(3210, 3200, 0));
-        lc.setDistance(5);
-        lc.setCardinalOnly(true);
+        lc.getDistance().setValue(5);
+        lc.getCardinalOnly().setValue(true);
         lc.process();
         assertFalse(lc.getResult().getValue());
     }
@@ -55,8 +55,8 @@ public class LocationCompareProcessTest {
         LocationCompare lc = new LocationCompare();
         lc.getA().setValue(new WorldPoint(3200, 3200, 0));
         lc.getB().setValue(new WorldPoint(3200, 3204, 0));
-        lc.setDistance(5);
-        lc.setCardinalOnly(true);
+        lc.getDistance().setValue(5);
+        lc.getCardinalOnly().setValue(true);
         lc.process();
         assertTrue(lc.getResult().getValue());
     }
@@ -66,8 +66,8 @@ public class LocationCompareProcessTest {
         LocationCompare lc = new LocationCompare();
         lc.getA().setValue(new WorldPoint(3200, 3200, 0));
         lc.getB().setValue(new WorldPoint(3202, 3202, 0));
-        lc.setDistance(5);
-        lc.setCardinalOnly(false);
+        lc.getDistance().setValue(5);
+        lc.getCardinalOnly().setValue(false);
         lc.process();
         assertTrue(lc.getResult().getValue());
     }
@@ -77,8 +77,8 @@ public class LocationCompareProcessTest {
         LocationCompare lc = new LocationCompare();
         lc.getA().setValue(new WorldPoint(3200, 3200, 0));
         lc.getB().setValue(new WorldPoint(3210, 3210, 0));
-        lc.setDistance(5);
-        lc.setCardinalOnly(false);
+        lc.getDistance().setValue(5);
+        lc.getCardinalOnly().setValue(false);
         lc.process();
         assertFalse(lc.getResult().getValue());
     }

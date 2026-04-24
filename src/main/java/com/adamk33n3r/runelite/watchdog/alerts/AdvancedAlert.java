@@ -31,7 +31,7 @@ public class AdvancedAlert extends Alert {
         NoteNode note = new NoteNode();
         note.setX(20);
         note.setY(20);
-        note.setNote(
+        note.getNote().setValue(
             "Welcome to the Graph Editor!\n\n" +
             "Quick Start:\n" +
             "  \u2022 Right-click the canvas to add a node\n" +

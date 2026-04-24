@@ -138,7 +138,7 @@ public class AdvancedAlertEventHandlerTest extends AlertTestBase {
         Mockito.when(pluginManager.isPluginEnabled(mockPlugin)).thenReturn(true);
 
         PluginState pv = new PluginState();
-        pv.setPluginName("Bank");
+        pv.getPluginName().setValue("Bank");
         advSpy.getGraph().add(pv);
 
         eventHandler.initializePluginVars();
@@ -154,7 +154,7 @@ public class AdvancedAlertEventHandlerTest extends AlertTestBase {
         Mockito.when(pluginManager.isPluginEnabled(mockPlugin)).thenReturn(false);
 
         PluginState pv = new PluginState();
-        pv.setPluginName("Bank");
+        pv.getPluginName().setValue("Bank");
         pv.setValue(true); // start true to confirm it gets corrected to false
         advSpy.getGraph().add(pv);
 
@@ -181,7 +181,7 @@ public class AdvancedAlertEventHandlerTest extends AlertTestBase {
         Mockito.when(pluginManager.getPlugins()).thenReturn(List.of(mockPlugin));
 
         PluginState pv = new PluginState();
-        pv.setPluginName("NonExistentPlugin");
+        pv.getPluginName().setValue("NonExistentPlugin");
         advSpy.getGraph().add(pv);
 
         eventHandler.initializePluginVars();

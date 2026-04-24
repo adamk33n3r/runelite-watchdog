@@ -7,10 +7,10 @@ import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.ConnectionLine;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.ConnectionPointIn;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.ConnectionPointOut;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.inputs.BoolInput;
+import com.adamk33n3r.runelite.watchdog.ui.nodegraph.inputs.EnumInput;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.inputs.ViewInput;
 import lombok.Getter;
 
-import javax.swing.*;
 import java.awt.*;
 
 @Getter
@@ -20,13 +20,9 @@ public class BooleanGateNodePanel extends NodePanel {
     public BooleanGateNodePanel(GraphPanel graphPanel, BooleanGate node, int x, int y, String name, Color color) {
         super(graphPanel, node, x, y, name, color);
 
-        JComboBox<BooleanGate.Op> opBox = new JComboBox<>(BooleanGate.Op.values());
-        opBox.setSelectedItem(node.getOp().getValue());
-        opBox.addActionListener(e -> {
-            node.getOp().setValue((BooleanGate.Op) opBox.getSelectedItem());
-            this.notifyChange();
-        });
-        this.items.add(opBox);
+        ConnectionPointIn<BooleanGate.Op> opIn = new ConnectionPointIn<>(this, node.getOp());
+        this.items.add(new ConnectionLine<>(opIn, new EnumInput<>("Op", node.getOp()), null));
+        this.watchDirty(node.getOp());
 
         ConnectionPointIn<Boolean> inA = new ConnectionPointIn<>(this, node.getA());
         this.items.add(new ConnectionLine<>(inA, new BoolInput("A", node.getA()), null));

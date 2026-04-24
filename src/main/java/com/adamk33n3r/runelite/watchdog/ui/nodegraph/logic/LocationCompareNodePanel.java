@@ -6,6 +6,8 @@ import com.adamk33n3r.runelite.watchdog.ui.nodegraph.NodePanel;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.ConnectionLine;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.ConnectionPointIn;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.ConnectionPointOut;
+import com.adamk33n3r.runelite.watchdog.ui.nodegraph.inputs.BoolInput;
+import com.adamk33n3r.runelite.watchdog.ui.nodegraph.inputs.NumberInput;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.inputs.ViewInput;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
 import lombok.Getter;
@@ -68,24 +70,25 @@ public class LocationCompareNodePanel extends NodePanel {
         });
         this.items.add(setCurrentB);
 
-        // Distance spinner — calls process() and updates resultView directly
-        JSpinner distanceSpinner = PanelUtils.createSpinner(node.getDistance(), 0, Integer.MAX_VALUE, 1, val -> {
-            node.setDistance(val);
-            node.process();
-            resultView.setValue(node.getResult().getValue());
-            this.notifyChange();
-        });
-        this.items.add(PanelUtils.createLabeledComponent("Distance", "Max distance between points", distanceSpinner));
+        this.watchDirty(node.getA(), node.getB());
 
-        // Cardinal Only checkbox — calls process() and updates resultView directly
-        JCheckBox cardinalOnlyBox = new JCheckBox("Cardinal Only", node.isCardinalOnly());
-        cardinalOnlyBox.addActionListener(e -> {
-            node.setCardinalOnly(cardinalOnlyBox.isSelected());
-            node.process();
+        // Distance — now a connectable VarInput<Number>
+        ConnectionPointIn<Number> distIn = new ConnectionPointIn<>(this, node.getDistance());
+        this.items.add(new ConnectionLine<>(distIn, new NumberInput("Distance", node.getDistance()), null));
+        addDisposer(node.getDistance().onChange(_v -> {
             resultView.setValue(node.getResult().getValue());
             this.notifyChange();
-        });
-        this.items.add(cardinalOnlyBox);
+        }));
+//        this.watchDirty(node.getDistance());
+
+        // Cardinal Only — now a connectable VarInput<Boolean>
+        ConnectionPointIn<Boolean> cardIn = new ConnectionPointIn<>(this, node.getCardinalOnly());
+        this.items.add(new ConnectionLine<>(cardIn, new BoolInput("Cardinal Only", node.getCardinalOnly()), null));
+        addDisposer(node.getCardinalOnly().onChange(_v -> {
+            resultView.setValue(node.getResult().getValue());
+            this.notifyChange();
+        }));
+//        this.watchDirty(node.getCardinalOnly());
 
         // Wire result view to update when A or B input values change
         addDisposer(node.getA().onChange(a -> {

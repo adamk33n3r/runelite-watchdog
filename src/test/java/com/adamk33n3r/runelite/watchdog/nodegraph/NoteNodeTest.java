@@ -31,13 +31,7 @@ public class NoteNodeTest {
         RuntimeTypeAdapterFactory<Notification> notifFactory = RuntimeTypeAdapterFactory.of(Notification.class)
             .registerSubtype(ScreenFlash.class);
         NodeTypeRegistry registry = new NodeTypeRegistry()
-            .registerSubtype(NoteNode.class,
-                (json, gson) -> {
-                    NoteNode n = new NoteNode();
-                    if (json.has("note")) n.setNote(json.get("note").getAsString());
-                    return n;
-                },
-                (note, obj, gson) -> obj.addProperty("note", note.getNote()));
+            .registerSubtype(NoteNode.class, NoteNode::new);
         Gson intermediateGson = RuneLiteAPI.GSON.newBuilder()
             .registerTypeAdapterFactory(alertFactory)
             .registerTypeAdapterFactory(notifFactory)
@@ -52,12 +46,12 @@ public class NoteNodeTest {
     public void noteNode_preservesText_afterRoundTrip() {
         Graph graph = new Graph();
         NoteNode note = new NoteNode();
-        note.setNote("Hello World");
+        note.getNote().setValue("Hello World");
         graph.add(note);
 
         Graph loaded = roundTrip(graph);
         NoteNode loadedNote = (NoteNode) loaded.getNodes().get(0);
-        assertEquals("Hello World", loadedNote.getNote());
+        assertEquals("Hello World", loadedNote.getNote().getValue());
     }
 
     @Test

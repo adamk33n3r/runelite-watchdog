@@ -83,45 +83,11 @@ public class GraphSerializerTest {
             .registerSubtype(Num.class, Num::new)
             .registerSubtype(Location.class, Location::new)
             .registerSubtype(Inventory.class, Inventory::new)
-            .registerSubtype(PluginState.class,
-                (json, gson) -> {
-                    PluginState ps = new PluginState();
-                    if (json.has("pluginName")) ps.setPluginName(json.get("pluginName").getAsString());
-                    return ps;
-                },
-                (ps, obj, gson) -> { if (ps.getPluginName() != null) obj.addProperty("pluginName", ps.getPluginName()); })
+            .registerSubtype(PluginState.class, PluginState::new)
             .registerAlias("PluginVar", PluginState.class)
-            .registerSubtype(InventoryCheck.class,
-                (json, gson) -> {
-                    InventoryCheck inv = new InventoryCheck();
-                    if (json.has("inventoryAlertType")) inv.setInventoryAlertType(InventoryAlert.InventoryAlertType.valueOf(json.get("inventoryAlertType").getAsString()));
-                    if (json.has("inventoryMatchType")) inv.setInventoryMatchType(InventoryAlert.InventoryMatchType.valueOf(json.get("inventoryMatchType").getAsString()));
-                    if (json.has("itemName")) inv.setItemName(json.get("itemName").getAsString());
-                    if (json.has("isRegexEnabled")) inv.setRegexEnabled(json.get("isRegexEnabled").getAsBoolean());
-                    if (json.has("itemQuantity")) inv.setItemQuantity(json.get("itemQuantity").getAsInt());
-                    if (json.has("quantityComparator")) inv.setQuantityComparator(ComparableNumber.Comparator.valueOf(json.get("quantityComparator").getAsString()));
-                    return inv;
-                },
-                (inv, obj, gson) -> {
-                    obj.addProperty("inventoryAlertType", inv.getInventoryAlertType().name());
-                    obj.addProperty("inventoryMatchType", inv.getInventoryMatchType().name());
-                    obj.addProperty("itemName", inv.getItemName());
-                    obj.addProperty("isRegexEnabled", inv.isRegexEnabled());
-                    obj.addProperty("itemQuantity", inv.getItemQuantity());
-                    obj.addProperty("quantityComparator", inv.getQuantityComparator().name());
-                })
+            .registerSubtype(InventoryCheck.class, InventoryCheck::new)
             .registerAlias("InventoryVar", InventoryCheck.class)
-            .registerSubtype(LocationCompare.class,
-                (json, gson) -> {
-                    LocationCompare lc = new LocationCompare();
-                    if (json.has("distance")) lc.setDistance(json.get("distance").getAsInt());
-                    if (json.has("cardinalOnly")) lc.setCardinalOnly(json.get("cardinalOnly").getAsBoolean());
-                    return lc;
-                },
-                (lc, obj, gson) -> {
-                    obj.addProperty("distance", lc.getDistance());
-                    obj.addProperty("cardinalOnly", lc.isCardinalOnly());
-                })
+            .registerSubtype(LocationCompare.class, LocationCompare::new)
             .registerSubtype(DelayNode.class, DelayNode::new)
             .registerAlias("Delay", DelayNode.class)
             .registerSubtype(com.adamk33n3r.nodegraph.nodes.flow.Counter.class, com.adamk33n3r.nodegraph.nodes.flow.Counter::new)
@@ -129,13 +95,7 @@ public class GraphSerializerTest {
             .registerAlias("Timer", TimerNode.class)
             .registerSubtype(Branch.class, Branch::new)
             .registerSubtype(DisplayNode.class, DisplayNode::new)
-            .registerSubtype(NoteNode.class,
-                (json, gson) -> {
-                    NoteNode n = new NoteNode();
-                    if (json.has("note")) n.setNote(json.get("note").getAsString());
-                    return n;
-                },
-                (note, obj, gson) -> obj.addProperty("note", note.getNote()));
+            .registerSubtype(NoteNode.class, NoteNode::new);
     }
 
     @Test
@@ -269,34 +229,34 @@ public class GraphSerializerTest {
     public void roundTrip_preservesPluginVarConfig() {
         Graph graph = new Graph();
         PluginState pv = new PluginState();
-        pv.setPluginName("GPU");
+        pv.getPluginName().setValue("GPU");
         graph.add(pv);
 
         Graph loaded = roundTrip(graph);
         PluginState loadedPv = (PluginState) loaded.getNodes().get(0);
-        assertEquals("GPU", loadedPv.getPluginName());
+        assertEquals("GPU", loadedPv.getPluginName().getValue());
     }
 
     @Test
     public void roundTrip_preservesInventoryVarConfig() {
         Graph graph = new Graph();
         InventoryCheck inv = new InventoryCheck();
-        inv.setInventoryAlertType(InventoryAlert.InventoryAlertType.ITEM);
-        inv.setInventoryMatchType(InventoryAlert.InventoryMatchType.UN_NOTED);
-        inv.setItemName("Lobster");
+        inv.getInventoryAlertType().setValue(InventoryAlert.InventoryAlertType.ITEM);
+        inv.getInventoryMatchType().setValue(InventoryAlert.InventoryMatchType.UN_NOTED);
+        inv.getItemName().setValue("Lobster");
         inv.setRegexEnabled(true);
-        inv.setItemQuantity(5);
-        inv.setQuantityComparator(ComparableNumber.Comparator.GREATER_THAN);
+        inv.getItemQuantity().setValue(5);
+        inv.getQuantityComparator().setValue(ComparableNumber.Comparator.GREATER_THAN);
         graph.add(inv);
 
         Graph loaded = roundTrip(graph);
         InventoryCheck loadedInv = (InventoryCheck) loaded.getNodes().get(0);
-        assertEquals(InventoryAlert.InventoryAlertType.ITEM, loadedInv.getInventoryAlertType());
-        assertEquals(InventoryAlert.InventoryMatchType.UN_NOTED, loadedInv.getInventoryMatchType());
-        assertEquals("Lobster", loadedInv.getItemName());
+        assertEquals(InventoryAlert.InventoryAlertType.ITEM, loadedInv.getInventoryAlertType().getValue());
+        assertEquals(InventoryAlert.InventoryMatchType.UN_NOTED, loadedInv.getInventoryMatchType().getValue());
+        assertEquals("Lobster", loadedInv.getItemName().getValue());
         assertTrue(loadedInv.isRegexEnabled());
-        assertEquals(5, loadedInv.getItemQuantity());
-        assertEquals(ComparableNumber.Comparator.GREATER_THAN, loadedInv.getQuantityComparator());
+        assertEquals(5, loadedInv.getItemQuantity().getValue().intValue());
+        assertEquals(ComparableNumber.Comparator.GREATER_THAN, loadedInv.getQuantityComparator().getValue());
     }
 
     @Test
@@ -305,8 +265,8 @@ public class GraphSerializerTest {
         LocationCompare lc = new LocationCompare();
         lc.getA().setValue(new WorldPoint(3200, 3200, 0));
         lc.getB().setValue(new WorldPoint(3210, 3210, 1));
-        lc.setDistance(5);
-        lc.setCardinalOnly(true);
+        lc.getDistance().setValue(5);
+        lc.getCardinalOnly().setValue(true);
         graph.add(lc);
 
         Graph loaded = roundTrip(graph);
@@ -314,8 +274,8 @@ public class GraphSerializerTest {
         LocationCompare loadedLc = (LocationCompare) loaded.getNodes().get(0);
         assertEquals(new WorldPoint(3200, 3200, 0), loadedLc.getA().getValue());
         assertEquals(new WorldPoint(3210, 3210, 1), loadedLc.getB().getValue());
-        assertEquals(5, loadedLc.getDistance());
-        assertTrue(loadedLc.isCardinalOnly());
+        assertEquals(5, loadedLc.getDistance().getValue().intValue());
+        assertTrue(loadedLc.getCardinalOnly().getValue());
     }
 
     @Test

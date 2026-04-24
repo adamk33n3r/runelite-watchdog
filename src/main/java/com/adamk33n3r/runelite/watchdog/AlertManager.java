@@ -171,45 +171,11 @@ public class AlertManager {
             .registerSubtype(Location.class, Location::new)
             .registerSubtype(Inventory.class, Inventory::new)
             // Variable nodes with extra non-var state
-            .registerSubtype(PluginState.class,
-                (json, gson) -> {
-                    PluginState ps = new PluginState();
-                    if (json.has("pluginName")) ps.setPluginName(json.get("pluginName").getAsString());
-                    return ps;
-                },
-                (ps, obj, gson) -> { if (ps.getPluginName() != null) obj.addProperty("pluginName", ps.getPluginName()); })
+            .registerSubtype(PluginState.class, PluginState::new)
             .registerAlias("PluginVar", PluginState.class)
-            .registerSubtype(InventoryCheck.class,
-                (json, gson) -> {
-                    InventoryCheck inv = new InventoryCheck();
-                    if (json.has("inventoryAlertType")) inv.setInventoryAlertType(InventoryAlert.InventoryAlertType.valueOf(json.get("inventoryAlertType").getAsString()));
-                    if (json.has("inventoryMatchType")) inv.setInventoryMatchType(InventoryAlert.InventoryMatchType.valueOf(json.get("inventoryMatchType").getAsString()));
-                    if (json.has("itemName")) inv.setItemName(json.get("itemName").getAsString());
-                    if (json.has("isRegexEnabled")) inv.setRegexEnabled(json.get("isRegexEnabled").getAsBoolean());
-                    if (json.has("itemQuantity")) inv.setItemQuantity(json.get("itemQuantity").getAsInt());
-                    if (json.has("quantityComparator")) inv.setQuantityComparator(ComparableNumber.Comparator.valueOf(json.get("quantityComparator").getAsString()));
-                    return inv;
-                },
-                (inv, obj, gson) -> {
-                    obj.addProperty("inventoryAlertType", inv.getInventoryAlertType().name());
-                    obj.addProperty("inventoryMatchType", inv.getInventoryMatchType().name());
-                    obj.addProperty("itemName", inv.getItemName());
-                    obj.addProperty("isRegexEnabled", inv.isRegexEnabled());
-                    obj.addProperty("itemQuantity", inv.getItemQuantity());
-                    obj.addProperty("quantityComparator", inv.getQuantityComparator().name());
-                })
+            .registerSubtype(InventoryCheck.class, InventoryCheck::new)
             .registerAlias("InventoryVar", InventoryCheck.class)
-            .registerSubtype(LocationCompare.class,
-                (json, gson) -> {
-                    LocationCompare lc = new LocationCompare();
-                    if (json.has("distance")) lc.setDistance(json.get("distance").getAsInt());
-                    if (json.has("cardinalOnly")) lc.setCardinalOnly(json.get("cardinalOnly").getAsBoolean());
-                    return lc;
-                },
-                (lc, obj, gson) -> {
-                    obj.addProperty("distance", lc.getDistance());
-                    obj.addProperty("cardinalOnly", lc.isCardinalOnly());
-                })
+            .registerSubtype(LocationCompare.class, LocationCompare::new)
             // Flow nodes
             .registerSubtype(DelayNode.class, DelayNode::new)
             .registerAlias("Delay", DelayNode.class)
@@ -219,13 +185,7 @@ public class AlertManager {
             .registerSubtype(Branch.class, Branch::new)
             // Utility nodes
             .registerSubtype(DisplayNode.class, DisplayNode::new)
-            .registerSubtype(NoteNode.class,
-                (json, gson) -> {
-                    NoteNode n = new NoteNode();
-                    if (json.has("note")) n.setNote(json.get("note").getAsString());
-                    return n;
-                },
-                (note, obj, gson) -> obj.addProperty("note", note.getNote()));
+            .registerSubtype(NoteNode.class, NoteNode::new);
         Gson intermediateGson = this.clientGson.newBuilder()
 //            .serializeNulls()
             .registerTypeAdapterFactory(alertTypeFactory)
