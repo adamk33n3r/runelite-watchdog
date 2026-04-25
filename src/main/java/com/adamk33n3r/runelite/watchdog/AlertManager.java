@@ -372,6 +372,10 @@ public class AlertManager {
             .map(type::cast);
     }
 
+    public <T extends Alert> boolean hasEnabledAlertsOfType(Class<T> type) {
+        return this.getAllEnabledAlerts().anyMatch(type::isInstance);
+    }
+
     public Stream<Alert> getAllAlerts() {
         return this.getAllAlertsFrom(this.alerts.stream(), false);
     }

@@ -70,6 +70,9 @@ public class EventHandler {
 
     private final Map<Alert, Instant> lastTriggered = new HashMap<>();
 
+    // Cached once per session; reset on logout. Avoids repeated getVarbitValue() calls during region loads.
+    private int cachedAccountType = -1;
+
     private final Map<Skill, Integer> previousSkillLevelTable = new EnumMap<>(Skill.class);
     private final Map<Skill, Integer> previousSkillXPTable = new EnumMap<>(Skill.class);
     private final Map<Integer, ItemComposition> itemCompositionCache = new ConcurrentHashMap<>();
@@ -181,7 +184,15 @@ public class EventHandler {
             this.previousSkillXPTable.clear();
             this.previousItemsTable.clear();
             this.hasInitializedInventory = false;
+            this.cachedAccountType = -1;
         }
+    }
+
+    private int getAccountType() {
+        if (this.cachedAccountType == -1) {
+            this.cachedAccountType = this.client.getVarbitValue(VarbitID.IRONMAN);
+        }
+        return this.cachedAccountType;
     }
 
     @Subscribe
@@ -416,15 +427,15 @@ public class EventHandler {
     //region Spawned
     @Subscribe
     private void onItemSpawned(ItemSpawned itemSpawned) {
-        ItemComposition comp = this.itemManager.getItemComposition(itemSpawned.getItem().getId());
-        final int accountType = this.client.getVarbitValue(VarbitID.IRONMAN);
+        ItemComposition comp = this.itemCompositionCache.computeIfAbsent(itemSpawned.getItem().getId(), this.itemManager::getItemComposition);
+        final int accountType = this.getAccountType();
         this.onSpawned(comp.getName(), comp.getId(), itemSpawned.getTile().getWorldLocation(), SPAWNED, ITEM, spawnedAlert ->
             Util.shouldTriggerItem(spawnedAlert.getItemOwnershipFilterMode(), itemSpawned.getItem().getOwnership(), accountType));
     }
     @Subscribe
     private void onItemDespawned(ItemDespawned itemDespawned) {
-        ItemComposition comp = this.itemManager.getItemComposition(itemDespawned.getItem().getId());
-        final int accountType = this.client.getVarbitValue(VarbitID.IRONMAN);
+        ItemComposition comp = this.itemCompositionCache.computeIfAbsent(itemDespawned.getItem().getId(), this.itemManager::getItemComposition);
+        final int accountType = this.getAccountType();
         this.onSpawned(comp.getName(), comp.getId(), itemDespawned.getTile().getWorldLocation(), DESPAWNED, ITEM, spawnedAlert ->
             Util.shouldTriggerItem(spawnedAlert.getItemOwnershipFilterMode(), itemDespawned.getItem().getOwnership(), accountType));
     }
@@ -513,6 +524,10 @@ public class EventHandler {
         if (name == null) {
             return;
         }
+        // Fast path: skip the whole pipeline when no relevant alerts are configured (common during region loads)
+        if (!this.alertManager.hasEnabledAlertsOfType(SpawnedAlert.class) && !this.alertManager.hasEnabledAlertsOfType(AdvancedAlert.class)) {
+            return;
+        }
         Player localPlayer = this.client.getLocalPlayer();
         if (localPlayer == null) {
             return;
@@ -525,15 +540,14 @@ public class EventHandler {
             .filter(spawnedAlert -> spawnedAlert.getDistance() == -1 || spawnedAlert.getDistanceComparator().compare(distanceToObject, spawnedAlert.getDistance()))
             .filter(additionalFilter)
             .forEach(spawnedAlert -> {
-                try {
-                    int parsedID = Integer.parseInt(spawnedAlert.getPattern());
-                    if (id == parsedID) {
-                        this.fireAlert(spawnedAlert, new String[] { spawnedAlert.getPattern() });
+                String pattern = spawnedAlert.getPattern();
+                if (isNumericString(pattern)) {
+                    if (id == Integer.parseInt(pattern)) {
+                        this.fireAlert(spawnedAlert, new String[] { pattern });
                     }
-                } catch (NumberFormatException ignored) {
+                } else {
                     String[] groups = Util.matchPattern(spawnedAlert, unformattedName);
                     if (groups == null) return;
-
                     this.fireAlert(spawnedAlert, groups);
                 }
             });
@@ -544,13 +558,20 @@ public class EventHandler {
                 && (a.getDistance() == -1 || a.getDistanceComparator().compare(distanceToObject, a.getDistance()))
                 && additionalFilter.test(a),
             a -> {
-                try {
-                    int parsedID = Integer.parseInt(a.getPattern());
-                    return id == parsedID ? new String[]{ a.getPattern() } : null;
-                } catch (NumberFormatException ignored) {
-                    return Util.matchPattern(a, unformattedName);
+                String pattern = a.getPattern();
+                if (isNumericString(pattern)) {
+                    return id == Integer.parseInt(pattern) ? new String[]{ pattern } : null;
                 }
+                return Util.matchPattern(a, unformattedName);
             });
+    }
+
+    private static boolean isNumericString(String s) {
+        if (s.isEmpty()) return false;
+        for (int i = 0; i < s.length(); i++) {
+            if (!Character.isDigit(s.charAt(i))) return false;
+        }
+        return true;
     }
     //endregion
 
