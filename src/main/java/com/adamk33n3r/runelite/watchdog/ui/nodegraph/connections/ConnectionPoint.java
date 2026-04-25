@@ -8,11 +8,11 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
+import static com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.TypeColorRegistry.DISCONNECTED_COLOR;
+import static com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.TypeColorRegistry.EXEC_COLOR;
+
 @Getter
 public abstract class ConnectionPoint extends JComponent {
-    protected static final Color EXEC_COLOR = new Color(220, 220, 220);
-    public static final Color DISCONNECTED_COLOR = new Color(75, 75, 75);
-
     private final NodePanel nodePanel;
     private final boolean exec;
     /** true = right-pointing (output), false = left-pointing (input) */

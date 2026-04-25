@@ -5,10 +5,11 @@ import javax.swing.JComponent;
 import java.awt.*;
 import java.awt.geom.CubicCurve2D;
 
+import static com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.TypeColorRegistry.EXEC_COLOR;
+
 public class Connection extends JComponent {
     protected static final int END_SIZE = 10;
     protected static final int BOUNDS_OFFSET = 40;
-    private static final Color EXEC_COLOR = new Color(220, 220, 220);
 
     protected Point start;
     protected Point end;
