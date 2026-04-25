@@ -84,6 +84,9 @@ public class EventHandler {
 
     private boolean firedByWatchdog = false;
 
+    private final ArrayDeque<SpawnedEventData> spawnQueue = new ArrayDeque<>();
+    static final Predicate<SpawnedAlert> ALWAYS = a -> true;
+
     public synchronized void notify(String message) {
         this.firedByWatchdog = true;
         // The event bus is synchronous
@@ -178,8 +181,12 @@ public class EventHandler {
 
     //region Stat Changed
     @Subscribe
-    private void onGameStateChanged(GameStateChanged gameStateChanged) {
-        if (gameStateChanged.getGameState() == GameState.LOGIN_SCREEN) {
+    void onGameStateChanged(GameStateChanged gameStateChanged) {
+        GameState state = gameStateChanged.getGameState();
+        if (state == GameState.LOGIN_SCREEN || state == GameState.HOPPING) {
+            this.spawnQueue.clear();
+        }
+        if (state == GameState.LOGIN_SCREEN) {
             this.previousSkillLevelTable.clear();
             this.previousSkillXPTable.clear();
             this.previousItemsTable.clear();
@@ -429,15 +436,17 @@ public class EventHandler {
     private void onItemSpawned(ItemSpawned itemSpawned) {
         ItemComposition comp = this.itemCompositionCache.computeIfAbsent(itemSpawned.getItem().getId(), this.itemManager::getItemComposition);
         final int accountType = this.getAccountType();
+        final int ownership = itemSpawned.getItem().getOwnership();
         this.onSpawned(comp.getName(), comp.getId(), itemSpawned.getTile().getWorldLocation(), SPAWNED, ITEM, spawnedAlert ->
-            Util.shouldTriggerItem(spawnedAlert.getItemOwnershipFilterMode(), itemSpawned.getItem().getOwnership(), accountType));
+            Util.shouldTriggerItem(spawnedAlert.getItemOwnershipFilterMode(), ownership, accountType));
     }
     @Subscribe
     private void onItemDespawned(ItemDespawned itemDespawned) {
         ItemComposition comp = this.itemCompositionCache.computeIfAbsent(itemDespawned.getItem().getId(), this.itemManager::getItemComposition);
         final int accountType = this.getAccountType();
+        final int ownership = itemDespawned.getItem().getOwnership();
         this.onSpawned(comp.getName(), comp.getId(), itemDespawned.getTile().getWorldLocation(), DESPAWNED, ITEM, spawnedAlert ->
-            Util.shouldTriggerItem(spawnedAlert.getItemOwnershipFilterMode(), itemDespawned.getItem().getOwnership(), accountType));
+            Util.shouldTriggerItem(spawnedAlert.getItemOwnershipFilterMode(), ownership, accountType));
     }
     @Subscribe
     private void onNpcSpawned(NpcSpawned npcSpawned) {
@@ -517,53 +526,18 @@ public class EventHandler {
     }
 
     private void onSpawned(@Nullable String name, int id, WorldPoint location, SpawnedAlert.SpawnedDespawned mode, SpawnedAlert.SpawnedType type) {
-        this.onSpawned(name, id, location, mode, type, spawnedAlert -> true);
+        this.onSpawned(name, id, location, mode, type, ALWAYS);
     }
 
-    private void onSpawned(@Nullable String name, int id, WorldPoint location, SpawnedAlert.SpawnedDespawned mode, SpawnedAlert.SpawnedType type, Predicate<SpawnedAlert> additionalFilter) {
+    void onSpawned(@Nullable String name, int id, WorldPoint location, SpawnedAlert.SpawnedDespawned mode, SpawnedAlert.SpawnedType type, Predicate<SpawnedAlert> additionalFilter) {
         if (name == null) {
             return;
         }
-        // Fast path: skip the whole pipeline when no relevant alerts are configured (common during region loads)
+        // Fast path: skip enqueueing when no relevant alerts are configured (common during region loads)
         if (!this.alertManager.hasEnabledAlertsOfType(SpawnedAlert.class) && !this.alertManager.hasEnabledAlertsOfType(AdvancedAlert.class)) {
             return;
         }
-        Player localPlayer = this.client.getLocalPlayer();
-        if (localPlayer == null) {
-            return;
-        }
-        String unformattedName = Text.removeFormattingTags(name);
-        int distanceToObject = location.distanceTo(localPlayer.getWorldLocation());
-        this.alertManager.getAllEnabledAlertsOfType(SpawnedAlert.class)
-            .filter(spawnedAlert -> spawnedAlert.getSpawnedDespawned() == mode)
-            .filter(spawnedAlert -> spawnedAlert.getSpawnedType() == type)
-            .filter(spawnedAlert -> spawnedAlert.getDistance() == -1 || spawnedAlert.getDistanceComparator().compare(distanceToObject, spawnedAlert.getDistance()))
-            .filter(additionalFilter)
-            .forEach(spawnedAlert -> {
-                String pattern = spawnedAlert.getPattern();
-                if (isNumericString(pattern)) {
-                    if (id == Integer.parseInt(pattern)) {
-                        this.fireAlert(spawnedAlert, new String[] { pattern });
-                    }
-                } else {
-                    String[] groups = Util.matchPattern(spawnedAlert, unformattedName);
-                    if (groups == null) return;
-                    this.fireAlert(spawnedAlert, groups);
-                }
-            });
-
-        this.fireAdvancedAlertTriggers(SpawnedAlert.class,
-            a -> a.getSpawnedDespawned() == mode
-                && a.getSpawnedType() == type
-                && (a.getDistance() == -1 || a.getDistanceComparator().compare(distanceToObject, a.getDistance()))
-                && additionalFilter.test(a),
-            a -> {
-                String pattern = a.getPattern();
-                if (isNumericString(pattern)) {
-                    return id == Integer.parseInt(pattern) ? new String[]{ pattern } : null;
-                }
-                return Util.matchPattern(a, unformattedName);
-            });
+        this.spawnQueue.add(new SpawnedEventData(Text.removeFormattingTags(name), id, location, mode, type, additionalFilter));
     }
 
     private static boolean isNumericString(String s) {
@@ -572,6 +546,66 @@ public class EventHandler {
             if (!Character.isDigit(s.charAt(i))) return false;
         }
         return true;
+    }
+
+    void drainSpawnQueue() {
+        if (this.spawnQueue.isEmpty()) return;
+
+        Player localPlayer = this.client.getLocalPlayer();
+        if (localPlayer == null) {
+            this.spawnQueue.clear();
+            return;
+        }
+        WorldPoint playerLoc = localPlayer.getWorldLocation();
+
+        List<SpawnedEventData> events = new ArrayList<>(this.spawnQueue);
+        this.spawnQueue.clear();
+
+        // Plain SpawnedAlerts: outer = alert, inner = events, break on first match per tick.
+        this.alertManager.getAllEnabledAlertsOfType(SpawnedAlert.class).forEach(alert -> {
+            for (SpawnedEventData ev : events) {
+                String[] groups = matchSpawnedAlert(alert, ev, playerLoc);
+                if (groups == null) continue;
+                this.fireAlert(alert, groups);
+                break;
+            }
+        });
+
+        // AdvancedAlert graph triggers: per-event (graph state must see every event), but lift
+        // the alert stream materialization out of the per-event loop.
+        List<AdvancedAlert> advAlerts = this.alertManager
+            .getAllEnabledAlertsOfType(AdvancedAlert.class)
+            .collect(Collectors.toList());
+        if (advAlerts.isEmpty()) return;
+
+        for (SpawnedEventData ev : events) {
+            for (AdvancedAlert adv : advAlerts) {
+                adv.getGraph().getTriggerNodesOfType(SpawnedAlert.class)
+                    .filter(tn -> tn.getAlert().isEnabled())
+                    .forEach(tn -> {
+                        SpawnedAlert a = (SpawnedAlert) tn.getAlert();
+                        String[] groups = matchSpawnedAlert(a, ev, playerLoc);
+                        if (groups == null) return;
+                        this.fireAdvancedAlertTriggerNode(adv, tn, groups);
+                    });
+            }
+        }
+    }
+
+    private static String[] matchSpawnedAlert(SpawnedAlert alert, SpawnedEventData ev, WorldPoint playerLoc) {
+        if (alert.getSpawnedDespawned() != ev.despawned) return null;
+        if (alert.getSpawnedType() != ev.type) return null;
+        if (alert.getDistance() != -1) {
+            int dist = ev.location.distanceTo(playerLoc);
+            if (!alert.getDistanceComparator().compare(dist, alert.getDistance())) return null;
+        }
+        if (!ev.additionalFilter.test(alert)) return null;
+
+        String pattern = alert.getPattern();
+        if (isNumericString(pattern)) {
+            return ev.id == Integer.parseInt(pattern) ? new String[]{ pattern } : null;
+        }
+        return Util.matchPattern(alert, ev.unformattedName);
     }
     //endregion
 
@@ -626,6 +660,8 @@ public class EventHandler {
 
         // Push game state into variable nodes in AdvancedAlert graphs
         this.updateVariableNodes(worldLocation);
+
+        this.drainSpawnQueue();
     }
 
     public void initializePluginVars() {
