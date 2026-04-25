@@ -12,15 +12,16 @@ public class NumberInput extends AbstractInput<Number> {
     public NumberInput(String label, Var<Number> value) {
         JLabel labelComp = new JLabel(label);
         this.spinner = new JSpinner();
-        this.spinner.setValue(value.getValue());
+//        this.spinner.setValue(value.getValue());
+        this.spinner.setModel(new SpinnerNumberModel(value.getValue().doubleValue(), -Double.MAX_VALUE, Double.MAX_VALUE, 0.1));
         this.registerOnChange(value::setValue);
         this.add(labelComp, BorderLayout.WEST);
         this.add(this.spinner);
     }
 
     @Override
-    public Integer getValue() {
-        return (Integer) this.spinner.getValue();
+    public Number getValue() {
+        return (Number) this.spinner.getValue();
     }
 
     @Override

@@ -18,7 +18,10 @@ import com.adamk33n3r.nodegraph.nodes.logic.Equality;
 import com.adamk33n3r.nodegraph.nodes.logic.InventoryCheck;
 import com.adamk33n3r.nodegraph.nodes.logic.LocationCompare;
 import com.adamk33n3r.nodegraph.nodes.math.Add;
+import com.adamk33n3r.nodegraph.nodes.math.Ceiling;
 import com.adamk33n3r.nodegraph.nodes.math.Clamp;
+import com.adamk33n3r.nodegraph.nodes.math.Floor;
+import com.adamk33n3r.nodegraph.nodes.math.Round;
 import com.adamk33n3r.nodegraph.nodes.math.Divide;
 import com.adamk33n3r.nodegraph.nodes.math.Max;
 import com.adamk33n3r.nodegraph.nodes.math.Min;
@@ -26,6 +29,7 @@ import com.adamk33n3r.nodegraph.nodes.math.Multiply;
 import com.adamk33n3r.nodegraph.nodes.math.Subtract;
 import com.adamk33n3r.nodegraph.nodes.utility.DisplayNode;
 import com.adamk33n3r.nodegraph.nodes.utility.NoteNode;
+import com.adamk33n3r.nodegraph.nodes.utility.ToStringNode;
 import com.adamk33n3r.runelite.watchdog.alerts.*;
 
 import com.adamk33n3r.runelite.watchdog.elevenlabs.ElevenLabs;
@@ -162,6 +166,9 @@ public class AlertManager {
             .registerSubtype(Min.class, Min::new)
             .registerSubtype(Max.class, Max::new)
             .registerSubtype(Clamp.class, Clamp::new)
+            .registerSubtype(Floor.class, Floor::new)
+            .registerSubtype(Ceiling.class, Ceiling::new)
+            .registerSubtype(Round.class, Round::new)
             // Logic nodes (simple)
             .registerSubtype(BooleanGate.class, BooleanGate::new)
             .registerSubtype(Equality.class, Equality::new)
@@ -185,7 +192,8 @@ public class AlertManager {
             .registerSubtype(Branch.class, Branch::new)
             // Utility nodes
             .registerSubtype(DisplayNode.class, DisplayNode::new)
-            .registerSubtype(NoteNode.class, NoteNode::new);
+            .registerSubtype(NoteNode.class, NoteNode::new)
+            .registerSubtype(ToStringNode.class, ToStringNode::new);
         Gson intermediateGson = this.clientGson.newBuilder()
 //            .serializeNulls()
             .registerTypeAdapterFactory(alertTypeFactory)

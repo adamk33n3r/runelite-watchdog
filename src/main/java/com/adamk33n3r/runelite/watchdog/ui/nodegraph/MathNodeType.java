@@ -16,6 +16,9 @@ public enum MathNodeType implements Displayable {
     MIN("Min", "Returns the smaller of two numbers", Min.class, MinNodePanel.class),
     MAX("Max", "Returns the larger of two numbers", Max.class, MaxNodePanel.class),
     CLAMP("Clamp", "Clamps a value between Min and Max", Clamp.class, ClampNodePanel.class),
+    FLOOR("Floor", "Rounds a number down to the nearest integer", Floor.class, FloorNodePanel.class),
+    CEILING("Ceiling", "Rounds a number up to the nearest integer", Ceiling.class, CeilingNodePanel.class),
+    ROUND("Round", "Rounds a number to the nearest integer", Round.class, RoundNodePanel.class),
     ;
 
     private final String name;

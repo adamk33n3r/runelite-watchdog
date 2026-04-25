@@ -21,6 +21,7 @@ import com.adamk33n3r.nodegraph.nodes.logic.LocationCompare;
 import com.adamk33n3r.nodegraph.nodes.math.*;
 import com.adamk33n3r.nodegraph.nodes.utility.DisplayNode;
 import com.adamk33n3r.nodegraph.nodes.utility.NoteNode;
+import com.adamk33n3r.nodegraph.nodes.utility.ToStringNode;
 import com.adamk33n3r.runelite.watchdog.RuntimeTypeAdapterFactory;
 import com.adamk33n3r.runelite.watchdog.alerts.Alert;
 import com.adamk33n3r.runelite.watchdog.alerts.AdvancedAlert;
@@ -77,6 +78,9 @@ public class GraphSerializerTest {
             .registerSubtype(Min.class, Min::new)
             .registerSubtype(Max.class, Max::new)
             .registerSubtype(Clamp.class, Clamp::new)
+            .registerSubtype(Floor.class, Floor::new)
+            .registerSubtype(Ceiling.class, Ceiling::new)
+            .registerSubtype(Round.class, Round::new)
             .registerSubtype(BooleanGate.class, BooleanGate::new)
             .registerSubtype(Equality.class, Equality::new)
             .registerSubtype(Bool.class, Bool::new)
@@ -95,7 +99,8 @@ public class GraphSerializerTest {
             .registerAlias("Timer", TimerNode.class)
             .registerSubtype(Branch.class, Branch::new)
             .registerSubtype(DisplayNode.class, DisplayNode::new)
-            .registerSubtype(NoteNode.class, NoteNode::new);
+            .registerSubtype(NoteNode.class, NoteNode::new)
+            .registerSubtype(ToStringNode.class, ToStringNode::new);
     }
 
     @Test
@@ -270,7 +275,6 @@ public class GraphSerializerTest {
         graph.add(lc);
 
         Graph loaded = roundTrip(graph);
-        System.out.println(loaded.getNodes().size());
         LocationCompare loadedLc = (LocationCompare) loaded.getNodes().get(0);
         assertEquals(new WorldPoint(3200, 3200, 0), loadedLc.getA().getValue());
         assertEquals(new WorldPoint(3210, 3210, 1), loadedLc.getB().getValue());
@@ -348,7 +352,6 @@ public class GraphSerializerTest {
 
     private Graph roundTrip(Graph graph) {
         String json = gson.toJson(graph, Graph.class);
-        System.out.println("roundTrip: " + json);
         return gson.fromJson(json, Graph.class);
     }
 }

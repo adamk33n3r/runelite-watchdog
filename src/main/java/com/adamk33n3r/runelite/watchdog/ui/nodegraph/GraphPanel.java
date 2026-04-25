@@ -8,6 +8,7 @@ import com.adamk33n3r.nodegraph.nodes.logic.InventoryCheck;
 import com.adamk33n3r.nodegraph.nodes.logic.LocationCompare;
 import com.adamk33n3r.nodegraph.nodes.utility.DisplayNode;
 import com.adamk33n3r.nodegraph.nodes.utility.NoteNode;
+import com.adamk33n3r.nodegraph.nodes.utility.ToStringNode;
 import com.adamk33n3r.nodegraph.nodes.flow.Branch;
 import com.adamk33n3r.nodegraph.nodes.flow.Counter;
 import com.adamk33n3r.nodegraph.nodes.flow.TimerNode;
@@ -338,6 +339,9 @@ public class GraphPanel extends JLayeredPane {
                         case MIN: mathNode = new Min(); break;
                         case MAX: mathNode = new Max(); break;
                         case CLAMP: mathNode = new Clamp(); break;
+                        case FLOOR: mathNode = new Floor(); break;
+                        case CEILING: mathNode = new Ceiling(); break;
+                        case ROUND: mathNode = new Round(); break;
                         default: mathNode = new Add(); break;
                     }
                     mathNode.setX(px);
@@ -466,6 +470,16 @@ public class GraphPanel extends JLayeredPane {
                             NodePanel displayPanel = this.createNodePanel(displayNode, utilityNodeType.getName());
                             this.add(displayPanel, NODE_LAYER, 0);
                             onSelect.accept(displayPanel);
+                            break;
+                        }
+                        case TO_STRING: {
+                            ToStringNode tsNode = new ToStringNode();
+                            tsNode.setX(px);
+                            tsNode.setY(py);
+                            this.graph.add(tsNode);
+                            NodePanel tsPanel = this.createNodePanel(tsNode, utilityNodeType.getName());
+                            this.add(tsPanel, NODE_LAYER, 0);
+                            onSelect.accept(tsPanel);
                             break;
                         }
                     }
@@ -602,6 +616,12 @@ public class GraphPanel extends JLayeredPane {
             return new MaxNodePanel(this, (Max) node, node.getX(), node.getY(), name, NODE_MATH_COLOR);
         } else if (node instanceof Clamp) {
             return new ClampNodePanel(this, (Clamp) node, node.getX(), node.getY(), name, NODE_MATH_COLOR);
+        } else if (node instanceof Floor) {
+            return new FloorNodePanel(this, (Floor) node, node.getX(), node.getY(), name, NODE_MATH_COLOR);
+        } else if (node instanceof Ceiling) {
+            return new CeilingNodePanel(this, (Ceiling) node, node.getX(), node.getY(), name, NODE_MATH_COLOR);
+        } else if (node instanceof Round) {
+            return new RoundNodePanel(this, (Round) node, node.getX(), node.getY(), name, NODE_MATH_COLOR);
         } else if (node instanceof DelayNode) {
             DelayNode delayNode = (DelayNode) node;
             return new DelayNodePanel(this, delayNode.getX(), delayNode.getY(), delayNode, NODE_FLOW_COLOR);
@@ -626,6 +646,8 @@ public class GraphPanel extends JLayeredPane {
                 itemManager = null;
             }
             return new DisplayNodePanel(this, displayNode, displayNode.getX(), displayNode.getY(), NODE_UTILITY_COLOR, itemManager);
+        } else if (node instanceof ToStringNode) {
+            return new ToStringNodePanel(this, (ToStringNode) node, node.getX(), node.getY(), NODE_UTILITY_COLOR);
         }
         return null;
     }

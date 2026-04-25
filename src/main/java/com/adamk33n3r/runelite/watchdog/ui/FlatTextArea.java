@@ -135,6 +135,12 @@ public class FlatTextArea extends JPanel {
         return this.textArea.requestFocusInWindow();
     }
 
+    @Override
+    public void setEnabled(boolean enabled) {
+        super.setEnabled(enabled);
+        this.textArea.setEnabled(enabled);
+    }
+
     public void setBackground(Color color, boolean saveColor)
     {
         if (color == null)

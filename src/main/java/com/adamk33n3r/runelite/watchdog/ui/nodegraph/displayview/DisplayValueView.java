@@ -83,7 +83,7 @@ public class DisplayValueView extends JPanel {
         if (value instanceof Integer || value instanceof Long) {
             text = NumberFormat.getInstance().format(value.longValue());
         } else {
-            text = String.format("%.4g", value.doubleValue());
+            text = String.format("%.1f", value.doubleValue());
         }
         JLabel label = new JLabel(text);
         label.setHorizontalAlignment(SwingConstants.RIGHT);
