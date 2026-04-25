@@ -35,6 +35,7 @@ public class BranchNodePanel extends NodePanel {
         this.execFalse = new ConnectionPointOut<>(this, node.getExecFalse());
         this.items.add(new ConnectionLine<>(null, new ViewInput<>("False", null), this.execFalse));
 
+        this.watchDirty(node.getCondition());
         this.pack();
     }
 }

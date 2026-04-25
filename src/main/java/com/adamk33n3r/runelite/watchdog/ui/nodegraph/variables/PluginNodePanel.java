@@ -30,7 +30,6 @@ public class PluginNodePanel extends VariableNodePanel {
                 .filter(pl -> pl.getName().equals(pluginName))
                 .findFirst().orElse(null);
             node.setValue(p != null && pluginManager.isPluginEnabled(p));
-            this.notifyChange();
         }));
         // Prime initial enabled state
         String initialName = node.getPluginName().getValue();
@@ -44,6 +43,7 @@ public class PluginNodePanel extends VariableNodePanel {
         addDisposer(node.getValue().onChange(a -> valueView.setValue(node.getValue().getValue())));
         this.items.add(new ConnectionLine<>(null, valueView, this.valueOut));
 
+        this.watchDirty(node.getPluginName());
         this.pack();
     }
 }

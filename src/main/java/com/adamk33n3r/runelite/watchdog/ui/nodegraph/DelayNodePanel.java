@@ -28,6 +28,7 @@ public class DelayNodePanel extends NodePanel {
         this.delayMsIn = new ConnectionPointIn<>(this, delayNode.getDelayMs());
         this.items.add(new ConnectionLine<>(this.delayMsIn, new IntegerInput("Delay (ms)", delayNode.getDelayMs()), null));
 
+        this.watchDirty(delayNode.getDelayMs());
         this.pack();
     }
 }

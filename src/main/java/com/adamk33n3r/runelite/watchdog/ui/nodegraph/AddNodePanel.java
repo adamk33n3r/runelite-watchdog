@@ -29,6 +29,7 @@ public class AddNodePanel extends NodePanel {
         addDisposer(node.getB().onChange(b -> resultView.setValue(node.getResult().getValue())));
         this.items.add(new ConnectionLine<>(null, resultView, this.resultOut));
 
+        this.watchDirty(node.getA(), node.getB());
         this.pack();
     }
 }

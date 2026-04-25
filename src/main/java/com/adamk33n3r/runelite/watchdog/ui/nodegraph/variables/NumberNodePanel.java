@@ -20,6 +20,7 @@ public class NumberNodePanel extends ConstantNodePanel {
         this.numValue = new ConnectionPointOut<>(this, node.getValue());
 
         NumberInput numberInput = new NumberInput("Number Value", node.getValue());
+        numberInput.registerOnChange(v -> this.notifyChange());
         this.items.add(new ConnectionLine<>(null, numberInput, this.numValue));
 
         this.pack();

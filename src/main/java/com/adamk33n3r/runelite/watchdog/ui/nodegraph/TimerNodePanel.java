@@ -40,6 +40,7 @@ public class TimerNodePanel extends NodePanel {
         this.pulseOut = new ConnectionPointOut<>(this, node.getPulseOut());
         this.items.add(new SplitConnectionLine<>(this.pulseIn, new BoolInput("Pulse", node.getPulse()), this.pulseOut));
 
+        this.watchDirty(node.getDurationMs(), node.getPulse());
         this.pack();
     }
 }

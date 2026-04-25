@@ -25,6 +25,7 @@ public class CeilingNodePanel extends NodePanel {
         addDisposer(node.getValue().onChange(v -> resultView.setValue(node.getResult().getValue())));
         this.items.add(new ConnectionLine<>(null, resultView, this.resultOut));
 
+        this.watchDirty(node.getValue());
         this.pack();
     }
 }

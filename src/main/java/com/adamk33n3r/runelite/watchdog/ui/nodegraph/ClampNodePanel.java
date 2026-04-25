@@ -33,6 +33,7 @@ public class ClampNodePanel extends NodePanel {
         addDisposer(node.getMax().onChange(v -> resultView.setValue(node.getResult().getValue())));
         this.items.add(new ConnectionLine<>(null, resultView, this.resultOut));
 
+        this.watchDirty(node.getValue(), node.getMin(), node.getMax());
         this.pack();
     }
 }

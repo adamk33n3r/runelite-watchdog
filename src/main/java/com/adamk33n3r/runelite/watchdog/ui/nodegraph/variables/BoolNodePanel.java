@@ -21,6 +21,7 @@ public class BoolNodePanel extends ConstantNodePanel {
         this.boolValueOut = new ConnectionPointOut<>(this, boolNode.getValueOut());
 
         BoolInput boolInput = new BoolInput("Boolean Value", boolNode.getValueOut());
+        boolInput.registerOnChange(v -> this.notifyChange());
         this.items.add(new ConnectionLine<>(null, boolInput, this.boolValueOut));
 
         this.pack();

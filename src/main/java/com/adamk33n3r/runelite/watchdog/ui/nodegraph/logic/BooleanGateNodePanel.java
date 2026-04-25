@@ -22,7 +22,6 @@ public class BooleanGateNodePanel extends NodePanel {
 
         ConnectionPointIn<BooleanGate.Op> opIn = new ConnectionPointIn<>(this, node.getOp());
         this.items.add(new ConnectionLine<>(opIn, new EnumInput<>("Op", node.getOp()), null));
-        this.watchDirty(node.getOp());
 
         ConnectionPointIn<Boolean> inA = new ConnectionPointIn<>(this, node.getA());
         this.items.add(new ConnectionLine<>(inA, new BoolInput("A", node.getA()), null));
@@ -37,6 +36,7 @@ public class BooleanGateNodePanel extends NodePanel {
         addDisposer(node.getOp().onChange(op -> result.setValue(node.getResult().getValue())));
         this.items.add(new ConnectionLine<>(null, result, this.resultOut));
 
+        this.watchDirty(node.getOp(), node.getA(), node.getB());
         this.pack();
     }
 }

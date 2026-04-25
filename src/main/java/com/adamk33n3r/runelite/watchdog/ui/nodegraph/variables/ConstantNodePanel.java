@@ -15,6 +15,7 @@ public class ConstantNodePanel extends NodePanel {
 
         TextInput nameInput = new TextInput("Name", "Name", node.getNameOut());
         nameInput.registerOnType(this::updateHeaderLabel);
+        nameInput.registerOnChange(v -> this.notifyChange());
         this.items.add(nameInput);
     }
 }

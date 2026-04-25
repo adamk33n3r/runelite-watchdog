@@ -70,25 +70,15 @@ public class LocationCompareNodePanel extends NodePanel {
         });
         this.items.add(setCurrentB);
 
-        this.watchDirty(node.getA(), node.getB());
-
         // Distance — now a connectable VarInput<Number>
         ConnectionPointIn<Number> distIn = new ConnectionPointIn<>(this, node.getDistance());
         this.items.add(new ConnectionLine<>(distIn, new IntegerInput("Distance", node.getDistance()), null));
-        addDisposer(node.getDistance().onChange(_v -> {
-            resultView.setValue(node.getResult().getValue());
-            this.notifyChange();
-        }));
-//        this.watchDirty(node.getDistance());
+        addDisposer(node.getDistance().onChange(_v -> resultView.setValue(node.getResult().getValue())));
 
         // Cardinal Only — now a connectable VarInput<Boolean>
         ConnectionPointIn<Boolean> cardIn = new ConnectionPointIn<>(this, node.getCardinalOnly());
         this.items.add(new ConnectionLine<>(cardIn, new BoolInput("Cardinal Only", node.getCardinalOnly()), null));
-        addDisposer(node.getCardinalOnly().onChange(_v -> {
-            resultView.setValue(node.getResult().getValue());
-            this.notifyChange();
-        }));
-//        this.watchDirty(node.getCardinalOnly());
+        addDisposer(node.getCardinalOnly().onChange(_v -> resultView.setValue(node.getResult().getValue())));
 
         // Wire result view to update when A or B input values change
         addDisposer(node.getA().onChange(a -> {
@@ -101,6 +91,7 @@ public class LocationCompareNodePanel extends NodePanel {
         }));
         this.items.add(new ConnectionLine<>(null, resultView, this.resultOut));
 
+        this.watchDirty(node.getA(), node.getB(), node.getDistance(), node.getCardinalOnly());
         this.pack();
     }
 
