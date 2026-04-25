@@ -47,6 +47,12 @@ public class ActionNodePanel extends NodePanel {
         this.items.add(new ConnectionLine<>(this.fireWhenAfkIn, new BoolInput("AFK", actionNode.getFireWhenAfk()), null));
         this.fireWhenAfkSecondsIn = new ConnectionPointIn<>(this, actionNode.getFireWhenAfkSeconds());
         this.items.add(new ConnectionLine<>(this.fireWhenAfkSecondsIn, new NumberInput("AFK Seconds", actionNode.getFireWhenAfkSeconds()), null));
+        this.watchDirty(
+            actionNode.getEnabled(),
+            actionNode.getFireWhenFocused(),
+            actionNode.getFireWhenAfk(),
+            actionNode.getFireWhenAfkSeconds()
+        );
 
         // Populate type-specific controls via content panel instance
         NotificationContentPanel<?> contentPanel = notificationPanelFactory.createContentPanel(notification, this::notifyChange);

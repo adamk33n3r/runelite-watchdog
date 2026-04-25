@@ -5,9 +5,9 @@ import lombok.Getter;
 
 @Getter
 public class Clamp extends MathNode {
-    private final VarInput<Number> value = new VarInput<>(this, "Value", Number.class, 0);
-    private final VarInput<Number> min = new VarInput<>(this, "Min", Number.class, 0);
-    private final VarInput<Number> max = new VarInput<>(this, "Max", Number.class, 1);
+    private final VarInput<Number> value = new VarInput<>(this, "Value", Number.class, 0d);
+    private final VarInput<Number> min = new VarInput<>(this, "Min", Number.class, 0d);
+    private final VarInput<Number> max = new VarInput<>(this, "Max", Number.class, 1d);
 
     public Clamp() {
         this.value.onChange(v -> this.process());

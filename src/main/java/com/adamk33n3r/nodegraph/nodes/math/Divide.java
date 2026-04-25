@@ -7,8 +7,8 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Getter
 public class Divide extends MathNode {
-    private final VarInput<Number> a = new VarInput<>(this, "A", Number.class, 1);
-    private final VarInput<Number> b = new VarInput<>(this, "B", Number.class, 1);
+    private final VarInput<Number> a = new VarInput<>(this, "A", Number.class, 1d);
+    private final VarInput<Number> b = new VarInput<>(this, "B", Number.class, 1d);
 
     public Divide() {
         this.a.onChange(a -> this.process());

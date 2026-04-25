@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @Getter
 public class Round extends MathNode {
-    private final VarInput<Number> value = new VarInput<>(this, "Value", Number.class, 0);
+    private final VarInput<Number> value = new VarInput<>(this, "Value", Number.class, 0d);
 
     public Round() {
         this.value.onChange(v -> this.process());

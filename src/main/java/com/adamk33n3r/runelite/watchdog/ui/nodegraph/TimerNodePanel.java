@@ -7,7 +7,7 @@ import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.ConnectionPoint
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.ConnectionPointOut;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.SplitConnectionLine;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.inputs.BoolInput;
-import com.adamk33n3r.runelite.watchdog.ui.nodegraph.inputs.NumberInput;
+import com.adamk33n3r.runelite.watchdog.ui.nodegraph.inputs.IntegerInput;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.inputs.ViewInput;
 
 import lombok.Getter;
@@ -34,7 +34,7 @@ public class TimerNodePanel extends NodePanel {
         this.items.add(new ConnectionLine<>(this.resetIn, new ViewInput<>("Reset", null), null));
 
         this.durationMsIn = new ConnectionPointIn<>(this, node.getDurationMs());
-        this.items.add(new ConnectionLine<>(this.durationMsIn, new NumberInput("Duration (ms)", node.getDurationMs()), null));
+        this.items.add(new ConnectionLine<>(this.durationMsIn, new IntegerInput("Duration (ms)", node.getDurationMs()), null));
 
         this.pulseIn = new ConnectionPointIn<>(this, node.getPulse());
         this.pulseOut = new ConnectionPointOut<>(this, node.getPulseOut());

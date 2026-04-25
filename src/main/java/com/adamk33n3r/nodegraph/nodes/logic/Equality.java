@@ -30,8 +30,8 @@ public class Equality extends Node {
     }
 
     private final VarInput<Op> op = new VarInput<>(this, "Op", Op.class, Op.EQUAL);
-    private final VarInput<Number> a = new VarInput<>(this, "A", Number.class, 0);
-    private final VarInput<Number> b = new VarInput<>(this, "B", Number.class, 0);
+    private final VarInput<Number> a = new VarInput<>(this, "A", Number.class, 0d);
+    private final VarInput<Number> b = new VarInput<>(this, "B", Number.class, 0d);
     private final VarOutput<Boolean> result = new VarOutput<>(this, "Result", Boolean.class, false);
 
     public Equality() {

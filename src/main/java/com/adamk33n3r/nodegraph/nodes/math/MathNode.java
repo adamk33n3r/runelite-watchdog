@@ -10,7 +10,7 @@ import lombok.Getter;
  */
 @Getter
 public abstract class MathNode extends Node {
-    private final VarOutput<Number> result = new VarOutput<>(this, "Result", Number.class, 0);
+    private final VarOutput<Number> result = new VarOutput<>(this, "Result", Number.class, 0d);
 
     protected MathNode() {
         reg(this.result);

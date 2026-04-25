@@ -5,8 +5,8 @@ import lombok.Getter;
 
 @Getter
 public class Add extends MathNode {
-    private final VarInput<Number> a = new VarInput<>(this, "A", Number.class, 0);
-    private final VarInput<Number> b = new VarInput<>(this, "B", Number.class, 0);
+    private final VarInput<Number> a = new VarInput<>(this, "A", Number.class, 0d);
+    private final VarInput<Number> b = new VarInput<>(this, "B", Number.class, 0d);
 
     public Add() {
         this.a.onChange(a -> this.process());

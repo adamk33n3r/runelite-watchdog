@@ -14,9 +14,7 @@ public class ActionNode extends Node {
     private final VarInput<Boolean> enabled = new VarInput<>(this, "Enabled", Boolean.class, true);
     private final VarInput<Boolean> fireWhenFocused = new VarInput<>(this, "Fire When Focused", Boolean.class, true);
     private final VarInput<Boolean> fireWhenAfk = new VarInput<>(this, "Fire When AFK", Boolean.class, false);
-    private final VarInput<Number> fireWhenAfkSeconds = new VarInput<>(this, "Fire When AFK Seconds", Number.class, 0);
-//    private final VarInput<Number> delayMilliseconds = new VarInput<>(this, "Delay (ms)", Number.class, 0);
-//    private final VarInput<String> alertName = new VarInput<>(this, "Alert Name", String.class, "");
+    private final VarInput<Number> fireWhenAfkSeconds = new VarInput<>(this, "Fire When AFK Seconds", Number.class, 0d);
     private final VarInput<ExecSignal> exec = new VarInput<>(this, "Exec", ExecSignal.class, new ExecSignal(new String[0]));
     private final VarOutput<ExecSignal> execOut = new VarOutput<>(this, "Exec", ExecSignal.class, new ExecSignal(new String[0]));
 

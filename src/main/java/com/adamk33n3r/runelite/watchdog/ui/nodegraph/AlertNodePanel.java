@@ -46,6 +46,8 @@ public class AlertNodePanel extends NodePanel {
         this.enabledOut = new ConnectionPointOut<>(this, triggerNode.getEnabledOut());
         this.items.add(new ConnectionLine<>(this.enabled, enabledInput, this.enabledOut));
 
+        this.watchDirty(triggerNode.getEnabled());
+
         // Type-specific controls via factory — supports rebuild for conditional UI panels
         AlertContentPanel<?> content = alertPanelContentFactory.createContentPanel(alert, this::notifyChange);
         if (content != null) {

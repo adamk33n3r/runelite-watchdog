@@ -4,6 +4,7 @@ import com.adamk33n3r.nodegraph.nodes.utility.ToStringNode;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.ConnectionLine;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.ConnectionPointIn;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.ConnectionPointOut;
+import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.SplitConnectionLine;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.inputs.NullInput;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.inputs.ViewInput;
 import lombok.Getter;
@@ -22,9 +23,9 @@ public class ToStringNodePanel extends NodePanel {
         this.items.add(new ConnectionLine<>(this.valueIn, new NullInput<>(), null));
 
         this.resultOut = new ConnectionPointOut<>(this, node.getResult());
-        ViewInput<String> resultView = new ViewInput<>("Result", node.getResult().getValue());
+        ViewInput<Object> resultView = new ViewInput<>("Result", node.getResult().getValue());
         addDisposer(node.getValue().onChange(v -> resultView.setValue(node.getResult().getValue())));
-        this.items.add(new ConnectionLine<>(null, resultView, this.resultOut));
+        this.items.add(new SplitConnectionLine<>(this.valueIn, resultView, this.resultOut));
 
         this.pack();
     }

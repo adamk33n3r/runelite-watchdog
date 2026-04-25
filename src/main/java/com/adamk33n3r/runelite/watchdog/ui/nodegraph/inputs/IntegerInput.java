@@ -7,16 +7,16 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.function.Consumer;
 
-public class NumberInput extends AbstractInput<Number> {
+public class IntegerInput extends AbstractInput<Number> {
     private final JSpinner spinner;
 
-    public NumberInput(String label, Var<Number> value) {
+    public IntegerInput(String label, Var<Number> value) {
         JLabel labelComp = new JLabel(label);
-        this.spinner = PanelUtils.createSpinnerDouble(
-            value.getValue().doubleValue(),
-            -Double.MAX_VALUE,
-            Double.MAX_VALUE,
-            0.1,
+        this.spinner = PanelUtils.createSpinner(
+            value.getValue().intValue(),
+            Integer.MIN_VALUE,
+            Integer.MAX_VALUE,
+            1,
             value::setValue
         );
         this.add(labelComp, BorderLayout.WEST);
@@ -30,12 +30,12 @@ public class NumberInput extends AbstractInput<Number> {
 
     @Override
     public void setValue(Number value) {
-        this.spinner.setValue(value);
+        this.spinner.setValue(value.intValue());
     }
 
     @Override
     public void registerOnChange(Consumer<Number> onChange) {
-        this.spinner.addChangeListener((e) -> onChange.accept((Number) this.spinner.getValue()));
+        this.spinner.addChangeListener(e -> onChange.accept((Number) this.spinner.getValue()));
     }
 
     @Override

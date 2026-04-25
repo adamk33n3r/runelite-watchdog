@@ -11,7 +11,7 @@ import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.ConnectionPoint
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.ConnectionPointOut;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.inputs.BoolInput;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.inputs.EnumInput;
-import com.adamk33n3r.runelite.watchdog.ui.nodegraph.inputs.NumberInput;
+import com.adamk33n3r.runelite.watchdog.ui.nodegraph.inputs.IntegerInput;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.inputs.TextInput;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.inputs.ViewInput;
 import lombok.Getter;
@@ -97,7 +97,7 @@ public class InventoryCheckNodePanel extends NodePanel {
 
             ConnectionPointIn<Number> qtyIn = new ConnectionPointIn<>(this, node.getItemQuantity());
             this.items.add(new ConnectionLine<>(qtyIn,
-                new NumberInput("Quantity", node.getItemQuantity()), null));
+                new IntegerInput("Quantity", node.getItemQuantity()), null));
             addDisposer(node.getItemQuantity().onChange(_v -> this.updateResult()));
 
             ConnectionPointIn<ComparableNumber.Comparator> cmpIn = new ConnectionPointIn<>(this, node.getQuantityComparator());
@@ -108,7 +108,7 @@ public class InventoryCheckNodePanel extends NodePanel {
         } else if (alertType == InventoryAlert.InventoryAlertType.SLOTS) {
             ConnectionPointIn<Number> qtyIn = new ConnectionPointIn<>(this, node.getItemQuantity());
             this.items.add(new ConnectionLine<>(qtyIn,
-                new NumberInput("Quantity", node.getItemQuantity()), null));
+                new IntegerInput("Quantity", node.getItemQuantity()), null));
             addDisposer(node.getItemQuantity().onChange(_v -> this.updateResult()));
 
             ConnectionPointIn<ComparableNumber.Comparator> cmpIn = new ConnectionPointIn<>(this, node.getQuantityComparator());

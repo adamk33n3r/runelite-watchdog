@@ -7,7 +7,7 @@ import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.ConnectionLine;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.ConnectionPointIn;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.ConnectionPointOut;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.inputs.BoolInput;
-import com.adamk33n3r.runelite.watchdog.ui.nodegraph.inputs.NumberInput;
+import com.adamk33n3r.runelite.watchdog.ui.nodegraph.inputs.IntegerInput;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.inputs.ViewInput;
 import com.adamk33n3r.runelite.watchdog.ui.panels.PanelUtils;
 import lombok.Getter;
@@ -74,7 +74,7 @@ public class LocationCompareNodePanel extends NodePanel {
 
         // Distance — now a connectable VarInput<Number>
         ConnectionPointIn<Number> distIn = new ConnectionPointIn<>(this, node.getDistance());
-        this.items.add(new ConnectionLine<>(distIn, new NumberInput("Distance", node.getDistance()), null));
+        this.items.add(new ConnectionLine<>(distIn, new IntegerInput("Distance", node.getDistance()), null));
         addDisposer(node.getDistance().onChange(_v -> {
             resultView.setValue(node.getResult().getValue());
             this.notifyChange();

@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @Getter
 public class Ceiling extends MathNode {
-    private final VarInput<Number> value = new VarInput<>(this, "Value", Number.class, 0);
+    private final VarInput<Number> value = new VarInput<>(this, "Value", Number.class, 0d);
 
     public Ceiling() {
         this.value.onChange(v -> this.process());
