@@ -68,6 +68,9 @@ public class EventHandler {
     @Inject
     private WatchdogPlugin plugin;
 
+    @Inject
+    private WatchdogConfig config;
+
     private final Map<Alert, Instant> lastTriggered = new HashMap<>();
 
     // Cached once per session; reset on logout. Avoids repeated getVarbitValue() calls during region loads.
@@ -533,11 +536,54 @@ public class EventHandler {
         if (name == null) {
             return;
         }
-        // Fast path: skip enqueueing when no relevant alerts are configured (common during region loads)
+        // Fast path: skip the whole pipeline when no relevant alerts are configured (common during region loads)
         if (!this.alertManager.hasEnabledAlertsOfType(SpawnedAlert.class) && !this.alertManager.hasEnabledAlertsOfType(AdvancedAlert.class)) {
             return;
         }
-        this.spawnQueue.add(new SpawnedEventData(Text.removeFormattingTags(name), id, location, mode, type, additionalFilter));
+
+        if (this.config.batchSpawnedEvents()) {
+            // New path: queue and drain at end of GameTick (see drainSpawnQueue + onGameTick).
+            this.spawnQueue.add(new SpawnedEventData(Text.removeFormattingTags(name), id, location, mode, type, additionalFilter));
+            return;
+        }
+
+        // Legacy path: per-event match + fire.
+        Player localPlayer = this.client.getLocalPlayer();
+        if (localPlayer == null) {
+            return;
+        }
+        String unformattedName = Text.removeFormattingTags(name);
+        int distanceToObject = location.distanceTo(localPlayer.getWorldLocation());
+        this.alertManager.getAllEnabledAlertsOfType(SpawnedAlert.class)
+            .filter(spawnedAlert -> spawnedAlert.getSpawnedDespawned() == mode)
+            .filter(spawnedAlert -> spawnedAlert.getSpawnedType() == type)
+            .filter(spawnedAlert -> spawnedAlert.getDistance() == -1 || spawnedAlert.getDistanceComparator().compare(distanceToObject, spawnedAlert.getDistance()))
+            .filter(additionalFilter)
+            .forEach(spawnedAlert -> {
+                String pattern = spawnedAlert.getPattern();
+                if (isNumericString(pattern)) {
+                    if (id == Integer.parseInt(pattern)) {
+                        this.fireAlert(spawnedAlert, new String[] { pattern });
+                    }
+                } else {
+                    String[] groups = Util.matchPattern(spawnedAlert, unformattedName);
+                    if (groups == null) return;
+                    this.fireAlert(spawnedAlert, groups);
+                }
+            });
+
+        this.fireAdvancedAlertTriggers(SpawnedAlert.class,
+            a -> a.getSpawnedDespawned() == mode
+                && a.getSpawnedType() == type
+                && (a.getDistance() == -1 || a.getDistanceComparator().compare(distanceToObject, a.getDistance()))
+                && additionalFilter.test(a),
+            a -> {
+                String pattern = a.getPattern();
+                if (isNumericString(pattern)) {
+                    return id == Integer.parseInt(pattern) ? new String[]{ pattern } : null;
+                }
+                return Util.matchPattern(a, unformattedName);
+            });
     }
 
     private static boolean isNumericString(String s) {

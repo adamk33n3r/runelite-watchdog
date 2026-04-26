@@ -38,6 +38,7 @@ public class SpawnedAlertEventHandlerTest extends AlertTestBase {
         Player player = Mockito.mock(Player.class);
         Mockito.when(player.getWorldLocation()).thenReturn(PLAYER_LOC);
         Mockito.when(this.client.getLocalPlayer()).thenReturn(player);
+        Mockito.when(this.watchdogConfig.batchSpawnedEvents()).thenReturn(true);
     }
 
     // region Helpers

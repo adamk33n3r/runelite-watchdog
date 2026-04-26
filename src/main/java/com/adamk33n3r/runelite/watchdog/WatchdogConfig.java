@@ -30,6 +30,7 @@ public interface WatchdogConfig extends Config {
     String ENABLE_NOTIFICATION_CATEGORIES = "enableNotificationCategories";
     String DISABLE_ALL_ALERTS_ON_STARTUP = "disableAllAlertsOnStartup";
     String ENABLE_ADVANCED_ALERTS = "enableAdvancedAlerts";
+    String BATCH_SPAWNED_EVENTS = "batchSpawnedEvents";
 
     // AFK Notification
     String DEFAULT_AFK_MODE = "defaultAFKMode";
@@ -170,6 +171,13 @@ public interface WatchdogConfig extends Config {
         description = "Enable the creation of Advanced Alerts (currently in BETA)"
     )
     default boolean enableAdvancedAlerts() { return false; }
+
+    @ConfigItem(
+        keyName = BATCH_SPAWNED_EVENTS,
+        name = "Batch Spawned Events (Experimental)",
+        description = "Collapse spawn events to one fire per matching alert per game tick. Reduces lag during region transitions but changes fire-per-event semantics for debounce=0 alerts."
+    )
+    default boolean batchSpawnedEvents() { return false; }
 
     @ConfigItem(
         keyName = ENABLE_NOTIFICATION_CATEGORIES,
