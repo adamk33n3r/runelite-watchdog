@@ -11,6 +11,8 @@ public class VarInput<T> extends Var<T> {
     private final List<Connection<T>> connections = new ArrayList<>();
     @Getter @Setter
     private boolean allowMultipleConnections = false;
+    @Getter @Setter
+    private boolean terminatesExec = false;
     private final List<Consumer<T>> onChange = new ArrayList<>();
     private final List<Consumer<Boolean>> onConnectChange = new ArrayList<>();
 

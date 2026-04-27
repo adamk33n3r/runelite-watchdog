@@ -28,6 +28,7 @@ public class TimerNode extends Node {
     public TimerNode() {
         this.exec.setAllowMultipleConnections(true);
         this.reset.setAllowMultipleConnections(true);
+        this.reset.setTerminatesExec(true);
 
         reg(this.exec);
         reg(this.reset);

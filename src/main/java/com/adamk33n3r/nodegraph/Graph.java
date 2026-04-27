@@ -74,7 +74,11 @@ public class Graph {
         this.connections.removeAll(toRemove);
     }
 
-    private boolean wouldCreateCycle(Node source, Node dest) {
+    private boolean wouldCreateCycle(VarOutput<?> output, VarInput<?> input) {
+        if (input.isTerminatesExec()) return false;
+
+        Node source = output.getNode();
+        Node dest = input.getNode();
         Set<Node> visited = new HashSet<>();
         Deque<Node> stack = new ArrayDeque<>();
         stack.push(source);
@@ -84,6 +88,7 @@ public class Graph {
             if (!visited.add(node)) continue;
             this.connections.stream()
                 .filter(c -> c.getInput().getNode() == node)
+                .filter(c -> !c.getInput().isTerminatesExec())
                 .map(c -> c.getOutput().getNode())
                 .forEach(stack::push);
         }
@@ -96,7 +101,7 @@ public class Graph {
             return false;
         }
 
-        if (wouldCreateCycle(output.getNode(), input.getNode())) {
+        if (wouldCreateCycle(output, input)) {
             log.warn("Connection would create a cycle");
             return false;
         }

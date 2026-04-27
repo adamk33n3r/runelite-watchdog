@@ -7,6 +7,8 @@ import com.adamk33n3r.nodegraph.VarOutput;
 import com.adamk33n3r.nodegraph.nodes.Dummy;
 import com.adamk33n3r.nodegraph.nodes.Logger;
 import com.adamk33n3r.nodegraph.nodes.constants.Num;
+import com.adamk33n3r.nodegraph.nodes.flow.Counter;
+import com.adamk33n3r.nodegraph.nodes.flow.TimerNode;
 import com.adamk33n3r.nodegraph.nodes.math.Add;
 import org.junit.Test;
 import org.slf4j.LoggerFactory;
@@ -173,5 +175,78 @@ public class GraphTest {
         graph.remove(num);
         // Should not throw
         num.setValue(99);
+    }
+
+    @Test
+    public void test_cycle_allows_back_edge_into_counter_reset() {
+        Graph graph = new Graph();
+        Counter counter1 = new Counter();
+        Counter counter2 = new Counter();
+        graph.add(counter1);
+        graph.add(counter2);
+
+        assertTrue(graph.connect(counter1.getExecOut(), counter2.getExec()));
+        assertTrue(graph.connect(counter2.getExecOut(), counter1.getReset()));
+    }
+
+    @Test
+    public void test_cycle_allows_direct_self_loop_into_reset() {
+        Graph graph = new Graph();
+        Counter counter = new Counter();
+        graph.add(counter);
+
+        assertTrue(graph.connect(counter.getExecOut(), counter.getReset()));
+    }
+
+    @Test
+    public void test_cycle_blocks_back_edge_into_counter_main_exec() {
+        Graph graph = new Graph();
+        Counter counter1 = new Counter();
+        Counter counter2 = new Counter();
+        graph.add(counter1);
+        graph.add(counter2);
+
+        assertTrue(graph.connect(counter1.getExecOut(), counter2.getExec()));
+        assertFalse(graph.connect(counter2.getExecOut(), counter1.getExec()));
+    }
+
+    @Test
+    public void test_cycle_allows_back_edge_into_timer_reset() {
+        Graph graph = new Graph();
+        TimerNode timer = new TimerNode();
+        Counter counter = new Counter();
+        graph.add(timer);
+        graph.add(counter);
+
+        assertTrue(graph.connect(timer.getExecOut(), counter.getExec()));
+        assertTrue(graph.connect(counter.getExecOut(), timer.getReset()));
+    }
+
+    @Test
+    public void test_cycle_allows_unrelated_connection_when_reset_edge_exists() {
+        Graph graph = new Graph();
+        Counter counter1 = new Counter();
+        Counter counter2 = new Counter();
+        graph.add(counter1);
+        graph.add(counter2);
+
+        assertTrue(graph.connect(counter2.getExecOut(), counter1.getReset()));
+        // Without the in-walk terminal filter, the existing reset edge would generate a false-positive cycle
+        assertTrue(graph.connect(counter1.getExecOut(), counter2.getExec()));
+    }
+
+    @Test
+    public void test_cycle_blocks_pure_exec_cycle_without_reset() {
+        Graph graph = new Graph();
+        Counter counter1 = new Counter();
+        Counter counter2 = new Counter();
+        Counter counter3 = new Counter();
+        graph.add(counter1);
+        graph.add(counter2);
+        graph.add(counter3);
+
+        assertTrue(graph.connect(counter1.getExecOut(), counter2.getExec()));
+        assertTrue(graph.connect(counter2.getExecOut(), counter3.getExec()));
+        assertFalse(graph.connect(counter3.getExecOut(), counter1.getExec()));
     }
 }

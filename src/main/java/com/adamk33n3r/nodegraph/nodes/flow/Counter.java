@@ -17,9 +17,9 @@ public class Counter extends Node {
     public Counter() {
         this.exec.setAllowMultipleConnections(true);
         this.reset.setAllowMultipleConnections(true);
+        this.reset.setTerminatesExec(true);
 
         this.exec.onChange(val -> this.process());
-        this.reset.onChange(val -> this.process());
         this.count.onChange(val -> this.process());
 
         reg(this.exec);
