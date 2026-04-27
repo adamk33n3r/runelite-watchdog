@@ -7,7 +7,7 @@ import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.ConnectionLine;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.ConnectionPointIn;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.ConnectionPointOut;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.inputs.BoolInput;
-import com.adamk33n3r.runelite.watchdog.ui.nodegraph.inputs.NumberInput;
+import com.adamk33n3r.runelite.watchdog.ui.nodegraph.inputs.IntegerInput;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.inputs.ViewInput;
 import com.adamk33n3r.runelite.watchdog.ui.notifications.panels.NotificationContentPanel;
 import com.adamk33n3r.runelite.watchdog.ui.panels.NotificationPanelFactory;
@@ -46,7 +46,7 @@ public class ActionNodePanel extends NodePanel {
         this.fireWhenAfkIn = new ConnectionPointIn<>(this, actionNode.getFireWhenAfk());
         this.items.add(new ConnectionLine<>(this.fireWhenAfkIn, new BoolInput("AFK", actionNode.getFireWhenAfk()), null));
         this.fireWhenAfkSecondsIn = new ConnectionPointIn<>(this, actionNode.getFireWhenAfkSeconds());
-        this.items.add(new ConnectionLine<>(this.fireWhenAfkSecondsIn, new NumberInput("AFK Seconds", actionNode.getFireWhenAfkSeconds()), null));
+        this.items.add(new ConnectionLine<>(this.fireWhenAfkSecondsIn, new IntegerInput("AFK Seconds", actionNode.getFireWhenAfkSeconds()), null));
 
         // Populate type-specific controls via content panel instance
         NotificationContentPanel<?> contentPanel = notificationPanelFactory.createContentPanel(notification, this::notifyChange);
