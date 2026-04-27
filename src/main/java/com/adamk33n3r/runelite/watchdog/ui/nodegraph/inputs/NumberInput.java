@@ -30,7 +30,7 @@ public class NumberInput extends AbstractInput<Number> {
 
     @Override
     public void setValue(Number value) {
-        this.spinner.setValue(value);
+        this.spinner.setValue(value.doubleValue());
     }
 
     @Override
