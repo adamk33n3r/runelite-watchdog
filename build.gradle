@@ -44,6 +44,20 @@ version = major+'.'+minor+'.'+patch
 if (!phase.empty)
     version = version+'-'+phase
 
+def nextBuildNumber(File destDir, String baseName, String suffix) {
+    if (!destDir.exists()) return 1
+    def pattern = ~/\Q${baseName}\E\+(\d+)\Q${suffix}\E/
+    def maxN = 0
+    destDir.listFiles()?.each { f ->
+        def m = pattern.matcher(f.name)
+        if (m.matches()) {
+            def n = m.group(1).toInteger()
+            if (n > maxN) maxN = n
+        }
+    }
+    return maxN + 1
+}
+
 sourceCompatibility = '11'
 targetCompatibility = '11'
 
@@ -81,7 +95,12 @@ tasks.register("shadowJar", Jar) {
 
     group = BasePlugin.BUILD_GROUP
     archiveClassifier = "shadow"
-    archiveFileName = rootProject.name + "-" + project.version + "-all.jar"
+    archiveFileName.set(providers.provider {
+        def base = rootProject.name + "-" + project.version
+        def suffix = "-all.jar"
+        def n = nextBuildNumber(destinationDirectory.get().asFile, base, suffix)
+        "${base}+${n}${suffix}"
+    })
     destinationDirectory = file('jars')
     doLast {
         println("file://"+destinationDirectory.get().asFile.toURI().rawPath)
@@ -116,7 +135,12 @@ tasks.register("shadowJarNGE", Jar) {
 
     group = BasePlugin.BUILD_GROUP
     archiveClassifier = "shadow"
-    archiveFileName = rootProject.name + "-" + project.version + "-nge-all.jar"
+    archiveFileName.set(providers.provider {
+        def base = rootProject.name + "-" + project.version
+        def suffix = "-nge-all.jar"
+        def n = nextBuildNumber(destinationDirectory.get().asFile, base, suffix)
+        "${base}+${n}${suffix}"
+    })
     destinationDirectory = file('jars')
     doLast {
         println("file://"+destinationDirectory.get().asFile.toURI().rawPath)
