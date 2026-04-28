@@ -5,6 +5,7 @@ import com.adamk33n3r.runelite.watchdog.elevenlabs.ElevenLabs;
 import com.adamk33n3r.runelite.watchdog.elevenlabs.Voice;
 import com.adamk33n3r.runelite.watchdog.notifications.TextToSpeech;
 import com.adamk33n3r.runelite.watchdog.notifications.tts.TTSSource;
+import com.adamk33n3r.runelite.watchdog.ui.FlatTextArea;
 import com.adamk33n3r.runelite.watchdog.ui.Icons;
 import com.adamk33n3r.runelite.watchdog.ui.notifications.VoiceChooser;
 import com.adamk33n3r.runelite.watchdog.ui.notifications.VolumeSlider;
@@ -16,6 +17,7 @@ import net.runelite.client.ui.ColorScheme;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JSlider;
 import javax.swing.SwingUtilities;
 import java.awt.Font;
@@ -40,14 +42,32 @@ public class TextToSpeechNotificationPanel extends NotificationContentPanel<Text
             return;
         }
 
-        this.add(PanelUtils.createTextField(
+        FlatTextArea messageField = PanelUtils.createTextField(
             "Enter your message...",
             "The message to play",
             this.notification.getMessage(),
             val -> {
                 this.notification.setMessage(val);
                 this.onChange.run();
-            }));
+            });
+        JButton resetCacheButton = PanelUtils.createActionButton(
+            Icons.REFRESH,
+            Icons.REFRESH_HOVER,
+            "Reset cached audio for this message. It will regenerate the next time this notification fires",
+            (btn, modifiers) -> {
+                int result = JOptionPane.showConfirmDialog(
+                    this,
+                    "Delete the cached audio for this message? It will regenerate the next time this notification fires.",
+                    "Reset TTS Cache?",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.WARNING_MESSAGE
+                );
+                if (result == JOptionPane.YES_OPTION) {
+                    this.notification.clearCache();
+                }
+            });
+        resetCacheButton.setBackground(ColorScheme.DARKER_GRAY_COLOR);
+        this.add(PanelUtils.createInputGroupWithSuffix(messageField, resetCacheButton));
 
         JComboBox<TTSSource> sourceSelect = PanelUtils.createSelect(TTSSource.values(), this.notification.getSource(), selected -> {
             this.notification.setSource(selected);

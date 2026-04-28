@@ -19,9 +19,11 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 
 import static net.runelite.client.RuneLite.CACHE_DIR;
@@ -45,6 +47,30 @@ public class TextToSpeech extends MessageNotification implements IAudioNotificat
         this.setDefaults();
     }
 
+    private File getCacheFile(String message) throws UnsupportedEncodingException {
+        String encodedMessage = URLEncoder.encode(message, StandardCharsets.UTF_8);
+        File watchdogPath = new File(CACHE_DIR, "watchdog");
+        if (this.source == TTSSource.ELEVEN_LABS) {
+            return new File(watchdogPath, String.format("el-%s-%s.mp3", encodedMessage, this.elevenLabsVoiceId));
+        }
+        return new File(watchdogPath, String.format("%s-%d-%d.wav", encodedMessage, this.rate, this.legacyVoice.id));
+    }
+
+    public boolean clearCache() {
+        if (this.message == null || this.message.isEmpty()) {
+            return false;
+        }
+        try {
+            File cacheFile = this.getCacheFile(this.message);
+            if (cacheFile.exists()) {
+                return cacheFile.delete();
+            }
+        } catch (UnsupportedEncodingException ex) {
+            log.error("Failed to compute cache file path", ex);
+        }
+        return false;
+    }
+
     @Override
     protected void fireImpl(String[] triggerValues) {
         if (!WatchdogPlugin.getInstance().getConfig().ttsEnabled()) {
@@ -54,13 +80,12 @@ public class TextToSpeech extends MessageNotification implements IAudioNotificat
         String processedMessage = Util.processTriggerValues(this.message, triggerValues);
 
         try {
-            String encodedMessage = URLEncoder.encode(processedMessage, "UTF-8");
             File watchdogPath = new File(CACHE_DIR, "watchdog");
             //noinspection ResultOfMethodCallIgnored
             watchdogPath.mkdirs();
 
             if (this.source == TTSSource.ELEVEN_LABS) {
-                File soundFile = new File(watchdogPath, String.format("el-%s-%s.mp3", encodedMessage, this.elevenLabsVoiceId));
+                File soundFile = this.getCacheFile(processedMessage);
                 if (soundFile.exists()) {
                     log.debug("Using cached file");
                     WatchdogPlugin.getInstance().getSoundPlayer().play(soundFile, this.gain);
@@ -79,7 +104,8 @@ public class TextToSpeech extends MessageNotification implements IAudioNotificat
                 return;
             }
 
-            File soundFile = new File(watchdogPath, String.format("%s-%d-%d.wav", encodedMessage, this.rate, this.legacyVoice.id));
+            String encodedMessage = URLEncoder.encode(processedMessage, "UTF-8");
+            File soundFile = this.getCacheFile(processedMessage);
 
             // If the cache file exists, load and play it. Else fetch it from the server and cache it.
             if (soundFile.exists()) {

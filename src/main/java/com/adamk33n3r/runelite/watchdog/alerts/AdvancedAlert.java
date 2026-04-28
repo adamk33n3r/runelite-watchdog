@@ -34,15 +34,15 @@ public class AdvancedAlert extends Alert {
         note.getNote().setValue(
             "Welcome to the Graph Editor!\n\n" +
             "Quick Start:\n" +
-            "  \u2022 Right-click the canvas to add a node\n" +
-            "  \u2022 Drag from an output port to an input\n" +
+            "  • Right-click the canvas to add a node\n" +
+            "  • Drag from an output port to an input\n" +
             "    port to connect them\n" +
-            "  \u2022 Start with a Trigger node \u2014 it fires\n" +
+            "  • Start with a Trigger node - it fires\n" +
             "    when your alert condition is met\n\n" +
             "Port Types:\n" +
-            "  \u25b7 Triangle = execution flow\n" +
+            "  ▷ Triangle = execution flow\n" +
             "    (controls WHEN things happen)\n" +
-            "  \u25cf Circle = data flow\n" +
+            "  ● Circle = data flow\n" +
             "    (controls WHAT values are passed)\n\n" +
             "Colors: Cyan=Number  Green=Boolean\n" +
             "        Orange=String  Yellow=Location\n\n" +
