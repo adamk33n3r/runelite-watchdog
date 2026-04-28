@@ -4,10 +4,12 @@ import com.adamk33n3r.nodegraph.Graph;
 import com.adamk33n3r.nodegraph.nodes.ActionNode;
 import com.adamk33n3r.nodegraph.nodes.TriggerNode;
 import com.adamk33n3r.nodegraph.nodes.constants.Num;
+import com.adamk33n3r.nodegraph.nodes.flow.Branch;
 import com.adamk33n3r.nodegraph.nodes.flow.Counter;
 import com.adamk33n3r.nodegraph.nodes.logic.Equality;
 import com.adamk33n3r.runelite.watchdog.alerts.AdvancedAlert;
 import com.adamk33n3r.runelite.watchdog.alerts.ChatAlert;
+import com.adamk33n3r.runelite.watchdog.alerts.XPDropAlert;
 import com.adamk33n3r.runelite.watchdog.notifications.Notification;
 
 import org.junit.Test;
@@ -132,5 +134,28 @@ public class CounterNodeTest {
 
         assertTrue(graph.connect(trigger1.getExec(), counter.getReset()));
         assertTrue(graph.connect(trigger2.getExec(), counter.getReset()));
+    }
+
+    @Test
+    public void processDoesNotThrowStackOverflowExceptionOnResetConnection() {
+        Graph graph = new Graph();
+        TriggerNode trigger = new TriggerNode(new XPDropAlert("xp-drop"));
+        Counter counter = new Counter();
+        Branch branch = new Branch();
+
+        graph.add(trigger);
+        graph.add(counter);
+        graph.add(branch);
+        graph.connect(trigger.getExec(), counter.getExec());
+        graph.connect(counter.getExecOut(), branch.getExec());
+        graph.connect(branch.getExecTrue(), counter.getReset());
+
+        String[] triggerValues = {"test1"};
+        trigger.getCaptureGroupsIn().setValue(triggerValues);
+        try {
+            graph.process(trigger);
+        } catch (StackOverflowError e) {
+            fail("graph.process(trigger) produced a StackOverflowError");
+        }
     }
 }

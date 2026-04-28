@@ -178,6 +178,7 @@ public class Graph {
         node.process();
         this.connections.stream()
             .filter(c -> c.getOutput().getNode() == node)
+            .filter(c -> !c.getInput().isTerminatesExec())
             .map(c -> c.getInput().getNode())
             .distinct()
             .forEach(this::process);

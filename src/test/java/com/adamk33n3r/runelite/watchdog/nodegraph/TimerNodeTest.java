@@ -3,8 +3,11 @@ package com.adamk33n3r.runelite.watchdog.nodegraph;
 import com.adamk33n3r.nodegraph.Graph;
 import com.adamk33n3r.nodegraph.nodes.ActionNode;
 import com.adamk33n3r.nodegraph.nodes.TriggerNode;
+import com.adamk33n3r.nodegraph.nodes.flow.Branch;
+import com.adamk33n3r.nodegraph.nodes.flow.Counter;
 import com.adamk33n3r.nodegraph.nodes.flow.TimerNode;
 import com.adamk33n3r.runelite.watchdog.alerts.ChatAlert;
+import com.adamk33n3r.runelite.watchdog.alerts.XPDropAlert;
 import com.adamk33n3r.runelite.watchdog.notifications.Notification;
 
 import org.junit.Test;
@@ -283,6 +286,29 @@ public class TimerNodeTest {
         Thread.sleep(DURATION_MS * 4);
         int countAfterWait = Mockito.mockingDetails(pulseNotif).getInvocations().size();
         assertEquals("No additional pulse fires after reset", countAfterReset, countAfterWait);
+    }
+
+    @Test
+    public void processDoesNotThrowStackOverflowExceptionOnResetConnection() {
+        Graph graph = new Graph();
+        TriggerNode trigger = new TriggerNode(new XPDropAlert("xp-drop"));
+        TimerNode timer = new TimerNode();
+        Branch branch = new Branch();
+
+        graph.add(trigger);
+        graph.add(timer);
+        graph.add(branch);
+        graph.connect(trigger.getExec(), timer.getExec());
+        graph.connect(timer.getExecOut(), branch.getExec());
+        graph.connect(branch.getExecTrue(), timer.getReset());
+
+        String[] triggerValues = {"test1"};
+        trigger.getCaptureGroupsIn().setValue(triggerValues);
+        try {
+            graph.process(trigger);
+        } catch (StackOverflowError e) {
+            fail("graph.process(trigger) produced a StackOverflowError");
+        }
     }
 
     // ── Helpers ──────────────────────────────────────────────────────────────
