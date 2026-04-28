@@ -16,6 +16,7 @@ import lombok.Setter;
 
 import javax.inject.Inject;
 import java.util.Arrays;
+import java.util.Objects;
 
 @NoArgsConstructor
 public abstract class Notification implements INotification {
@@ -53,7 +54,7 @@ public abstract class Notification implements INotification {
     public Alert getAlert() {
         if (this.alert == null) {
             this.alert = this.alertManager.getAllAlerts()
-                .filter(a -> a.getNotifications().contains(this)).findFirst().orElse(null);
+                .filter(a -> Objects.requireNonNull(a.getNotifications()).contains(this)).findFirst().orElse(null);
         }
 
         return this.alert;

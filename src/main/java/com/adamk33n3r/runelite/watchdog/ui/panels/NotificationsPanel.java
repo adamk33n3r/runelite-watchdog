@@ -123,8 +123,10 @@ public class NotificationsPanel extends JPanel {
         JScrollPane scrollPane = new JScrollPane(scrollablePanel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         this.add(scrollPane, BorderLayout.CENTER);
 
-        for (Notification notification : this.alert.getNotifications()) {
-            this.addPanel(notification);
+        if (this.alert.getNotifications() != null) {
+            for (Notification notification : this.alert.getNotifications()) {
+                this.addPanel(notification);
+            }
         }
     }
 
@@ -132,7 +134,9 @@ public class NotificationsPanel extends JPanel {
         PanelUtils.OnRemove removeNotification = (removedPanel) -> {
             WatchdogPlugin.getInstance().getScreenMarkerUtil().finishCreation(true);
             WatchdogPlugin.getInstance().getObjectMarkerManager().turnOffObjectMarkerMode();
-            this.alert.getNotifications().remove(notification);
+            if (this.alert.getNotifications() != null) {
+                this.alert.getNotifications().remove(notification);
+            }
             this.notificationContainer.remove(removedPanel);
             this.notificationContainer.revalidate();
             this.alertManager.saveAlerts();
@@ -147,7 +151,9 @@ public class NotificationsPanel extends JPanel {
         Injector injector = WatchdogPlugin.getInstance().getInjector();
         Notification notification = injector.getInstance(notificationType.getImplClass());
         notification.setAlert(this.alert);
-        this.alert.getNotifications().add(notification);
+        if (this.alert.getNotifications() != null) {
+            this.alert.getNotifications().add(notification);
+        }
         return notification;
     }
 }

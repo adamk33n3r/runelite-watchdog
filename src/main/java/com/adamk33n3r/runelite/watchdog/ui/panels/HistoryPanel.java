@@ -99,16 +99,19 @@ public class HistoryPanel extends PluginPanel {
         this.historyItems.removeAll();
         this.previousAlerts.stream().filter(historyEntryPanel -> {
             Alert alert = historyEntryPanel.getAlert();
-            Stream<String> keywords = Stream.concat(Stream.of(
+            Stream<String> keywords = Stream.of(
                 alert.getName(),
                 alert.getType().getName()
-            ), alert.getNotifications().stream().flatMap(notification -> {
-                Stream<String> notificationType = Stream.of(notification.getType().getName());
-                if (notification instanceof IMessageNotification) {
-                    return Stream.concat(notificationType, Stream.of(((IMessageNotification) notification).getMessage()));
-                }
-                return notificationType;
-            }));
+            );
+            if (alert.getNotifications() != null) {
+                keywords = Stream.concat(keywords, alert.getNotifications().stream().flatMap(notification -> {
+                    Stream<String> notificationType = Stream.of(notification.getType().getName());
+                    if (notification instanceof IMessageNotification) {
+                        return Stream.concat(notificationType, Stream.of(((IMessageNotification) notification).getMessage()));
+                    }
+                    return notificationType;
+                }));
+            }
             return Util.searchText(search, keywords.collect(Collectors.toList()));
         }).forEach(this.historyItems::add);
         this.revalidate();

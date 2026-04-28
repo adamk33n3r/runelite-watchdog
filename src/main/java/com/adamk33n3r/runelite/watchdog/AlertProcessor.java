@@ -30,10 +30,12 @@ public class AlertProcessor extends Thread {
         this.triggerValues = triggerValues;
         this.forceFire = forceFire;
         this.onFinish = onFinish;
-        if (alert.isRandomNotifications()) {
-            this.notificationQueue.add(alert.getNotifications().get(new Random().nextInt(alert.getNotifications().size())));
-        } else {
-            this.notificationQueue.addAll(alert.getNotifications());
+        if (alert.getNotifications() != null) {
+            if (alert.isRandomNotifications()) {
+                this.notificationQueue.add(alert.getNotifications().get(new Random().nextInt(alert.getNotifications().size())));
+            } else {
+                this.notificationQueue.addAll(alert.getNotifications());
+            }
         }
     }
 

@@ -1,6 +1,7 @@
 package com.adamk33n3r.runelite.watchdog.ui.panels;
 
 import com.adamk33n3r.runelite.watchdog.*;
+import com.adamk33n3r.runelite.watchdog.alerts.AdvancedAlert;
 import com.adamk33n3r.runelite.watchdog.alerts.Alert;
 import com.adamk33n3r.runelite.watchdog.ui.*;
 
@@ -81,7 +82,7 @@ public class AlertPanel<T extends Alert> extends PluginPanel {
                 }
             );
             rightButtons.add(importAlertBtn);
-        } else {
+        } else if (!(contentPanel.alert instanceof AdvancedAlert)) {
             JButton testAlert = PanelUtils.createActionButton(
                 Icons.TEST,
                 Icons.TEST_HOVER,

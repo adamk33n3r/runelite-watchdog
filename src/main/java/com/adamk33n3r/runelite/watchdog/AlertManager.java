@@ -605,7 +605,9 @@ public class AlertManager {
                         statChangedAlert.setDebounceTime(statDrainAlert.getDebounceTime());
                         statChangedAlert.setSkill(statDrainAlert.getSkill());
                         statChangedAlert.setChangedAmount(-statDrainAlert.getDrainAmount());
-                        statChangedAlert.getNotifications().addAll(statDrainAlert.getNotifications());
+                        if (statChangedAlert.getNotifications() != null && statDrainAlert.getNotifications() != null) {
+                            statChangedAlert.getNotifications().addAll(statDrainAlert.getNotifications());
+                        }
                         return statChangedAlert;
                     }
 
@@ -615,8 +617,8 @@ public class AlertManager {
                 // Not sure why I thought it was a good idea to store the decibels in the JSON
                 log.debug("Need to convert all Sound and TTS gain back to 0,10 scale.");
                 this.alerts.stream()
-                    .filter(alert -> !(alert instanceof AlertGroup))
-                    .flatMap(alert -> alert.getNotifications().stream())
+                    .filter(alert -> !(alert instanceof AlertGroup) && !(alert instanceof AdvancedAlert))
+                    .flatMap(alert -> Objects.requireNonNull(alert.getNotifications()).stream())
                     .filter(notification -> notification instanceof IAudioNotification)
                     .map(notification -> (IAudioNotification) notification)
                     .forEach(sound -> sound.setGain(Util.scale(sound.getGain(), -25, 5, 0, 10)));
@@ -625,8 +627,8 @@ public class AlertManager {
             if (configVersion.compareTo(new Version("2.8.0")) < 0) {
                 log.debug("Need to convert flash notifications to new properties");
                 this.alerts.stream()
-                    .filter(alert -> !(alert instanceof AlertGroup))
-                    .flatMap(alert -> alert.getNotifications().stream())
+                    .filter(alert -> !(alert instanceof AlertGroup) &&  !(alert instanceof AdvancedAlert))
+                    .flatMap(alert -> Objects.requireNonNull(alert.getNotifications()).stream())
                     .filter(notification -> notification instanceof ScreenFlash)
                     .map(notification -> (ScreenFlash) notification)
                     .forEach(screenFlash -> {
@@ -640,8 +642,8 @@ public class AlertManager {
             if (configVersion.compareTo(new Version("2.13.0")) < 0) {
                 log.debug("Need to set default overlay notification text color");
                 this.alerts.stream()
-                    .filter(alert -> !(alert instanceof AlertGroup))
-                    .flatMap(alert -> alert.getNotifications().stream())
+                    .filter(alert -> !(alert instanceof AlertGroup) && !(alert instanceof AdvancedAlert))
+                    .flatMap(alert -> Objects.requireNonNull(alert.getNotifications()).stream())
                     .filter(notification -> notification instanceof Overlay)
                     .map(notification -> (Overlay) notification)
                     .forEach(overlay -> {
