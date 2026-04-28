@@ -555,7 +555,7 @@ public class AlertManager {
                     Notification notification = ((ActionNode) node).getNotification();
                     if (notification instanceof TextToSpeech) {
                         TextToSpeech tts = (TextToSpeech) notification;
-                        if (tts.getSource() == TTSSource.ELEVEN_LABS && tts.getElevenLabsVoiceId() != null) {
+                        if (tts.getSource() == TTSSource.ELEVEN_LABS && tts.getElevenLabsVoiceId() != null && !watchdogConfig.elevenLabsAPIKey().isEmpty()) {
                             ElevenLabs.getVoice(this.plugin.getHttpClient(), tts.getElevenLabsVoiceId(), tts::setElevenLabsVoice, log::error);
                         }
                     }
@@ -573,7 +573,7 @@ public class AlertManager {
             for (INotification notification : alert.getNotifications()) {
                 if (notification instanceof TextToSpeech) {
                     TextToSpeech tts = (TextToSpeech) notification;
-                    if (tts.getSource() == TTSSource.ELEVEN_LABS && tts.getElevenLabsVoiceId() != null) {
+                    if (tts.getSource() == TTSSource.ELEVEN_LABS && tts.getElevenLabsVoiceId() != null && !watchdogConfig.elevenLabsAPIKey().isEmpty()) {
                         ElevenLabs.getVoice(this.plugin.getHttpClient(), tts.getElevenLabsVoiceId(), tts::setElevenLabsVoice, log::error);
                     }
                 }
