@@ -41,9 +41,9 @@ public class TimerNodeTest {
     }
 
     @Test
-    public void execIn_allowsMultipleConnections() {
+    public void execIn_disallowsMultipleConnections() {
         TimerNode timer = new TimerNode();
-        assertTrue(timer.getExec().isAllowMultipleConnections());
+        assertFalse(timer.getExec().isAllowMultipleConnections());
     }
 
     @Test

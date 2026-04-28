@@ -30,12 +30,12 @@ public class Counter extends Node {
     }
 
     // Called by Graph.executeExecChainBFS when the exec input fires
-    public void increment() {
+    public synchronized void increment() {
         this.count.setValue(this.count.getValue().intValue() + 1);
     }
 
     // Called by Graph.executeExecChainBFS when the reset input fires
-    public void reset() {
+    public synchronized void reset() {
         this.count.setValue(0);
     }
 

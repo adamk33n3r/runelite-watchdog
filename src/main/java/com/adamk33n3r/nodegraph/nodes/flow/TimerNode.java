@@ -26,7 +26,6 @@ public class TimerNode extends Node {
     private final AtomicBoolean canceled = new AtomicBoolean(false);
 
     public TimerNode() {
-        this.exec.setAllowMultipleConnections(true);
         this.reset.setAllowMultipleConnections(true);
         this.reset.setTerminatesExec(true);
 
