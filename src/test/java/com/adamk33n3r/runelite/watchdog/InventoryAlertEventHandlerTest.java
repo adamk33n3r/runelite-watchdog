@@ -81,6 +81,13 @@ public class InventoryAlertEventHandlerTest extends AlertTestBase {
         return alert;
     }
 
+    private InventoryAlert emptyAlert() {
+        InventoryAlert alert = new InventoryAlert("Empty");
+        alert.setInventoryAlertType(InventoryAlertType.EMPTY);
+        this.mockAlertManager(alert);
+        return alert;
+    }
+
     // endregion
 
     @Test
@@ -143,6 +150,83 @@ public class InventoryAlertEventHandlerTest extends AlertTestBase {
         this.eventHandler.onItemContainerChanged(this.inventoryEvent(fullInventory)); // first tick: must be skipped
 
         Mockito.verify(this.watchdogPlugin, Mockito.never()).processAlert(any(), any(), anyBoolean());
+    }
+
+    // ── fireOnChange ──────────────────────────────────────────────────────────
+
+    @Test
+    public void fullAlert_fireOnChange_firesOnce_whenBecomingFull() {
+        InventoryAlert alert = this.fullAlert();
+        alert.setFireOnChange(true);
+        Item[] fullInventory = new Item[28];
+        for (int i = 0; i < 28; i++) fullInventory[i] = this.item(i + 1, 1);
+
+        this.eventHandler.onItemContainerChanged(this.inventoryEvent());           // tick 1: empty (init)
+        this.eventHandler.onItemContainerChanged(this.inventoryEvent(fullInventory)); // tick 2: becomes full → fires
+
+        Mockito.verify(this.watchdogPlugin, Mockito.times(1)).processAlert(Mockito.eq(alert), any(), Mockito.eq(false));
+    }
+
+    @Test
+    public void fullAlert_fireOnChange_doesNotFire_whenAlreadyFull() {
+        InventoryAlert alert = this.fullAlert();
+        alert.setFireOnChange(true);
+        Item[] fullInventory = new Item[28];
+        for (int i = 0; i < 28; i++) fullInventory[i] = this.item(i + 1, 1);
+        Item[] fullInventory2 = fullInventory.clone();
+        fullInventory2[0] = this.item(100, 1); // swap one item, still full
+
+        this.eventHandler.onItemContainerChanged(this.inventoryEvent());              // tick 1: empty (init)
+        this.eventHandler.onItemContainerChanged(this.inventoryEvent(fullInventory)); // tick 2: becomes full → fires
+        this.eventHandler.onItemContainerChanged(this.inventoryEvent(fullInventory2)); // tick 3: still full → must not fire again
+
+        Mockito.verify(this.watchdogPlugin, Mockito.times(1)).processAlert(Mockito.eq(alert), any(), Mockito.eq(false));
+    }
+
+    @Test
+    public void emptyAlert_fireOnChange_firesOnce_whenBecomingEmpty() {
+        InventoryAlert alert = this.emptyAlert();
+        alert.setFireOnChange(true);
+
+        this.eventHandler.onItemContainerChanged(this.inventoryEvent(this.item(1, 1))); // tick 1: 1 item (init)
+        this.eventHandler.onItemContainerChanged(this.inventoryEvent());                 // tick 2: becomes empty → fires
+
+        Mockito.verify(this.watchdogPlugin, Mockito.times(1)).processAlert(Mockito.eq(alert), any(), Mockito.eq(false));
+    }
+
+    @Test
+    public void emptyAlert_fireOnChange_doesNotFire_whenAlreadyEmpty() {
+        InventoryAlert alert = this.emptyAlert();
+        alert.setFireOnChange(true);
+
+        this.eventHandler.onItemContainerChanged(this.inventoryEvent(this.item(1, 1))); // tick 1: 1 item (init)
+        this.eventHandler.onItemContainerChanged(this.inventoryEvent());                 // tick 2: becomes empty → fires
+        this.eventHandler.onItemContainerChanged(this.inventoryEvent());                 // tick 3: still empty → must not fire again
+
+        Mockito.verify(this.watchdogPlugin, Mockito.times(1)).processAlert(Mockito.eq(alert), any(), Mockito.eq(false));
+    }
+
+    @Test
+    public void itemCountAlert_fireOnChange_firesOnce_onFirstMatch() {
+        InventoryAlert alert = this.itemCountAlert(14);
+        alert.setFireOnChange(true);
+
+        this.eventHandler.onItemContainerChanged(this.inventoryEvent(this.item(995, 1)));  // tick 1: 1 coin (init)
+        this.eventHandler.onItemContainerChanged(this.inventoryEvent(this.item(995, 14))); // tick 2: reaches 14 → fires
+
+        Mockito.verify(this.watchdogPlugin, Mockito.times(1)).processAlert(Mockito.eq(alert), any(), Mockito.eq(false));
+    }
+
+    @Test
+    public void itemCountAlert_fireOnChange_doesNotFire_whenAlreadyMatching() {
+        InventoryAlert alert = this.itemCountAlert(14);
+        alert.setFireOnChange(true);
+
+        this.eventHandler.onItemContainerChanged(this.inventoryEvent(this.item(995, 1)));  // tick 1: 1 coin (init)
+        this.eventHandler.onItemContainerChanged(this.inventoryEvent(this.item(995, 14))); // tick 2: reaches 14 → fires
+        this.eventHandler.onItemContainerChanged(this.inventoryEvent(this.item(995, 14))); // tick 3: still 14 → must not fire again
+
+        Mockito.verify(this.watchdogPlugin, Mockito.times(1)).processAlert(Mockito.eq(alert), any(), Mockito.eq(false));
     }
 
     // ── slot preservation ─────────────────────────────────────────────────────

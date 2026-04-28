@@ -18,6 +18,7 @@ public class InventoryAlert extends Alert implements RegexMatcher {
     private InventoryMatchType inventoryMatchType = InventoryMatchType.BOTH;
     private int itemQuantity = 1;
     private ComparableNumber.Comparator quantityComparator = ComparableNumber.Comparator.GREATER_THAN_OR_EQUALS;
+    private boolean fireOnChange = false;
 
     @Override
     public String getPattern() {

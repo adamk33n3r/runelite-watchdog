@@ -22,6 +22,10 @@ public class InventoryAlertPanel extends AlertContentPanel<InventoryAlert> {
                 this.rebuild();
             })
             .addIf(
+                b -> b.addCheckbox("Only fire on change", "Only fire when the condition first becomes true, not on every tick while it remains true", this.alert.isFireOnChange(), this.alert::setFireOnChange),
+                () -> alertType != InventoryAlert.InventoryAlertType.ITEM_CHANGE
+            )
+            .addIf(
                 b -> b
                     .addRegexMatcher(this.alert, "Enter the name of the item to trigger on...", "The name to trigger on. Supports glob (*)")
                     .addSelect("Match", "Match on noted or un-noted", InventoryAlert.InventoryMatchType.class, this.alert.getInventoryMatchType(), this.alert::setInventoryMatchType)
