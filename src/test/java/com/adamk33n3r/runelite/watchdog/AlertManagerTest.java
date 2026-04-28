@@ -12,6 +12,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import javax.inject.Inject;
 import java.util.List;
+import java.util.stream.Stream;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AlertManagerTest extends TestBase {
@@ -44,6 +45,59 @@ public class AlertManagerTest extends TestBase {
         Notification notification = alert.getNotifications().get(0);
         Assert.assertTrue(notification instanceof Overlay);
         Assert.assertNotNull(((Overlay) notification).getTextColor());
+    }
+
+    @Test
+    public void getAllEnabledAlertsOfType_returnsEmpty_whenAdvancedAlertsDisabled() {
+        // watchdogConfig.enableAdvancedAlerts() returns false by default (Mockito mock)
+        AdvancedAlert adv = new AdvancedAlert("Test");
+        adv.setEnabled(true);
+        alertManager.getAlerts().add(adv);
+
+        Stream<AdvancedAlert> result = alertManager.getAllEnabledAlertsOfType(AdvancedAlert.class);
+        Assert.assertEquals(0, result.count());
+    }
+
+    @Test
+    public void getAllEnabledAlertsOfType_returnsAlerts_whenAdvancedAlertsEnabled() {
+        Mockito.when(this.watchdogConfig.enableAdvancedAlerts()).thenReturn(true);
+        AdvancedAlert adv = new AdvancedAlert("Test");
+        adv.setEnabled(true);
+        alertManager.getAlerts().add(adv);
+
+        Stream<AdvancedAlert> result = alertManager.getAllEnabledAlertsOfType(AdvancedAlert.class);
+        Assert.assertEquals(1, result.count());
+    }
+
+    @Test
+    public void getAllEnabledAlertsOfType_unaffectedForOtherTypes_whenAdvancedAlertsDisabled() {
+        // watchdogConfig.enableAdvancedAlerts() returns false by default (Mockito mock)
+        ChatAlert chat = new ChatAlert("hello");
+        chat.setEnabled(true);
+        alertManager.getAlerts().add(chat);
+
+        Stream<ChatAlert> result = alertManager.getAllEnabledAlertsOfType(ChatAlert.class);
+        Assert.assertEquals(1, result.count());
+    }
+
+    @Test
+    public void hasEnabledAlertsOfType_returnsFalse_whenAdvancedAlertsDisabled() {
+        // watchdogConfig.enableAdvancedAlerts() returns false by default (Mockito mock)
+        AdvancedAlert adv = new AdvancedAlert("Test");
+        adv.setEnabled(true);
+        alertManager.getAlerts().add(adv);
+
+        Assert.assertFalse(alertManager.hasEnabledAlertsOfType(AdvancedAlert.class));
+    }
+
+    @Test
+    public void hasEnabledAlertsOfType_returnsTrue_whenAdvancedAlertsEnabled() {
+        Mockito.when(this.watchdogConfig.enableAdvancedAlerts()).thenReturn(true);
+        AdvancedAlert adv = new AdvancedAlert("Test");
+        adv.setEnabled(true);
+        alertManager.getAlerts().add(adv);
+
+        Assert.assertTrue(alertManager.hasEnabledAlertsOfType(AdvancedAlert.class));
     }
 
     @Test

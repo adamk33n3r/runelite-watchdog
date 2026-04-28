@@ -367,12 +367,18 @@ public class AlertManager {
     }
 
     public <T extends Alert> Stream<T> getAllEnabledAlertsOfType(Class<T> type) {
+        if (type == AdvancedAlert.class && !this.watchdogConfig.enableAdvancedAlerts()) {
+            return Stream.empty();
+        }
         return this.getAllEnabledAlerts()
             .filter(type::isInstance)
             .map(type::cast);
     }
 
     public <T extends Alert> boolean hasEnabledAlertsOfType(Class<T> type) {
+        if (type == AdvancedAlert.class && !this.watchdogConfig.enableAdvancedAlerts()) {
+            return false;
+        }
         return this.getAllEnabledAlerts().anyMatch(type::isInstance);
     }
 
