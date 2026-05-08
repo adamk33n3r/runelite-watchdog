@@ -94,19 +94,18 @@ even though the file itself will not be played.
 
 With [regex](https://en.wikipedia.org/wiki/Regular_expression) enabled, you instead use parenthesis `()` to surround the text you wish to capture.
 
-## Setting up Eleven Labs API key
-
-- Login or register a new account on [Eleven Labs](https://elevenlabs.io/) - it's free
-- Go to Developers page, then click the tab "API Keys" and click "Create key"
-- On new API creation, you can name it "Watchdog", and **copy** the API key.
-  - Paste the API key to the "Eleven Labs API Keys" textfield in Watchdog's RL settings under "Text to Speech" section
-  - Tick "Enable TTS" on the top of the Watchdog settings.
-- You need to give two permissions to this Eleven Labs API you just created for it to start working:
-- Go back to Eleven Labs site, in API keys page, click "Edit" on your API, in a drop-down of horizontal three dots icon:
-  - Grant "Access" permission for "Text to Speech"
-  - Grant "Read" permission for "Voices"
-  - Press "Save Changes"
-- If properly done, everything should work well. You can run a test using a Watchdog tool.
+## Setting up Eleven Labs API key for Text to Speech
+- Login or register a new account on [Eleven Labs](https://elevenlabs.io/) (free)
+- Go to the Developers page, then click the tab "API Keys" and click "Create key”.
+- On a new API creation, you can name it "Watchdog", and **copy the API key**.
+  - **Paste the API key** to the "Eleven Labs API Keys" text field in Watchdog's RL settings under the "Text to Speech" section.
+  - Tick "Enable TTS" at the top of the Watchdog settings.
+- You need to grant two permissions on the API you just created for the TTS function to start working:
+- Go back to Eleven Labs site, in the API keys page, click "Edit" on your Watchdog's API:
+  - **Grant "Access" permission to "Text to Speech"**
+  - **Grant "Read" permission to "Voices"**
+  - Press the "Save Changes" button
+- If you followed the instructions properly, the TTS functionality should work. You can run a TTS test on Watchdog.
 
 ## Attribution
 This project uses the [JACo MP3 Player](http://jacomp3player.sourceforge.net) to play mp3 files. Its source can be found [here](https://sourceforge.net/p/jacomp3player/code/HEAD/tree/) and is licensed under LGPL which you can find [here](./ThirdPartyLicenses.txt) or otherwise [here](https://www.gnu.org/licenses/lgpl-3.0.en.html).
