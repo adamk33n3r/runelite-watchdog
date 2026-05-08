@@ -23,7 +23,18 @@ with any amount of unique action types like
 - Screen Flash
 - Custom Sound
 - In-Game Sound Effect
-- Text to Speech (Eleven Labs API key needs Voices and TTS permissions)
+- Text to Speech (Eleven Labs)
+  - Login or register a new account on [Eleven Labs](https://elevenlabs.io/) - it's free
+  - Go to Developers page, then click the tab "API Keys" and click "Create key"
+  - On new API creation, you can name it "Watchdog", and **copy** the API key.
+    - Paste the API key to the "Eleven Labs API Keys" textfield in Watchdog's RL settings under "Text to Speech" section
+    - Tick "Enable TTS" on the top of the Watchdog settings.
+  - You need to give two permissions to this Eleven Labs API you just created for it to start working:
+  - Go back to Eleven Labs site, in API keys page, click "Edit" on your API, in a drop-down of horizontal three dots icon:
+    - Grant "Access" permission for "Text to Speech"
+    - Grant "Read" permission for "Voices"
+    - Press "Save Changes"
+  - If properly done, everything should work well. You can run a test using a Watchdog tool.
 - Tray Notification
 - Overhead Text
 - Overlay
