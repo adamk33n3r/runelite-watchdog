@@ -23,7 +23,7 @@ public class BankAlertPanel extends AlertContentPanel<BankAlert> {
                 this.rebuild();
             })
             .addIf(
-                b -> b.addCheckbox("Don't fire when opening bank", "Only fire when the condition first becomes true, not on every tick while it remains true", this.alert.isFireOnChange(), this.alert::setFireOnChange),
+                b -> b.addCheckbox("Don't fire when opening bank", "Only fire when the condition first becomes true when removing or adding to the bank", this.alert.isFireOnChange(), this.alert::setFireOnChange),
                 () -> alertType != BankAlert.BankAlertType.ITEM_CHANGE
             )
             .addIf(
