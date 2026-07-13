@@ -314,14 +314,10 @@ public class EventHandler {
     //region Inventory
     @Subscribe
     void onItemContainerChanged(ItemContainerChanged itemContainerChanged) {
-        // Ignore everything but inventory
+        // Ignore everything but inventory and bank
         if (itemContainerChanged.getItemContainer().getId() != InventoryID.INV &&
                 itemContainerChanged.getItemContainer().getId() != InventoryID.BANK)
             return;
-        /*
-        when it's the inventory container, do the inventory stuff
-        when it's bank, do bank
-         */
         Item[] items = itemContainerChanged.getItemContainer().getItems();
         long itemCount = Arrays.stream(items).filter(item -> item.getId() > -1).count();
         InventoryItemData[] slots = new InventoryItemData[items.length];
