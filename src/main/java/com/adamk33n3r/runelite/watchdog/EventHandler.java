@@ -26,6 +26,7 @@ import net.runelite.client.util.Text;
 
 import lombok.extern.slf4j.Slf4j;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -517,14 +518,7 @@ public class EventHandler {
                 );
             })
             .filter(Objects::nonNull)
-            .reduce((acc, b) -> {
-                acc.groups = IntStream.range(0, Math.min(acc.groups.size(), b.groups.size()))
-                    .mapToObj(i -> acc.groups.get(i) + ", " + b.groups.get(i))
-                    .collect(Collectors.toList());
-                acc.previousQuantity = acc.previousQuantity + b.previousQuantity;
-                acc.currentQuantity = acc.currentQuantity + b.currentQuantity;
-                return acc;
-            });
+            .reduce(EventHandler::itemQuantities);
     }
 
     private Optional<MatchedItem> getMatchedBankItems(BankAlert bankAlert, Map<Integer, InventoryItemData> allItems) {
@@ -541,14 +535,17 @@ public class EventHandler {
                     );
                 })
                 .filter(Objects::nonNull)
-                .reduce((acc, b) -> {
-                    acc.groups = IntStream.range(0, Math.min(acc.groups.size(), b.groups.size()))
-                            .mapToObj(i -> acc.groups.get(i) + ", " + b.groups.get(i))
-                            .collect(Collectors.toList());
-                    acc.previousQuantity = acc.previousQuantity + b.previousQuantity;
-                    acc.currentQuantity = acc.currentQuantity + b.currentQuantity;
-                    return acc;
-                });
+                .reduce(EventHandler::itemQuantities);
+    }
+
+    @Nonnull
+    private static MatchedItem itemQuantities(MatchedItem acc, MatchedItem b) {
+        acc.groups = IntStream.range(0, Math.min(acc.groups.size(), b.groups.size()))
+                .mapToObj(i -> acc.groups.get(i) + ", " + b.groups.get(i))
+                .collect(Collectors.toList());
+        acc.previousQuantity = acc.previousQuantity + b.previousQuantity;
+        acc.currentQuantity = acc.currentQuantity + b.currentQuantity;
+        return acc;
     }
     //endregion
 
