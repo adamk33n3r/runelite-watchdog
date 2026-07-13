@@ -55,6 +55,7 @@ public class WatchdogGsonFactory {
             .registerSubtype(SoundFiredAlert.class)
             .registerSubtype(SpawnedAlert.class)
             .registerSubtype(InventoryAlert.class)
+                .registerSubtype(BankAlert.class)
             .registerSubtype(AlertGroup.class)
             .registerSubtype(LocationAlert.class)
             .registerSubtype(AdvancedAlert.class);
