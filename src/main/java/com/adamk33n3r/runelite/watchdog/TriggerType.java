@@ -18,8 +18,8 @@ public enum TriggerType implements Displayable {
     SOUND_FIRED("Sound Fired", "When a sound effect plays", SoundFiredAlert.class),
     SPAWNED_OBJECT("Spawned Object", "When an object, player, or npc spawns or despawns", SpawnedAlert.class),
     INVENTORY("Inventory", "When your inventory is full, empty, or contains certain items", InventoryAlert.class),
-    LOCATION("Location", "Triggers when you near a set location", LocationAlert.class),
     BANK("Bank", "When your bank contains certain items", BankAlert.class),
+    LOCATION("Location", "Triggers when you near a set location", LocationAlert.class),
     // Keep this last so that people maybe won't try to use it over the chat one
     NOTIFICATION_FIRED("Notification Fired", "When other plugins fire notifications", NotificationFiredAlert.class),
     ADVANCED_ALERT("Advanced Alert", "Visual node graph based alert", AdvancedAlert.class),
