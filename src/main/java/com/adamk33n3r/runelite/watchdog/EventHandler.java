@@ -26,6 +26,7 @@ import net.runelite.client.util.Text;
 
 import lombok.extern.slf4j.Slf4j;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -79,8 +80,10 @@ public class EventHandler {
     private final Map<Skill, Integer> previousSkillLevelTable = new EnumMap<>(Skill.class);
     private final Map<Skill, Integer> previousSkillXPTable = new EnumMap<>(Skill.class);
     private final Map<Integer, ItemComposition> itemCompositionCache = new ConcurrentHashMap<>();
-    private Map<Integer, InventoryItemData> previousItemsTable = new ConcurrentHashMap<>();
+    private Map<Integer, InventoryItemData> previousInventoryItemsTable = new ConcurrentHashMap<>();
+    private Map<Integer, InventoryItemData> previousBankItemsTable = new ConcurrentHashMap<>();
     private boolean hasInitializedInventory = false;
+    private boolean hasInitializedBank = false;
     private long previousInventorySlotCount = 0;
 //    private volatile long currentInventoryItemCount = 0;
 //    private volatile Map<Integer, InventoryItemData> currentItemsSnapshot = new ConcurrentHashMap<>();
@@ -195,8 +198,10 @@ public class EventHandler {
         if (state == GameState.LOGIN_SCREEN) {
             this.previousSkillLevelTable.clear();
             this.previousSkillXPTable.clear();
-            this.previousItemsTable.clear();
+            this.previousInventoryItemsTable.clear();
+            this.previousBankItemsTable.clear();
             this.hasInitializedInventory = false;
+            this.hasInitializedBank = false;
             this.previousInventorySlotCount = 0;
             this.cachedAccountType = -1;
         }
@@ -314,8 +319,9 @@ public class EventHandler {
     //region Inventory
     @Subscribe
     void onItemContainerChanged(ItemContainerChanged itemContainerChanged) {
-        // Ignore everything but inventory
-        if (itemContainerChanged.getItemContainer().getId() != InventoryID.INV)
+        // Ignore everything but inventory and bank
+        if (itemContainerChanged.getItemContainer().getId() != InventoryID.INV &&
+                itemContainerChanged.getItemContainer().getId() != InventoryID.BANK)
             return;
         Item[] items = itemContainerChanged.getItemContainer().getItems();
         long itemCount = Arrays.stream(items).filter(item -> item.getId() > -1).count();
@@ -336,111 +342,187 @@ public class EventHandler {
                 .build());
         }
 
-        this.alertManager.getAllEnabledAlertsOfType(AdvancedAlert.class).forEach(adv -> {
-            adv.getGraph().getNodesOfType(Inventory.class).forEach(inv -> {
-                inv.setValue(currentItems);
-            });
-        });
+        int containerID = itemContainerChanged.getItemContainer().getId();
+        boolean isInventory = containerID == InventoryID.INV;
+        Map<Integer, InventoryItemData> previousItems = isInventory
+            ? this.previousInventoryItemsTable
+            : this.previousBankItemsTable;
+        boolean hasInitialized = isInventory ? this.hasInitializedInventory : this.hasInitializedBank;
 
-        // Skip firing alerts on the very first inventory event after login (no valid previous state yet).
-        if (this.hasInitializedInventory && !this.plugin.isInBannedArea()) {
+            this.alertManager.getAllEnabledAlertsOfType(AdvancedAlert.class).forEach(adv ->
+                adv.getGraph().getNodesOfType(Inventory.class).forEach(inv -> inv.setValue(currentItems)));
+
+        // Skip firing alerts on the first event for each container after login.
+        if (hasInitialized && !this.plugin.isInBannedArea()) {
             var itemMap = new InventoryItemData.InventoryItemDataMap(currentItems);
-            this.previousItemsTable.forEach((itemID, data) -> itemMap.getItems()
+            previousItems.forEach((itemID, data) -> itemMap.getItems()
                 .putIfAbsent(itemID, InventoryItemData.builder()
                 .itemComposition(data.getItemComposition())
                 .build()));
-            this.alertManager.getAllEnabledAlertsOfType(InventoryAlert.class)
-                .forEach(inventoryAlert -> {
-                    InventoryAlertType alertType = inventoryAlert.getInventoryAlertType();
-                    switch (alertType) {
-                        case FULL:
-                            if (itemCount == 28 && (!inventoryAlert.isFireOnChange() || this.previousInventorySlotCount != 28))
-                                this.fireAlert(inventoryAlert, alertType.getName());
-                            break;
-                        case EMPTY:
-                            if (itemCount == 0 && (!inventoryAlert.isFireOnChange() || this.previousInventorySlotCount != 0))
-                                this.fireAlert(inventoryAlert, alertType.getName());
-                            break;
-                        case SLOTS: {
-                            boolean slotNow = inventoryAlert.getQuantityComparator().compare((int) itemCount, inventoryAlert.getItemQuantity());
-                            boolean slotPrev = inventoryAlert.getQuantityComparator().compare((int) this.previousInventorySlotCount, inventoryAlert.getItemQuantity());
-                            if (slotNow && (!inventoryAlert.isFireOnChange() || !slotPrev))
-                                this.fireAlert(inventoryAlert, alertType.getName());
-                            break;
-                        }
-                        case ITEM: {
-                            Optional<MatchedItem> matchedItems = this.getMatchedItems(inventoryAlert, itemMap.getItems());
-                            matchedItems.ifPresent(matched -> {
-                                boolean condNow = inventoryAlert.getQuantityComparator().compare(matched.currentQuantity, inventoryAlert.getItemQuantity());
-                                boolean condPrev = inventoryAlert.getQuantityComparator().compare(matched.previousQuantity, inventoryAlert.getItemQuantity());
-                                if (condNow && (!inventoryAlert.isFireOnChange() || !condPrev))
-                                    this.fireAlert(inventoryAlert, matched.groups.toArray(new String[0]));
-                            });
-                            break;
-                        }
-                        case ITEM_CHANGE: {
-                            Optional<MatchedItem> matchedItems = this.getMatchedItems(inventoryAlert, itemMap.getItems());
-                            matchedItems.ifPresent(matched -> {
-                                if (inventoryAlert.getQuantityComparator().compare(matched.currentQuantity - matched.previousQuantity, inventoryAlert.getItemQuantity()))
-                                    this.fireAlert(inventoryAlert, matched.groups.toArray(new String[0]));
-                            });
-                            break;
-                        }
-                    }
-                });
+            if (isInventory) {
+                this.processInventoryChanges(itemCount, itemMap, previousItems);
+            } else {
+                this.processBankChanges(itemMap, previousItems);
+            }
+        }
 
-            this.alertManager.getAllEnabledAlertsOfType(AdvancedAlert.class).forEach(adv ->
-                adv.getGraph().getTriggerNodesOfType(InventoryAlert.class)
-                    .filter(tn -> tn.getAlert().isEnabled())
-                    .forEach(tn -> {
-                        InventoryAlert inventoryAlert = (InventoryAlert) tn.getAlert();
+        if (isInventory) {
+            this.previousInventoryItemsTable = currentItems.getItems();
+            this.previousInventorySlotCount = itemCount;
+            this.hasInitializedInventory = true;
+        } else {
+            this.previousBankItemsTable = currentItems.getItems();
+            this.hasInitializedBank = true;
+        }
+    }
+
+    private void processInventoryChanges(long itemCount, InventoryItemData.InventoryItemDataMap itemMap, Map<Integer, InventoryItemData> previousItems) {
+            this.alertManager.getAllEnabledAlertsOfType(InventoryAlert.class)
+                    .forEach(inventoryAlert -> {
                         InventoryAlertType alertType = inventoryAlert.getInventoryAlertType();
-                        String[] groups = null;
                         switch (alertType) {
                             case FULL:
                                 if (itemCount == 28 && (!inventoryAlert.isFireOnChange() || this.previousInventorySlotCount != 28))
-                                    groups = new String[]{ alertType.getName() };
+                                    this.fireAlert(inventoryAlert, alertType.getName());
                                 break;
                             case EMPTY:
                                 if (itemCount == 0 && (!inventoryAlert.isFireOnChange() || this.previousInventorySlotCount != 0))
-                                    groups = new String[]{ alertType.getName() };
+                                    this.fireAlert(inventoryAlert, alertType.getName());
                                 break;
                             case SLOTS: {
                                 boolean slotNow = inventoryAlert.getQuantityComparator().compare((int) itemCount, inventoryAlert.getItemQuantity());
                                 boolean slotPrev = inventoryAlert.getQuantityComparator().compare((int) this.previousInventorySlotCount, inventoryAlert.getItemQuantity());
                                 if (slotNow && (!inventoryAlert.isFireOnChange() || !slotPrev))
-                                    groups = new String[]{ alertType.getName() };
+                                    this.fireAlert(inventoryAlert, alertType.getName());
                                 break;
                             }
                             case ITEM: {
-                                Optional<MatchedItem> matched = this.getMatchedItems(inventoryAlert, itemMap.getItems());
-                                if (matched.isPresent()) {
-                                    boolean condNow = inventoryAlert.getQuantityComparator().compare(matched.get().currentQuantity, inventoryAlert.getItemQuantity());
-                                    boolean condPrev = inventoryAlert.getQuantityComparator().compare(matched.get().previousQuantity, inventoryAlert.getItemQuantity());
+                                Optional<MatchedItem> matchedItems = this.getMatchedInventoryItems(inventoryAlert, itemMap.getItems(), previousItems);
+                                matchedItems.ifPresent(matched -> {
+                                    boolean condNow = inventoryAlert.getQuantityComparator().compare(matched.currentQuantity, inventoryAlert.getItemQuantity());
+                                    boolean condPrev = inventoryAlert.getQuantityComparator().compare(matched.previousQuantity, inventoryAlert.getItemQuantity());
                                     if (condNow && (!inventoryAlert.isFireOnChange() || !condPrev))
-                                        groups = matched.get().groups.toArray(new String[0]);
-                                }
+                                        this.fireAlert(inventoryAlert, matched.groups.toArray(new String[0]));
+                                });
                                 break;
                             }
                             case ITEM_CHANGE: {
-                                Optional<MatchedItem> matched = this.getMatchedItems(inventoryAlert, itemMap.getItems());
-                                if (matched.isPresent()) {
-                                    if (inventoryAlert.getQuantityComparator().compare(matched.get().currentQuantity - matched.get().previousQuantity, inventoryAlert.getItemQuantity()))
-                                        groups = matched.get().groups.toArray(new String[0]);
-                                }
+                                Optional<MatchedItem> matchedItems = this.getMatchedInventoryItems(inventoryAlert, itemMap.getItems(), previousItems);
+                                matchedItems.ifPresent(matched -> {
+                                    if (inventoryAlert.getQuantityComparator().compare(matched.currentQuantity - matched.previousQuantity, inventoryAlert.getItemQuantity()))
+                                        this.fireAlert(inventoryAlert, matched.groups.toArray(new String[0]));
+                                });
                                 break;
                             }
                         }
-                        if (groups != null) this.fireAdvancedAlertTriggerNode(adv, tn, groups);
-                    })
+                    });
+
+            this.alertManager.getAllEnabledAlertsOfType(AdvancedAlert.class).forEach(adv ->
+                    adv.getGraph().getTriggerNodesOfType(InventoryAlert.class)
+                            .filter(tn -> tn.getAlert().isEnabled())
+                            .forEach(tn -> {
+                                InventoryAlert inventoryAlert = (InventoryAlert) tn.getAlert();
+                                InventoryAlertType alertType = inventoryAlert.getInventoryAlertType();
+                                String[] groups = null;
+                                switch (alertType) {
+                                    case FULL:
+                                        if (itemCount == 28 && (!inventoryAlert.isFireOnChange() || this.previousInventorySlotCount != 28))
+                                            groups = new String[]{alertType.getName()};
+                                        break;
+                                    case EMPTY:
+                                        if (itemCount == 0 && (!inventoryAlert.isFireOnChange() || this.previousInventorySlotCount != 0))
+                                            groups = new String[]{alertType.getName()};
+                                        break;
+                                    case SLOTS: {
+                                        boolean slotNow = inventoryAlert.getQuantityComparator().compare((int) itemCount, inventoryAlert.getItemQuantity());
+                                        boolean slotPrev = inventoryAlert.getQuantityComparator().compare((int) this.previousInventorySlotCount, inventoryAlert.getItemQuantity());
+                                        if (slotNow && (!inventoryAlert.isFireOnChange() || !slotPrev))
+                                            groups = new String[]{alertType.getName()};
+                                        break;
+                                    }
+                                    case ITEM: {
+                                        Optional<MatchedItem> matched = this.getMatchedInventoryItems(inventoryAlert, itemMap.getItems(), previousItems);
+                                        if (matched.isPresent()) {
+                                            boolean condNow = inventoryAlert.getQuantityComparator().compare(matched.get().currentQuantity, inventoryAlert.getItemQuantity());
+                                            boolean condPrev = inventoryAlert.getQuantityComparator().compare(matched.get().previousQuantity, inventoryAlert.getItemQuantity());
+                                            if (condNow && (!inventoryAlert.isFireOnChange() || !condPrev))
+                                                groups = matched.get().groups.toArray(new String[0]);
+                                        }
+                                        break;
+                                    }
+                                    case ITEM_CHANGE: {
+                                        Optional<MatchedItem> matched = this.getMatchedInventoryItems(inventoryAlert, itemMap.getItems(), previousItems);
+                                        if (matched.isPresent()) {
+                                            if (inventoryAlert.getQuantityComparator().compare(matched.get().currentQuantity - matched.get().previousQuantity, inventoryAlert.getItemQuantity()))
+                                                groups = matched.get().groups.toArray(new String[0]);
+                                        }
+                                        break;
+                                    }
+                                }
+                                if (groups != null) this.fireAdvancedAlertTriggerNode(adv, tn, groups);
+                            })
             );
-        }
-        this.previousItemsTable = currentItems.getItems();
-        this.previousInventorySlotCount = itemCount;
-        this.hasInitializedInventory = true;
     }
 
-    private Optional<MatchedItem> getMatchedItems(InventoryAlert inventoryAlert, Map<Integer, InventoryItemData> allItems) {
+    private void processBankChanges(InventoryItemData.InventoryItemDataMap itemMap, Map<Integer, InventoryItemData> previousItems) {
+            this.alertManager.getAllEnabledAlertsOfType(BankAlert.class)
+                    .forEach(bankAlert -> {
+                        BankAlert.BankAlertType alertType = bankAlert.getBankAlertType();
+                        switch (alertType) {
+                            case ITEM: {
+                                Optional<MatchedItem> matchedItems = this.getMatchedBankItems(bankAlert, itemMap.getItems(), previousItems);
+                                matchedItems.ifPresent(matched -> {
+                                    boolean condNow = bankAlert.getQuantityComparator().compare(matched.currentQuantity, bankAlert.getItemQuantity());
+                                    boolean condPrev = bankAlert.getQuantityComparator().compare(matched.previousQuantity, bankAlert.getItemQuantity());
+                                    if (condNow && (!bankAlert.isFireOnChange() || !condPrev))
+                                        this.fireAlert(bankAlert, matched.groups.toArray(new String[0]));
+                                });
+                                break;
+                            }
+                            case ITEM_CHANGE: {
+                                Optional<MatchedItem> matchedItems = this.getMatchedBankItems(bankAlert, itemMap.getItems(), previousItems);
+                                matchedItems.ifPresent(matched -> {
+                                    if (bankAlert.getQuantityComparator().compare(matched.currentQuantity - matched.previousQuantity, bankAlert.getItemQuantity()))
+                                        this.fireAlert(bankAlert, matched.groups.toArray(new String[0]));
+                                });
+                                break;
+                            }
+                        }
+                    });
+
+            this.alertManager.getAllEnabledAlertsOfType(AdvancedAlert.class).forEach(adv ->
+                    adv.getGraph().getTriggerNodesOfType(BankAlert.class)
+                            .filter(tn -> tn.getAlert().isEnabled())
+                            .forEach(tn -> {
+                                BankAlert bankAlert = (BankAlert) tn.getAlert();
+                                BankAlert.BankAlertType alertType = bankAlert.getBankAlertType();
+                                String[] groups = null;
+                                switch (alertType) {
+                                    case ITEM: {
+                                        Optional<MatchedItem> matched = this.getMatchedBankItems(bankAlert, itemMap.getItems(), previousItems);
+                                        if (matched.isPresent()) {
+                                            boolean condNow = bankAlert.getQuantityComparator().compare(matched.get().currentQuantity, bankAlert.getItemQuantity());
+                                            boolean condPrev = bankAlert.getQuantityComparator().compare(matched.get().previousQuantity, bankAlert.getItemQuantity());
+                                            if (condNow && (!bankAlert.isFireOnChange() || !condPrev))
+                                                groups = matched.get().groups.toArray(new String[0]);
+                                        }
+                                        break;
+                                    }
+                                    case ITEM_CHANGE: {
+                                        Optional<MatchedItem> matched = this.getMatchedBankItems(bankAlert, itemMap.getItems(), previousItems);
+                                        if (matched.isPresent()) {
+                                            if (bankAlert.getQuantityComparator().compare(matched.get().currentQuantity - matched.get().previousQuantity, bankAlert.getItemQuantity()))
+                                                groups = matched.get().groups.toArray(new String[0]);
+                                        }
+                                        break;
+                                    }
+                                }
+                                if (groups != null) this.fireAdvancedAlertTriggerNode(adv, tn, groups);
+                            })
+            );
+}
+
+    private Optional<MatchedItem> getMatchedInventoryItems(InventoryAlert inventoryAlert, Map<Integer, InventoryItemData> allItems, Map<Integer, InventoryItemData> previousItems) {
         return allItems.entrySet().stream()
             .filter(itemData -> inventoryAlert.getInventoryMatchType() == InventoryAlert.InventoryMatchType.BOTH
                 || (inventoryAlert.getInventoryMatchType() == InventoryAlert.InventoryMatchType.NOTED && itemData.getValue().isNoted())
@@ -448,7 +530,7 @@ public class EventHandler {
             .map(itemData -> {
                 String[] groups = Util.matchPattern(inventoryAlert, itemData.getValue().getItemComposition().getName());
                 if (groups == null) return null;
-                var prevItem = this.previousItemsTable.get(itemData.getKey());
+                var prevItem = previousItems.get(itemData.getKey());
                 return new MatchedItem(
                     new ArrayList<>(List.of(groups)), // so that is mutable
                     prevItem == null ? 0 : prevItem.getQuantity(),
@@ -456,14 +538,34 @@ public class EventHandler {
                 );
             })
             .filter(Objects::nonNull)
-            .reduce((acc, b) -> {
-                acc.groups = IntStream.range(0, Math.min(acc.groups.size(), b.groups.size()))
-                    .mapToObj(i -> acc.groups.get(i) + ", " + b.groups.get(i))
-                    .collect(Collectors.toList());
-                acc.previousQuantity = acc.previousQuantity + b.previousQuantity;
-                acc.currentQuantity = acc.currentQuantity + b.currentQuantity;
-                return acc;
-            });
+            .reduce(EventHandler::itemQuantities);
+    }
+
+    private Optional<MatchedItem> getMatchedBankItems(BankAlert bankAlert, Map<Integer, InventoryItemData> allItems, Map<Integer, InventoryItemData> previousItems) {
+        return allItems.entrySet().stream()
+                .filter(itemData -> itemData.getValue().getItemComposition().getPlaceholderTemplateId() == -1)
+                .map(itemData -> {
+                    String[] groups = Util.matchPattern(bankAlert, itemData.getValue().getItemComposition().getName());
+                    if (groups == null) return null;
+                    var prevItem = previousItems.get(itemData.getKey());
+                    return new MatchedItem(
+                            new ArrayList<>(List.of(groups)), // so that is mutable
+                            prevItem == null ? 0 : prevItem.getQuantity(),
+                            itemData.getValue().getQuantity()
+                    );
+                })
+                .filter(Objects::nonNull)
+                .reduce(EventHandler::itemQuantities);
+    }
+
+    @Nonnull
+    private static MatchedItem itemQuantities(MatchedItem acc, MatchedItem b) {
+        acc.groups = IntStream.range(0, Math.min(acc.groups.size(), b.groups.size()))
+                .mapToObj(i -> acc.groups.get(i) + ", " + b.groups.get(i))
+                .collect(Collectors.toList());
+        acc.previousQuantity = acc.previousQuantity + b.previousQuantity;
+        acc.currentQuantity = acc.currentQuantity + b.currentQuantity;
+        return acc;
     }
     //endregion
 
