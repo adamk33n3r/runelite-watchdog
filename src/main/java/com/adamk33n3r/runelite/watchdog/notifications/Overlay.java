@@ -36,9 +36,9 @@ public class Overlay extends MessageNotification {
     }
 
     @Override
-    protected void fireImpl(String[] triggerValues) {
+    protected void fireImpl(String[] triggerValues, String message) {
         WatchdogPlugin.getInstance().getNotificationOverlay()
-            .add(this, Util.processTriggerValues(this.message, triggerValues));
+            .add(this, Util.processTriggerValues(message, triggerValues));
     }
 
     @Override

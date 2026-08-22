@@ -28,9 +28,9 @@ public class GameMessage extends MessageNotification {
     }
 
     @Override
-    protected void fireImpl(String[] triggerValues) {
+    protected void fireImpl(String[] triggerValues, String message) {
         String formattedMessage = "<col" + ChatColorType.HIGHLIGHT.name() + ">" +
-            Util.processTriggerValues(this.message, triggerValues);
+            Util.processTriggerValues(message, triggerValues);
         this.chatMessageManager.queue(QueuedMessage.builder()
             .type(ChatMessageType.CONSOLE)
             .name(WatchdogPlugin.getInstance().getName())

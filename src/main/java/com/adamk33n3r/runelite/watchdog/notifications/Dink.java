@@ -30,9 +30,9 @@ public class Dink extends MessageNotification {
     private transient EventBus eventBus;
 
     @Override
-    protected void fireImpl(String[] triggerValues) {
+    protected void fireImpl(String[] triggerValues, String message) {
         HashMap<String, Object> dinkData = new HashMap<>();
-        String processedMessage = Util.processTriggerValues(this.message, triggerValues);
+        String processedMessage = Util.processTriggerValues(message, triggerValues);
         dinkData.put("text", processedMessage);
         dinkData.put("sourcePlugin", WatchdogPlugin.getInstance().getName());
         dinkData.put("title", this.getAlert().getName());

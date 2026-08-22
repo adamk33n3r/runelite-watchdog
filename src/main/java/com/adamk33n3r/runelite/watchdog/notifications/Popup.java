@@ -30,13 +30,13 @@ public class Popup extends MessageNotification {
     }
 
     @Override
-    protected void fireImpl(String[] triggerValues) {
+    protected void fireImpl(String[] triggerValues, String message) {
         String titleString = Strings.isNullOrEmpty(this.title) ? this.getAlert().getName() : this.title;
         String title = Util.processTriggerValues(titleString, triggerValues);
-        String message = Util.processTriggerValues(this.message, triggerValues);
+        String processedMessage = Util.processTriggerValues(message, triggerValues);
         WatchdogPlugin.getInstance().getPopupManager().getPopupQueue().offer(new PopupData(
             title,
-            message,
+            processedMessage,
             this.getTextColor()
         ));
     }

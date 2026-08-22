@@ -37,8 +37,8 @@ public class Overhead extends MessageNotification {
     }
 
     @Override
-    protected void fireImpl(String[] triggerValues) {
-        String message = Util.processTriggerValues(this.message, triggerValues);
+    protected void fireImpl(String[] triggerValues, String message) {
+        String processedMessage = Util.processTriggerValues(message, triggerValues);
         Player localPlayer = this.client.getLocalPlayer();
         if (localPlayer == null) {
             return;
@@ -48,10 +48,10 @@ public class Overhead extends MessageNotification {
             sb.append("<col=")
                 .append(ColorUtil.colorToHexCode(this.textColor))
                 .append(">")
-                .append(message)
+                .append(processedMessage)
                 .append("</col>");
         } else {
-            sb.append(message);
+            sb.append(processedMessage);
         }
         localPlayer.setOverheadText(sb.toString());
         localPlayer.setOverheadCycle(this.displayTime * 1000 / Constants.CLIENT_TICK_LENGTH);
