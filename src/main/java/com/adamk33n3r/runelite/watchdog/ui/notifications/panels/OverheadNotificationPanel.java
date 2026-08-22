@@ -20,7 +20,7 @@ public class OverheadNotificationPanel extends NotificationContentPanel<Overhead
 
     @Override
     protected void buildContent() {
-        this.add(PanelUtils.createTextField(
+        this.add(this.setMessageField(PanelUtils.createTextField(
             "Enter your formatted message...",
             "",
             this.notification.getMessage(),
@@ -28,7 +28,7 @@ public class OverheadNotificationPanel extends NotificationContentPanel<Overhead
                 this.notification.setMessage(val);
                 this.onChange.run();
             }
-        ));
+        )));
 
         ColorJButton colorPickerBtn = PanelUtils.createColorPicker(
             "Pick a color",

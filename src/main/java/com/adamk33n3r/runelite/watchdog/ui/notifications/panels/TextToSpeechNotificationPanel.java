@@ -42,14 +42,14 @@ public class TextToSpeechNotificationPanel extends NotificationContentPanel<Text
             return;
         }
 
-        FlatTextArea messageField = PanelUtils.createTextField(
+        FlatTextArea messageField = this.setMessageField(PanelUtils.createTextField(
             "Enter your message...",
             "The message to play",
             this.notification.getMessage(),
             val -> {
                 this.notification.setMessage(val);
                 this.onChange.run();
-            });
+            }));
         JButton resetCacheButton = PanelUtils.createActionButton(
             Icons.REFRESH,
             Icons.REFRESH_HOVER,

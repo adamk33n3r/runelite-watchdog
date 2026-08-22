@@ -17,11 +17,17 @@ import lombok.Getter;
 import javax.swing.JButton;
 import java.awt.Color;
 
+import javax.annotation.Nullable;
+
 @Getter
 public class ActionNodePanel extends NodePanel {
     private final ConnectionPointIn<Boolean> enabledIn;
     private final ConnectionPointIn<ExecSignal> execIn;
     private final ConnectionPointOut<ExecSignal> execOut;
+    @Nullable
+    private final ConnectionPointIn<String> messageIn;
+    @Nullable
+    private final ViewInput<String> messageView;
 //    private final ConnectionPointIn<String> alertNameIn;
 //    private final ConnectionPointIn<Number> delayMillisecondsIn;
     private final ConnectionPointIn<Boolean> fireWhenFocusedIn;
@@ -35,6 +41,14 @@ public class ActionNodePanel extends NodePanel {
         this.execIn = new ConnectionPointIn<>(this, actionNode.getExec());
         this.execOut = new ConnectionPointOut<>(this, actionNode.getExecOut());
         this.items.add(new ConnectionLine<>(this.execIn, new ViewInput<>("Exec", actionNode.getExec().getValue()), this.execOut));
+        if (actionNode.getMessage() != null) {
+            this.messageIn = new ConnectionPointIn<>(this, actionNode.getMessage());
+            this.messageView = new ViewInput<>("Message", actionNode.getMessage().getValue());
+            this.items.add(new ConnectionLine<>(this.messageIn, this.messageView, null));
+        } else {
+            this.messageIn = null;
+            this.messageView = null;
+        }
         this.enabledIn = new ConnectionPointIn<>(this, actionNode.getEnabled());
         this.items.add(new ConnectionLine<>(this.enabledIn, new BoolInput("Enabled", actionNode.getEnabled()), null));
 //        this.alertNameIn = new ConnectionPointIn<>(this, actionNode.getAlertName());
@@ -49,14 +63,26 @@ public class ActionNodePanel extends NodePanel {
         this.items.add(new ConnectionLine<>(this.fireWhenAfkSecondsIn, new IntegerInput("AFK Seconds", actionNode.getFireWhenAfkSeconds()), null));
 
         // Populate type-specific controls via content panel instance
-        NotificationContentPanel<?> contentPanel = notificationPanelFactory.createContentPanel(notification, this::notifyChange);
+        NotificationContentPanel<?> contentPanel = notificationPanelFactory.createContentPanel(notification, () -> {
+            this.notifyChange();
+            this.refreshMessageView();
+        });
         if (contentPanel != null) {
             contentPanel.setOnRebuild(this::pack);
             this.items.add(contentPanel);
+
+            if (actionNode.getMessage() != null) {
+                Runnable syncMessageField = () -> {
+                    contentPanel.setMessageFieldEnabled(!actionNode.getMessage().isConnected());
+                    this.refreshMessageView();
+                };
+                syncMessageField.run();
+                this.addDisposer(actionNode.getMessage().onConnectChange(_c -> syncMessageField.run()));
+            }
         }
 
         JButton testBtn = new JButton("TEST");
-        testBtn.addActionListener(ev -> notification.fireForced(new String[]{}));
+        testBtn.addActionListener(ev -> actionNode.fireForced(new String[]{}));
         this.items.add(testBtn);
 
         this.watchDirty(
@@ -66,5 +92,11 @@ public class ActionNodePanel extends NodePanel {
             actionNode.getFireWhenAfkSeconds()
         );
         this.pack();
+    }
+
+    private void refreshMessageView() {
+        if (this.messageView != null) {
+            this.messageView.setValue(((ActionNode) this.getNode()).getMessage().getValue());
+        }
     }
 }

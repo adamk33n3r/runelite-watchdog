@@ -13,13 +13,17 @@ import com.adamk33n3r.nodegraph.nodes.flow.Counter;
 import com.adamk33n3r.nodegraph.nodes.flow.DelayNode;
 import com.adamk33n3r.nodegraph.nodes.logic.InventoryCheck;
 import com.adamk33n3r.nodegraph.nodes.logic.LocationCompare;
+import com.adamk33n3r.nodegraph.nodes.utility.ToStringNode;
 import com.adamk33n3r.runelite.watchdog.alerts.ChatAlert;
 import com.adamk33n3r.runelite.watchdog.alerts.InventoryAlert;
+import com.adamk33n3r.runelite.watchdog.notifications.GameMessage;
 import com.adamk33n3r.runelite.watchdog.notifications.ScreenFlash;
 import com.adamk33n3r.runelite.watchdog.serialization.WatchdogGsonFactory;
 import com.adamk33n3r.runelite.watchdog.ui.ComparableNumber;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.http.api.RuneLiteAPI;
 import org.junit.Before;
@@ -292,6 +296,63 @@ public class GraphSerializerTest {
         assertTrue(loaded.getNodes().get(0) instanceof Location);
         Location loadedLoc = (Location) loaded.getNodes().get(0);
         assertEquals(new WorldPoint(3200, 3200, 0), loadedLoc.getValue().getValue());
+    }
+
+    @Test
+    public void roundTrip_preservesMessageInputConnection() {
+        Graph graph = new Graph();
+        GameMessage notif = new GameMessage();
+        notif.setMessage("configured message");
+        ActionNode action = new ActionNode(notif);
+        ToStringNode toString = new ToStringNode();
+        graph.add(toString);
+        graph.add(action);
+        graph.connect(toString.getResult(), action.getMessage());
+
+        Graph loaded = roundTrip(graph);
+
+        ActionNode loadedAction = (ActionNode) loaded.getNodes().stream()
+            .filter(n -> n instanceof ActionNode).findFirst().get();
+        assertNotNull(loadedAction.getMessage());
+        assertTrue(loadedAction.getMessage().isConnected());
+        assertEquals(1, loaded.getConnections().size());
+    }
+
+    @Test
+    public void roundTrip_graphWithoutMessageInput_keepsConfiguredMessage() {
+        Graph graph = new Graph();
+        GameMessage notif = new GameMessage();
+        notif.setMessage("configured message");
+        graph.add(new ActionNode(notif));
+
+        JsonObject json = new JsonParser().parse(gson.toJson(graph, Graph.class)).getAsJsonObject();
+        JsonObject inputs = json.getAsJsonArray("nodes").get(0).getAsJsonObject()
+            .getAsJsonObject("vars").getAsJsonObject("in");
+        assertTrue(inputs.has("Message"));
+        inputs.remove("Message");
+
+        Graph loaded = gson.fromJson(json.toString(), Graph.class);
+
+        ActionNode loadedAction = (ActionNode) loaded.getNodes().get(0);
+        assertEquals("configured message", ((GameMessage) loadedAction.getNotification()).getMessage());
+        assertEquals("configured message", loadedAction.getMessage().getValue());
+        assertFalse(loadedAction.getMessage().isConnected());
+    }
+
+    @Test
+    public void roundTrip_unconnectedMessage_persistsEditedMessage() {
+        Graph graph = new Graph();
+        GameMessage notif = new GameMessage();
+        notif.setMessage("original message");
+        ActionNode action = new ActionNode(notif);
+        graph.add(action);
+        notif.setMessage("edited message");
+
+        Graph loaded = roundTrip(graph);
+
+        ActionNode loadedAction = (ActionNode) loaded.getNodes().get(0);
+        assertEquals("edited message", ((GameMessage) loadedAction.getNotification()).getMessage());
+        assertEquals("edited message", loadedAction.getMessage().getValue());
     }
 
     private Graph roundTrip(Graph graph) {
