@@ -325,13 +325,13 @@ public class GraphSerializerTest {
         notif.setMessage("configured message");
         graph.add(new ActionNode(notif));
 
-        JsonObject json = new JsonParser().parse(gson.toJson(graph, Graph.class)).getAsJsonObject();
+        JsonObject json = new JsonParser().parse(this.gson.toJson(graph, Graph.class)).getAsJsonObject();
         JsonObject inputs = json.getAsJsonArray("nodes").get(0).getAsJsonObject()
             .getAsJsonObject("vars").getAsJsonObject("in");
         assertTrue(inputs.has("Message"));
         inputs.remove("Message");
 
-        Graph loaded = gson.fromJson(json.toString(), Graph.class);
+        Graph loaded = this.gson.fromJson(json.toString(), Graph.class);
 
         ActionNode loadedAction = (ActionNode) loaded.getNodes().get(0);
         assertEquals("configured message", ((GameMessage) loadedAction.getNotification()).getMessage());

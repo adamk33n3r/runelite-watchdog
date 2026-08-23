@@ -17,6 +17,7 @@ public class TextInput extends AbstractInput<String> {
 
     public TextInput(String placeholder, String tooltip, String text) {
         this.textField = PanelUtils.createTextArea(placeholder, tooltip, text, (v) -> {});
+        this.addPropertyChangeListener("enabled", (e) -> this.textField.setToolTipText(this.isEnabled() ? tooltip : null));
         this.add(this.textField);
     }
 
