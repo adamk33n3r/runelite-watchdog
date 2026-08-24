@@ -4,6 +4,7 @@ import com.adamk33n3r.nodegraph.ExecSignal;
 import com.adamk33n3r.nodegraph.Graph;
 import com.adamk33n3r.nodegraph.VarOutput;
 import com.adamk33n3r.nodegraph.nodes.ActionNode;
+import com.adamk33n3r.nodegraph.nodes.ActionNodeFactory;
 import com.adamk33n3r.nodegraph.nodes.TriggerNode;
 import com.adamk33n3r.nodegraph.nodes.flow.DelayNode;
 import com.adamk33n3r.runelite.watchdog.alerts.AdvancedAlert;
@@ -85,7 +86,7 @@ public class AlertConverter {
 
                     Notification notifCopy = deepCopyNotification(notification);
                     notifCopy.setDelayMilliseconds(0);
-                    ActionNode actionNode = new ActionNode(notifCopy);
+                    ActionNode actionNode = ActionNodeFactory.create(notifCopy);
                     actionNode.setX(nodeX);
                     actionNode.setY(rowY);
                     graph.add(actionNode);

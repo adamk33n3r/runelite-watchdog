@@ -35,6 +35,7 @@ public class ActionNodePanel extends NodePanel {
         this.execIn = new ConnectionPointIn<>(this, actionNode.getExec());
         this.execOut = new ConnectionPointOut<>(this, actionNode.getExecOut());
         this.items.add(new ConnectionLine<>(this.execIn, new ViewInput<>("Exec", actionNode.getExec().getValue()), this.execOut));
+        this.addTypeSpecificRows(actionNode);
         this.enabledIn = new ConnectionPointIn<>(this, actionNode.getEnabled());
         this.items.add(new ConnectionLine<>(this.enabledIn, new BoolInput("Enabled", actionNode.getEnabled()), null));
 //        this.alertNameIn = new ConnectionPointIn<>(this, actionNode.getAlertName());
@@ -51,8 +52,11 @@ public class ActionNodePanel extends NodePanel {
         // Populate type-specific controls via content panel instance
         NotificationContentPanel<?> contentPanel = notificationPanelFactory.createContentPanel(notification, this::notifyChange);
         if (contentPanel != null) {
-            contentPanel.setOnRebuild(this::pack);
-            this.items.add(contentPanel);
+            this.configureContentPanel(contentPanel);
+            if (contentPanel.getComponentCount() > 0) {
+                contentPanel.setOnRebuild(this::pack);
+                this.items.add(contentPanel);
+            }
         }
 
         JButton testBtn = new JButton("TEST");
@@ -67,4 +71,8 @@ public class ActionNodePanel extends NodePanel {
         );
         this.pack();
     }
+
+    protected void addTypeSpecificRows(ActionNode actionNode) {}
+
+    protected void configureContentPanel(NotificationContentPanel<?> contentPanel) {}
 }

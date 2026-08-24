@@ -4,6 +4,8 @@ import com.adamk33n3r.nodegraph.Graph;
 import com.adamk33n3r.nodegraph.GraphSerializer;
 import com.adamk33n3r.nodegraph.NodeTypeRegistry;
 import com.adamk33n3r.nodegraph.nodes.ActionNode;
+import com.adamk33n3r.nodegraph.nodes.ActionNodeFactory;
+import com.adamk33n3r.nodegraph.nodes.MessageActionNode;
 import com.adamk33n3r.nodegraph.nodes.TriggerNode;
 import com.adamk33n3r.nodegraph.nodes.constants.*;
 import com.adamk33n3r.nodegraph.nodes.flow.Branch;
@@ -88,9 +90,12 @@ public class WatchdogGsonFactory {
                 (json, gson) -> new TriggerNode(gson.fromJson(json.get("alert"), Alert.class)),
                 (node, obj, gson) -> obj.add("alert", gson.toJsonTree(node.getAlert(), Alert.class)))
             .registerSubtype(ActionNode.class,
-                (json, gson) -> new ActionNode(gson.fromJson(json.get("notification"), Notification.class)),
+                (json, gson) -> ActionNodeFactory.create(gson.fromJson(json.get("notification"), Notification.class)),
                 (node, obj, gson) -> obj.add("notification", gson.toJsonTree(node.getNotification(), Notification.class)))
             .registerAlias("NotificationNode", ActionNode.class)
+            .registerSubtype(MessageActionNode.class,
+                (json, gson) -> new MessageActionNode((MessageNotification) gson.fromJson(json.get("notification"), Notification.class)),
+                (node, obj, gson) -> obj.add("notification", gson.toJsonTree(node.getNotification(), Notification.class)))
             .registerSubtype(Add.class, Add::new)
             .registerSubtype(Subtract.class, Subtract::new)
             .registerSubtype(Multiply.class, Multiply::new)

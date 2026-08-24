@@ -14,7 +14,7 @@ public class MessageNotificationPanel extends NotificationContentPanel<MessageNo
     @Override
     protected void buildContent() {
         boolean supportsFormattingTags = this.notification instanceof GameMessage;
-        this.add(PanelUtils.createTextField(
+        this.add(this.setMessageField(PanelUtils.createTextField(
             supportsFormattingTags ? "Enter your formatted message..." : "Enter your message...",
             "",
             this.notification.getMessage(),
@@ -22,6 +22,6 @@ public class MessageNotificationPanel extends NotificationContentPanel<MessageNo
                 this.notification.setMessage(val);
                 this.onChange.run();
             }
-        ));
+        )));
     }
 }

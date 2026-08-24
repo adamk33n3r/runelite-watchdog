@@ -24,7 +24,7 @@ public class PopupNotificationPanel extends NotificationContentPanel<Popup> {
             this.notification::setTitle
         ));
 
-        this.add(PanelUtils.createTextField(
+        this.add(this.setMessageField(PanelUtils.createTextField(
             "Enter your formatted message...",
             "",
             this.notification.getMessage(),
@@ -32,7 +32,7 @@ public class PopupNotificationPanel extends NotificationContentPanel<Popup> {
                 this.notification.setMessage(val);
                 this.onChange.run();
             }
-        ));
+        )));
 
         ColorJButton textColorPicker = PanelUtils.createColorPicker(
             "Pick a color",
