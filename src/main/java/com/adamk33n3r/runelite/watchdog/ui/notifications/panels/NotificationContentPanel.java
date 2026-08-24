@@ -8,11 +8,10 @@ import net.runelite.client.ui.ColorScheme;
 
 import lombok.Getter;
 
+import javax.annotation.Nullable;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import java.awt.Component;
-
-import javax.annotation.Nullable;
 
 /**
  * Abstract base class for notification type-specific content panels.

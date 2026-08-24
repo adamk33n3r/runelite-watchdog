@@ -2,14 +2,12 @@ package com.adamk33n3r.runelite.watchdog.ui.nodegraph;
 
 import com.adamk33n3r.nodegraph.ExecSignal;
 import com.adamk33n3r.nodegraph.nodes.ActionNode;
-import com.adamk33n3r.runelite.watchdog.notifications.MessageNotification;
 import com.adamk33n3r.runelite.watchdog.notifications.Notification;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.ConnectionLine;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.ConnectionPointIn;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.connections.ConnectionPointOut;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.inputs.BoolInput;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.inputs.IntegerInput;
-import com.adamk33n3r.runelite.watchdog.ui.nodegraph.inputs.TextInput;
 import com.adamk33n3r.runelite.watchdog.ui.nodegraph.inputs.ViewInput;
 import com.adamk33n3r.runelite.watchdog.ui.notifications.panels.NotificationContentPanel;
 import com.adamk33n3r.runelite.watchdog.ui.panels.NotificationPanelFactory;
@@ -19,19 +17,11 @@ import lombok.Getter;
 import javax.swing.JButton;
 import java.awt.Color;
 
-import javax.annotation.Nullable;
-
 @Getter
 public class ActionNodePanel extends NodePanel {
-    private static final String MESSAGE_TOOLTIP = "The message this action fires with. Connect the pin to supply it from the graph instead.";
-
     private final ConnectionPointIn<Boolean> enabledIn;
     private final ConnectionPointIn<ExecSignal> execIn;
     private final ConnectionPointOut<ExecSignal> execOut;
-    @Nullable
-    private final ConnectionPointIn<String> messageIn;
-    @Nullable
-    private final TextInput messageInput;
 //    private final ConnectionPointIn<String> alertNameIn;
 //    private final ConnectionPointIn<Number> delayMillisecondsIn;
     private final ConnectionPointIn<Boolean> fireWhenFocusedIn;
@@ -45,24 +35,7 @@ public class ActionNodePanel extends NodePanel {
         this.execIn = new ConnectionPointIn<>(this, actionNode.getExec());
         this.execOut = new ConnectionPointOut<>(this, actionNode.getExecOut());
         this.items.add(new ConnectionLine<>(this.execIn, new ViewInput<>("Exec", actionNode.getExec().getValue()), this.execOut));
-        if (actionNode.getMessage() != null) {
-            MessageNotification messageNotification = (MessageNotification) notification;
-            this.messageIn = new ConnectionPointIn<>(this, actionNode.getMessage());
-            this.messageInput = new TextInput("Enter your message...", MESSAGE_TOOLTIP, messageNotification.getMessage());
-            this.messageInput.registerOnChange(value -> {
-                messageNotification.setMessage(value);
-                this.notifyChange();
-            });
-            this.items.add(new ConnectionLine<>(this.messageIn, this.messageInput, null));
-            this.addDisposer(actionNode.getMessage().onConnectChange(_c -> {
-                if (!actionNode.getMessage().isConnected()) {
-                    this.messageInput.setValue(messageNotification.getMessage());
-                }
-            }));
-        } else {
-            this.messageIn = null;
-            this.messageInput = null;
-        }
+        this.addTypeSpecificRows(actionNode);
         this.enabledIn = new ConnectionPointIn<>(this, actionNode.getEnabled());
         this.items.add(new ConnectionLine<>(this.enabledIn, new BoolInput("Enabled", actionNode.getEnabled()), null));
 //        this.alertNameIn = new ConnectionPointIn<>(this, actionNode.getAlertName());
@@ -79,7 +52,7 @@ public class ActionNodePanel extends NodePanel {
         // Populate type-specific controls via content panel instance
         NotificationContentPanel<?> contentPanel = notificationPanelFactory.createContentPanel(notification, this::notifyChange);
         if (contentPanel != null) {
-            contentPanel.setMessageFieldHidden(actionNode.getMessage() != null);
+            this.configureContentPanel(contentPanel);
             if (contentPanel.getComponentCount() > 0) {
                 contentPanel.setOnRebuild(this::pack);
                 this.items.add(contentPanel);
@@ -87,7 +60,7 @@ public class ActionNodePanel extends NodePanel {
         }
 
         JButton testBtn = new JButton("TEST");
-        testBtn.addActionListener(ev -> actionNode.fireForced(new String[]{}));
+        testBtn.addActionListener(ev -> notification.fireForced(new String[]{}));
         this.items.add(testBtn);
 
         this.watchDirty(
@@ -98,4 +71,8 @@ public class ActionNodePanel extends NodePanel {
         );
         this.pack();
     }
+
+    protected void addTypeSpecificRows(ActionNode actionNode) {}
+
+    protected void configureContentPanel(NotificationContentPanel<?> contentPanel) {}
 }

@@ -23,6 +23,8 @@ import com.adamk33n3r.runelite.watchdog.alerts.ChatAlert;
 import com.adamk33n3r.nodegraph.Graph;
 import com.adamk33n3r.nodegraph.Node;
 import com.adamk33n3r.nodegraph.nodes.ActionNode;
+import com.adamk33n3r.nodegraph.nodes.ActionNodeFactory;
+import com.adamk33n3r.nodegraph.nodes.MessageActionNode;
 import com.adamk33n3r.nodegraph.nodes.flow.DelayNode;
 import com.adamk33n3r.nodegraph.nodes.TriggerNode;
 import com.adamk33n3r.runelite.watchdog.notifications.TextToSpeech;
@@ -280,7 +282,7 @@ public class GraphPanel extends JLayeredPane {
                     } catch (Exception e) {
                         notification = new TextToSpeech();
                     }
-                    ActionNode notificationNode = new ActionNode(notification);
+                    ActionNode notificationNode = ActionNodeFactory.create(notification);
                     notificationNode.setX(px);
                     notificationNode.setY(py);
                     this.graph.add(notificationNode);
@@ -584,6 +586,9 @@ public class GraphPanel extends JLayeredPane {
         if (node instanceof TriggerNode) {
             TriggerNode tn = (TriggerNode) node;
             return new AlertNodePanel(this, tn.getX(), tn.getY(), name, NODE_TRIGGER_COLOR, tn, alertPanelContentFactory);
+        } else if (node instanceof MessageActionNode) {
+            MessageActionNode mn = (MessageActionNode) node;
+            return new MessageActionNodePanel(this, mn.getX(), mn.getY(), name, NODE_ACTION_COLOR, mn, notificationPanelFactory);
         } else if (node instanceof ActionNode) {
             ActionNode nn = (ActionNode) node;
             return new ActionNodePanel(this, nn.getX(), nn.getY(), name, NODE_ACTION_COLOR, nn, notificationPanelFactory);

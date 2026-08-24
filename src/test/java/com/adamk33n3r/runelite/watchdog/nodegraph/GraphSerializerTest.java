@@ -3,6 +3,7 @@ package com.adamk33n3r.runelite.watchdog.nodegraph;
 import com.adamk33n3r.nodegraph.Connection;
 import com.adamk33n3r.nodegraph.Graph;
 import com.adamk33n3r.nodegraph.nodes.ActionNode;
+import com.adamk33n3r.nodegraph.nodes.MessageActionNode;
 import com.adamk33n3r.nodegraph.nodes.TriggerNode;
 import com.adamk33n3r.nodegraph.nodes.constants.Bool;
 import com.adamk33n3r.nodegraph.nodes.constants.Inventory;
@@ -303,7 +304,7 @@ public class GraphSerializerTest {
         Graph graph = new Graph();
         GameMessage notif = new GameMessage();
         notif.setMessage("configured message");
-        ActionNode action = new ActionNode(notif);
+        MessageActionNode action = new MessageActionNode(notif);
         ToStringNode toString = new ToStringNode();
         graph.add(toString);
         graph.add(action);
@@ -311,9 +312,8 @@ public class GraphSerializerTest {
 
         Graph loaded = roundTrip(graph);
 
-        ActionNode loadedAction = (ActionNode) loaded.getNodes().stream()
-            .filter(n -> n instanceof ActionNode).findFirst().get();
-        assertNotNull(loadedAction.getMessage());
+        MessageActionNode loadedAction = (MessageActionNode) loaded.getNodes().stream()
+            .filter(n -> n instanceof MessageActionNode).findFirst().get();
         assertTrue(loadedAction.getMessage().isConnected());
         assertEquals(1, loaded.getConnections().size());
     }
@@ -323,7 +323,7 @@ public class GraphSerializerTest {
         Graph graph = new Graph();
         GameMessage notif = new GameMessage();
         notif.setMessage("configured message");
-        graph.add(new ActionNode(notif));
+        graph.add(new MessageActionNode(notif));
 
         JsonObject json = new JsonParser().parse(this.gson.toJson(graph, Graph.class)).getAsJsonObject();
         JsonObject inputs = json.getAsJsonArray("nodes").get(0).getAsJsonObject()
@@ -333,8 +333,8 @@ public class GraphSerializerTest {
 
         Graph loaded = this.gson.fromJson(json.toString(), Graph.class);
 
-        ActionNode loadedAction = (ActionNode) loaded.getNodes().get(0);
-        assertEquals("configured message", ((GameMessage) loadedAction.getNotification()).getMessage());
+        MessageActionNode loadedAction = (MessageActionNode) loaded.getNodes().get(0);
+        assertEquals("configured message", loadedAction.getMessageNotification().getMessage());
         assertEquals("configured message", loadedAction.getMessage().getValue());
         assertFalse(loadedAction.getMessage().isConnected());
     }
@@ -344,15 +344,34 @@ public class GraphSerializerTest {
         Graph graph = new Graph();
         GameMessage notif = new GameMessage();
         notif.setMessage("original message");
-        ActionNode action = new ActionNode(notif);
+        MessageActionNode action = new MessageActionNode(notif);
         graph.add(action);
-        notif.setMessage("edited message");
+        action.getMessage().setValue("edited message");
 
         Graph loaded = roundTrip(graph);
 
-        ActionNode loadedAction = (ActionNode) loaded.getNodes().get(0);
-        assertEquals("edited message", ((GameMessage) loadedAction.getNotification()).getMessage());
+        MessageActionNode loadedAction = (MessageActionNode) loaded.getNodes().get(0);
+        assertEquals("edited message", loadedAction.getMessageNotification().getMessage());
         assertEquals("edited message", loadedAction.getMessage().getValue());
+    }
+
+    @Test
+    public void deserialize_legacyActionNodeType_upgradesMessageActionsToSubclass() {
+        Graph graph = new Graph();
+        GameMessage notif = new GameMessage();
+        notif.setMessage("configured message");
+        graph.add(new MessageActionNode(notif));
+
+        JsonObject json = new JsonParser().parse(this.gson.toJson(graph, Graph.class)).getAsJsonObject();
+        JsonObject node = json.getAsJsonArray("nodes").get(0).getAsJsonObject();
+        assertEquals("MessageActionNode", node.get("type").getAsString());
+        node.addProperty("type", "ActionNode");
+
+        Graph loaded = this.gson.fromJson(json.toString(), Graph.class);
+
+        assertTrue(loaded.getNodes().get(0) instanceof MessageActionNode);
+        MessageActionNode loadedAction = (MessageActionNode) loaded.getNodes().get(0);
+        assertEquals("configured message", loadedAction.getMessage().getValue());
     }
 
     private Graph roundTrip(Graph graph) {
