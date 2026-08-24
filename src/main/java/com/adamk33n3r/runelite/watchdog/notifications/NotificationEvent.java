@@ -21,7 +21,7 @@ public class NotificationEvent extends MessageNotification {
     }
 
     @Override
-    protected void fireImpl(String[] triggerValues, String message) {
-        this.eventHandler.notify(Util.processTriggerValues(message, triggerValues));
+    protected void fireImpl(String[] triggerValues) {
+        this.eventHandler.notify(Util.processTriggerValues(this.message, triggerValues));
     }
 }

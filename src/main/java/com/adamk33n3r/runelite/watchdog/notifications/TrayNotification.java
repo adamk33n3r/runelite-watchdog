@@ -25,7 +25,7 @@ public class TrayNotification extends MessageNotification {
     }
 
     @Override
-    protected void fireImpl(String[] triggerValues, String message) {
+    protected void fireImpl(String[] triggerValues) {
         this.notifier.notify(
             new net.runelite.client.config.Notification()
                 .withEnabled(true)
@@ -36,7 +36,7 @@ public class TrayNotification extends MessageNotification {
                 .withSound(NotificationSound.OFF)
                 .withFlash(FlashNotification.DISABLED)
                 .withSendWhenFocused(true),
-            Util.processTriggerValues(message, triggerValues)
+            Util.processTriggerValues(this.message, triggerValues)
         );
     }
 }

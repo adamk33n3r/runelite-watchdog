@@ -72,12 +72,12 @@ public class TextToSpeech extends MessageNotification implements IAudioNotificat
     }
 
     @Override
-    protected void fireImpl(String[] triggerValues, String message) {
+    protected void fireImpl(String[] triggerValues) {
         if (!WatchdogPlugin.getInstance().getConfig().ttsEnabled()) {
             return;
         }
 
-        String processedMessage = Util.processTriggerValues(message, triggerValues);
+        String processedMessage = Util.processTriggerValues(this.message, triggerValues);
 
         try {
             File watchdogPath = new File(CACHE_DIR, "watchdog");
