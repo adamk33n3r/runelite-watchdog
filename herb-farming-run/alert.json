@@ -5,7 +5,7 @@
   "author": "thomasoien",
   "category": "SKILLING",
   "tags": [ "farming", "harvest", "patch", "herb", "path", "early game", "late game" ],
-  "dependsOn": [],
+  "dependsOn": ["Shortest Path"],
   "alerts": [
     {
       "type": "AlertGroup",
