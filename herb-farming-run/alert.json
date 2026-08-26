@@ -15,11 +15,7 @@
           "alerts": [
             {
               "type": "LocationAlert",
-              "worldPoint": {
-                "x": 3058,
-                "y": 3310,
-                "plane": 0
-              },
+              "worldPoint": { "x": 3058, "y": 3310, "plane": 0 },
               "distance": 2,
               "repeat": false,
               "cardinalOnly": false,
@@ -34,11 +30,7 @@
                   "type": "ShortestPath",
                   "mode": "PATH",
                   "useCurrentLocationForStart": true,
-                  "target": {
-                    "x": 1739,
-                    "y": 3552,
-                    "plane": 0
-                  },
+                  "target": { "x": 1739, "y": 3552,  "plane": 0 },
                   "enabled": true,
                   "fireWhenFocused": true,
                   "fireWhenAFK": false,
@@ -58,11 +50,7 @@
             },
             {
               "type": "LocationAlert",
-              "worldPoint": {
-                "x": 1739,
-                "y": 3552,
-                "plane": 0
-              },
+              "worldPoint": { "x": 1739, "y": 3552, "plane": 0 },
               "distance": 2,
               "repeat": false,
               "cardinalOnly": false,
@@ -77,11 +65,7 @@
                   "type": "ShortestPath",
                   "mode": "PATH",
                   "useCurrentLocationForStart": true,
-                  "target": {
-                    "x": 2812,
-                    "y": 3463,
-                    "plane": 0
-                  },
+                  "target": { "x": 2812, "y": 3463, "plane": 0 },
                   "enabled": true,
                   "fireWhenFocused": true,
                   "fireWhenAFK": false,
@@ -101,11 +85,7 @@
             },
             {
               "type": "LocationAlert",
-              "worldPoint": {
-                "x": 2812,
-                "y": 3463,
-                "plane": 0
-              },
+              "worldPoint": { "x": 2812, "y": 3463, "plane": 0 },
               "distance": 2,
               "repeat": false,
               "cardinalOnly": false,
@@ -120,11 +100,7 @@
                   "type": "ShortestPath",
                   "mode": "PATH",
                   "useCurrentLocationForStart": true,
-                  "target": {
-                    "x": 2669,
-                    "y": 3375,
-                    "plane": 0
-                  },
+                  "target": { "x": 2669, "y": 3375, "plane": 0 },
                   "enabled": true,
                   "fireWhenFocused": true,
                   "fireWhenAFK": false,
@@ -154,11 +130,7 @@
           "alerts": [
             {
               "type": "LocationAlert",
-              "worldPoint": {
-                "x": 2669,
-                "y": 3375,
-                "plane": 0
-              },
+              "worldPoint": { "x": 2669, "y": 3375, "plane": 0 },
               "distance": 2,
               "repeat": false,
               "cardinalOnly": false,
@@ -173,11 +145,7 @@
                   "type": "ShortestPath",
                   "mode": "PATH",
                   "useCurrentLocationForStart": true,
-                  "target": {
-                    "x": 3606,
-                    "y": 3530,
-                    "plane": 0
-                  },
+                  "target": { "x": 3606, "y": 3530, "plane": 0 },
                   "enabled": true,
                   "fireWhenFocused": true,
                   "fireWhenAFK": false,
@@ -197,11 +165,7 @@
             },
             {
               "type": "LocationAlert",
-              "worldPoint": {
-                "x": 3606,
-                "y": 3530,
-                "plane": 0
-              },
+              "worldPoint": { "x": 3606, "y": 3530, "plane": 0 },
               "distance": 2,
               "repeat": false,
               "cardinalOnly": false,
@@ -216,11 +180,7 @@
                   "type": "ShortestPath",
                   "mode": "PATH",
                   "useCurrentLocationForStart": true,
-                  "target": {
-                    "x": 1583,
-                    "y": 3094,
-                    "plane": 0
-                  },
+                  "target": { "x": 1583, "y": 3094, "plane": 0 },
                   "enabled": true,
                   "fireWhenFocused": true,
                   "fireWhenAFK": false,
@@ -240,11 +200,7 @@
             },
             {
               "type": "LocationAlert",
-              "worldPoint": {
-                "x": 1583,
-                "y": 3094,
-                "plane": 0
-              },
+              "worldPoint": { "x": 1583, "y": 3094, "plane": 0 },
               "distance": 2,
               "repeat": false,
               "cardinalOnly": false,
@@ -259,11 +215,7 @@
                   "type": "ShortestPath",
                   "mode": "PATH",
                   "useCurrentLocationForStart": true,
-                  "target": {
-                    "x": 1246,
-                    "y": 3729,
-                    "plane": 0
-                  },
+                  "target": { "x": 1246, "y": 3729, "plane": 0 },
                   "enabled": true,
                   "fireWhenFocused": true,
                   "fireWhenAFK": false,
@@ -293,11 +245,7 @@
           "alerts": [
             {
               "type": "LocationAlert",
-              "worldPoint": {
-                "x": 1238,
-                "y": 3726,
-                "plane": 0
-              },
+              "worldPoint": { "x": 1238, "y": 3726, "plane": 0 },
               "distance": 2,
               "repeat": false,
               "cardinalOnly": false,
@@ -312,11 +260,7 @@
                   "type": "ShortestPath",
                   "mode": "PATH",
                   "useCurrentLocationForStart": true,
-                  "target": {
-                    "x": 2828,
-                    "y": 3694,
-                    "plane": 0
-                  },
+                  "target": { "x": 2828, "y": 3694, "plane": 0 },
                   "enabled": true,
                   "fireWhenFocused": true,
                   "fireWhenAFK": false,
@@ -336,11 +280,7 @@
             },
             {
               "type": "LocationAlert",
-              "worldPoint": {
-                "x": 2828,
-                "y": 3694,
-                "plane": 0
-              },
+              "worldPoint": { "x": 2828, "y": 3694, "plane": 0 },
               "distance": 2,
               "repeat": false,
               "cardinalOnly": false,
@@ -355,11 +295,7 @@
                   "type": "ShortestPath",
                   "mode": "PATH",
                   "useCurrentLocationForStart": true,
-                  "target": {
-                    "x": 2847,
-                    "y": 3935,
-                    "plane": 0
-                  },
+                  "target": { "x": 2847, "y": 3935, "plane": 0 },
                   "enabled": true,
                   "fireWhenFocused": true,
                   "fireWhenAFK": false,
@@ -379,11 +315,7 @@
             },
             {
               "type": "LocationAlert",
-              "worldPoint": {
-                "x": 2847,
-                "y": 3935,
-                "plane": 0
-              },
+              "worldPoint": { "x": 2847, "y": 3935, "plane": 0 },
               "distance": 2,
               "repeat": false,
               "cardinalOnly": false,
@@ -398,11 +330,7 @@
                   "type": "ShortestPath",
                   "mode": "PATH",
                   "useCurrentLocationForStart": true,
-                  "target": {
-                    "x": 3790,
-                    "y": 2839,
-                    "plane": 0
-                  },
+                  "target": { "x": 3790, "y": 2839, "plane": 0 },
                   "enabled": true,
                   "fireWhenFocused": true,
                   "fireWhenAFK": false,
@@ -432,11 +360,7 @@
           "alerts": [
             {
               "type": "LocationAlert",
-              "worldPoint": {
-                "x": 1238,
-                "y": 3726,
-                "plane": 0
-              },
+              "worldPoint": { "x": 1238, "y": 3726, "plane": 0 },
               "distance": 2,
               "repeat": false,
               "cardinalOnly": false,
@@ -451,11 +375,7 @@
                   "type": "ShortestPath",
                   "mode": "PATH",
                   "useCurrentLocationForStart": true,
-                  "target": {
-                    "x": 2847,
-                    "y": 3935,
-                    "plane": 0
-                  },
+                  "target": { "x": 2847, "y": 3935, "plane": 0 },
                   "enabled": true,
                   "fireWhenFocused": true,
                   "fireWhenAFK": false,
@@ -475,11 +395,7 @@
             },
             {
               "type": "LocationAlert",
-              "worldPoint": {
-                "x": 2847,
-                "y": 3935,
-                "plane": 0
-              },
+              "worldPoint": { "x": 2847, "y": 3935, "plane": 0 },
               "distance": 2,
               "repeat": false,
               "cardinalOnly": false,
@@ -494,11 +410,7 @@
                   "type": "ShortestPath",
                   "mode": "PATH",
                   "useCurrentLocationForStart": true,
-                  "target": {
-                    "x": 2828,
-                    "y": 3694,
-                    "plane": 0
-                  },
+                  "target": { "x": 2828, "y": 3694, "plane": 0 },
                   "enabled": true,
                   "fireWhenFocused": true,
                   "fireWhenAFK": false,
@@ -518,11 +430,7 @@
             },
             {
               "type": "LocationAlert",
-              "worldPoint": {
-                "x": 2828,
-                "y": 3694,
-                "plane": 0
-              },
+              "worldPoint": { "x": 2828, "y": 3694, "plane": 0 },
               "distance": 2,
               "repeat": false,
               "cardinalOnly": false,
@@ -537,11 +445,7 @@
                   "type": "ShortestPath",
                   "mode": "PATH",
                   "useCurrentLocationForStart": true,
-                  "target": {
-                    "x": 1739,
-                    "y": 3552,
-                    "plane": 0
-                  },
+                  "target": { "x": 1739, "y": 3552, "plane": 0 },
                   "enabled": true,
                   "fireWhenFocused": true,
                   "fireWhenAFK": false,
@@ -561,11 +465,7 @@
             },
             {
               "type": "LocationAlert",
-              "worldPoint": {
-                "x": 1739,
-                "y": 3552,
-                "plane": 0
-              },
+              "worldPoint": { "x": 1739,"y": 3552, "plane": 0 },
               "distance": 2,
               "repeat": false,
               "cardinalOnly": false,
@@ -580,11 +480,7 @@
                   "type": "ShortestPath",
                   "mode": "PATH",
                   "useCurrentLocationForStart": true,
-                  "target": {
-                    "x": 3790,
-                    "y": 2839,
-                    "plane": 0
-                  },
+                  "target": { "x": 3790, "y": 2839, "plane": 0 },
                   "enabled": true,
                   "fireWhenFocused": true,
                   "fireWhenAFK": false,
@@ -604,11 +500,7 @@
             },
             {
               "type": "LocationAlert",
-              "worldPoint": {
-                "x": 3790,
-                "y": 2839,
-                "plane": 0
-              },
+              "worldPoint": { "x": 3790, "y": 2839, "plane": 0 },
               "distance": 2,
               "repeat": false,
               "cardinalOnly": false,
@@ -623,11 +515,7 @@
                   "type": "ShortestPath",
                   "mode": "PATH",
                   "useCurrentLocationForStart": true,
-                  "target": {
-                    "x": 3606,
-                    "y": 3530,
-                    "plane": 0
-                  },
+                  "target": { "x": 3606, "y": 3530, "plane": 0 },
                   "enabled": true,
                   "fireWhenFocused": true,
                   "fireWhenAFK": false,
@@ -647,11 +535,7 @@
             },
             {
               "type": "LocationAlert",
-              "worldPoint": {
-                "x": 3606,
-                "y": 3530,
-                "plane": 0
-              },
+              "worldPoint": { "x": 3606, "y": 3530, "plane": 0 },
               "distance": 2,
               "repeat": false,
               "cardinalOnly": false,
@@ -666,11 +550,7 @@
                   "type": "ShortestPath",
                   "mode": "PATH",
                   "useCurrentLocationForStart": true,
-                  "target": {
-                    "x": 2812,
-                    "y": 3463,
-                    "plane": 0
-                  },
+                  "target": { "x": 2812, "y": 3463, "plane": 0  },
                   "enabled": true,
                   "fireWhenFocused": true,
                   "fireWhenAFK": false,
@@ -690,11 +570,7 @@
             },
             {
               "type": "LocationAlert",
-              "worldPoint": {
-                "x": 2812,
-                "y": 3463,
-                "plane": 0
-              },
+              "worldPoint": { "x": 2812, "y": 3463, "plane": 0 },
               "distance": 2,
               "repeat": false,
               "cardinalOnly": false,
@@ -709,11 +585,7 @@
                   "type": "ShortestPath",
                   "mode": "PATH",
                   "useCurrentLocationForStart": true,
-                  "target": {
-                    "x": 2669,
-                    "y": 3375,
-                    "plane": 0
-                  },
+                  "target": { "x": 2669, "y": 3375, "plane": 0 },
                   "enabled": true,
                   "fireWhenFocused": true,
                   "fireWhenAFK": false,
@@ -733,11 +605,7 @@
             },
             {
               "type": "LocationAlert",
-              "worldPoint": {
-                "x": 2669,
-                "y": 3375,
-                "plane": 0
-              },
+              "worldPoint": { "x": 2669, "y": 3375, "plane": 0 },
               "distance": 2,
               "repeat": false,
               "cardinalOnly": false,
@@ -752,11 +620,7 @@
                   "type": "ShortestPath",
                   "mode": "PATH",
                   "useCurrentLocationForStart": true,
-                  "target": {
-                    "x": 3058,
-                    "y": 3310,
-                    "plane": 0
-                  },
+                  "target": { "x": 3058, "y": 3310, "plane": 0 },
                   "enabled": true,
                   "fireWhenFocused": true,
                   "fireWhenAFK": false,
@@ -776,11 +640,7 @@
             },
             {
               "type": "LocationAlert",
-              "worldPoint": {
-                "x": 3058,
-                "y": 3310,
-                "plane": 0
-              },
+              "worldPoint": { "x": 3058, "y": 3310, "plane": 0 },
               "distance": 2,
               "repeat": false,
               "cardinalOnly": false,
@@ -795,11 +655,7 @@
                   "type": "ShortestPath",
                   "mode": "PATH",
                   "useCurrentLocationForStart": true,
-                  "target": {
-                    "x": 1583,
-                    "y": 3094,
-                    "plane": 0
-                  },
+                  "target": { "x": 1583,"y": 3094, "plane": 0 },
                   "enabled": true,
                   "fireWhenFocused": true,
                   "fireWhenAFK": false,
