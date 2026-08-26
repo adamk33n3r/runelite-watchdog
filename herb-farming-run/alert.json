@@ -7,9 +7,6 @@
   "tags": [ "farming", "harvest", "patch", "herb", "path", "early game", "late game" ],
   "dependsOn": ["Shortest Path"],
   "alert": [
-    {
-      "type": "AlertGroup",
-      "alerts": [
         {
           "type": "AlertGroup",
           "alerts": [
@@ -680,12 +677,5 @@
           "debounceResetTime": false,
           "randomNotifications": false
         }
-      ],
-      "enabled": true,
-      "name": "Herb run (Master group)",
-      "debounceTime": 0,
-      "debounceResetTime": false,
-      "randomNotifications": false
-    }
-  ]
+      ]
 }
