@@ -1,0 +1,709 @@
+{
+  "displayName": "Modular-ish Herb Run (All Patches)",
+  "description": "Shortest Path & Game Message herb runs split into Early, Mid, Late Game, and Full Farming Guild Start groups.",
+  "compatibleVersion": "4.0.3",
+  "author": "thomasoien",
+  "category": "SKILLING",
+  "tags": [ "farming", "harvest", "patch", "herb", "path", "early game", "late game" ],
+  "dependsOn": ["Shortest Path"],
+  "alerts": [
+    {
+      "type": "AlertGroup",
+      "name": "Herb Run (Master Group)",
+      "enabled": true,
+      "debounceTime": 0,
+      "debounceResetTime": false,
+      "randomNotifications": false,
+      "alerts": [
+        {
+          "type": "AlertGroup",
+          "name": "1. Early Game Run (Start @ Falador)",
+          "enabled": false,
+          "debounceTime": 0,
+          "debounceResetTime": false,
+          "randomNotifications": false,
+          "alerts": [
+            {
+              "type": "LocationAlert",
+              "worldPoint": { "x": 3058, "y": 3310, "plane": 0 },
+              "distance": 2,
+              "repeat": false,
+              "cardinalOnly": false,
+              "enabled": true,
+              "name": "[START @ FALADOR] -> Go to Hosidius",
+              "debounceTime": 30000,
+              "debounceResetTime": false,
+              "randomNotifications": false,
+              "alertMode": "MULTI",
+              "notifications": [
+                {
+                  "type": "ShortestPath",
+                  "mode": "PATH",
+                  "useCurrentLocationForStart": true,
+                  "start": { "x": 3223, "y": 3219, "plane": 0 },
+                  "target": { "x": 1739, "y": 3552, "plane": 0 },
+                  "enabled": true,
+                  "fireWhenFocused": true,
+                  "fireWhenAFK": false,
+                  "fireWhenAFKForSeconds": 5,
+                  "delayMilliseconds": 0
+                },
+                {
+                  "type": "GameMessage",
+                  "message": "Next Location: Go to Hosidius",
+                  "enabled": true,
+                  "fireWhenFocused": true,
+                  "fireWhenAFK": false,
+                  "fireWhenAFKForSeconds": 5,
+                  "delayMilliseconds": 0
+                }
+              ]
+            },
+            {
+              "type": "LocationAlert",
+              "worldPoint": { "x": 1739, "y": 3552, "plane": 0 },
+              "distance": 2,
+              "repeat": false,
+              "cardinalOnly": false,
+              "enabled": true,
+              "name": "Go to Catherby",
+              "debounceTime": 30000,
+              "debounceResetTime": false,
+              "randomNotifications": false,
+              "alertMode": "MULTI",
+              "notifications": [
+                {
+                  "type": "ShortestPath",
+                  "mode": "PATH",
+                  "useCurrentLocationForStart": true,
+                  "start": { "x": 3223, "y": 3219, "plane": 0 },
+                  "target": { "x": 2812, "y": 3463, "plane": 0 },
+                  "enabled": true,
+                  "fireWhenFocused": true,
+                  "fireWhenAFK": false,
+                  "fireWhenAFKForSeconds": 5,
+                  "delayMilliseconds": 0
+                },
+                {
+                  "type": "GameMessage",
+                  "message": "Next Location: Go to Catherby",
+                  "enabled": true,
+                  "fireWhenFocused": true,
+                  "fireWhenAFK": false,
+                  "fireWhenAFKForSeconds": 5,
+                  "delayMilliseconds": 0
+                }
+              ]
+            },
+            {
+              "type": "LocationAlert",
+              "worldPoint": { "x": 2812, "y": 3463, "plane": 0 },
+              "distance": 2,
+              "repeat": false,
+              "cardinalOnly": false,
+              "enabled": true,
+              "name": "Go to Ardougne",
+              "debounceTime": 30000,
+              "debounceResetTime": false,
+              "randomNotifications": false,
+              "alertMode": "MULTI",
+              "notifications": [
+                {
+                  "type": "ShortestPath",
+                  "mode": "PATH",
+                  "useCurrentLocationForStart": true,
+                  "start": { "x": 3223, "y": 3219, "plane": 0 },
+                  "target": { "x": 2669, "y": 3375, "plane": 0 },
+                  "enabled": true,
+                  "fireWhenFocused": true,
+                  "fireWhenAFK": false,
+                  "fireWhenAFKForSeconds": 5,
+                  "delayMilliseconds": 0
+                },
+                {
+                  "type": "GameMessage",
+                  "message": "Next Location: Go to Ardougne",
+                  "enabled": true,
+                  "fireWhenFocused": true,
+                  "fireWhenAFK": false,
+                  "fireWhenAFKForSeconds": 5,
+                  "delayMilliseconds": 0
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "AlertGroup",
+          "name": "2. Mid Game Add-ons",
+          "enabled": false,
+          "debounceTime": 0,
+          "debounceResetTime": false,
+          "randomNotifications": false,
+          "alerts": [
+            {
+              "type": "LocationAlert",
+              "worldPoint": { "x": 2669, "y": 3375, "plane": 0 },
+              "distance": 2,
+              "repeat": false,
+              "cardinalOnly": false,
+              "enabled": true,
+              "name": "Go to Morytania",
+              "debounceTime": 30000,
+              "debounceResetTime": false,
+              "randomNotifications": false,
+              "alertMode": "MULTI",
+              "notifications": [
+                {
+                  "type": "ShortestPath",
+                  "mode": "PATH",
+                  "useCurrentLocationForStart": true,
+                  "start": { "x": 3223, "y": 3219, "plane": 0 },
+                  "target": { "x": 3608, "y": 3532, "plane": 0 },
+                  "enabled": true,
+                  "fireWhenFocused": true,
+                  "fireWhenAFK": false,
+                  "fireWhenAFKForSeconds": 5,
+                  "delayMilliseconds": 0
+                },
+                {
+                  "type": "GameMessage",
+                  "message": "Next Location: Go to Morytania",
+                  "enabled": true,
+                  "fireWhenFocused": true,
+                  "fireWhenAFK": false,
+                  "fireWhenAFKForSeconds": 5,
+                  "delayMilliseconds": 0
+                }
+              ]
+            },
+            {
+              "type": "LocationAlert",
+              "worldPoint": { "x": 3608, "y": 3532, "plane": 0 },
+              "distance": 2,
+              "repeat": false,
+              "cardinalOnly": false,
+              "enabled": true,
+              "name": "Go to Hunter Guild",
+              "debounceTime": 30000,
+              "debounceResetTime": false,
+              "randomNotifications": false,
+              "alertMode": "MULTI",
+              "notifications": [
+                {
+                  "type": "ShortestPath",
+                  "mode": "PATH",
+                  "useCurrentLocationForStart": true,
+                  "start": { "x": 3223, "y": 3219, "plane": 0 },
+                  "target": { "x": 1583, "y": 3094, "plane": 0 },
+                  "enabled": true,
+                  "fireWhenFocused": true,
+                  "fireWhenAFK": false,
+                  "fireWhenAFKForSeconds": 5,
+                  "delayMilliseconds": 0
+                },
+                {
+                  "type": "GameMessage",
+                  "message": "Next Location: Go to Hunter Guild",
+                  "enabled": true,
+                  "fireWhenFocused": true,
+                  "fireWhenAFK": false,
+                  "fireWhenAFKForSeconds": 5,
+                  "delayMilliseconds": 0
+                }
+              ]
+            },
+            {
+              "type": "LocationAlert",
+              "worldPoint": { "x": 1583, "y": 3094, "plane": 0 },
+              "distance": 2,
+              "repeat": false,
+              "cardinalOnly": false,
+              "enabled": true,
+              "name": "Go to Farming Guild",
+              "debounceTime": 30000,
+              "debounceResetTime": false,
+              "randomNotifications": false,
+              "alertMode": "MULTI",
+              "notifications": [
+                {
+                  "type": "ShortestPath",
+                  "mode": "PATH",
+                  "useCurrentLocationForStart": true,
+                  "start": { "x": 3223, "y": 3219, "plane": 0 },
+                  "target": { "x": 1246, "y": 3729, "plane": 0 },
+                  "enabled": true,
+                  "fireWhenFocused": true,
+                  "fireWhenAFK": false,
+                  "fireWhenAFKForSeconds": 5,
+                  "delayMilliseconds": 0
+                },
+                {
+                  "type": "GameMessage",
+                  "message": "Next Location: Go to Farming Guild",
+                  "enabled": true,
+                  "fireWhenFocused": true,
+                  "fireWhenAFK": false,
+                  "fireWhenAFKForSeconds": 5,
+                  "delayMilliseconds": 0
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "AlertGroup",
+          "name": "3. Late Game / High Quests",
+          "enabled": false,
+          "debounceTime": 0,
+          "debounceResetTime": false,
+          "randomNotifications": false,
+          "alerts": [
+            {
+              "type": "LocationAlert",
+              "worldPoint": { "x": 1238, "y": 3726, "plane": 0 },
+              "distance": 2,
+              "repeat": false,
+              "cardinalOnly": false,
+              "enabled": true,
+              "name": "Go to Troll Stronghold",
+              "debounceTime": 30000,
+              "debounceResetTime": false,
+              "randomNotifications": false,
+              "alertMode": "MULTI",
+              "notifications": [
+                {
+                  "type": "ShortestPath",
+                  "mode": "PATH",
+                  "useCurrentLocationForStart": true,
+                  "start": { "x": 3223, "y": 3219, "plane": 0 },
+                  "target": { "x": 2828, "y": 3694, "plane": 0 },
+                  "enabled": true,
+                  "fireWhenFocused": true,
+                  "fireWhenAFK": false,
+                  "fireWhenAFKForSeconds": 5,
+                  "delayMilliseconds": 0
+                },
+                {
+                  "type": "GameMessage",
+                  "message": "Next Location: Go to Troll Stronghold",
+                  "enabled": true,
+                  "fireWhenFocused": true,
+                  "fireWhenAFK": false,
+                  "fireWhenAFKForSeconds": 5,
+                  "delayMilliseconds": 0
+                }
+              ]
+            },
+            {
+              "type": "LocationAlert",
+              "worldPoint": { "x": 2828, "y": 3694, "plane": 0 },
+              "distance": 2,
+              "repeat": false,
+              "cardinalOnly": false,
+              "enabled": true,
+              "name": "Go to Weiss",
+              "debounceTime": 30000,
+              "debounceResetTime": false,
+              "randomNotifications": false,
+              "alertMode": "MULTI",
+              "notifications": [
+                {
+                  "type": "ShortestPath",
+                  "mode": "PATH",
+                  "useCurrentLocationForStart": true,
+                  "start": { "x": 3223, "y": 3219, "plane": 0 },
+                  "target": { "x": 2847, "y": 3935, "plane": 0 },
+                  "enabled": true,
+                  "fireWhenFocused": true,
+                  "fireWhenAFK": false,
+                  "fireWhenAFKForSeconds": 5,
+                  "delayMilliseconds": 0
+                },
+                {
+                  "type": "GameMessage",
+                  "message": "Next Location: Go to Weiss",
+                  "enabled": true,
+                  "fireWhenFocused": true,
+                  "fireWhenAFK": false,
+                  "fireWhenAFKForSeconds": 5,
+                  "delayMilliseconds": 0
+                }
+              ]
+            },
+            {
+              "type": "LocationAlert",
+              "worldPoint": { "x": 2847, "y": 3935, "plane": 0 },
+              "distance": 2,
+              "repeat": false,
+              "cardinalOnly": false,
+              "enabled": true,
+              "name": "Go to Harmony Island",
+              "debounceTime": 30000,
+              "debounceResetTime": false,
+              "randomNotifications": false,
+              "alertMode": "MULTI",
+              "notifications": [
+                {
+                  "type": "ShortestPath",
+                  "mode": "PATH",
+                  "useCurrentLocationForStart": true,
+                  "start": { "x": 3223, "y": 3219, "plane": 0 },
+                  "target": { "x": 3790, "y": 2839, "plane": 0 },
+                  "enabled": true,
+                  "fireWhenFocused": true,
+                  "fireWhenAFK": false,
+                  "fireWhenAFKForSeconds": 5,
+                  "delayMilliseconds": 0
+                },
+                {
+                  "type": "GameMessage",
+                  "message": "Next Location: Go to Harmony Island",
+                  "enabled": true,
+                  "fireWhenFocused": true,
+                  "fireWhenAFK": false,
+                  "fireWhenAFKForSeconds": 5,
+                  "delayMilliseconds": 0
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "AlertGroup",
+          "name": "4. All Patches (Start @ Farming Guild)",
+          "enabled": false,
+          "debounceTime": 0,
+          "debounceResetTime": false,
+          "randomNotifications": false,
+          "alerts": [
+            {
+              "type": "LocationAlert",
+              "worldPoint": { "x": 1238, "y": 3726, "plane": 0 },
+              "distance": 2,
+              "repeat": false,
+              "cardinalOnly": false,
+              "enabled": true,
+              "name": "[START @ GUILD] -> Go to Weiss",
+              "debounceTime": 30000,
+              "debounceResetTime": false,
+              "randomNotifications": false,
+              "alertMode": "MULTI",
+              "notifications": [
+                {
+                  "type": "ShortestPath",
+                  "mode": "PATH",
+                  "useCurrentLocationForStart": true,
+                  "start": { "x": 3223, "y": 3219, "plane": 0 },
+                  "target": { "x": 2847, "y": 3935, "plane": 0 },
+                  "enabled": true,
+                  "fireWhenFocused": true,
+                  "fireWhenAFK": false,
+                  "fireWhenAFKForSeconds": 5,
+                  "delayMilliseconds": 0
+                },
+                {
+                  "type": "GameMessage",
+                  "message": "Next Location: Go to Weiss",
+                  "enabled": true,
+                  "fireWhenFocused": true,
+                  "fireWhenAFK": false,
+                  "fireWhenAFKForSeconds": 5,
+                  "delayMilliseconds": 0
+                }
+              ]
+            },
+            {
+              "type": "LocationAlert",
+              "worldPoint": { "x": 2847, "y": 3935, "plane": 0 },
+              "distance": 2,
+              "repeat": false,
+              "cardinalOnly": false,
+              "enabled": true,
+              "name": "Go to Troll Stronghold",
+              "debounceTime": 30000,
+              "debounceResetTime": false,
+              "randomNotifications": false,
+              "alertMode": "MULTI",
+              "notifications": [
+                {
+                  "type": "ShortestPath",
+                  "mode": "PATH",
+                  "useCurrentLocationForStart": true,
+                  "start": { "x": 3223, "y": 3219, "plane": 0 },
+                  "target": { "x": 2828, "y": 3694, "plane": 0 },
+                  "enabled": true,
+                  "fireWhenFocused": true,
+                  "fireWhenAFK": false,
+                  "fireWhenAFKForSeconds": 5,
+                  "delayMilliseconds": 0
+                },
+                {
+                  "type": "GameMessage",
+                  "message": "Next Location: Go to Troll Stronghold",
+                  "enabled": true,
+                  "fireWhenFocused": true,
+                  "fireWhenAFK": false,
+                  "fireWhenAFKForSeconds": 5,
+                  "delayMilliseconds": 0
+                }
+              ]
+            },
+            {
+              "type": "LocationAlert",
+              "worldPoint": { "x": 2828, "y": 3694, "plane": 0 },
+              "distance": 2,
+              "repeat": false,
+              "cardinalOnly": false,
+              "enabled": true,
+              "name": "Go to Hosidius",
+              "debounceTime": 30000,
+              "debounceResetTime": false,
+              "randomNotifications": false,
+              "alertMode": "MULTI",
+              "notifications": [
+                {
+                  "type": "ShortestPath",
+                  "mode": "PATH",
+                  "useCurrentLocationForStart": true,
+                  "start": { "x": 3223, "y": 3219, "plane": 0 },
+                  "target": { "x": 1739, "y": 3552, "plane": 0 },
+                  "enabled": true,
+                  "fireWhenFocused": true,
+                  "fireWhenAFK": false,
+                  "fireWhenAFKForSeconds": 5,
+                  "delayMilliseconds": 0
+                },
+                {
+                  "type": "GameMessage",
+                  "message": "Next Location: Go to Hosidius",
+                  "enabled": true,
+                  "fireWhenFocused": true,
+                  "fireWhenAFK": false,
+                  "fireWhenAFKForSeconds": 5,
+                  "delayMilliseconds": 0
+                }
+              ]
+            },
+            {
+              "type": "LocationAlert",
+              "worldPoint": { "x": 1739, "y": 3552, "plane": 0 },
+              "distance": 2,
+              "repeat": false,
+              "cardinalOnly": false,
+              "enabled": true,
+              "name": "Go to Harmony Island",
+              "debounceTime": 30000,
+              "debounceResetTime": false,
+              "randomNotifications": false,
+              "alertMode": "MULTI",
+              "notifications": [
+                {
+                  "type": "ShortestPath",
+                  "mode": "PATH",
+                  "useCurrentLocationForStart": true,
+                  "start": { "x": 3223, "y": 3219, "plane": 0 },
+                  "target": { "x": 3790, "y": 2839, "plane": 0 },
+                  "enabled": true,
+                  "fireWhenFocused": true,
+                  "fireWhenAFK": false,
+                  "fireWhenAFKForSeconds": 5,
+                  "delayMilliseconds": 0
+                },
+                {
+                  "type": "GameMessage",
+                  "message": "Next Location: Go to Harmony Island",
+                  "enabled": true,
+                  "fireWhenFocused": true,
+                  "fireWhenAFK": false,
+                  "fireWhenAFKForSeconds": 5,
+                  "delayMilliseconds": 0
+                }
+              ]
+            },
+            {
+              "type": "LocationAlert",
+              "worldPoint": { "x": 3790, "y": 2839, "plane": 0 },
+              "distance": 2,
+              "repeat": false,
+              "cardinalOnly": false,
+              "enabled": true,
+              "name": "Go to Morytania",
+              "debounceTime": 30000,
+              "debounceResetTime": false,
+              "randomNotifications": false,
+              "alertMode": "MULTI",
+              "notifications": [
+                {
+                  "type": "ShortestPath",
+                  "mode": "PATH",
+                  "useCurrentLocationForStart": true,
+                  "start": { "x": 3223, "y": 3219, "plane": 0 },
+                  "target": { "x": 3608, "y": 3532, "plane": 0 },
+                  "enabled": true,
+                  "fireWhenFocused": true,
+                  "fireWhenAFK": false,
+                  "fireWhenAFKForSeconds": 5,
+                  "delayMilliseconds": 0
+                },
+                {
+                  "type": "GameMessage",
+                  "message": "Next Location: Go to Morytania",
+                  "enabled": true,
+                  "fireWhenFocused": true,
+                  "fireWhenAFK": false,
+                  "fireWhenAFKForSeconds": 5,
+                  "delayMilliseconds": 0
+                }
+              ]
+            },
+            {
+              "type": "LocationAlert",
+              "worldPoint": { "x": 3608, "y": 3532, "plane": 0 },
+              "distance": 2,
+              "repeat": false,
+              "cardinalOnly": false,
+              "enabled": true,
+              "name": "Go to Catherby",
+              "debounceTime": 30000,
+              "debounceResetTime": false,
+              "randomNotifications": false,
+              "alertMode": "MULTI",
+              "notifications": [
+                {
+                  "type": "ShortestPath",
+                  "mode": "PATH",
+                  "useCurrentLocationForStart": true,
+                  "start": { "x": 3223, "y": 3219, "plane": 0 },
+                  "target": { "x": 2812, "y": 3463, "plane": 0 },
+                  "enabled": true,
+                  "fireWhenFocused": true,
+                  "fireWhenAFK": false,
+                  "fireWhenAFKForSeconds": 5,
+                  "delayMilliseconds": 0
+                },
+                {
+                  "type": "GameMessage",
+                  "message": "Next Location: Go to Catherby",
+                  "enabled": true,
+                  "fireWhenFocused": true,
+                  "fireWhenAFK": false,
+                  "fireWhenAFKForSeconds": 5,
+                  "delayMilliseconds": 0
+                }
+              ]
+            },
+            {
+              "type": "LocationAlert",
+              "worldPoint": { "x": 2812, "y": 3463, "plane": 0 },
+              "distance": 2,
+              "repeat": false,
+              "cardinalOnly": false,
+              "enabled": true,
+              "name": "Go to Ardougne",
+              "debounceTime": 30000,
+              "debounceResetTime": false,
+              "randomNotifications": false,
+              "alertMode": "MULTI",
+              "notifications": [
+                {
+                  "type": "ShortestPath",
+                  "mode": "PATH",
+                  "useCurrentLocationForStart": true,
+                  "start": { "x": 3223, "y": 3219, "plane": 0 },
+                  "target": { "x": 2669, "y": 3375, "plane": 0 },
+                  "enabled": true,
+                  "fireWhenFocused": true,
+                  "fireWhenAFK": false,
+                  "fireWhenAFKForSeconds": 5,
+                  "delayMilliseconds": 0
+                },
+                {
+                  "type": "GameMessage",
+                  "message": "Next Location: Go to Ardougne",
+                  "enabled": true,
+                  "fireWhenFocused": true,
+                  "fireWhenAFK": false,
+                  "fireWhenAFKForSeconds": 5,
+                  "delayMilliseconds": 0
+                }
+              ]
+            },
+            {
+              "type": "LocationAlert",
+              "worldPoint": { "x": 2669, "y": 3375, "plane": 0 },
+              "distance": 2,
+              "repeat": false,
+              "cardinalOnly": false,
+              "enabled": true,
+              "name": "Go to Falador",
+              "debounceTime": 30000,
+              "debounceResetTime": false,
+              "randomNotifications": false,
+              "alertMode": "MULTI",
+              "notifications": [
+                {
+                  "type": "ShortestPath",
+                  "mode": "PATH",
+                  "useCurrentLocationForStart": true,
+                  "start": { "x": 3223, "y": 3219, "plane": 0 },
+                  "target": { "x": 3058, "y": 3310, "plane": 0 },
+                  "enabled": true,
+                  "fireWhenFocused": true,
+                  "fireWhenAFK": false,
+                  "fireWhenAFKForSeconds": 5,
+                  "delayMilliseconds": 0
+                },
+                {
+                  "type": "GameMessage",
+                  "message": "Next Location: Go to Falador",
+                  "enabled": true,
+                  "fireWhenFocused": true,
+                  "fireWhenAFK": false,
+                  "fireWhenAFKForSeconds": 5,
+                  "delayMilliseconds": 0
+                }
+              ]
+            },
+            {
+              "type": "LocationAlert",
+              "worldPoint": { "x": 3058, "y": 3310, "plane": 0 },
+              "distance": 2,
+              "repeat": false,
+              "cardinalOnly": false,
+              "enabled": true,
+              "name": "Go to Hunter Guild",
+              "debounceTime": 30000,
+              "debounceResetTime": false,
+              "randomNotifications": false,
+              "alertMode": "MULTI",
+              "notifications": [
+                {
+                  "type": "ShortestPath",
+                  "mode": "PATH",
+                  "useCurrentLocationForStart": true,
+                  "start": { "x": 3223, "y": 3219, "plane": 0 },
+                  "target": { "x": 1583, "y": 3094, "plane": 0 },
+                  "enabled": true,
+                  "fireWhenFocused": true,
+                  "fireWhenAFK": false,
+                  "fireWhenAFKForSeconds": 5,
+                  "delayMilliseconds": 0
+                },
+                {
+                  "type": "GameMessage",
+                  "message": "Next Location: Go to Hunter Guild",
+                  "enabled": true,
+                  "fireWhenFocused": true,
+                  "fireWhenAFK": false,
+                  "fireWhenAFKForSeconds": 5,
+                  "delayMilliseconds": 0
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
