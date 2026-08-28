@@ -1,27 +1,31 @@
-# Modular-ish Herb Run (All Tiers) with Shortest Path & Chat Alerts
+# Fully Modular Herb Run Framework (All Patches) with Shortest Path & Chat Alerts
 
-A modular alert configuration that automatically triggers **Shortest Path** navigation lines and **Game Chat Messages** to guide you from one herb patch to the next as soon as you arrive at a location.
+A plug-and-play Watchdog alert-group designed for complete flexibility. 
 
-Designed for all account types, this setup is split into togglable sub-groups depending on whether you want a step-by-step account progression run or a full Farming Guild Start.
+Unlike fixed-path setups, this framework features **interconnected sub-groups for every patch location**. Since all alerts start disabled, you simply toggle on your preferred destination routes before or during your run to build a completely custom, adaptable path.
 
-## Progression & Routes
+---
 
-### Option A: Progressive Runs (Groups 1–3)
-Ideal for low-to-mid level accounts. Toggle groups 1, 2, or 3 based on your unlocked content.
+##  Key Features
 
-* **1. Early Game (Start @ Falador):** Falador → Hosidius → Catherby → Ardougne
-* **2. Mid-Game Add-ons:** Ardougne → Morytania → Hunter Guild → Farming Guild
-* **3. Late Game / Quests:** Farming Guild → Troll Stronghold → Weiss → Harmony Island
+* **True Point-to-Point Modular Routes:** Every patch location alert-group contains routing triggers to all other patches.
+* **Flexible Start & Order:** Pick your starting patch, enable only your desired destinations, and run them in whatever order fits your needs.
+* **Visual Shortest Path Lines:** Automatically plots path lines to your chosen next destination upon arrival.
+* **Game Chat Notifications:** Clear chatbox prompts guiding your next move as soon as you step foot on a patch location.
 
-### Option B: Full Guild-Start Run (Group 4)
-Ideal for high-level accounts with all patches unlocked. Disable groups 1–3 and enable **Group 4 only**.
+---
 
-* **4. All Patches Loop (Start @ Farming Guild):** Farming Guild → Weiss → Troll Stronghold → Hosidius → Harmony Island → Morytania → Catherby → Ardougne → Falador → Hunter Guild
+##  Herb Patch Groups Breakdown
+
+Enable or disable individual Herb Patch groups based on your account progression:
+
+> **How it works:**
+> 1. Arriving at **Harmony Patch** for example, open the **"Harmony Patch"** Alert-Group and enable your next target (example **"To Catherby Patch"**).
+> 2. Once at **Catherby Patch**, open the **"Catherby Patch"** Alert-Group and enable your next destination to keep the chain going.
 
 ---
 
 ## ⚠️ Important Usage Notes
 
-* **Choose Your Mode:** Use *either* the progressive groups (1–3) OR the full farming guild start (Group 4). Do not keep both enabled at the same time to prevent conflicting path triggers.
-* **Chain Continuity:** Within any active group, do NOT disable individual location alerts. Arriving at each patch physically triggers the route to the next target. Skipping an alert will break the chain.
-* **Prevent Accidental Triggers:** Toggle off the main **"Farming Runs (Master Group)"** when not actively farming so high-traffic hubs like the Farming Guild don't accidentally start a path line while banking.
+1. **Toggle Off When Done:** Toggle off the main **"Farm run(herbs)"** when not actively farming so high-traffic areas (such as the Farming Guild) don't trigger unwanted pathing lines during daily activities. *(Alternatively, you can make the Farming Guild your final destination since that is most likely to get triggered when doing farming contracts)*
+2. **Shortest Path Plugin Required:** Ensure the **Shortest Path** plugin is installed and enabled in your RuneLite client so Watchdog can render the pathing lines.
