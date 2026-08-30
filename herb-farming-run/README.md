@@ -1,6 +1,6 @@
 # Fully Modular Herb Run Framework (All Patches) with Shortest Path & Chat Alerts
 
-A plug-and-play Watchdog alert-group designed for complete flexibility. 
+A customizable, menu-driven Watchdog alert group built for total route flexibility.
 
 Unlike fixed-path setups, this framework features **interconnected sub-groups for every patch location**. Since all alerts start disabled, you simply toggle on your preferred destination routes before or during your run to build a completely custom, adaptable path.
 
