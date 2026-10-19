@@ -42,15 +42,15 @@ public class TextToSpeechNotificationPanel extends NotificationContentPanel<Text
             return;
         }
 
-        FlatTextArea messageField = PanelUtils.createTextField(
+        FlatTextArea messageField = this.setMessageField(PanelUtils.createTextField(
             "Enter your message...",
             "The message to play",
             this.notification.getMessage(),
             val -> {
                 this.notification.setMessage(val);
                 this.onChange.run();
-            });
-        JButton resetCacheButton = PanelUtils.createActionButton(
+            }));
+        JButton resetCacheButton = this.setMessageFieldSuffix(PanelUtils.createActionButton(
             Icons.REFRESH,
             Icons.REFRESH_HOVER,
             "Reset cached audio for this message. It will regenerate the next time this notification fires",
@@ -65,7 +65,7 @@ public class TextToSpeechNotificationPanel extends NotificationContentPanel<Text
                 if (result == JOptionPane.YES_OPTION) {
                     this.notification.clearCache();
                 }
-            });
+            }));
         resetCacheButton.setBackground(ColorScheme.DARKER_GRAY_COLOR);
         this.add(PanelUtils.createInputGroupWithSuffix(messageField, resetCacheButton));
 

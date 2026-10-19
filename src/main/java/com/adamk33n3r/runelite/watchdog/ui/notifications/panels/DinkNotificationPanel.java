@@ -48,7 +48,7 @@ public class DinkNotificationPanel extends NotificationContentPanel<Dink> {
             }
         );
         ((AbstractDocument) message.getDocument()).setDocumentFilter(new LengthLimitFilter(4096));
-        this.add(message);
+        this.add(this.setMessageField(message));
 
         var urls = PanelUtils.createTextField(
             "Custom urls (optional)...",

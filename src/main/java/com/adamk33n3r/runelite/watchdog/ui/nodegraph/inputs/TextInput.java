@@ -61,6 +61,13 @@ public class TextInput extends AbstractInput<String> {
         });
     }
 
+    public void setSuffix(JComponent suffix) {
+        this.removeAll();
+        this.add(PanelUtils.createInputGroupWithSuffix(this.textField, suffix));
+        this.revalidate();
+        this.repaint();
+    }
+
     @Override
     protected JComponent getValueComponent() {
         return this.textField;
