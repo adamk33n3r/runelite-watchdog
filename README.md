@@ -72,7 +72,7 @@ _You can set defaults for actions in the plugin config._
 
 ## Disabled Areas
 
-Watchdog is automatically disabled in the following areas _(updated 2026/07/01)_:
+Watchdog is automatically disabled in the following areas _(updated 2026/10/19)_:
 
 |                  |                |                                |            |
 | ---------------- | -------------- | ------------------------------ | ---------- |
@@ -80,7 +80,7 @@ Watchdog is automatically disabled in the following areas _(updated 2026/07/01)_
 | Sucellus         | Vorkath        | Inferno                        | Fight Cave |
 | Colosseum        | Kalphite Queen | COX                            | TOB        |
 | TOA              | Yama           | Delve Boss (Doom of Mokhaiotl) | Nightmare  |
-| Muspah           | Maggot King    |                                |            |
+| Muspah           | Maggot King    | TFA                            |            |
 
 ## Recommended RuneLite Notification Settings
 
