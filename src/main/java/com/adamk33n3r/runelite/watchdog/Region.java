@@ -121,7 +121,7 @@ public enum Region {
         .build()),
     TFA(RegionConfig
         .builder()
-        .regionIDs(Set.of(16214, 16726, 16215, 16727, 16216, 16728, 16472))
+        .regionIDs(Set.of(16214, 16726, 16215, 16727, 16216, 16728, 16472, 16471))
         .build())
 //    LUMBRIDGE_CASTLE(RegionConfig
 //        .builder()
