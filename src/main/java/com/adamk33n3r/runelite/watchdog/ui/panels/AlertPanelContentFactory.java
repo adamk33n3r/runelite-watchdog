@@ -39,6 +39,8 @@ public class AlertPanelContentFactory {
             return new StatChangedAlertPanel((StatChangedAlert) alert, onChange);
         if (alert instanceof InventoryAlert)
             return new InventoryAlertPanel((InventoryAlert) alert, onChange);
+        if (alert instanceof BankAlert)
+            return new BankAlertPanel((BankAlert) alert, onChange);
         if (alert instanceof LocationAlert)
             return new LocationAlertPanel((LocationAlert) alert, this.client, onChange);
         if (alert instanceof XPDropAlert)

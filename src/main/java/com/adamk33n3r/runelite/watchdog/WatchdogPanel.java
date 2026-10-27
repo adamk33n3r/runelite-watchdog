@@ -244,6 +244,8 @@ public class WatchdogPanel extends PluginPanel {
             return new AlertPanel<>(this, new SpawnedAlertPanel((SpawnedAlert) alert, onChange));
         if (alert instanceof InventoryAlert)
             return new AlertPanel<>(this, new InventoryAlertPanel((InventoryAlert) alert, onChange));
+        if (alert instanceof BankAlert)
+            return new AlertPanel<>(this, new BankAlertPanel((BankAlert) alert, onChange));
         if (alert instanceof AlertGroup)
             return new AlertPanel<>(this, new AlertGroupPanel((AlertGroup) alert, this, onChange));
         if (alert instanceof LocationAlert)
