@@ -1,0 +1,90 @@
+{
+  "compatibleVersion": "4.0.5",
+  "displayName":"HCW Announcements",
+  "description":"A collection of alerts for Hardcore World related game announcements",
+  "author":"0x0B57AC1E",
+  "category":"MISC",
+  "tags":["hcw","death","firsts"],
+  "alert": [
+    {
+      "type": "AlertGroup",
+      "alerts": [
+        {
+          "type": "ChatAlert",
+          "message": "((?:((?:\\w|\\s)+)\\skilled\\s([^\\(]+)\\(([0-9\\.]+[Kk]?)\\)\\swith\\sa\\s(\\d+)\\sdamage\\shit\\sin\\s(.+)))",
+          "regexEnabled": true,
+          "gameMessageType": "GAME_MESSAGE",
+          "enabled": true,
+          "name": "HCW Death Announcement Killer",
+          "debounceTime": 0,
+          "debounceResetTime": false,
+          "randomNotifications": false,
+          "alertMode": "MULTI",
+          "notifications": [
+            {
+              "type": "Popup",
+              "title": "Hardcore Death",
+              "textColor": "#FFFFFFFF",
+              "message": "$1",
+              "enabled": true,
+              "fireWhenFocused": true,
+              "fireWhenAFK": false,
+              "fireWhenAFKForSeconds": 5,
+              "delayMilliseconds": 0
+            },
+            {
+              "type": "SoundEffect",
+              "soundID": 512,
+              "gain": 8,
+              "enabled": true,
+              "fireWhenFocused": true,
+              "fireWhenAFK": false,
+              "fireWhenAFKForSeconds": 5,
+              "delayMilliseconds": 0
+            }
+          ]
+        },
+        {
+          "type": "ChatAlert",
+          "message": "([^\\(]+)\\(([0-9\\.]+[Kk]?)\\)\\swas\\skilled\\sby\\sa\\s(\\d+)\\sdamage\\shit\\sin\\s(.+)",
+          "regexEnabled": true,
+          "gameMessageType": "GAME_MESSAGE",
+          "enabled": true,
+          "name": "HCW Death Announcement No killer",
+          "debounceTime": 0,
+          "debounceResetTime": false,
+          "randomNotifications": false,
+          "alertMode": "MULTI",
+          "notifications": [
+            {
+              "type": "Popup",
+              "title": "Hardcore Death",
+              "textColor": "#FFFFFFFF",
+              "message": "$1",
+              "enabled": true,
+              "fireWhenFocused": true,
+              "fireWhenAFK": false,
+              "fireWhenAFKForSeconds": 5,
+              "delayMilliseconds": 0
+            },
+            {
+              "type": "SoundEffect",
+              "soundID": 512,
+              "gain": 8,
+              "enabled": true,
+              "fireWhenFocused": true,
+              "fireWhenAFK": false,
+              "fireWhenAFKForSeconds": 5,
+              "delayMilliseconds": 0
+            }
+          ]
+        }
+      ],
+      "enabled": true,
+      "name": "HCW Announcements",
+      "debounceTime": 0,
+      "debounceResetTime": false,
+      "randomNotifications": false
+    }
+  ]
+}
