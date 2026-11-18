@@ -5,13 +5,12 @@
   "author":"0x0B57AC1E",
   "category":"MISC",
   "tags":["hcw","death","firsts"],
-  "alert": [
-    {
+  "alert": {
       "type": "AlertGroup",
       "alerts": [
         {
           "type": "ChatAlert",
-          "message": "((?:((?:\\w|\\s)+)\\skilled\\s([^\\(]+)\\(([0-9\\.]+[Kk]?)\\)\\swith\\sa\\s(\\d+)\\sdamage\\shit\\sin\\s(.+)))",
+          "message": "(((?:[\\w\\s\\-\u0027\\u00A0])+)\\skilled\\s([^\\(]+)\\(([0-9\\.]+[Kk]?)\\)\\swith\\sa\\s(\\d+)\\sdamage\\shit\\sin\\s(.+))",
           "regexEnabled": true,
           "gameMessageType": "GAME_MESSAGE",
           "enabled": true,
@@ -46,7 +45,7 @@
         },
         {
           "type": "ChatAlert",
-          "message": "([^\\(]+)\\(([0-9\\.]+[Kk]?)\\)\\swas\\skilled\\sby\\sa\\s(\\d+)\\sdamage\\shit\\sin\\s(.+)",
+          "message": "(([^\\(]+)\\(([0-9\\.]+[Kk]?)\\)\\swas\\skilled\\sby\\sa\\s(\\d+)\\sdamage\\shit(?:\\sin\\s(.+))?)",
           "regexEnabled": true,
           "gameMessageType": "GAME_MESSAGE",
           "enabled": true,
@@ -86,5 +85,4 @@
       "debounceResetTime": false,
       "randomNotifications": false
     }
-  ]
 }
